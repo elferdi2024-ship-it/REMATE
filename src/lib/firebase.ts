@@ -11,19 +11,38 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Check if Firebase is properly configured
+const isFirebaseConfigured = !!(
+  process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
+  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+);
 
-// Enable offline persistence (best-effort)
-if (typeof window !== "undefined") {
-  enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code === "failed-precondition") {
-      console.warn("Firestore persistence failed: multiple tabs open.");
-    } else if (err.code === "unimplemented") {
-      console.warn("Firestore persistence not available in this browser.");
+// Initialize Firebase only if configured
+let app: any = null;
+let auth: any = null;
+let db: any = null;
+
+if (isFirebaseConfigured) {
+  try {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+
+    // Enable offline persistence (best-effort)
+    if (typeof window !== "undefined") {
+      enableIndexedDbPersistence(db).catch((err) => {
+        if (err.code === "failed-precondition") {
+          console.warn("Firestore persistence failed: multiple tabs open.");
+        } else if (err.code === "unimplemented") {
+          console.warn("Firestore persistence not available in this browser.");
+        }
+      });
     }
-  });
+  } catch (error) {
+    console.warn("Firebase initialization failed:", error);
+  }
+} else {
+  console.warn("Firebase not configured. Set NEXT_PUBLIC_FIREBASE_* environment variables.");
 }
 
-export { app, auth, db };
+export { app, auth, db, isFirebaseConfigured };
