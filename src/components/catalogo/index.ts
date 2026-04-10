@@ -1,0 +1,10 @@
+export { default as Hero } from "./Hero";
+export { default as Ticker } from "./Ticker";
+export { default as CatsNav } from "./CatsNav";
+export { default as ResultsBar } from "./ResultsBar";
+export { default as ProductoCard } from "./ProductoCard";
+export { default as ProductoRow } from "./ProductoRow";
+export { default as MasPedidos } from "./MasPedidos";
+export { default as Buscador } from "./Buscador";
+export { default as ProductoGrid } from "./ProductoGrid";
+export { default as FloatCartBtn } from "./FloatCartBtn";

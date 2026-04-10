@@ -1,0 +1,569 @@
+"use client";
+
+import { useState, useCallback, useMemo, Suspense, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCart } from "@/lib/cart-context";
+import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/lib/toast-context";
+import { usePedidosLocales } from "@/hooks/usePedidosLocales";
+import { usePedidosCloud } from "@/hooks/usePedidosCloud";
+import { useOnline } from "@/hooks/useOnline";
+import {
+  Hero,
+  Ticker,
+  CatsNav,
+  ResultsBar,
+  ProductoGrid,
+  FloatCartBtn,
+} from "@/components/catalogo";
+import CartPanel from "@/components/carrito/CartPanel";
+import UserPanel from "@/components/usuario/UserPanel";
+import ConfirmModal from "@/components/carrito/ConfirmModal";
+import OnlineBanner from "@/components/ui/OnlineBanner";
+import {
+  armarMensajeWA,
+  enviarWhatsApp,
+} from "@/lib/whatsapp";
+import {
+  guardarPedidoGlobal,
+  incrementarStats,
+} from "@/lib/pedidos";
+import { encodeCartToURL, decodeCartFromURL } from "@/lib/cart-share";
+import { haptic } from "@/lib/haptic";
+import * as ls from "@/lib/ls";
+import type { Vista, CartItem, Producto } from "@/types";
+
+interface CatalogoPageClientProps {
+  // In the future we can pass pre-loaded products from server
+}
+
+/* ── Shared cart banner (shown when ?cart= URL param) ── */
+function SharedCartBanner({
+  sharedCart,
+  onLoad,
+  onIgnore,
+}: {
+  sharedCart: CartItem[] | null;
+  onLoad: () => void;
+  onIgnore: () => void;
+}) {
+  if (!sharedCart) return null;
+
+  return (
+    <div
+      style={{
+        background: "var(--ambar-pale, rgba(248,150,30,0.14))",
+        border: "1.5px solid rgba(248,150,30,0.35)",
+        borderRadius: "var(--r-md, 12px)",
+        margin: "12px 16px",
+        padding: "12px 16px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "12px",
+        flexWrap: "wrap",
+      }}
+    >
+      <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text)" }}>
+        Se carg\u00f3 un pedido compartido ({sharedCart.length} productos)
+      </span>
+      <div style={{ display: "flex", gap: "8px" }}>
+        <button
+          onClick={onLoad}
+          style={{
+            background: "var(--oscuro, #1A1410)",
+            color: "#fff",
+            border: "none",
+            borderRadius: "var(--r-sm, 8px)",
+            padding: "6px 14px",
+            fontFamily: "var(--font-body), sans-serif",
+            fontSize: "0.78rem",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          Cargar este pedido
+        </button>
+        <button
+          onClick={onIgnore}
+          style={{
+            background: "transparent",
+            color: "var(--muted, #9C8570)",
+            border: "1.5px solid var(--border, #E8DDD0)",
+            borderRadius: "var(--r-sm, 8px)",
+            padding: "6px 14px",
+            fontFamily: "var(--font-body), sans-serif",
+            fontSize: "0.78rem",
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          Ignorar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Suspense-wrapped component that reads useSearchParams.
+ * Must be rendered inside a Suspense boundary.
+ */
+function SharedCartWatcher({
+  onLoadCart,
+}: {
+  onLoadCart: (cart: CartItem[]) => void;
+}) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const cartParam = searchParams?.get("cart");
+    if (cartParam) {
+      const decoded = decodeCartFromURL(cartParam);
+      if (decoded && decoded.length > 0) {
+        onLoadCart(decoded);
+      }
+    }
+    // Only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return null;
+}
+
+/* ── Client Component with pre-loaded productos ── */
+export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
+  // Hooks
+  const { items: cartItems, addItem, removeItem, updateQty, clearCart, total, totalQty } = useCart();
+  const { user, signOut } = useAuth();
+  const toast = useToast();
+  const isOnline = useOnline();
+
+  // Local state
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [userPanelOpen, setUserPanelOpen] = useState(false);
+  const [vista, setVista] = useState<Vista>(() => ls.getVista());
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [alias, setAlias] = useState(() => ls.getAlias());
+  const [clientNotes, setClientNotes] = useState("");
+  const [sharedCart, setSharedCart] = useState<CartItem[] | null>(null);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+
+  // Search & filter state (client-side only)
+  const [search, setSearch] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Fetch productos on mount
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchProductos() {
+      try {
+        setLoading(true);
+        setLoadingError(null);
+        const res = await fetch("/productos.json");
+        if (!res.ok) throw new Error(`HTTP ${res.status}: failed to load productos`);
+        const data = (await res.json()) as Producto[];
+        if (!cancelled) {
+          setProductos(data);
+          setLoading(false);
+        }
+      } catch (err: any) {
+        if (!cancelled) {
+          setLoadingError(err.message || "Error al cargar productos");
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchProductos();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Debounce search (200ms)
+  const setSearchDebounced = useCallback((term: string) => {
+    setSearch(term);
+    const timer = setTimeout(() => setDebouncedSearch(term), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Cloud orders (when logged in)
+  const { pedidos: cloudPedidos } = usePedidosCloud();
+  // Local orders (guest)
+  const { pedidos: localPedidos, savePedido: saveLocalPedido } = usePedidosLocales();
+
+  // Derive unique categories from loaded productos
+  const categorias = useMemo(() => {
+    const cats = new Set(productos.map((p) => p.categoria).filter(Boolean));
+    return Array.from(cats).sort();
+  }, [productos]);
+
+  // Filter by search and category (memoized for performance)
+  const filtrados = useMemo(() => {
+    let result = productos;
+
+    if (categoria) {
+      result = result.filter((p) => p.categoria === categoria);
+    }
+
+    if (debouncedSearch.trim()) {
+      const term = debouncedSearch.trim().toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.nombre.toLowerCase().includes(term) ||
+          p.codigo.toLowerCase().includes(term)
+      );
+    }
+
+    return result;
+  }, [productos, categoria, debouncedSearch]);
+
+  // Qty map for product grid
+  const qtyMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    cartItems.forEach((i) => {
+      map[i.codigo] = i.cantidad;
+    });
+    return map;
+  }, [cartItems]);
+
+  // Handlers
+  const handleAddProduct = useCallback(
+    (producto: Producto) => {
+      addItem(producto);
+    },
+    [addItem]
+  );
+
+  const handleQtyChange = useCallback(
+    (codigo: string, qty: number) => {
+      if (qty <= 0) {
+        removeItem(codigo);
+      } else {
+        const current = qtyMap[codigo] || 0;
+        const delta = qty - current;
+        if (delta > 0) {
+          for (let i = 0; i < delta; i++) addItem({ codigo, nombre: "", precio: 0 });
+        } else {
+          for (let i = 0; i < -delta; i++) updateQty(codigo, -1);
+        }
+      }
+    },
+    [qtyMap, addItem, removeItem, updateQty]
+  );
+
+  const handleToggleVista = useCallback((v: Vista) => {
+    setVista(v);
+    ls.setVista(v);
+  }, []);
+
+  const handleSaveAlias = useCallback((a: string) => {
+    setAlias(a);
+    ls.setAlias(a);
+  }, []);
+
+  const handleClearData = useCallback(() => {
+    ls.setAlias("");
+    ls.setHistory([]);
+    ls.setBusquedas([]);
+    setAlias("");
+    toast.info("Datos locales limpiados");
+  }, [toast]);
+
+  const handleLogout = useCallback(async () => {
+    await signOut();
+    toast.info("Sesi\u00f3n cerrada");
+  }, [signOut, toast]);
+
+  const handleReorder = useCallback(
+    (pedido: { items: { codigo: string; nombre: string; cantidad: number; precioUnitario?: number; precio?: number }[]; total: number }) => {
+      if (totalQty === 0) {
+        pedido.items.forEach((item) => {
+          for (let i = 0; i < item.cantidad; i++) {
+            addItem({ codigo: item.codigo, nombre: item.nombre, precio: item.precioUnitario ?? item.precio ?? 0 });
+          }
+        });
+        setUserPanelOpen(false);
+        toast.success("Cargado. Revis\u00e1 antes de enviar.");
+      } else {
+        pedido.items.forEach((item) => {
+          for (let i = 0; i < item.cantidad; i++) {
+            addItem({ codigo: item.codigo, nombre: item.nombre, precio: item.precioUnitario ?? item.precio ?? 0 });
+          }
+        });
+        setUserPanelOpen(false);
+        toast.success("Productos agregados al carrito.");
+      }
+    },
+    [totalQty, addItem, toast]
+  );
+
+  const handleShareCart = useCallback(() => {
+    const encoded = encodeCartToURL(cartItems);
+    if (!encoded) return;
+    const url = `${window.location.origin}/catalogo?cart=${encoded}`;
+    setShareLink(url);
+    toast.info("Link generado. Copialo desde el carrito.");
+  }, [cartItems, toast]);
+
+  const handleCopyShareLink = useCallback(() => {
+    if (shareLink) {
+      navigator.clipboard.writeText(shareLink).then(() => {
+        toast.success("Link copiado al portapapeles");
+      });
+    }
+  }, [shareLink, toast]);
+
+  // Send WA flow
+  const handleSendWA = useCallback(() => {
+    setCartOpen(false);
+    setConfirmModalOpen(true);
+  }, []);
+
+  const handleConfirmSend = useCallback(() => {
+    setConfirmModalOpen(false);
+
+    const nombre = alias || "Cliente";
+    const mensaje = armarMensajeWA(nombre, cartItems, clientNotes);
+    const waNumber = process.env.NEXT_PUBLIC_WA_NUMBER || "";
+    enviarWhatsApp(waNumber, mensaje);
+
+    // Non-blocking: save order
+    const pedidoItems = cartItems.map((i) => ({
+      codigo: i.codigo,
+      nombre: i.nombre,
+      cantidad: i.cantidad,
+      precioUnitario: i.precio,
+    }));
+
+    guardarPedidoGlobal({
+      uid: user?.uid ?? null,
+      clienteNombre: nombre,
+      items: pedidoItems,
+      total,
+      notas: clientNotes || undefined,
+    }).catch((err) => console.warn("Failed to save pedido global:", err));
+
+    const codigos = cartItems.map((i) => i.codigo);
+    incrementarStats(codigos).catch((err) =>
+      console.warn("Failed to increment stats:", err)
+    );
+
+    saveLocalPedido(cartItems, total, clientNotes || undefined);
+    clearCart();
+
+    toast.success("\u00a1Listo! Te esperamos pronto. \ud83d\ude4c");
+  }, [alias, cartItems, clientNotes, total, user, clearCart, saveLocalPedido, toast]);
+
+  const handleLoadSharedCart = useCallback(() => {
+    if (sharedCart) {
+      sharedCart.forEach((item) => {
+        for (let i = 0; i < item.cantidad; i++) {
+          addItem({ codigo: item.codigo, nombre: item.nombre, precio: item.precio });
+        }
+      });
+      setSharedCart(null);
+      toast.success("Pedido compartido cargado al carrito.");
+    }
+  }, [sharedCart, addItem, toast]);
+
+  const handleIgnoreSharedCart = useCallback(() => {
+    setSharedCart(null);
+  }, []);
+
+  // Use cloud pedidos when logged in, local when guest
+  const pedidos = user ? cloudPedidos : localPedidos;
+
+  // Determine active category for CatsNav
+  const activeCat = categoria || (categorias.length > 0 ? categorias[0] : "");
+
+  // Loading state
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: "20px",
+          background: "var(--oscuro, #1A1410)",
+        }}
+      >
+        <div
+          style={{
+            width: "56px",
+            height: "56px",
+            border: "4px solid rgba(232,48,42,0.15)",
+            borderTopColor: "var(--rojo, #E8302A)",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }}
+        />
+        <p style={{ color: "var(--on-dark-mid, #C8C3BC)", fontSize: "0.9rem", fontWeight: 600 }}>
+          Cargando catálogo...
+        </p>
+        <style>{`
+          @keyframes spin { to { transform: rotate(360deg); } }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Show error state if failed to load
+  if (loadingError) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: "16px",
+          background: "var(--bg, #F5F0E8)",
+          padding: "20px",
+        }}
+      >
+        <span style={{ fontSize: "3rem" }}>⚠️</span>
+        <h2 style={{ fontFamily: "var(--font-display), sans-serif", fontSize: "2rem", color: "var(--texto)" }}>
+          Error al cargar productos
+        </h2>
+        <p style={{ color: "var(--muted)", textAlign: "center" }}>{loadingError}</p>
+        <button
+          onClick={() => window.location.reload()}
+          style={{
+            background: "var(--rojo, #E8302A)",
+            color: "#fff",
+            border: "none",
+            borderRadius: "var(--r-md, 12px)",
+            padding: "12px 24px",
+            fontFamily: "var(--font-body), sans-serif",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <OnlineBanner />
+
+      {/* Shared cart watcher (reads URL params inside Suspense) */}
+      <Suspense fallback={null}>
+        <SharedCartWatcher onLoadCart={(cart) => setSharedCart(cart)} />
+      </Suspense>
+
+      {/* Shared cart banner */}
+      <SharedCartBanner
+        sharedCart={sharedCart}
+        onLoad={handleLoadSharedCart}
+        onIgnore={handleIgnoreSharedCart}
+      />
+
+      {/* Hero */}
+      <Hero
+        onOpenCart={() => setCartOpen(true)}
+        cartQty={totalQty}
+        cartTotal={total}
+        onOpenUser={() => setUserPanelOpen(true)}
+        onShareCart={cartItems.length > 0 ? handleShareCart : undefined}
+        isLoggedIn={!!user}
+        searchQuery={search}
+        onSearchChange={setSearchDebounced}
+      />
+
+      {/* Ticker */}
+      <Ticker />
+
+      {/* Category nav */}
+      {categorias.length > 0 && (
+        <CatsNav
+          categorias={["Todos", ...categorias]}
+          activeCat={activeCat}
+          onSelect={(cat) => setCategoria(cat === "Todos" ? "" : cat)}
+        />
+      )}
+
+      {/* Results bar */}
+      <ResultsBar
+        showing={Math.min(filtrados.length, 40)}
+        total={filtrados.length}
+        vista={vista}
+        onToggleVista={handleToggleVista}
+      />
+
+      {/* Product grid/list */}
+      <ProductoGrid
+        productos={filtrados}
+        vista={vista}
+        qtyMap={qtyMap}
+        searchTerm={search}
+        onAdd={handleAddProduct}
+        onQtyChange={handleQtyChange}
+      />
+
+      {/* Float cart button */}
+      <FloatCartBtn
+        totalQty={totalQty}
+        total={total}
+        onClick={() => setCartOpen(true)}
+      />
+
+      {/* Cart Panel */}
+      <CartPanel
+        isOpen={cartOpen}
+        onClose={() => setCartOpen(false)}
+        items={cartItems}
+        onUpdateQty={updateQty}
+        onRemove={removeItem}
+        total={total}
+        onSendWA={handleSendWA}
+        alias={alias}
+        onAliasChange={handleSaveAlias}
+        onShare={handleShareCart}
+        onClear={() => {
+          clearCart();
+          toast.info("Carrito limpiado");
+        }}
+        shareLink={shareLink}
+        onCopyShareLink={handleCopyShareLink}
+        clientNotes={clientNotes}
+        onClientNotesChange={setClientNotes}
+      />
+
+      {/* User Panel */}
+      <UserPanel
+        isOpen={userPanelOpen}
+        onClose={() => setUserPanelOpen(false)}
+        alias={alias}
+        user={user}
+        pedidos={pedidos}
+        onAliasSave={handleSaveAlias}
+        onReorder={handleReorder}
+        onLogout={handleLogout}
+        onClearData={handleClearData}
+      />
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModalOpen}
+        items={cartItems}
+        total={total}
+        onConfirm={handleConfirmSend}
+        onCancel={() => setConfirmModalOpen(false)}
+      />
+    </>
+  );
+}

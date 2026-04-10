@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Remate Canelones — Distribuidora Mayorista</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+
+<style>
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS — Paleta C: Mayorista Premium
+══════════════════════════════════════════════ */
+:root {
+  /* Core palette */
+  --navy:       #1A1F3A;
+  --navy-deep:  #0F1225;
+  --navy-mid:   #252B4A;
+  --navy-light: #2F365A;
+  --red:        #EF233C;
+  --red-dark:   #C01730;
+  --red-glow:   rgba(239,35,60,0.28);
+  --cyan:       #4CC9F0;
+  --cyan-dark:  #2BA8CE;
+  --cyan-pale:  rgba(76,201,240,0.12);
+  --amber:      #F8961E;
+  --amber-pale: rgba(248,150,30,0.14);
+  --green:      #22C55E;
+  --green-dark: #16A34A;
+
+  /* Backgrounds */
+  --bg:    #F4F6FB;
+  --bg2:   #ECEEF6;
+  --bg3:   #E3E6F0;
+  --white: #FFFFFF;
+
+  /* Text */
+  --text:  #12172E;
+  --text2: #3D4466;
+  --muted: #7A7FA8;
+
+  /* Borders */
+  --border:  #DDE1F0;
+  --border2: #C8CEDE;
+
+  /* Shadows */
+  --shadow-sm:    0 1px 3px rgba(26,31,58,0.08);
+  --shadow-md:    0 4px 16px rgba(26,31,58,0.1);
+  --shadow-lg:    0 12px 40px rgba(26,31,58,0.16);
+  --shadow-panel: -8px 0 48px rgba(10,14,35,0.28);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 100px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════════════════════════════════════════════
+   HERO — Mayorista Premium
+══════════════════════════════════════════════ */
+.hero {
+  background: var(--navy-deep);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Layered background effects */
+.hero-bg-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(76,201,240,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(76,201,240,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+.hero-bg-radial {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 80% at -5% 50%, rgba(239,35,60,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 105% 20%, rgba(76,201,240,0.14) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 40% at 50% 110%, rgba(26,31,58,0.9) 0%, transparent 60%);
+  pointer-events: none;
+}
+/* Diagonal accent stripe */
+.hero-stripe {
+  position: absolute;
+  top: -60px; right: -40px;
+  width: 320px; height: 320px;
+  background: linear-gradient(135deg, rgba(76,201,240,0.06) 0%, transparent 60%);
+  transform: rotate(-15deg);
+  pointer-events: none;
+}
+
+.hero-inner {
+  position: relative; z-index: 2;
+  padding: 20px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+@media(min-width:700px) {
+  .hero-inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 26px 32px 22px;
+  }
+}
+
+/* Brand */
+.hero-brand { display: flex; flex-direction: column; gap: 0; }
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-bottom: 8px;
+}
+.hero-eyebrow-badge {
+  background: var(--red);
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+.hero-eyebrow-text {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  opacity: 0.9;
+}
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.4rem, 7vw, 3.8rem);
+  letter-spacing: 2.5px;
+  line-height: 0.88;
+  color: #fff;
+}
+.hero-title .accent { color: var(--cyan); display: block; }
+.hero-title .sub-accent { color: var(--red); }
+
+.hero-descriptor {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.hero-descriptor-line {
+  width: 24px; height: 2px;
+  background: var(--red);
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+.hero-descriptor p {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+/* Stats strip */
+.hero-stats {
+  display: flex; gap: 0;
+  margin-top: 14px;
+  border: 1px solid rgba(76,201,240,0.18);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  width: fit-content;
+}
+.hero-stat {
+  padding: 8px 16px;
+  text-align: center;
+  border-right: 1px solid rgba(76,201,240,0.12);
+}
+.hero-stat:last-child { border-right: none; }
+.hero-stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.35rem;
+  color: var(--cyan);
+  letter-spacing: 1px;
+  line-height: 1;
+}
+.hero-stat-lbl {
+  font-size: 0.55rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.38);
+  margin-top: 2px;
+}
+
+/* Right controls */
+.hero-controls {
+  display: flex; flex-direction: column; gap: 8px;
+  width: 100%;
+}
+@media(min-width:700px) { .hero-controls { width: 300px; flex-shrink: 0; } }
+
+/* Search */
+.hero-search-wrap { position: relative; }
+.hero-search-wrap input {
+  width: 100%;
+  padding: 11px 16px 11px 42px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid rgba(76,201,240,0.18);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s;
+}
+.hero-search-wrap input::placeholder { color: rgba(255,255,255,0.3); }
+.hero-search-wrap input:focus {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(76,201,240,0.5);
+  box-shadow: 0 0 0 3px rgba(76,201,240,0.08);
+}
+.hero-search-icon {
+  position: absolute; left: 13px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.88rem; color: rgba(255,255,255,0.32);
+  pointer-events: none;
+}
+
+/* CTA row */
+.hero-actions { display: flex; gap: 7px; }
+
+.btn-hero-cart {
+  flex: 1;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 11px 16px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.15s;
+  box-shadow: 0 4px 18px var(--red-glow);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+.btn-hero-cart::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+.btn-hero-cart:hover { background: var(--red-dark); transform: translateY(-1px); box-shadow: 0 6px 22px var(--red-glow); }
+
+.cart-badge {
+  background: rgba(0,0,0,0.25);
+  color: #fff;
+  border-radius: 50%;
+  min-width: 19px; height: 19px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  padding: 0 4px;
+}
+.hero-total-pill {
+  background: rgba(0,0,0,0.2);
+  border-radius: 5px;
+  padding: 1px 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+/* Share cart button */
+.btn-hero-share {
+  background: rgba(76,201,240,0.1);
+  border: 1.5px solid rgba(76,201,240,0.3);
+  color: var(--cyan);
+  border-radius: var(--radius-md);
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  position: relative;
+}
+.btn-hero-share:hover { background: rgba(76,201,240,0.18); border-color: rgba(76,201,240,0.55); }
+.btn-hero-share .share-tooltip {
+  position: absolute; bottom: calc(100% + 8px); right: 0;
+  background: var(--navy);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(76,201,240,0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.btn-hero-share:hover .share-tooltip { opacity: 1; }
+
+/* User btn */
+.btn-hero-user {
+  background: rgba(255,255,255,0.07);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.75);
+  border-radius: var(--radius-md);
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  position: relative;
+}
+.btn-hero-user:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.btn-hero-user.logged-in {
+  background: rgba(76,201,240,0.12);
+  border-color: rgba(76,201,240,0.35);
+  color: var(--cyan);
+}
+.user-dot {
+  position: absolute; bottom: 5px; right: 5px;
+  width: 7px; height: 7px;
+  background: var(--green);
+  border-radius: 50%;
+  border: 1.5px solid var(--navy-deep);
+  display: none;
+}
+.btn-hero-user.logged-in .user-dot { display: block; }
+
+/* ══════════════════════════════════════════════
+   TICKER
+══════════════════════════════════════════════ */
+.ticker {
+  background: var(--navy-mid);
+  border-top: 1px solid rgba(76,201,240,0.12);
+  border-bottom: 1px solid rgba(76,201,240,0.12);
+  overflow: hidden;
+  padding: 8px 0;
+}
+.ticker-track {
+  display: flex;
+  animation: tickerScroll 32s linear infinite;
+  white-space: nowrap;
+}
+.ticker-item {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  opacity: 0.8;
+  padding: 0 28px;
+  flex-shrink: 0;
+}
+.ticker-item .sep { color: var(--red); margin: 0 4px; opacity: 1; }
+@keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ══════════════════════════════════════════════
+   STICKY NAV — Category pills
+══════════════════════════════════════════════ */
+.sticky-nav {
+  background: var(--white);
+  border-bottom: 1.5px solid var(--border);
+  position: sticky; top: 0; z-index: 90;
+  box-shadow: 0 2px 16px rgba(26,31,58,0.06);
+}
+.cats-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 0 12px;
+}
+.cats-wrap::-webkit-scrollbar { display: none; }
+.cats-inner { display: inline-flex; gap: 5px; padding: 8px 4px; }
+.cat-pill {
+  display: inline-block;
+  padding: 5px 13px;
+  border-radius: var(--radius-sm);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  background: var(--bg2);
+  color: var(--text2);
+  transition: all 0.13s;
+  white-space: nowrap;
+  user-select: none;
+}
+.cat-pill:hover { background: var(--bg3); color: var(--text); }
+.cat-pill.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy-mid);
+  box-shadow: 0 2px 8px rgba(26,31,58,0.2);
+}
+
+/* ══════════════════════════════════════════════
+   RESULTS BAR
+══════════════════════════════════════════════ */
+.results-bar {
+  padding: 10px 16px 2px;
+  font-size: 0.74rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ══════════════════════════════════════════════
+   PRODUCT GRID
+══════════════════════════════════════════════ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 8px 12px 20px;
+}
+@media(min-width:520px)  { .grid { grid-template-columns: repeat(3, 1fr); } }
+@media(min-width:780px)  { .grid { grid-template-columns: repeat(4, 1fr); } }
+@media(min-width:1060px) { .grid { grid-template-columns: repeat(5, 1fr); } }
+@media(min-width:1300px) { .grid { grid-template-columns: repeat(6, 1fr); } }
+
+/* Card */
+.card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.18s, transform 0.15s, border-color 0.15s;
+  position: relative;
+  animation: cardFadeIn 0.28s ease both;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--border2);
+}
+.card.in-cart {
+  border-color: rgba(76,201,240,0.45);
+  box-shadow: 0 0 0 1px rgba(76,201,240,0.12);
+}
+@keyframes cardFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes cardPop { 0%{transform:scale(1)} 45%{transform:scale(1.05)} 100%{transform:scale(1)} }
+.card.popped { animation: cardPop 0.22s ease-out; }
+
+.card-thumb {
+  background: linear-gradient(145deg, var(--bg) 0%, var(--bg2) 100%);
+  height: 76px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+  position: relative;
+}
+.card.in-cart .card-thumb::after {
+  content: '✓';
+  position: absolute; top: 6px; right: 6px;
+  background: var(--cyan);
+  color: var(--navy-deep);
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  font-size: 0.62rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.cat-badge {
+  position: absolute; top: 6px; left: 6px;
+  background: rgba(26,31,58,0.65);
+  backdrop-filter: blur(4px);
+  color: rgba(255,255,255,0.85);
+  font-size: 0.5rem; padding: 2px 6px;
+  border-radius: 5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  max-width: 88px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.card-body {
+  padding: 9px 10px 10px;
+  flex: 1; display: flex; flex-direction: column; gap: 4px;
+}
+.card-name {
+  font-size: 0.7rem; font-weight: 700;
+  line-height: 1.28; color: var(--text);
+  text-transform: uppercase; letter-spacing: 0.15px;
+}
+.card-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem; color: var(--navy); letter-spacing: 0.5px; line-height: 1;
+}
+.card-price-label {
+  font-size: 0.57rem; color: var(--muted);
+  font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.4px; margin-top: -3px;
+}
+.card-actions {
+  display: flex; align-items: center; gap: 5px;
+  margin-top: auto; padding-top: 6px;
+}
+.btn-add {
+  flex: 1; background: var(--navy);
+  color: #fff; border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.71rem; font-weight: 700;
+  cursor: pointer; text-align: center;
+  transition: background 0.13s, transform 0.1s;
+}
+.btn-add:hover { background: var(--navy-mid); transform: scale(1.02); }
+.qty-ctrl {
+  display: flex; align-items: center; gap: 3px;
+  width: 100%; background: var(--bg2);
+  border-radius: var(--radius-sm); padding: 3px;
+}
+.qty-btn {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1rem; font-weight: 700;
+  color: var(--navy); transition: background 0.1s, border-color 0.1s; flex-shrink: 0;
+}
+.qty-btn:hover { background: var(--cyan-pale); border-color: var(--cyan-dark); color: var(--navy-deep); }
+.qty-val {
+  flex: 1; text-align: center;
+  font-weight: 800; font-size: 0.88rem; color: var(--text);
+}
+
+/* Load more */
+.load-more-wrap { text-align: center; padding: 16px; }
+.btn-load-more {
+  background: transparent; color: var(--navy);
+  border: 2px solid var(--navy);
+  border-radius: 10px; padding: 10px 28px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem; letter-spacing: 1px;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-load-more:hover { background: var(--navy); color: #fff; }
+
+/* ══════════════════════════════════════════════
+   FLOAT CART
+══════════════════════════════════════════════ */
+.float-cart {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--navy);
+  color: #fff;
+  border: 1.5px solid rgba(76,201,240,0.2);
+  border-radius: 30px; padding: 12px 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.05rem; letter-spacing: 1.5px;
+  cursor: pointer; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 8px 32px rgba(10,14,35,0.4);
+  z-index: 89; transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+  white-space: nowrap; opacity: 0;
+}
+.float-cart.has-items { transform: translateX(-50%) translateY(0); opacity: 1; }
+.float-cart:hover { box-shadow: 0 12px 40px rgba(10,14,35,0.5); }
+.float-qty {
+  background: var(--red); color: #fff; border-radius: 50%;
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-family: 'Inter', sans-serif; font-weight: 700;
+}
+.float-total {
+  background: rgba(76,201,240,0.15);
+  border: 1px solid rgba(76,201,240,0.3);
+  color: var(--cyan); border-radius: 10px;
+  padding: 2px 10px; font-size: 0.95rem; font-weight: 800;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ══════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════ */
+.no-results { text-align: center; padding: 70px 20px; color: var(--muted); }
+.no-results-icon { font-size: 2.8rem; margin-bottom: 12px; opacity: 0.45; }
+
+/* ══════════════════════════════════════════════
+   OVERLAY
+══════════════════════════════════════════════ */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(10,14,35,0.7);
+  z-index: 200; backdrop-filter: blur(4px);
+}
+.overlay.open { display: block; }
+
+/* ══════════════════════════════════════════════
+   SIDE PANEL BASE
+══════════════════════════════════════════════ */
+.side-panel {
+  position: fixed; top: 0; bottom: 0;
+  width: 100%; max-width: 440px;
+  background: var(--white); z-index: 201;
+  display: flex; flex-direction: column;
+  transition: transform 0.32s cubic-bezier(.4,0,.2,1);
+  box-shadow: var(--shadow-panel);
+}
+.side-panel.right { right: 0; transform: translateX(100%); }
+.side-panel.right.open { transform: translateX(0); }
+.side-panel.left { left: 0; transform: translateX(-100%); }
+.side-panel.left.open { transform: translateX(0); }
+
+/* Panel header dark */
+.panel-header-dark {
+  background: var(--navy-deep);
+  padding: 20px 20px 16px;
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.panel-header-dark::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(76,201,240,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(76,201,240,0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+.panel-header-inner {
+  position: relative; z-index: 1;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.panel-header-brand { display: flex; flex-direction: column; gap: 1px; }
+.panel-eyebrow {
+  font-size: 0.58rem; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--cyan); opacity: 0.8;
+}
+.panel-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.85rem; letter-spacing: 1.5px; line-height: 1; color: #fff;
+}
+.panel-sub { font-size: 0.68rem; color: rgba(255,255,255,0.35); margin-top: 3px; font-weight: 500; }
+.panel-close {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+  border-radius: var(--radius-sm);
+  width: 34px; height: 34px;
+  cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s; flex-shrink: 0;
+}
+.panel-close:hover { background: rgba(255,255,255,0.16); color: #fff; }
+
+/* ══════════════════════════════════════════════
+   CART PANEL
+══════════════════════════════════════════════ */
+.cart-items {
+  flex: 1; overflow-y: auto;
+  padding: 12px 12px 4px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.cart-empty {
+  text-align: center; color: var(--muted); padding: 50px 20px;
+}
+.cart-empty-icon { font-size: 3rem; margin-bottom: 12px; display: block; opacity: 0.4; }
+.cart-empty strong { color: var(--text2); font-size: 0.95rem; display: block; margin-bottom: 4px; }
+.cart-empty p { font-size: 0.78rem; }
+.cart-item {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 9px 11px;
+  display: flex; align-items: center; gap: 9px;
+  transition: border-color 0.13s;
+}
+.cart-item:hover { border-color: var(--border2); }
+.cart-item-icon { font-size: 1.4rem; flex-shrink: 0; }
+.cart-item-info { flex: 1; min-width: 0; }
+.cart-item-name {
+  font-size: 0.7rem; font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text);
+}
+.cart-item-subtotal {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.05rem; color: var(--navy); letter-spacing: 0.5px; margin-top: 1px;
+}
+.cart-item-qty { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.cart-item-qty .qty-btn { width: 27px; height: 27px; }
+.cart-item-qty .qty-val { width: 22px; font-size: 0.85rem; }
+
+/* Cart footer */
+.cart-footer { border-top: 1.5px solid var(--border); flex-shrink: 0; }
+.cart-total-section {
+  padding: 12px 16px 10px;
+  background: var(--bg); border-bottom: 1.5px solid var(--border);
+}
+.cart-total-row { display: flex; justify-content: space-between; align-items: baseline; }
+.cart-total-label { font-size: 0.74rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.cart-total-amount { font-family: 'Bebas Neue', sans-serif; font-size: 2.1rem; color: var(--navy); letter-spacing: 1px; }
+.cart-disclaimer { font-size: 0.64rem; color: var(--muted); margin-top: 2px; }
+
+.cart-order-section { padding: 14px 16px 16px; }
+.cart-section-title { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px; }
+.field-label { display: block; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); margin-bottom: 5px; }
+.field-input {
+  width: 100%; padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem; outline: none;
+  transition: border 0.15s; color: var(--text);
+  background: var(--bg); margin-bottom: 10px;
+}
+.field-input:focus { border-color: var(--cyan-dark); background: var(--white); }
+.field-input::placeholder { color: var(--muted); }
+
+/* Share cart section */
+.cart-share-section {
+  padding: 10px 16px 0;
+  border-bottom: 1.5px solid var(--border);
+}
+.btn-share-cart {
+  width: 100%;
+  background: var(--cyan-pale);
+  border: 1.5px solid rgba(76,201,240,0.35);
+  color: var(--cyan-dark);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.15s; margin-bottom: 10px;
+}
+.btn-share-cart:hover { background: rgba(76,201,240,0.2); border-color: rgba(76,201,240,0.55); }
+.share-link-row {
+  display: flex; gap: 6px; align-items: center;
+  margin-bottom: 10px;
+}
+.share-link-input {
+  flex: 1; padding: 8px 10px;
+  border: 1.5px solid rgba(76,201,240,0.3);
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem; color: var(--text2);
+  background: var(--bg); outline: none;
+  cursor: text;
+}
+.btn-copy-link {
+  background: var(--navy); color: #fff; border: none;
+  border-radius: var(--radius-sm); padding: 8px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem; font-weight: 700;
+  cursor: pointer; transition: background 0.13s; white-space: nowrap;
+}
+.btn-copy-link:hover { background: var(--navy-mid); }
+.btn-copy-link.copied { background: var(--green-dark); }
+
+.btn-whatsapp {
+  width: 100%; background: var(--green);
+  color: #fff; border: none;
+  border-radius: var(--radius-md); padding: 13px 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem; letter-spacing: 1.5px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: background 0.13s, transform 0.1s;
+  box-shadow: 0 4px 18px rgba(34,197,94,0.3);
+}
+.btn-whatsapp:hover { background: var(--green-dark); transform: scale(1.015); }
+.btn-whatsapp svg { width: 21px; height: 21px; fill: #fff; flex-shrink: 0; }
+.btn-whatsapp-text { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+.btn-wa-main { font-size: 1.2rem; line-height: 1; }
+.btn-wa-sub { font-size: 0.58rem; font-family: 'Inter', sans-serif; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; opacity: 0.72; }
+
+/* ══════════════════════════════════════════════
+   USER PANEL
+══════════════════════════════════════════════ */
+.user-panel-body { flex: 1; overflow-y: auto; padding: 20px 20px 24px; }
+.auth-loading { text-align: center; padding: 40px 20px; color: var(--muted); }
+.auth-loading .spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.auth-setup { display: flex; flex-direction: column; gap: 16px; }
+.auth-welcome {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 18px; text-align: center;
+}
+.auth-welcome-emoji { font-size: 2.5rem; margin-bottom: 8px; display: block; }
+.auth-welcome h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+.auth-welcome p { font-size: 0.78rem; color: var(--text2); line-height: 1.5; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.btn-primary {
+  background: var(--navy); color: #fff; border: none;
+  border-radius: var(--radius-md); padding: 12px 20px;
+  font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 700;
+  cursor: pointer; transition: all 0.13s; width: 100%;
+  box-shadow: 0 4px 12px rgba(26,31,58,0.2);
+}
+.btn-primary:hover { background: var(--navy-mid); transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.user-profile { display: flex; flex-direction: column; gap: 16px; }
+.profile-card {
+  background: var(--navy-deep);
+  border-radius: var(--radius-lg); padding: 18px;
+  position: relative; overflow: hidden;
+}
+.profile-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 0% 100%, rgba(76,201,240,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+.profile-card-inner { position: relative; z-index: 1; }
+.profile-alias-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--cyan); opacity: 0.8; }
+.profile-alias { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: #fff; letter-spacing: 1px; line-height: 1.1; margin-top: 2px; }
+.profile-uid { font-size: 0.62rem; color: rgba(255,255,255,0.28); margin-top: 4px; font-family: monospace; }
+.profile-stats { display: flex; gap: 10px; margin-top: 14px; }
+.profile-stat {
+  flex: 1; background: rgba(255,255,255,0.06);
+  border-radius: var(--radius-sm); padding: 8px; text-align: center;
+}
+.profile-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--cyan); line-height: 1; }
+.profile-stat-lbl { font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.btn-ghost {
+  background: transparent; color: var(--text2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 14px;
+  font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: all 0.13s;
+}
+.btn-ghost:hover { border-color: var(--border2); color: var(--text); background: var(--bg2); }
+.btn-ghost.danger { color: #e74c3c; border-color: rgba(231,76,60,0.25); }
+.btn-ghost.danger:hover { background: rgba(231,76,60,0.06); border-color: rgba(231,76,60,0.5); }
+.history-section { display: flex; flex-direction: column; gap: 10px; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); }
+.history-empty {
+  background: var(--bg); border: 1.5px dashed var(--border2);
+  border-radius: var(--radius-md); padding: 28px 16px;
+  text-align: center; color: var(--muted); font-size: 0.8rem;
+}
+.history-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--radius-md); overflow: hidden;
+  transition: border-color 0.13s, box-shadow 0.13s;
+}
+.history-card:hover { border-color: var(--border2); box-shadow: var(--shadow-sm); }
+.history-card-header {
+  padding: 10px 12px;
+  background: var(--bg);
+  border-bottom: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.history-date { font-size: 0.68rem; font-weight: 600; color: var(--text2); }
+.history-total { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--navy); letter-spacing: 0.5px; }
+.history-items { padding: 8px 12px; }
+.history-item-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 3px 0; font-size: 0.68rem; color: var(--text2);
+  border-bottom: 1px solid var(--bg2);
+}
+.history-item-row:last-child { border-bottom: none; }
+.history-item-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+.history-item-qty { color: var(--muted); flex-shrink: 0; }
+.history-more { font-size: 0.65rem; color: var(--muted); padding: 4px 12px 8px; font-style: italic; }
+.history-card-footer {
+  padding: 8px 12px 10px; border-top: 1.5px solid var(--border); display: flex; gap: 6px;
+}
+.btn-reorder {
+  flex: 1; background: var(--navy); color: #fff; border: none;
+  border-radius: var(--radius-sm); padding: 8px 12px;
+  font-family: 'Inter', sans-serif; font-size: 0.74rem; font-weight: 700;
+  cursor: pointer; transition: background 0.13s;
+}
+.btn-reorder:hover { background: var(--navy-mid); }
+.btn-view-full {
+  background: var(--bg); color: var(--text2);
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 600;
+  cursor: pointer; transition: all 0.13s;
+}
+.btn-view-full:hover { border-color: var(--border2); color: var(--text); }
+.alias-edit-row { display: flex; gap: 8px; align-items: center; }
+.alias-edit-row .field-input { margin-bottom: 0; flex: 1; padding: 8px 11px; font-size: 0.88rem; }
+.btn-sm {
+  background: var(--navy); color: #fff; border: none;
+  border-radius: var(--radius-sm); padding: 8px 14px;
+  font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; transition: background 0.13s; white-space: nowrap; flex-shrink: 0;
+}
+.btn-sm:hover { background: var(--navy-mid); }
+
+/* ══════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 90px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--navy); color: #fff;
+  border-radius: 20px; padding: 10px 20px;
+  font-size: 0.82rem; font-weight: 600;
+  z-index: 999; opacity: 0;
+  transition: all 0.25s; pointer-events: none;
+  white-space: nowrap;
+  border: 1px solid rgba(76,201,240,0.15);
+  box-shadow: 0 6px 24px rgba(10,14,35,0.4);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ══════════════════════════════════════════════
+   FULL ORDER MODAL
+══════════════════════════════════════════════ */
+.full-order-modal {
+  position: fixed; inset: 0;
+  background: rgba(10,14,35,0.78); z-index: 300;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px; backdrop-filter: blur(4px);
+}
+.full-order-modal.open { display: flex; }
+.full-order-box {
+  background: var(--white); border-radius: var(--radius-xl);
+  width: 100%; max-width: 400px; max-height: 80vh;
+  overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: var(--shadow-lg);
+}
+.full-order-box-header {
+  padding: 16px 18px; border-bottom: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.full-order-box-header h3 { font-size: 0.9rem; font-weight: 700; }
+.full-order-box-header span { font-size: 0.72rem; color: var(--muted); }
+.btn-icon-close {
+  background: var(--bg2); border: none; border-radius: var(--radius-sm);
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 0.9rem; color: var(--text2); transition: background 0.13s;
+}
+.btn-icon-close:hover { background: var(--bg3); }
+.full-order-list { flex: 1; overflow-y: auto; padding: 12px 16px; }
+.full-order-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; border-bottom: 1px solid var(--bg2); font-size: 0.78rem;
+}
+.full-order-row:last-child { border-bottom: none; }
+.full-order-name { font-weight: 600; color: var(--text); }
+.full-order-right { text-align: right; flex-shrink: 0; margin-left: 12px; }
+.full-order-qty { font-size: 0.65rem; color: var(--muted); }
+.full-order-price { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: var(--navy); }
+.full-order-footer {
+  padding: 12px 16px; border-top: 1.5px solid var(--border);
+  display: flex; gap: 8px; align-items: center; justify-content: space-between;
+}
+.full-order-total { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--navy); }
+
+/* ══════════════════════════════════════════════
+   SHARED CART BANNER (cargado desde URL)
+══════════════════════════════════════════════ */
+.shared-cart-banner {
+  background: var(--navy);
+  border-bottom: 1px solid rgba(76,201,240,0.2);
+  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  display: none;
+}
+.shared-cart-banner.visible { display: flex; }
+.shared-banner-text { font-size: 0.82rem; font-weight: 600; color: #fff; }
+.shared-banner-text span { color: var(--cyan); }
+.shared-banner-actions { display: flex; gap: 8px; }
+.btn-load-shared {
+  background: var(--cyan); color: var(--navy-deep); border: none;
+  border-radius: var(--radius-sm); padding: 7px 14px;
+  font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 800;
+  cursor: pointer; transition: background 0.13s;
+}
+.btn-load-shared:hover { background: var(--cyan-dark); color: #fff; }
+.btn-dismiss-shared {
+  background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border: none;
+  border-radius: var(--radius-sm); padding: 7px 12px;
+  font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ SHARED CART BANNER ══════ -->
+<div class="shared-cart-banner" id="sharedCartBanner">
+  <div class="shared-banner-text">
+    📎 Te compartieron un pedido de <span id="sharedCartAlias">alguien</span>
+    — <span id="sharedCartQty">0</span> productos · <span id="sharedCartTotal">$0</span>
+  </div>
+  <div class="shared-banner-actions">
+    <button class="btn-load-shared" onclick="loadSharedCart()">Cargar pedido</button>
+    <button class="btn-dismiss-shared" onclick="dismissSharedBanner()">Ignorar</button>
+  </div>
+</div>
+
+<!-- ══════ HERO ══════ -->
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-bg-radial"></div>
+  <div class="hero-stripe"></div>
+  <div class="hero-inner">
+
+    <div class="hero-brand">
+      <div class="hero-eyebrow">
+        <span class="hero-eyebrow-badge">Mayorista</span>
+        <span class="hero-eyebrow-text">Distribuidora · Canelones</span>
+      </div>
+      <div class="hero-title">
+        EL REMATE
+        <span class="accent">CANELONES</span>
+      </div>
+      <div class="hero-descriptor">
+        <div class="hero-descriptor-line"></div>
+        <p>Precios de distribuidor · Pedidos por WhatsApp · Zona Canelones</p>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val">800+</div>
+          <div class="hero-stat-lbl">Productos</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val">WA</div>
+          <div class="hero-stat-lbl">Pedido express</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val">CAN</div>
+          <div class="hero-stat-lbl">Zona entrega</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-controls">
+      <div class="hero-search-wrap">
+        <span class="hero-search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar producto...">
+      </div>
+      <div class="hero-actions">
+        <button class="btn-hero-cart" onclick="openCart()">
+          🛒 Pedido
+          <span class="cart-badge" id="cartBadge">0</span>
+          <span class="hero-total-pill" id="heroTotal" style="display:none"></span>
+        </button>
+        <button class="btn-hero-share" onclick="openCart(); setTimeout(generateShareLink,300)" title="Compartir pedido">
+          🔗
+          <span class="share-tooltip">Compartir pedido</span>
+        </button>
+
+        <button class="btn-hero-user" id="userBtn" onclick="openUserPanel()" title="Mi cuenta">
+          👤<span class="user-dot"></span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════ TICKER ══════ -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item">⚡ Precios de distribuidor<span class="sep">·</span></span>
+    <span class="ticker-item">📦 Pedí por WhatsApp<span class="sep">·</span></span>
+    <span class="ticker-item">🏠 Zona Canelones<span class="sep">·</span></span>
+    <span class="ticker-item">🛒 Más de 800 productos<span class="sep">·</span></span>
+    <span class="ticker-item">✅ Fiambres · Congelados · Limpieza<span class="sep">·</span></span>
+    <span class="ticker-item">⚡ Precios de distribuidor<span class="sep">·</span></span>
+    <span class="ticker-item">📦 Pedí por WhatsApp<span class="sep">·</span></span>
+    <span class="ticker-item">🏠 Zona Canelones<span class="sep">·</span></span>
+    <span class="ticker-item">🛒 Más de 800 productos<span class="sep">·</span></span>
+    <span class="ticker-item">✅ Fiambres · Congelados · Limpieza<span class="sep">·</span></span>
+  </div>
+</div>
+
+<!-- ══════ STICKY CATEGORIES ══════ -->
+<div class="sticky-nav">
+  <div class="cats-wrap">
+    <div class="cats-inner" id="catsInner">
+      <span class="cat-pill active" data-cat="Todos" onclick="filterCat('Todos',this)">Todos</span>
+    </div>
+  </div>
+</div>
+
+<div class="results-bar" id="resultsBar"></div>
+
+<!-- ══════ GRID ══════ -->
+<div class="grid" id="productGrid"></div>
+<div class="load-more-wrap" id="loadMoreWrap" style="display:none">
+  <button class="btn-load-more" onclick="loadMore()">VER MÁS PRODUCTOS ↓</button>
+</div>
+<div class="no-results" id="noResults" style="display:none">
+  <div class="no-results-icon">🔍</div>
+  <p>No encontramos <strong id="noResultsTerm"></strong></p>
+  <p style="margin-top:6px;font-size:.78rem">Probá con otro término o revisá las categorías</p>
+</div>
+
+<!-- ══════ FLOAT CART ══════ -->
+<button class="float-cart" id="floatCart" onclick="openCart()">
+  🛒 Pedido
+  <span class="float-qty" id="floatQty">0</span>
+  <span class="float-total" id="floatTotal">$0</span>
+</button>
+
+<!-- ══════ OVERLAY ══════ -->
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- ══════ CART PANEL ══════ -->
+<div class="side-panel right" id="cartPanel">
+  <div class="panel-header-dark">
+    <div class="panel-header-inner">
+      <div class="panel-header-brand">
+        <span class="panel-eyebrow">El Remate · Canelones</span>
+        <span class="panel-title">Tu Pedido</span>
+        <span class="panel-sub">Revisá y enviá por WhatsApp</span>
+      </div>
+      <button class="panel-close" onclick="closeCart()">✕</button>
+    </div>
+  </div>
+
+  <div class="cart-items" id="cartItems"></div>
+
+  <div class="cart-footer">
+    <div class="cart-total-section">
+      <div class="cart-total-row">
+        <span class="cart-total-label">Total estimado</span>
+        <span class="cart-total-amount" id="cartTotal">$0</span>
+      </div>
+      <div class="cart-disclaimer">* Los precios son estimativos y pueden variar.</div>
+    </div>
+
+    <!-- Compartir pedido -->
+    <div class="cart-share-section">
+      <button class="btn-share-cart" onclick="generateShareLink()">
+        🔗 Compartir este pedido por WhatsApp
+      </button>
+      <div class="share-link-row" id="shareLinkRow" style="display:none">
+        <input type="text" class="share-link-input" id="shareLinkInput" readonly>
+        <button class="btn-copy-link" id="copyLinkBtn" onclick="copyShareLink()">Copiar</button>
+      </div>
+    </div>
+
+    <div class="cart-order-section">
+      <div class="cart-section-title">Completá tu pedido</div>
+      <div class="form-group">
+        <label class="field-label" for="clientName">👤 Tu nombre o negocio</label>
+        <input type="text" id="clientName" class="field-input" placeholder="Ej: Almacén Don Pepe" style="margin-bottom:10px">
+      </div>
+      <button class="btn-whatsapp" onclick="sendWhatsApp()">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.025.507 3.932 1.395 5.608L0 24l6.538-1.373A11.936 11.936 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.923 0-3.728-.5-5.287-1.375l-.378-.225-3.88.816.824-3.787-.248-.39A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        <div class="btn-whatsapp-text">
+          <span class="btn-wa-main">ENVIAR PEDIDO</span>
+          <span class="btn-wa-sub">Abre WhatsApp al instante</span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ USER PANEL ══════ -->
+<div class="side-panel left" id="userPanel">
+  <div class="panel-header-dark">
+    <div class="panel-header-inner">
+      <div class="panel-header-brand">
+        <span class="panel-eyebrow">El Remate · Canelones</span>
+        <span class="panel-title">Mi Cuenta</span>
+        <span class="panel-sub" id="userPanelSub">Historial de pedidos</span>
+      </div>
+      <button class="panel-close" onclick="closeUserPanel()">✕</button>
+    </div>
+  </div>
+  <div class="user-panel-body" id="userPanelBody">
+    <div class="auth-loading">
+      <div class="spinner"></div>
+      <p style="font-size:.8rem">Conectando...</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ FULL ORDER MODAL ══════ -->
+<div class="full-order-modal" id="fullOrderModal" onclick="closeFullOrder(event)">
+  <div class="full-order-box">
+    <div class="full-order-box-header">
+      <div>
+        <h3 id="fullOrderTitle">Pedido completo</h3>
+        <span id="fullOrderDate"></span>
+      </div>
+      <button class="btn-icon-close" onclick="closeFullOrderDirect()">✕</button>
+    </div>
+    <div class="full-order-list" id="fullOrderList"></div>
+    <div class="full-order-footer">
+      <span class="full-order-total" id="fullOrderTotal"></span>
+      <button class="btn-reorder" onclick="reorderFromModal()">↺ Reordenar este pedido</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ TOAST ══════ -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONFIGURACIÓN — editá estos valores antes de publicar
+═══════════════════════════════════════════════════════ */
+const WHATSAPP_NUMBER = '59899000000'; // ← TU NÚMERO CON CÓDIGO DE PAÍS (598...)
+
+/* ═══════════════════════════════════════════════════════
+   DATOS DE PRODUCTOS — generados con herramienta_precios.html
+   Para actualizar: reemplazá todo desde "const PRODUCTS = [" hasta "];"
+═══════════════════════════════════════════════════════ */
+const PRODUCTS = [{"name":"SUELTO FAINA MOLINO 250 G","price":50.0,"category":"Harinas, Pastas y Legumbres"},{"name":"CALABAZA HALLOWER FINI 179G","price":315.0,"category":"Otros"},{"name":"CREMA DE AFEITAR 143ML","price":98.0,"category":"Lácteos"},{"name":"PANCHOS CAMPOSUR LIGHT 8+8","price":215.0,"category":"Fiambres y Carnes"},{"name":"RALLADO ECONOMICO 1KG","price":179.0,"category":"Otros"},{"name":"TENEDOR DESC. X100","price":120.0,"category":"Descartables y Embalaje"},{"name":"ACEITE DE ARROZ SAMAN 5L","price":630.0,"category":"Aceites y Aderezos"},{"name":"ACEITE DE OLIVA BASSO 1L","price":389.8,"category":"Aceites y Aderezos"},{"name":"ACEITE DE OLIVA BASSO 500ML","price":226.29,"category":"Aceites y Aderezos"},{"name":"ACEITE DE OLIVA MORIXE 500ML","price":325.0,"category":"Aceites y Aderezos"},{"name":"ACEITE FRITADOR FRITOMAC 10L","price":1100.0,"category":"Aceites y Aderezos"},{"name":"ACEITE OPTIMO 900ML GIRASOL","price":98.0,"category":"Aceites y Aderezos"},{"name":"ACEITE OPTIMO CANOLA 900ML","price":89.0,"category":"Aceites y Aderezos"},{"name":"ACEITE SOYA 3.2 L","price":250.0,"category":"Aceites y Aderezos"},{"name":"ACEITE URUGUAY 900ML","price":95.0,"category":"Aceites y Aderezos"},{"name":"ACEITUNAS GIBUR 250G","price":75.0,"category":"Aceites y Aderezos"},{"name":"ACEITUNAS GIBUR C/C 1.5KG","price":260.0,"category":"Aceites y Aderezos"},{"name":"ACEITUNAS GIBUR ROTAS 1.5KG","price":195.0,"category":"Aceites y Aderezos"},{"name":"ACEITUNAS GIBUR S/C 1.5KG","price":315.0,"category":"Aceites y Aderezos"},{"name":"ADEREZOS BARCATTI 440G","price":65.0,"category":"Aceites y Aderezos"},{"name":"ADOBO DUKITA 1KG","price":266.67,"category":"Especias y Condimentos"},{"name":"ADOBO TORRENUEVA 250G","price":99.0,"category":"Especias y Condimentos"},{"name":"ADOBO TORRENUEVA 500G","price":175.0,"category":"Especias y Condimentos"},{"name":"AGUA DE AZAHAR 1L","price":265.0,"category":"Bebidas"},{"name":"AGUA JANE 1L","price":80.0,"category":"Bebidas"},{"name":"AGUA MATUTINA 2.25L X4","price":160.0,"category":"Bebidas"},{"name":"AGUA MATUTINA 2.5L UNIDAD","price":61.0,"category":"Bebidas"},{"name":"AGUA NIX 500ML X 12","price":415.0,"category":"Bebidas"},{"name":"AGUA PISCIS BIDON 10","price":125.0,"category":"Bebidas"},{"name":"AGUA SALUS 600ML X6","price":380.0,"category":"Bebidas"},{"name":"AGUA SALUS 1L","price":74.0,"category":"Bebidas"},{"name":"AGUA SALUS 2.25L XUNIDAD","price":78.0,"category":"Bebidas"},{"name":"AGUA SALUS BIDON 6.25L","price":125.0,"category":"Bebidas"},{"name":"AGUA VITALE C/G 1.75L X4","price":146.0,"category":"Bebidas"},{"name":"AJI CATALAN DON DOMINGO KILO","price":199.0,"category":"Especias y Condimentos"},{"name":"AJO EN ESCAMAS 1KG","price":399.0,"category":"Especias y Condimentos"},{"name":"AJO Y PEREJIL DUKITA 1KG","price":388.8,"category":"Especias y Condimentos"},{"name":"AJO Y PEREJIL TORRENUEVA 250G","price":139.0,"category":"Especias y Condimentos"},{"name":"AJO Y PEREJIL TORRENUEVA 500G","price":215.0,"category":"Especias y Condimentos"},{"name":"ALFAJOR EL SOL","price":180.0,"category":"Golosinas y Dulces"},{"name":"ALFAJOR ILIKEX3 X12","price":350.0,"category":"Golosinas y Dulces"},{"name":"ALFAJOR KIOSCO CHOCO X26","price":315.0,"category":"Golosinas y Dulces"},{"name":"ALFAJOR P. BALLENA SOUL X12","price":295.0,"category":"Golosinas y Dulces"},{"name":"ALFAJOR P. BALLENA TRIPLE 60G X12","price":325.0,"category":"Golosinas y Dulces"},{"name":"ALFAJOR PUNTA DEL ESTE","price":185.0,"category":"Golosinas y Dulces"},{"name":"ALMIDON DE MAIZ BIOS 5 KILOS","price":315.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ALMIDON DE MAIZ DUKITA 1KG","price":70.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ALMIDON DE MAIZ DUKITA 3KG","price":199.0,"category":"Harinas, Pastas y Legumbres"},{"name":"AMONIACO WEMEXUL 1KG","price":149.0,"category":"Limpieza"},{"name":"ANANA COLOLO 830G","price":130.0,"category":"Mermeladas y Conservas Dulces"},{"name":"ANANA EN ALMIBAR VITER 820GR","price":120.0,"category":"Mermeladas y Conservas Dulces"},{"name":"ANANA FIZZ DEL VALLE","price":119.0,"category":"Bebidas"},{"name":"ARROLLADO DE CERDO","price":250.0,"category":"Fiambres y Carnes"},{"name":"ARROZ ARUBA 1KG","price":40.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ ARUBA 5KG","price":168.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ BLUE PATNA 5KG","price":229.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ CHEF 5 KG","price":230.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ GREEN CHEF 1KG","price":58.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ INTEGRAL SAMAN","price":95.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ PATNA COLOLO 500G","price":30.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ PURITAS 1K","price":35.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ SAMAN BLANCO 1K","price":65.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ SAMAN BLANCO 500G","price":40.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ SAMAN BLANCO 5KG","price":238.31,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ SAMAN PARBOILED 1K","price":80.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ SAMAN PARBOILED 5K","price":305.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ SAN JOSE 1KG","price":42.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ARROZ SAN JOSE 5KG","price":199.0,"category":"Harinas, Pastas y Legumbres"},{"name":"ATUN DESMENUZADO AL NAT. 170G","price":98.0,"category":"Conservas de Pescado"},{"name":"ATUN COQUEIRO 170G","price":89.0,"category":"Conservas de Pescado"},{"name":"AVENA GOURMET 300G","price":45.0,"category":"Cereales y Granola"},{"name":"AVENA GOURMET 600G","price":70.0,"category":"Cereales y Granola"},{"name":"AVENA LAMINADA DUKITA 1K","price":88.73,"category":"Cereales y Granola"},{"name":"AVENA LAMINADA DUKITA 2.5K","price":230.0,"category":"Cereales y Granola"},{"name":"AZUCAR 25KG","price":1060.28,"category":"Especias y Condimentos"},{"name":"AZUCAR IMPALPABLE 5K ALENAR","price":365.0,"category":"Especias y Condimentos"},{"name":"AZUCAR IMPALPABLE DUKITA 1KG","price":120.0,"category":"Especias y Condimentos"},{"name":"AZUCAR LA HEROICA 1K","price":50.0,"category":"Especias y Condimentos"},{"name":"AZUCAR POR KILO","price":45.0,"category":"Especias y Condimentos"},{"name":"BANDEJA MEMBRILLO 600GR","price":78.0,"category":"Descartables y Embalaje"},{"name":"BANDEJA BATATA 600GR","price":78.0,"category":"Descartables y Embalaje"},{"name":"BANDEJA COD. 08 (26X21)","price":206.0,"category":"Descartables y Embalaje"},{"name":"BARBACOA DEL GAUCHO 950G","price":250.0,"category":"Aceites y Aderezos"},{"name":"BARBACOA HELLMANN'S 3KG","price":799.0,"category":"Aceites y Aderezos"},{"name":"BARBACOA HELLMANS 1KG","price":280.0,"category":"Aceites y Aderezos"},{"name":"BARBACOA PONTEVEDRA 1K","price":189.0,"category":"Aceites y Aderezos"},{"name":"BARRITA HAPPY END X 36U","price":140.0,"category":"Golosinas y Dulces"},{"name":"BONDIOLA CAMPOSUR KG","price":630.0,"category":"Fiambres y Carnes"},{"name":"BONDIOLA LOS 2 CARLITOS KG","price":605.0,"category":"Fiambres y Carnes"},{"name":"BRACAFE 100G","price":205.0,"category":"Café, Té y Yerba"},{"name":"BUBY JAMON 100G","price":49.0,"category":"Fiambres y Carnes"},{"name":"BUBY JAMON 500G","price":189.0,"category":"Fiambres y Carnes"},{"name":"BUBY QUESO 100G","price":49.0,"category":"Lácteos"},{"name":"BUBY QUESO 500G","price":175.0,"category":"Lácteos"},{"name":"CAFE AGUILA 100GRS","price":135.0,"category":"Café, Té y Yerba"},{"name":"CAFE AGUILA 1KG","price":999.0,"category":"Café, Té y Yerba"},{"name":"CAFE AGUILA 250G","price":255.0,"category":"Café, Té y Yerba"},{"name":"CAFE AGUILA 500G","price":439.0,"category":"Café, Té y Yerba"},{"name":"CAFE BRACAFE 120X1.7G","price":525.0,"category":"Café, Té y Yerba"},{"name":"CAFE BRACAFE 50G","price":125.0,"category":"Café, Té y Yerba"},{"name":"CAFE CHANA MOLIDO 250G","price":365.0,"category":"Café, Té y Yerba"},{"name":"CAFE NESCAFE DESCAFEINADO 100G","price":465.0,"category":"Café, Té y Yerba"},{"name":"CAFE NESCAFE RECARGA 170G","price":298.0,"category":"Café, Té y Yerba"},{"name":"CAJON DE HUEVOS","price":2800.0,"category":"Especias y Condimentos"},{"name":"CHORIZO CENTENARIO P.C","price":250.0,"category":"Fiambres y Carnes"},{"name":"CHORIZO ARIZONA X10U KG","price":290.0,"category":"Fiambres y Carnes"},{"name":"CHORIZO CAMPOSUR X3U","price":380.0,"category":"Fiambres y Carnes"},{"name":"CHORIZO CENTENARIO SABORES","price":510.0,"category":"Fiambres y Carnes"},{"name":"CHORIZO EXTRA CENTENARIO KG","price":508.05,"category":"Fiambres y Carnes"},{"name":"CHORIZO PARRILLERO CAMPOSUR X3","price":290.0,"category":"Fiambres y Carnes"},{"name":"COCA COLA 1.5 UNIDAD","price":145.0,"category":"Bebidas"},{"name":"COCA COLA 2L X UNIDAD","price":150.0,"category":"Bebidas"},{"name":"COCA COLA 3L X UNIDAD","price":195.0,"category":"Bebidas"},{"name":"COPOS DE MAIZ NIKITOS C/A 900G","price":199.0,"category":"Cereales y Granola"},{"name":"COPOS DE MAIZ NIKITOS S/A 900G","price":199.0,"category":"Cereales y Granola"},{"name":"CREMA DE LECHE CONAPROLE 1L","price":195.0,"category":"Lácteos"},{"name":"CREMA DE LECHE CONAPROLE 250","price":80.0,"category":"Lácteos"},{"name":"CREMA DE LECHE LA TIROLESA 1L","price":235.0,"category":"Lácteos"},{"name":"CREMA DE LECHE PARMALAT 1L","price":245.0,"category":"Lácteos"},{"name":"DULCE DE LECHE CONAPROLE 5KG","price":899.0,"category":"Lácteos"},{"name":"DULCE DE LECHE MANJAR 1KG","price":179.0,"category":"Lácteos"},{"name":"DULCE DE LECHE MANJAR 500G","price":109.0,"category":"Lácteos"},{"name":"ENSALADA DE BROCOLI 2.5 K BOREAL","price":385.0,"category":"Congelados"},{"name":"ESPINACA 500G MC CAIN","price":125.0,"category":"Congelados"},{"name":"ESPINACA CONG. BOREAL 2,5K","price":325.0,"category":"Congelados"},{"name":"FAINA HORNEX 250GR","price":85.0,"category":"Harinas, Pastas y Legumbres"},{"name":"FERNET 420 CLASICO Y JAMAICA","price":690.0,"category":"Bebidas"},{"name":"FERNET BRANCA","price":650.0,"category":"Bebidas"},{"name":"FETEADO BONDIOLA CAMPOSUR KG","price":672.06,"category":"Fiambres y Carnes"},{"name":"FETEADO JAMON BLANCO POR KILO","price":216.89,"category":"Fiambres y Carnes"},{"name":"FETEADO JAMON RUVI POR KILO","price":297.13,"category":"Fiambres y Carnes"},{"name":"FIDEOS COLOLO 500GR","price":65.0,"category":"Harinas, Pastas y Legumbres"},{"name":"FIDEOS DON GUSTO 400G","price":49.0,"category":"Harinas, Pastas y Legumbres"},{"name":"FIDEOS EPIDOR 3KG","price":185.0,"category":"Harinas, Pastas y Legumbres"},{"name":"FIDEOS KILO SAN CONO","price":95.0,"category":"Harinas, Pastas y Legumbres"},{"name":"FIDEOS MAINARDI 3 K","price":294.58,"category":"Harinas, Pastas y Legumbres"},{"name":"FIDEOS MAINARDI 500G","price":49.0,"category":"Harinas, Pastas y Legumbres"},{"name":"FIDEOS MAINARDI 5KG","price":480.0,"category":"Harinas, Pastas y Legumbres"},{"name":"FIDEOS PURITAS 3KG","price":216.3,"category":"Harinas, Pastas y Legumbres"},{"name":"FIDEOS SAN CONO 500G","price":55.0,"category":"Harinas, Pastas y Legumbres"},{"name":"GARBANZOS COLOLO LTA 400G","price":55.0,"category":"Harinas, Pastas y Legumbres"},{"name":"GRATED DE SARDINA COLOLO 170G","price":49.0,"category":"Conservas de Pescado"},{"name":"GRATED SARDINA DUKITA 170 G","price":40.0,"category":"Conservas de Pescado"},{"name":"HARINA CAÑUELAS 0 25KG","price":560.0,"category":"Harinas, Pastas y Legumbres"},{"name":"HARINA CAÑUELAS 000 1KG ROJA","price":50.0,"category":"Harinas, Pastas y Legumbres"},{"name":"HARINA CAÑUELAS 0000 1KG VERDE","price":55.0,"category":"Harinas, Pastas y Legumbres"},{"name":"HARINA COLOLO 0000 1KG","price":45.0,"category":"Harinas, Pastas y Legumbres"},{"name":"HARINA MORIXE 000X25","price":480.0,"category":"Harinas, Pastas y Legumbres"},{"name":"HARINA SAN AGUSTIN 0 1KG","price":30.0,"category":"Harinas, Pastas y Legumbres"},{"name":"HARINA SAN JOSE 0000. X 25K","price":705.0,"category":"Harinas, Pastas y Legumbres"},{"name":"JABON ASTRAL 125G","price":40.0,"category":"Limpieza"},{"name":"JABON BULL DOG 200G","price":89.0,"category":"Limpieza"},{"name":"JABON DE MANOS CARE UP 250ML","price":115.0,"category":"Limpieza"},{"name":"JABON DE MANOS CARE UP 980ML","price":190.0,"category":"Limpieza"},{"name":"JABON EN POLVO NEVEX 800GRS","price":175.0,"category":"Limpieza"},{"name":"JABON EN POLVO QUERUBIN 3K","price":479.0,"category":"Limpieza"},{"name":"JABON LIQ ROPAS QUERUBIN 3LT","price":431.0,"category":"Limpieza"},{"name":"JABON LIQUIDO BARON ROJO 3 L","price":170.0,"category":"Limpieza"},{"name":"JAMON ARIZONA KG","price":250.0,"category":"Fiambres y Carnes"},{"name":"JAMON BLANCO DOÑA COCA KG","price":210.0,"category":"Fiambres y Carnes"},{"name":"JAMON CENTENARIO ET ROJA","price":320.0,"category":"Fiambres y Carnes"},{"name":"JAMON COCIDO LA DOLFINA KG","price":300.0,"category":"Fiambres y Carnes"},{"name":"JAMON COCIDO OTTONELLO KG","price":515.16,"category":"Fiambres y Carnes"},{"name":"JAMON COCIDO SCHNECK KG","price":520.0,"category":"Fiambres y Carnes"},{"name":"JAMON NEGRO DOÑA COCA KG","price":380.0,"category":"Fiambres y Carnes"},{"name":"JUGO ADES 1L","price":120.0,"category":"Bebidas"},{"name":"JUGO BIG C 1L","price":69.0,"category":"Bebidas"},{"name":"JUGO CLIGHT X 20","price":380.0,"category":"Bebidas"},{"name":"JUGO RIGBY 1L","price":65.0,"category":"Bebidas"},{"name":"JUGO WATT'S 1.5L","price":155.0,"category":"Bebidas"},{"name":"KETCHUP HELLMANN'S 3K","price":559.0,"category":"Aceites y Aderezos"},{"name":"KETCHUP PONTEVEDRA 1K","price":179.0,"category":"Aceites y Aderezos"},{"name":"KETCHUP RIGBY 1KG","price":110.0,"category":"Aceites y Aderezos"},{"name":"LAVANDINA ARTIK 5L","price":170.51,"category":"Limpieza"},{"name":"LAVANDINA BARON ROJO 1LT","price":42.0,"category":"Limpieza"},{"name":"LECHE BLANCANUVE ENTERA 1L","price":65.0,"category":"Lácteos"},{"name":"LECHE CONAPROLE 1LITRO","price":68.0,"category":"Lácteos"},{"name":"LENTEJAS COLOLO 300G","price":45.0,"category":"Harinas, Pastas y Legumbres"},{"name":"LENTEJAS COLOLO 400G","price":55.0,"category":"Harinas, Pastas y Legumbres"},{"name":"LIMPIADOR AQUAFAST 1L","price":69.0,"category":"Limpieza"},{"name":"LIMPIADOR ARTIK 5L","price":164.8,"category":"Limpieza"},{"name":"LIMPIADOR ODEX 4L","price":199.0,"category":"Limpieza"},{"name":"LIMPIADOR POETT LAVANDA 900ML","price":69.0,"category":"Limpieza"},{"name":"LOMITOS ATUN COLOLO X3 80GR","price":189.0,"category":"Conservas de Pescado"},{"name":"LOMITOS DE ATUN COLOLO 170G","price":89.0,"category":"Conservas de Pescado"},{"name":"LOS NIETITOS DULCE DE LECHE 1KG","price":199.0,"category":"Lácteos"},{"name":"LOS NIETITOS DULCE DE LECHE 3.8KG","price":730.0,"category":"Lácteos"},{"name":"LOS NIETITOS DULCE DE LECHE 500G","price":125.0,"category":"Lácteos"},{"name":"LOS NIETITOS X500G TRES FRUTAS","price":155.0,"category":"Mermeladas y Conservas Dulces"},{"name":"MANTECA CONAPROLE 100 GR","price":58.0,"category":"Lácteos"},{"name":"MANTECA CONAPROLE 200 GR","price":110.0,"category":"Lácteos"},{"name":"MANTECA CONAPROLE SUELTA","price":360.0,"category":"Lácteos"},{"name":"MANTECA PINEROLO KG","price":320.0,"category":"Lácteos"},{"name":"MAYONESA HELLMANNS 2.750 KG","price":499.0,"category":"Aceites y Aderezos"},{"name":"MAYONESA PARA TI 510G","price":69.0,"category":"Aceites y Aderezos"},{"name":"MAYONESA URUGUAY 1K","price":180.0,"category":"Aceites y Aderezos"},{"name":"MAYONESA URUGUAY 500G","price":95.0,"category":"Aceites y Aderezos"},{"name":"MEMBRILLO SERRA 5K","price":395.0,"category":"Mermeladas y Conservas Dulces"},{"name":"MERMELADA DOÑA TERE 3.5K","price":390.0,"category":"Mermeladas y Conservas Dulces"},{"name":"MERMELADA LIMAY FRUTILLA 3KG","price":609.0,"category":"Mermeladas y Conservas Dulces"},{"name":"MERMELADA LIMAY FRUTILLA 500G","price":125.0,"category":"Mermeladas y Conservas Dulces"},{"name":"MIEL LAS BRUJAS 1K","price":229.0,"category":"Mermeladas y Conservas Dulces"},{"name":"MIEL LAS BRUJAS 500G","price":130.0,"category":"Mermeladas y Conservas Dulces"},{"name":"MORCILLA CAMPOSUR SALADA","price":265.0,"category":"Fiambres y Carnes"},{"name":"MORCILLAS CAMPOSUR DULCE X2","price":250.0,"category":"Fiambres y Carnes"},{"name":"MORTADELA ARIZONA FINA KG","price":190.0,"category":"Fiambres y Carnes"},{"name":"MORTADELA DOÑA COCA KG","price":230.0,"category":"Fiambres y Carnes"},{"name":"MORTADELA LA DOLFINA KG","price":165.0,"category":"Fiambres y Carnes"},{"name":"MORTADELA OTTONELLO BOCHA KG","price":420.0,"category":"Fiambres y Carnes"},{"name":"MOSTAZA DEL GAUCHO 1K","price":110.0,"category":"Aceites y Aderezos"},{"name":"MOSTAZA PONTEVEDRA 1K","price":180.0,"category":"Aceites y Aderezos"},{"name":"MOSTAZA RIGBY 1KG","price":85.0,"category":"Aceites y Aderezos"},{"name":"MUZZARELA CENTENARIO KG","price":290.0,"category":"Lácteos"},{"name":"MUZZARELLA PAILA KG","price":325.0,"category":"Lácteos"},{"name":"NUGGET RIKITOS 1K","price":240.0,"category":"Congelados"},{"name":"NUGGETS C-VALE 1KG","price":269.0,"category":"Congelados"},{"name":"OREGANO DUKITA 1KG","price":257.01,"category":"Especias y Condimentos"},{"name":"PAN CATALAN MARBELLA X20U","price":275.0,"category":"Panadería"},{"name":"PAN DE MOLDE MARBELLA 0%","price":125.0,"category":"Panadería"},{"name":"PAN DE VIENA MARBELLA 8U 320G","price":89.0,"category":"Panadería"},{"name":"PAN DULCE HERMANDAD 330G","price":69.9,"category":"Golosinas y Dulces"},{"name":"PAN RALLADO COLOLO 900G","price":110.0,"category":"Panadería"},{"name":"PANCHO ARIZONA 3K","price":220.0,"category":"Fiambres y Carnes"},{"name":"PANCHO CENTENARIO SUPERLARGOS","price":165.0,"category":"Fiambres y Carnes"},{"name":"PANCHO LA DOLFINA","price":175.0,"category":"Fiambres y Carnes"},{"name":"PANCHOS LA DOLFINA CORTOS X8U","price":85.0,"category":"Fiambres y Carnes"},{"name":"PAPEL HIGIENICO CLARA 4 X 50M","price":65.0,"category":"Papel e Higiene"},{"name":"PAPEL HIGIENICO JUMU 60MTS","price":180.0,"category":"Papel e Higiene"},{"name":"PAPEL HIGIENICO PIKILU X16 X30M","price":95.0,"category":"Papel e Higiene"},{"name":"PAPEL HIGIENOL AZUL 12X60M","price":235.0,"category":"Papel e Higiene"},{"name":"PEPSI 1.5L UNIDAD","price":94.9,"category":"Bebidas"},{"name":"PIMENTON DUKITA 1KG","price":380.0,"category":"Especias y Condimentos"},{"name":"PIMENTON TORRENUEVA 250G","price":85.0,"category":"Especias y Condimentos"},{"name":"PIMENTON TORRENUEVA 500G","price":145.0,"category":"Especias y Condimentos"},{"name":"QUESO CATALCREM 4 QUESOS 500G","price":209.0,"category":"Lácteos"},{"name":"QUESO CHEDDAR CATALCREM 500G","price":195.0,"category":"Lácteos"},{"name":"QUESO COLONIA KG","price":350.0,"category":"Lácteos"},{"name":"QUESO DAMBO CENTENARIO KG","price":420.0,"category":"Lácteos"},{"name":"QUESO PARMESANO KG","price":420.0,"category":"Lácteos"},{"name":"QUESO RALLADO DON RAMON 1KG","price":504.0,"category":"Lácteos"},{"name":"RICOTA CONAPROLE 500G","price":165.0,"category":"Lácteos"},{"name":"SAL GRUESA COLOLO 500 G","price":48.0,"category":"Especias y Condimentos"},{"name":"SAL NILO 500G","price":35.0,"category":"Especias y Condimentos"},{"name":"SAL TORREVIEJA 25KG","price":699.0,"category":"Especias y Condimentos"},{"name":"SALCHICHA PARRILLERA CAMPOSUR","price":460.0,"category":"Fiambres y Carnes"},{"name":"SALSA BLANCA HORNEX KILO","price":295.0,"category":"Aceites y Aderezos"},{"name":"SALSA DE SOJA OSAKA 1L","price":185.0,"category":"Aceites y Aderezos"},{"name":"SALSA PIZZERA RIGBY 3KG","price":185.0,"category":"Aceites y Aderezos"},{"name":"SERVILLETAS FAMA X 100U","price":55.0,"category":"Papel e Higiene"},{"name":"SERVILLETAS NOVA 100U","price":40.0,"category":"Papel e Higiene"},{"name":"SPRITE 1.5 NO RET","price":799.0,"category":"Bebidas"},{"name":"TOALLA DE COCINA ARTIK X2U","price":49.0,"category":"Papel e Higiene"},{"name":"TOALLA DE COCINA JOB 300 PAÑOS","price":75.0,"category":"Papel e Higiene"},{"name":"VINAGRE COLOLO ALCOHOL 3L","price":165.0,"category":"Aceites y Aderezos"},{"name":"VINAGRE COLOLO MANZANA 750ML","price":78.0,"category":"Aceites y Aderezos"},{"name":"VINO DON PASCUAL 750ML","price":285.0,"category":"Bebidas"},{"name":"VINO FAISAN 1L","price":120.0,"category":"Bebidas"},{"name":"VINO FAISAN 3L","price":340.0,"category":"Bebidas"},{"name":"WHISKY DUNBAR 1L","price":520.0,"category":"Bebidas"},{"name":"WHISKY WILLIAM LAWSON'S 1L","price":590.0,"category":"Bebidas"},{"name":"YERBA BALDO 1KG","price":195.0,"category":"Café, Té y Yerba"},{"name":"YERBA BALDO 5K","price":949.0,"category":"Café, Té y Yerba"},{"name":"YERBA CANARIAS 1KG","price":199.0,"category":"Café, Té y Yerba"},{"name":"YERBA CANARIAS 500G","price":105.0,"category":"Café, Té y Yerba"},{"name":"YERBA CANARIAS 5KG","price":939.0,"category":"Café, Té y Yerba"},{"name":"YERBA CONTIGO 1KG","price":190.0,"category":"Café, Té y Yerba"},{"name":"YERBA CONTIGO 5K","price":1050.0,"category":"Café, Té y Yerba"},{"name":"YERBA LA SELVA COMPUESTA 1K","price":209.0,"category":"Café, Té y Yerba"},{"name":"YOGUR BIOTOP CONAPROLE 1.2KG","price":85.0,"category":"Lácteos"},{"name":"YOGUR YODRINK 1L","price":55.0,"category":"Lácteos"}];
+
+const CAT_EMOJI = {
+  'Aceites y Aderezos':'🫙','Harinas, Pastas y Legumbres':'🌾','Café, Té y Yerba':'☕',
+  'Bebidas':'🥤','Lácteos':'🥛','Fiambres y Carnes':'🥩','Golosinas y Dulces':'🍬',
+  'Especias y Condimentos':'🧂','Conservas de Pescado':'🐟','Limpieza':'🧹',
+  'Higiene Personal':'🧴','Papel e Higiene':'🧻','Congelados':'❄️',
+  'Conservas y Enlatados':'🥫','Descartables y Embalaje':'📦','Cereales y Granola':'🥣',
+  'Mermeladas y Conservas Dulces':'🍯','Panadería':'🍞','Otros':'🛒'
+};
+const getEmoji = cat => CAT_EMOJI[cat] || '🛒';
+
+/* ═══════════════════════════════════════════════════════
+   LOCAL STORAGE — historial y alias guardados en el navegador
+═══════════════════════════════════════════════════════ */
+const LS_ALIAS   = 'elremate_alias';
+const LS_HISTORY = 'elremate_history';
+
+function lsGetAlias()   { return localStorage.getItem(LS_ALIAS) || ''; }
+function lsSetAlias(v)  { localStorage.setItem(LS_ALIAS, v); }
+function lsGetHistory() {
+  try { return JSON.parse(localStorage.getItem(LS_HISTORY) || '[]'); } catch(e) { return []; }
+}
+function lsSaveHistory(arr) { localStorage.setItem(LS_HISTORY, JSON.stringify(arr.slice(0, 10))); }
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let cart         = {};
+let currentCat   = 'Todos';
+let currentSearch = '';
+let visibleCount = 40;
+let localAlias   = lsGetAlias();
+let localHistory = lsGetHistory();
+let fullOrderModalData = null;
+let sharedCartData     = null;
+
+/* ═══════════════════════════════════════════════════════
+   CARRITO COMPARTIBLE — URL encoding, sin backend
+═══════════════════════════════════════════════════════ */
+function generateShareLink() {
+  const items = Object.values(cart);
+  if (!items.length) { showToast('⚠️ Agregá productos primero'); return; }
+  const shareData = {
+    alias: localAlias || document.getElementById('clientName').value.trim() || 'Alguien',
+    items: items.map(i => ({ name: i.name, price: i.price, qty: i.qty })),
+    total: Math.round(getTotal())
+  };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))));
+  const url = location.origin + location.pathname + '?d=' + encoded;
+  const row = document.getElementById('shareLinkRow');
+  row.style.display = 'flex';
+  document.getElementById('shareLinkInput').value = url;
+  showToast('🔗 Link generado — copialo abajo');
+}
+
+function copyShareLink() {
+  const input = document.getElementById('shareLinkInput');
+  navigator.clipboard.writeText(input.value).then(() => {
+    const btn = document.getElementById('copyLinkBtn');
+    btn.textContent = '✓ Copiado'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+    showToast('📋 Link copiado al portapapeles');
+  }).catch(() => { input.select(); document.execCommand('copy'); showToast('📋 Link copiado'); });
+}
+
+function checkSharedCartFromURL() {
+  const encoded = new URLSearchParams(location.search).get('d');
+  if (!encoded) return;
+  try {
+    const data = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+    if (!data?.items) return;
+    sharedCartData = data;
+    document.getElementById('sharedCartAlias').textContent = data.alias || 'alguien';
+    document.getElementById('sharedCartQty').textContent   = data.items.length;
+    document.getElementById('sharedCartTotal').textContent = '$' + data.total.toLocaleString('es-UY');
+    document.getElementById('sharedCartBanner').classList.add('visible');
+  } catch(e) {}
+}
+
+function loadSharedCart() {
+  if (!sharedCartData?.items) return;
+  let loaded = 0;
+  sharedCartData.items.forEach(item => {
+    const p = PRODUCTS.find(p => p.name === item.name);
+    if (p) {
+      cart[item.name] = { name: item.name, price: item.price || p.price, qty: item.qty };
+      updateCardActions(item.name, item.price || p.price);
+      updateCardInCartState(item.name, true);
+      loaded++;
+    }
+  });
+  updateCartUI(); dismissSharedBanner(); openCart();
+  showToast(`✅ ${loaded} productos cargados al pedido`);
+}
+
+function dismissSharedBanner() {
+  document.getElementById('sharedCartBanner').classList.remove('visible');
+}
+
+/* ═══════════════════════════════════════════════════════
+   HISTORIAL — localStorage
+═══════════════════════════════════════════════════════ */
+function saveOrderToHistory(orderData) {
+  const entry = {
+    id: Date.now().toString(),
+    date: new Date().toISOString(),
+    total: orderData.total,
+    items: orderData.items.map(i => ({ name: i.name, qty: i.qty, price: i.price }))
+  };
+  localHistory = [entry, ...localHistory];
+  lsSaveHistory(localHistory);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BOTÓN USUARIO
+═══════════════════════════════════════════════════════ */
+function updateUserBtn() {
+  const btn = document.getElementById('userBtn');
+  if (!btn) return;
+  if (localAlias) {
+    btn.classList.add('logged-in');
+    btn.title = localAlias;
+    btn.innerHTML = `<span style="font-family:'Bebas Neue';font-size:1.1rem;color:var(--cyan)">${localAlias.charAt(0).toUpperCase()}</span><span class="user-dot"></span>`;
+  } else {
+    btn.classList.remove('logged-in');
+    btn.innerHTML = `👤<span class="user-dot"></span>`;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PANEL USUARIO
+═══════════════════════════════════════════════════════ */
+function openUserPanel() {
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('userPanel').classList.add('open');
+  renderUserPanel();
+}
+function closeUserPanel() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('userPanel').classList.remove('open');
+}
+
+function renderUserPanel() {
+  const body = document.getElementById('userPanelBody');
+  const sub  = document.getElementById('userPanelSub');
+
+  if (!localAlias) {
+    sub.textContent = 'Configurá tu nombre';
+    body.innerHTML = `
+      <div class="auth-setup">
+        <div class="auth-welcome">
+          <span class="auth-welcome-emoji">🏪</span>
+          <h3>¡Bienvenido a El Remate!</h3>
+          <p>Ingresá el nombre de tu negocio para guardar tu historial y repetir pedidos fácilmente.</p>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="aliasInput">Nombre del negocio</label>
+          <input type="text" id="aliasInput" class="field-input" placeholder="Ej: Almacén Don Pepe" maxlength="40"
+            onkeydown="if(event.key==='Enter') confirmAlias()">
+        </div>
+        <button class="btn-primary" onclick="confirmAlias()">Guardar y continuar →</button>
+        <p style="font-size:.68rem;color:var(--muted);text-align:center;line-height:1.5">
+          Guardado localmente en este navegador. Sin cuentas ni contraseñas.
+        </p>
+      </div>`;
+    setTimeout(() => document.getElementById('aliasInput')?.focus(), 80);
+    return;
+  }
+
+  sub.textContent = localAlias;
+  const totalSpent = localHistory.reduce((s, o) => s + (o.total || 0), 0);
+  body.innerHTML = `
+    <div class="user-profile">
+      <div class="profile-card">
+        <div class="profile-card-inner">
+          <div class="profile-alias-label">Negocio</div>
+          <div class="profile-alias">${localAlias}</div>
+          <div class="profile-uid">Guardado en este navegador</div>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <div class="profile-stat-val">${localHistory.length}</div>
+              <div class="profile-stat-lbl">Pedidos</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-val">$${totalSpent >= 1000 ? Math.round(totalSpent/1000)+'K' : Math.round(totalSpent)}</div>
+              <div class="profile-stat-lbl">Total hist.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-header" style="margin-bottom:8px">
+          <span class="section-title">Cambiar nombre</span>
+        </div>
+        <div class="alias-edit-row">
+          <input type="text" class="field-input" id="aliasEditInput" value="${localAlias}" maxlength="40"
+            onkeydown="if(event.key==='Enter') updateAlias()">
+          <button class="btn-sm" onclick="updateAlias()">Guardar</button>
+        </div>
+      </div>
+      <div class="history-section">
+        <div class="section-header">
+          <span class="section-title">📋 Últimos pedidos</span>
+          ${localHistory.length > 0 ? `<span style="font-size:.65rem;color:var(--muted)">${localHistory.length}/10</span>` : ''}
+        </div>
+        ${renderHistoryCards()}
+      </div>
+      <button class="btn-ghost danger" onclick="clearAlias()">Borrar nombre e historial</button>
+    </div>`;
+}
+
+function renderHistoryCards() {
+  if (!localHistory.length) {
+    return `<div class="history-empty">
+      <span style="font-size:1.8rem;display:block;margin-bottom:8px;opacity:.4">📭</span>
+      <strong style="font-size:.82rem;color:var(--text2)">Sin pedidos guardados</strong><br>
+      Cuando enviés tu primer pedido por WhatsApp, aparecerá aquí.
+    </div>`;
+  }
+  return localHistory.map((order, idx) => {
+    const date    = new Date(order.date);
+    const dateStr = date.toLocaleDateString('es-UY', { day:'2-digit', month:'short', year:'numeric' });
+    const timeStr = date.toLocaleTimeString('es-UY', { hour:'2-digit', minute:'2-digit' });
+    const preview = order.items.slice(0, 3);
+    const more    = order.items.length - 3;
+    return `
+      <div class="history-card">
+        <div class="history-card-header">
+          <div>
+            <div class="history-date">${dateStr} · ${timeStr}</div>
+            <div style="font-size:.62rem;color:var(--muted);margin-top:1px">${order.items.length} producto${order.items.length !== 1 ? 's' : ''}</div>
+          </div>
+          <div class="history-total">$${Math.round(order.total).toLocaleString('es-UY')}</div>
+        </div>
+        <div class="history-items">
+          ${preview.map(item => `
+            <div class="history-item-row">
+              <span class="history-item-name">${item.name}</span>
+              <span class="history-item-qty">x${item.qty}</span>
+            </div>`).join('')}
+        </div>
+        ${more > 0 ? `<div class="history-more">+ ${more} producto${more !== 1 ? 's' : ''} más</div>` : ''}
+        <div class="history-card-footer">
+          <button class="btn-reorder" onclick="reorderFromHistory(${idx})">↺ Reordenar</button>
+          <button class="btn-view-full" onclick="openFullOrder(${idx})">Ver todo</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function confirmAlias() {
+  const val = document.getElementById('aliasInput')?.value.trim();
+  if (!val) { document.getElementById('aliasInput')?.focus(); return; }
+  localAlias = val; lsSetAlias(val);
+  document.getElementById('clientName').value = val;
+  updateUserBtn(); renderUserPanel();
+  showToast('✅ Nombre guardado');
+}
+
+function updateAlias() {
+  const val = document.getElementById('aliasEditInput')?.value.trim();
+  if (!val) return;
+  localAlias = val; lsSetAlias(val);
+  document.getElementById('clientName').value = val;
+  updateUserBtn(); renderUserPanel();
+  showToast('✅ Nombre actualizado');
+}
+
+function clearAlias() {
+  if (!confirm('¿Borrar tu nombre e historial? Esta acción no se puede deshacer.')) return;
+  localAlias = ''; localHistory = [];
+  localStorage.removeItem(LS_ALIAS); localStorage.removeItem(LS_HISTORY);
+  updateUserBtn(); renderUserPanel();
+}
+
+function reorderFromHistory(idx) {
+  const order = localHistory[idx];
+  if (!order) return;
+  order.items.forEach(item => {
+    const p = PRODUCTS.find(p => p.name === item.name);
+    if (p) {
+      cart[item.name] = { name: item.name, price: item.price || p.price, qty: item.qty };
+      updateCardActions(item.name, item.price || p.price);
+      updateCardInCartState(item.name, true);
+    }
+  });
+  updateCartUI(); closeUserPanel(); openCart();
+  showToast(`✅ ${order.items.length} productos cargados al pedido`);
+}
+
+/* ═══════════════════════════════════════════════════════
+   MODAL PEDIDO COMPLETO
+═══════════════════════════════════════════════════════ */
+function openFullOrder(idx) {
+  const order = localHistory[idx];
+  if (!order) return;
+  fullOrderModalData = order;
+  const date = new Date(order.date);
+  document.getElementById('fullOrderTitle').textContent = 'Pedido completo';
+  document.getElementById('fullOrderDate').textContent  =
+    date.toLocaleDateString('es-UY', { day:'2-digit', month:'long', year:'numeric' }) + ' · ' +
+    date.toLocaleTimeString('es-UY', { hour:'2-digit', minute:'2-digit' });
+  document.getElementById('fullOrderTotal').textContent = '$' + Math.round(order.total).toLocaleString('es-UY');
+  document.getElementById('fullOrderList').innerHTML = order.items.map(item => `
+    <div class="full-order-row">
+      <span class="full-order-name">${item.name}</span>
+      <div class="full-order-right">
+        <div class="full-order-qty">x${item.qty}</div>
+        <div class="full-order-price">$${Math.round(item.price * item.qty).toLocaleString('es-UY')}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('fullOrderModal').classList.add('open');
+}
+function closeFullOrder(e)   { if (e.target === document.getElementById('fullOrderModal')) closeFullOrderDirect(); }
+function closeFullOrderDirect() { document.getElementById('fullOrderModal').classList.remove('open'); }
+function reorderFromModal() {
+  if (!fullOrderModalData) return;
+  const idx = localHistory.indexOf(fullOrderModalData);
+  closeFullOrderDirect();
+  if (idx >= 0) reorderFromHistory(idx);
+}
+
+/* ═══════════════════════════════════════════════════════
+   GRILLA / CATEGORÍAS
+═══════════════════════════════════════════════════════ */
+function buildCategories() {
+  const cats  = [...new Set(PRODUCTS.map(p => p.category))].sort();
+  const inner = document.getElementById('catsInner');
+  cats.forEach(cat => {
+    const span = document.createElement('span');
+    span.className   = 'cat-pill';
+    span.dataset.cat = cat;
+    span.textContent = getEmoji(cat) + ' ' + cat;
+    span.onclick     = () => filterCat(cat, span);
+    inner.appendChild(span);
+  });
+}
+
+function filterCat(cat, el) {
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  currentCat   = cat;
+  visibleCount = 40;
+  renderGrid();
+  document.getElementById('productGrid').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  currentSearch = this.value.trim().toLowerCase();
+  visibleCount  = 40;
+  renderGrid();
+});
+
+function getFiltered() {
+  return PRODUCTS.filter(p => {
+    const catOk    = currentCat === 'Todos' || p.category === currentCat;
+    const searchOk = !currentSearch || p.name.toLowerCase().includes(currentSearch);
+    return catOk && searchOk;
+  });
+}
+
+function renderGrid() {
+  const filtered      = getFiltered();
+  const grid          = document.getElementById('productGrid');
+  const resultsBar    = document.getElementById('resultsBar');
+  const noResults     = document.getElementById('noResults');
+  const loadMoreWrap  = document.getElementById('loadMoreWrap');
+  grid.innerHTML = '';
+  if (!filtered.length) {
+    noResults.style.display = 'block';
+    document.getElementById('noResultsTerm').textContent = '"' + currentSearch + '"';
+    resultsBar.textContent = '';
+    loadMoreWrap.style.display = 'none';
+    return;
+  }
+  noResults.style.display = 'none';
+  resultsBar.textContent  = Math.min(visibleCount, filtered.length) + ' de ' + filtered.length + ' productos';
+  filtered.slice(0, visibleCount).forEach((p, i) => {
+    const card = createCard(p);
+    card.style.animationDelay = `${Math.min(i * 18, 300)}ms`;
+    grid.appendChild(card);
+  });
+  loadMoreWrap.style.display = filtered.length > visibleCount ? 'block' : 'none';
+}
+
+function loadMore() { visibleCount += 40; renderGrid(); }
+
+function createCard(product) {
+  const key      = product.name;
+  const qty      = cart[key] ? cart[key].qty : 0;
+  const emoji    = getEmoji(product.category);
+  const priceFmt = '$' + product.price.toLocaleString('es-UY', {minimumFractionDigits:0, maximumFractionDigits:0});
+  const card     = document.createElement('div');
+  card.className = 'card' + (qty > 0 ? ' in-cart' : '');
+  card.id        = 'card-' + encodeKey(key);
+  card.innerHTML = `
+    <div class="card-thumb">${emoji}
+      <span class="cat-badge">${product.category}</span>
+    </div>
+    <div class="card-body">
+      <div class="card-name">${product.name}</div>
+      <div class="card-price">${priceFmt}</div>
+      <div class="card-price-label">precio unidad</div>
+      <div class="card-actions" id="actions-${encodeKey(key)}">
+        ${qty === 0
+          ? `<button class="btn-add" onclick="addItem('${escapeKey(key)}',${product.price})">+ Agregar</button>`
+          : `<div class="qty-ctrl">
+              <button class="qty-btn" onclick="changeQty('${escapeKey(key)}',${product.price},-1)">−</button>
+              <span class="qty-val">${qty}</span>
+              <button class="qty-btn" onclick="changeQty('${escapeKey(key)}',${product.price},1)">+</button>
+            </div>`}
+      </div>
+    </div>`;
+  return card;
+}
+
+const encodeKey = n => btoa(unescape(encodeURIComponent(n))).replace(/[^a-zA-Z0-9]/g,'_');
+const escapeKey = n => n.replace(/'/g,"\\'").replace(/"/g,'\\"');
+
+/* ═══════════════════════════════════════════════════════
+   LÓGICA DE CARRITO
+═══════════════════════════════════════════════════════ */
+function addItem(name, price) {
+  cart[name] = { name, price, qty: 1 };
+  updateCardActions(name, price); updateCardInCartState(name, true); updateCartUI(); bumpCard(name);
+}
+function changeQty(name, price, delta) {
+  if (!cart[name]) return;
+  cart[name].qty += delta;
+  if (cart[name].qty <= 0) { delete cart[name]; updateCardInCartState(name, false); }
+  updateCardActions(name, price); updateCartUI();
+}
+function changeQtyCart(name, delta) {
+  if (!cart[name]) return;
+  const price = cart[name].price;
+  cart[name].qty += delta;
+  if (cart[name].qty <= 0) { delete cart[name]; updateCardInCartState(name, false); }
+  updateCardActions(name, price); updateCartUI(); renderCartItems();
+}
+function updateCardInCartState(name, inCart) {
+  document.getElementById('card-' + encodeKey(name))?.classList.toggle('in-cart', inCart);
+}
+function updateCardActions(name, price) {
+  const el  = document.getElementById('actions-' + encodeKey(name));
+  if (!el) return;
+  const qty = cart[name] ? cart[name].qty : 0;
+  el.innerHTML = qty === 0
+    ? `<button class="btn-add" onclick="addItem('${escapeKey(name)}',${price})">+ Agregar</button>`
+    : `<div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty('${escapeKey(name)}',${price},-1)">−</button>
+        <span class="qty-val">${qty}</span>
+        <button class="qty-btn" onclick="changeQty('${escapeKey(name)}',${price},1)">+</button>
+      </div>`;
+}
+function bumpCard(name) {
+  const card = document.getElementById('card-' + encodeKey(name));
+  if (!card) return;
+  card.classList.remove('popped'); void card.offsetWidth; card.classList.add('popped');
+  setTimeout(() => card.classList.remove('popped'), 240);
+}
+const getTotal    = () => Object.values(cart).reduce((s,i) => s + i.price * i.qty, 0);
+const getTotalQty = () => Object.values(cart).reduce((s,i) => s + i.qty, 0);
+
+function updateCartUI() {
+  const qty      = getTotalQty();
+  const totalStr = '$' + Math.round(getTotal()).toLocaleString('es-UY');
+  document.getElementById('cartBadge').textContent = qty;
+  const heroTotal = document.getElementById('heroTotal');
+  heroTotal.textContent = totalStr;
+  heroTotal.style.display = qty > 0 ? 'inline' : 'none';
+  document.getElementById('cartTotal').textContent   = totalStr;
+  document.getElementById('floatTotal').textContent  = totalStr;
+  document.getElementById('floatQty').textContent    = qty;
+  document.getElementById('floatCart').classList.toggle('has-items', qty > 0);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PANEL DE CARRITO
+═══════════════════════════════════════════════════════ */
+function openCart() {
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('cartPanel').classList.add('open');
+  renderCartItems();
+}
+function closeCart() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('cartPanel').classList.remove('open');
+}
+function closeAll() { closeCart(); closeUserPanel(); }
+
+function renderCartItems() {
+  const el    = document.getElementById('cartItems');
+  const items = Object.values(cart);
+  if (!items.length) {
+    el.innerHTML = `<div class="cart-empty">
+      <span class="cart-empty-icon">🛒</span>
+      <strong>Tu pedido está vacío</strong>
+      <p>Buscá productos y empezá a agregar</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = items.map(item => {
+    const sub   = '$' + Math.round(item.price * item.qty).toLocaleString('es-UY');
+    const emoji = getEmoji(PRODUCTS.find(p => p.name === item.name)?.category || 'Otros');
+    return `<div class="cart-item">
+      <span class="cart-item-icon">${emoji}</span>
+      <div class="cart-item-info">
+        <div class="cart-item-name" title="${item.name}">${item.name}</div>
+        <div class="cart-item-subtotal">${sub}</div>
+      </div>
+      <div class="cart-item-qty">
+        <button class="qty-btn" onclick="changeQtyCart('${escapeKey(item.name)}',-1)">−</button>
+        <span class="qty-val">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQtyCart('${escapeKey(item.name)}',1)">+</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   WHATSAPP
+═══════════════════════════════════════════════════════ */
+function sendWhatsApp() {
+  const items = Object.values(cart);
+  if (!items.length) { alert('¡Agregá productos primero!'); return; }
+  const name  = localAlias || document.getElementById('clientName').value.trim() || 'Cliente';
+  const total = Math.round(getTotal());
+  let msg = '🛒 *PEDIDO — El Remate Canelones*\n\n';
+  msg += `🏪 *Negocio:* ${name}\n\n`;
+  msg += '*Productos:*\n';
+  items.forEach(i => { msg += `• ${i.name} x${i.qty} = $${Math.round(i.price*i.qty).toLocaleString('es-UY')}\n`; });
+  msg += `\n💰 *TOTAL ESTIMADO: $${total.toLocaleString('es-UY')}*\n`;
+  msg += '\n_Pedido generado desde El Remate Canelones_';
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+  saveOrderToHistory({ items, total });
+  localHistory = lsGetHistory();
+  showToast('✅ Pedido enviado y guardado en historial');
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ═══════════════════════════════════════════════════════
+   INICIO
+═══════════════════════════════════════════════════════ */
+function init() {
+  buildCategories();
+  renderGrid();
+  updateCartUI();
+  updateUserBtn();
+  // Pre-cargar nombre si ya fue guardado antes
+  if (localAlias) document.getElementById('clientName').value = localAlias;
+  checkSharedCartFromURL();
+}
+
+init();
+</script>
+</body>
+</html>
