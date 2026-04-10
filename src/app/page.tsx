@@ -475,7 +475,7 @@ export default function LandingPage() {
                 fontFamily: "var(--font-serif, 'DM Serif Display'), serif",
                 fontStyle: "italic",
                 fontSize: "1.1rem",
-                color: "var(--tierra, #5c380eff)",
+                color: "var(--tierra, #5C4A35)",
               }}
             >
               Rápido, práctico y pensado para vos
@@ -635,7 +635,7 @@ export default function LandingPage() {
                   style={{
                     fontSize: "0.75rem",
                     fontWeight: 700,
-                    color: "var(--texto, #180d0dff)",
+                    color: "var(--texto, #111111)",
                     letterSpacing: "0.3px",
                     lineHeight: 1.3,
                   }}
@@ -967,7 +967,7 @@ export default function LandingPage() {
                   style={{
                     fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif",
                     fontSize: "1.6rem",
-                    color: "var(--oscuro, #070707ff)", // 🎨 COLOR NOMBRE: cambiar aquí
+                    color: "var(--oscuro, #111111)", // 🎨 COLOR NOMBRE: cambiar aquí
                     letterSpacing: "1px",
                     marginBottom: "16px",
                     lineHeight: 1.1,
