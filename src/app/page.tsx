@@ -3,11 +3,26 @@
 import Image from "next/image";
 import Link from "next/link";
 
-/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════
    LANDING PAGE — Distribuidora El Remate
-   Paleta: tokens cálidos del branding v1.0
-   ═══════════════════════════════════════════════════════ */
+   
+   📌 GUÍA RÁPIDA DE EDICIÓN:
+   
+   1. TEXTOS "COMPRÁ FÁCIL" → buscá: FEATURES (línea 35)
+   2. TEXTOS "NUESTRAS SUCURSALES" → buscá: SUCURSALES (línea 11)
+   3. TEXTOS "VARIEDAD DE PRODUCTOS" → buscá: CATEGORIAS (línea 20)
+   4. TEXTOS "PEDÍ ONLINE" → buscá: "PEDÍ" (Ctrl+F, ~línea 620)
+   5. TEXTOS "CONTACTO" → buscá: "TENÉS DUDAS" (Ctrl+F, ~línea 990)
+   
+   🎨 COLORES DISPONIBLES:
+      Negro: "#000000" | Gris oscuro: "#333333" | Rojo: "#E8302A"
+      Verde: "#1A7A42" | Marrón: "#5C4A35" | Blanco: "#FFFFFF"
+   
+   ═══════════════════════════════════════════════════════════════════ */
 
+/* ──────────────────────────────────────────────────────────────
+   📍 DATOS: SUCURSALES (editar nombres, teléfonos, direcciones)
+   ────────────────────────────────────────────────────────────── */
 const SUCURSALES = [
   { nombre: "La Paz", telefono: "094 358 830", direccion: "Ramón Álvarez 225" },
   { nombre: "Las Piedras", telefono: "092 202 019", direccion: "Luis Alberto de Herrera 487" },
@@ -17,6 +32,9 @@ const SUCURSALES = [
   { nombre: "El Dorado", telefono: "093 404 158", direccion: "Elías Regules esq. Honduras" },
 ];
 
+/* ──────────────────────────────────────────────────────────────
+   📍 DATOS: CATEGORÍAS DE PRODUCTOS (editar nombres e íconos)
+   ────────────────────────────────────────────────────────────── */
 const CATEGORIAS = [
   { icono: "🫙", nombre: "Aceites y Aderezos" },
   { icono: "🌾", nombre: "Harinas, Pastas y Legumbres" },
@@ -32,6 +50,9 @@ const CATEGORIAS = [
   { icono: "🥫", nombre: "Conservas y Enlatados" },
 ];
 
+/* ──────────────────────────────────────────────────────────────
+   📍 DATOS: FEATURES "COMPRÁ FÁCIL" (editar títulos y descripciones)
+   ────────────────────────────────────────────────────────────── */
 const FEATURES = [
   {
     icono: "💰",
@@ -55,10 +76,18 @@ const FEATURES = [
   },
 ];
 
+/* ═══════════════════════════════════════════════════════════════════
+   🏠 SECCIÓN 1: HERO (sección principal de la página)
+   - Título: "PRECIOS MAYORISTAS TODOS LOS DÍAS"
+   - Descriptor: "Todo para tu negocio y tu casa..."
+   - Botones: "VER CATÁLOGO" y "WhatsApp"
+   - Stats: "1900+ Productos", "6 Sucursales", "WA Pedido Express"
+   ═══════════════════════════════════════════════════════════════════ */
+
 export default function LandingPage() {
   return (
     <div style={{ fontFamily: "var(--font-body, 'DM Sans'), sans-serif" }}>
-      {/* ══════ HERO ══════ */}
+      {/* ══════ HERO (SECCIÓN PRINCIPAL) ══════ */}
       <section
         style={{
           background: "var(--oscuro, #1A1410)",
@@ -382,7 +411,7 @@ export default function LandingPage() {
                 "⚡ Precios de distribuidor",
                 "📦 Pedí por WhatsApp",
                 "🏠 Zona Canelones",
-                "🛒 Más de 800 productos",
+                "🛒 Más de 1900 productos",
                 "✅ Fiambres · Congelados · Limpieza",
                 "🚚 Envío a domicilio",
               ].map((item, i) => (
@@ -416,7 +445,12 @@ export default function LandingPage() {
         `}</style>
       </div>
 
-      {/* ══════ FEATURES ══════ */}
+      {/* ══════ FEATURES (TARJETAS "COMPRÁ FÁCIL") ══════
+          📌 Aquí se editan los textos de las 4 tarjetas:
+          - TÍTULO: color: "var(--oscuro, #111111)" → línea ~485
+          - DESCRIPCIÓN: color: "var(--muted, #5C5550)" → línea ~495
+          - DATOS: const FEATURES → línea 56
+      ═══════════════════════════════════════════════ */}
       <section
         style={{
           padding: "80px 20px",
@@ -480,11 +514,12 @@ export default function LandingPage() {
                 <div style={{ fontSize: "3rem", marginBottom: "16px" }}>
                   {feature.icono}
                 </div>
+                {/* 👇 TÍTULO TARJETA - editar color aquí 👇 */}
                 <h3
                   style={{
                     fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif",
                     fontSize: "1.6rem",
-                    color: "var(--oscuro, #250f0fff)",
+                    color: "var(--oscuro, #111111)", // 🎨 COLOR TÍTULO: cambiar aquí
                     letterSpacing: "1px",
                     marginBottom: "12px",
                     lineHeight: 1.1,
@@ -492,10 +527,11 @@ export default function LandingPage() {
                 >
                   {feature.titulo}
                 </h3>
+                {/* 👇 DESCRIPCIÓN TARJETA - editar color aquí 👇 */}
                 <p
                   style={{
                     fontSize: "0.95rem",
-                    color: "var(--muted, #5C5550)",
+                    color: "var(--muted, #5C5550)", // 🎨 COLOR DESCRIPCIÓN: cambiar aquí
                     lineHeight: 1.6,
                     fontWeight: 500,
                   }}
@@ -508,7 +544,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ══════ CATEGORÍAS ══════ */}
+      {/* ══════ CATEGORÍAS (TARJETAS DE CATEGORÍAS) ══════
+          📌 Aquí se editan los textos de las tarjetas de categorías:
+          - NOMBRE: color: "var(--texto, #111111)" → línea ~610
+          - DATOS: const CATEGORIAS → línea 38
+      ═════════════════════════════════════════════════════ */}
       <section
         style={{
           padding: "80px 20px",
@@ -586,7 +626,7 @@ export default function LandingPage() {
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "var(--shadow-sm, 0 1px 3px rgba(17,11,8,0.08))";
+                  e.currentTarget.style.boxShadow = "var(--shadow-sm, 0 1px 3px rgba(250, 250, 250, 0.08))";
                   e.currentTarget.style.borderColor = "var(--border, #DDD8D0)";
                 }}
               >
@@ -595,7 +635,7 @@ export default function LandingPage() {
                   style={{
                     fontSize: "0.75rem",
                     fontWeight: 700,
-                    color: "var(--texto, #111111)",
+                    color: "var(--texto, #180d0dff)",
                     letterSpacing: "0.3px",
                     lineHeight: 1.3,
                   }}
@@ -631,7 +671,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ══════ PEDIDO ONLINE ══════ */}
+      {/* ══════ PEDÍ ONLINE (SECCIÓN PASOS) ══════
+          📌 Aquí se editan los textos de "PEDÍ ¡ONLINE!" y los 3 pasos:
+          - TÍTULO: color: "var(--oscuro, #1A1410)" → línea ~690
+          - DESC: color: "var(--tierra, #5C4A35)" → línea ~700
+          - TÍTULOS PASOS: color: "var(--rojo, #E8302A)" → línea ~750
+          - DESC PASOS: color: "var(--muted, #5C5550)" → línea ~760
+      ═══════════════════════════════════════════════════════ */}
       <section
         style={{
           padding: "80px 20px",
@@ -850,7 +896,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ══════ SUCURSALES ══════ */}
+      {/* ══════ SUCURSALES (TARJETAS DE SUCURSALES) ══════
+          📌 Aquí se editan los textos de las 6 tarjetas de sucursales:
+          - NOMBRE: color: "var(--oscuro, #111111)" → línea ~910
+          - DIRECCIÓN: color: "var(--texto, #111111)" → línea ~920
+          - TELÉFONO: color: "var(--verde, #1A7A42)" → línea ~935
+          - DATOS: const SUCURSALES → línea 26
+      ═══════════════════════════════════════════════════════ */}
       <section
         style={{
           padding: "80px 20px",
@@ -863,7 +915,7 @@ export default function LandingPage() {
               style={{
                 fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif",
                 fontSize: "clamp(2rem, 5vw, 3rem)",
-                color: "var(--oscuro, #1A1410)",
+                color: "var(--oscuro, #111111)", // 🎨 COLOR TÍTULO SUCURSALES: cambiar aquí
                 letterSpacing: "2px",
                 marginBottom: "8px",
               }}
@@ -875,7 +927,7 @@ export default function LandingPage() {
                 fontFamily: "var(--font-serif, 'DM Serif Display'), serif",
                 fontStyle: "italic",
                 fontSize: "1.1rem",
-                color: "var(--tierra, #5C4A35)",
+                color: "var(--tierra, #5C4A35)", // 🎨 COLOR SUBTÍTULO SUCURSALES: cambiar aquí
               }}
             >
               Encontranos en Canelones
@@ -910,11 +962,12 @@ export default function LandingPage() {
                   e.currentTarget.style.boxShadow = "var(--shadow-md, 0 4px 16px rgba(17,11,8,0.12))";
                 }}
               >
+                {/* 👇 NOMBRE SUCURSAL - editar color aquí 👇 */}
                 <h3
                   style={{
                     fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif",
                     fontSize: "1.6rem",
-                    color: "var(--oscuro, #111111)",
+                    color: "var(--oscuro, #070707ff)", // 🎨 COLOR NOMBRE: cambiar aquí
                     letterSpacing: "1px",
                     marginBottom: "16px",
                     lineHeight: 1.1,
@@ -923,10 +976,11 @@ export default function LandingPage() {
                   📍 {sucursal.nombre}
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  {/* 👇 DIRECCIÓN SUCURSAL - editar color aquí 👇 */}
                   <p
                     style={{
                       fontSize: "0.95rem",
-                      color: "var(--texto, #111111)",
+                      color: "var(--texto, #111111)", // 🎨 COLOR DIRECCIÓN: cambiar aquí
                       display: "flex",
                       alignItems: "center",
                       gap: "8px",
@@ -936,13 +990,14 @@ export default function LandingPage() {
                   >
                     {sucursal.direccion}
                   </p>
+                  {/* 👇 TELÉFONO SUCURSAL - editar color aquí 👇 */}
                   <a
                     href={`https://wa.me/598${sucursal.telefono.replace(/\s/g, "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
                       fontSize: "0.95rem",
-                      color: "var(--verde, #1A7A42)",
+                      color: "var(--verde, #1A7A42)", // 🎨 COLOR TELÉFONO: cambiar aquí
                       textDecoration: "none",
                       fontWeight: 700,
                       display: "flex",
@@ -971,7 +1026,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ══════ CONTACTO CTA ══════ */}
+      {/* ══════ CONTACTO (SECCIÓN OSCURA CON BOTÓN WHATSAPP) ══════
+          📌 Aquí se editan los textos de la sección de contacto:
+          - TÍTULO: color: "#FFFFFF" (blanco) → línea ~1050
+          - DESC: color: "var(--on-dark-mid, #C8C3BC)" → línea ~1060
+          - BOTÓN WA: fondo "var(--verde, #1A7A42)" + texto "#FFFFFF" → línea ~1080
+      ═══════════════════════════════════════════════════════════════════ */}
       <section
         style={{
           padding: "60px 20px",
@@ -1051,7 +1111,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ══════ FOOTER ══════ */}
+      {/* ══════ FOOTER (PIE DE PÁGINA) ══════
+          📌 Aquí se editan los textos del footer:
+          - COPYRIGHT: color: "rgba(255,255,255,0.35)" → línea ~1130
+          - POWERED BY: color: "rgba(255,255,255,0.2)" → línea ~1135
+      ══════════════════════════════════════════════════ */}
       <footer
         style={{
           background: "var(--oscuro, #1A1410)",
@@ -1079,25 +1143,148 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* ── Responsive ── */}
+      {/* ── Responsive (MÓVIL OPTIMIZADO) ── */}
       <style jsx global>{`
+        /* ═══════════════════════════════════════════════════════
+           📱 MODO MOBILE - Optimizado para pantallas pequeñas
+           Desktop NO se modifica
+           ═══════════════════════════════════════════════════════ */
+        
         @media (max-width: 768px) {
-          .hero-title { font-size: 2.5rem !important; }
-          .hero-stats { flex-direction: column !important; width: 100% !important; }
+          /* HERO - Sección principal */
+          .hero-title { 
+            font-size: 2.5rem !important;
+            letter-spacing: 1.5px !important;
+          }
+          .hero-stats { 
+            flex-direction: column !important; 
+            width: 100% !important;
+          }
           .hero-stat {
             border-right: none !important;
             border-bottom: 1px solid rgba(214,40,40,0.15) !important;
             padding: 12px !important;
           }
           .hero-stat:last-child { border-bottom: none !important; }
+          
+          /* CTA buttons */
+          .cta-buttons { 
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+          .cta-buttons a, .cta-buttons button {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 14px 24px !important;
+          }
+          
+          /* Grids a 1 columna */
           .features-grid,
           .categorias-grid,
-          .sucursales-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important; }
+          .sucursales-grid { 
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+          }
+          
+          /* Secciones - padding reducido */
+          section {
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+          }
         }
+        
         @media (max-width: 480px) {
-          .hero-title { font-size: 2rem !important; }
-          .hero-descriptor { font-size: 0.9rem !important; }
-          .cta-buttons { flex-direction: column !important; }
+          /* HERO más pequeño */
+          .hero-title { 
+            font-size: 2rem !important;
+            letter-spacing: 1px !important;
+          }
+          .hero-descriptor { 
+            font-size: 0.9rem !important;
+            line-height: 1.5 !important;
+          }
+          
+          /* Stats más compactos */
+          .hero-stat {
+            padding: 10px !important;
+          }
+          .hero-stat-val {
+            font-size: 1.5rem !important;
+          }
+          .hero-stat-lbl {
+            font-size: 0.6rem !important;
+          }
+          
+          /* FEATURES - tarjetas más compactas */
+          .features-grid > div {
+            padding: 24px 16px !important;
+          }
+          .features-grid h3 {
+            font-size: 1.4rem !important;
+          }
+          .features-grid p {
+            font-size: 0.9rem !important;
+          }
+          
+          /* CATEGORÍAS - grid 2 columnas en mobile muy pequeño */
+          .categorias-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+          }
+          .categorias-grid > a {
+            padding: 16px 8px !important;
+          }
+          .categorias-grid span:first-child {
+            font-size: 1.8rem !important;
+          }
+          .categorias-grid span:last-child {
+            font-size: 0.7rem !important;
+          }
+          
+          /* SUCURSALES - padding reducido */
+          .sucursales-grid > div {
+            padding: 20px !important;
+          }
+          .sucursales-grid h3 {
+            font-size: 1.4rem !important;
+          }
+          .sucursales-grid p,
+          .sucursales-grid a {
+            font-size: 0.9rem !important;
+          }
+          
+          /* PEDÍ ONLINE steps */
+          section > div > div:last-child > div {
+            padding: 24px 16px !important;
+          }
+          
+          /* CONTACTO - botón más grande */
+          section > div > div:last-child a {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 16px 24px !important;
+            font-size: 1.3rem !important;
+          }
+        }
+        
+        /* Ajustes extra para pantallas muy pequeñas (320px-360px) */
+        @media (max-width: 360px) {
+          .hero-title { 
+            font-size: 1.8rem !important;
+          }
+          .hero-descriptor {
+            font-size: 0.85rem !important;
+          }
+          
+          /* Categorías en 1 columna en pantallas muy pequeñas */
+          .categorias-grid {
+            grid-template-columns: 1fr !important;
+          }
+          
+          /* Textos más pequeños en general */
+          section h2 {
+            font-size: 1.8rem !important;
+          }
         }
       `}</style>
     </div>
