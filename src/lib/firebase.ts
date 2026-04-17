@@ -28,16 +28,14 @@ if (isFirebaseConfigured) {
     auth = getAuth(app);
     db = getFirestore(app);
 
-    // Enable offline persistence (best-effort)
+    /* Persistencia desactivada temporalmente para evitar bloqueos en producción */
+    /*
     if (typeof window !== "undefined") {
       enableIndexedDbPersistence(db).catch((err) => {
-        if (err.code === "failed-precondition") {
-          console.warn("Firestore persistence failed: multiple tabs open.");
-        } else if (err.code === "unimplemented") {
-          console.warn("Firestore persistence not available in this browser.");
-        }
+        ...
       });
     }
+    */
   } catch (error) {
     console.warn("Firebase initialization failed:", error);
   }

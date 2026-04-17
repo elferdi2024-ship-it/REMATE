@@ -49,7 +49,9 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
+      console.log("DEBUG: Iniciando handleSubmit...");
       await signIn(email, password);
+      console.log("DEBUG: Auth exitoso. UID:", user?.uid);
     } catch (err: unknown) {
       setLoading(false);
       const message =
