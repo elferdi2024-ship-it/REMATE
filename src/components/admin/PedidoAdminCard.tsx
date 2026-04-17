@@ -25,14 +25,13 @@ function formatDate(ts: { seconds: number; nanoseconds: number } | Date): string
 
 function isNew(ts: { seconds: number; nanoseconds: number } | Date): boolean {
   const d = ts instanceof Date ? ts.getTime() : ts.seconds * 1000;
-  return Date.now() - d < 5 * 60 * 1000; // less than 5 minutes
+  return Date.now() - d < 5 * 60 * 1000; // 5 min
 }
 
 export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardProps) {
   const [isViewingFull, setIsViewingFull] = useState(false);
   const [isFresh, setIsFresh] = useState(isNew(pedido.fecha));
 
-  // Update "new" badge every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setIsFresh(isNew(pedido.fecha));
@@ -48,135 +47,121 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
       style: "currency",
       currency: "UYU",
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
     });
   }
 
   return (
     <div
-      className="relative overflow-hidden rounded-xl border transition-all hover:shadow-lg"
-      style={{
-        background: "var(--white)",
-        borderColor: isFresh ? "rgba(76, 201, 240, 0.4)" : "var(--border)",
-      }}
+      className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${
+        isFresh
+          ? "border-[#00E5FF]/40 bg-[#0A0F1C] shadow-[0_0_20px_rgba(0,229,255,0.15)]"
+          : "border-white/10 bg-[#0A0F1C] hover:border-white/20 hover:bg-[#0A0F1C]/80"
+      }`}
     >
-      {/* NUEVO blinking badge */}
       {isFresh && (
-        <div
-          className="absolute right-3 top-3 rounded-full px-2.5 py-0.5 text-xs font-extrabold tracking-wider"
-          style={{
-            background: "var(--rojo)",
-            color: "#fff",
-            animation: "blink 1s ease-in-out infinite",
-          }}
-        >
-          NUEVO
+        <div className="absolute right-0 top-0 flex items-center justify-center bg-gradient-to-r from-transparent via-[#00E5FF] to-[#00E5FF] px-4 py-1">
+          <div className="absolute inset-0 animate-pulse bg-white/20" />
+          <span className="relative z-10 text-[10px] font-black uppercase tracking-widest text-black">
+            NUEVO
+          </span>
         </div>
       )}
 
-      {/* Header row */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-sm font-semibold" style={{ color: "var(--oscuro)" }}>
+      <div className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 font-mono text-sm font-bold text-[#00E5FF]">
             {formatDate(pedido.fecha)}
-          </span>
-          <span className="text-sm font-bold" style={{ color: "var(--text)" }}>
-            {pedido.clienteNombre.toUpperCase()}
-          </span>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold uppercase tracking-wide text-white">
+              {pedido.clienteNombre}
+            </h3>
+            <p className="text-xs font-semibold text-gray-500">
+              {pedido.items.length} ARTÍCULOS
+            </p>
+          </div>
         </div>
-        <span
-          className="font-bebas text-xl tracking-wide"
-          style={{ color: "var(--oscuro)" }}
-        >
-          {formatCurrency(pedido.total)}
-        </span>
+        <div className="text-right">
+          <p className="font-bebas text-3xl tracking-wide text-white">
+            {formatCurrency(pedido.total)}
+          </p>
+        </div>
       </div>
 
-      {/* Product preview */}
-      <div className="px-4 pb-3">
-        <p className="mb-1 text-xs font-semibold" style={{ color: "var(--muted)" }}>
-          {pedido.items.length} producto{pedido.items.length !== 1 ? "s" : ""}
-        </p>
-        <div className="flex flex-wrap gap-1">
+      <div className="border-t border-white/5 bg-white/[0.02] px-5 py-4">
+        <div className="flex flex-wrap gap-2">
           {previewItems.map((item, i) => (
             <span
               key={i}
-              className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium"
-              style={{
-                background: "var(--bg2)",
-                color: "var(--text2)",
-              }}
+              className="inline-flex items-center rounded-lg border border-white/10 bg-[#050914] px-3 py-1 text-xs font-medium text-gray-300"
             >
-              {item.cantidad}x {item.nombre.length > 22 ? item.nombre.slice(0, 22) + "\u2026" : item.nombre}
+              <span className="mr-1.5 font-bold text-[#00E5FF]">{item.cantidad}x</span>
+              {item.nombre}
             </span>
           ))}
           {remaining > 0 && (
-            <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold" style={{ color: "var(--muted)" }}>
-              +{remaining} m{remaining === 1 ? "ás" : "ás"}
+            <span className="inline-flex items-center rounded-lg border border-dashed border-white/20 bg-transparent px-3 py-1 text-xs font-bold text-gray-400">
+              +{remaining} MÁS
             </span>
           )}
         </div>
       </div>
 
-      {/* Ver completo button */}
-      <div className="border-t px-4 py-2.5" style={{ borderColor: "var(--border)" }}>
-        <button
-          onClick={() => {
-            setIsViewingFull(!isViewingFull);
-            onViewFull(pedido);
-          }}
-          className="w-full rounded-lg py-2 text-center text-xs font-bold uppercase tracking-wider transition-colors"
-          style={{
-            background: isViewingFull ? "var(--oscuro-2)" : "var(--oscuro)",
-            color: "#fff",
-          }}
-        >
-          {isViewingFull ? "\u25B2 Ocultar" : "Ver completo \u2193"}
-        </button>
-      </div>
+      <button
+        onClick={() => {
+          setIsViewingFull(!isViewingFull);
+          onViewFull(pedido);
+        }}
+        className={`w-full border-t py-3 text-xs font-bold uppercase tracking-widest transition-colors ${
+          isViewingFull
+            ? "border-[#00E5FF]/20 bg-[#00E5FF]/10 text-[#00E5FF]"
+            : "border-white/5 bg-transparent text-gray-400 hover:bg-white/5 hover:text-white"
+        }`}
+      >
+        {isViewingFull ? "▲ Ocultar Detalle" : "▼ Ver Detalle Completo"}
+      </button>
 
-      {/* Expanded full order */}
       {isViewingFull && (
-        <div className="border-t px-4 py-3" style={{ borderColor: "var(--border)" }}>
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="text-left" style={{ color: "var(--muted)" }}>
-                <th className="pb-1 font-semibold">Producto</th>
-                <th className="pb-1 text-right font-semibold">Cant.</th>
-                <th className="pb-1 text-right font-semibold">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pedido.items.map((item, i) => (
-                <tr key={i} className="border-t" style={{ borderColor: "var(--border)" }}>
-                  <td className="py-1.5 font-medium" style={{ color: "var(--text)" }}>
-                    {item.nombre}
-                  </td>
-                  <td className="py-1.5 text-right" style={{ color: "var(--text2)" }}>
-                    {item.cantidad}
-                  </td>
-                  <td className="py-1.5 text-right font-semibold" style={{ color: "var(--oscuro)" }}>
-                    {formatCurrency(item.cantidad * item.precioUnitario)}
-                  </td>
+        <div className="animate-in slide-in-from-top-2 border-t border-[#00E5FF]/20 bg-[#050914] p-5">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  <th className="pb-3 pr-4 font-medium">Producto</th>
+                  <th className="pb-3 text-right font-medium">Cant.</th>
+                  <th className="pb-3 text-right font-medium">Subtotal</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {pedido.items.map((item, i) => (
+                  <tr key={i} className="group transition-colors hover:bg-white/5">
+                    <td className="py-3 pr-4 font-medium text-gray-300 group-hover:text-white">
+                      {item.nombre}
+                    </td>
+                    <td className="py-3 text-right font-bold text-[#00E5FF]">
+                      {item.cantidad}
+                    </td>
+                    <td className="py-3 text-right font-mono font-medium text-gray-400">
+                      {formatCurrency(item.cantidad * item.precioUnitario)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {pedido.notas && (
-            <div className="mt-2 rounded-lg px-3 py-2 text-xs" style={{ background: "var(--bg2)", color: "var(--text2)" }}>
-              <span className="font-semibold">Notas:</span> {pedido.notas}
+            <div className="mt-4 flex items-start gap-3 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-4">
+              <span className="text-lg">💬</span>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-yellow-500">
+                  Notas del cliente
+                </p>
+                <p className="mt-1 text-sm text-yellow-100/80">{pedido.notas}</p>
+              </div>
             </div>
           )}
         </div>
       )}
-
-      {/* Blink animation */}
-      <style jsx>{`
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
-      `}</style>
     </div>
   );
 }

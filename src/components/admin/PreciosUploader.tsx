@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, type DragEvent, type ChangeEvent } from "react";
+import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
 import { type WorkBook } from "xlsx";
 import * as XLSX from "xlsx";
 import { db } from "@/lib/firebase";
@@ -13,11 +13,7 @@ interface ProductRow {
   categoria: string;
 }
 
-interface PreciosUploaderProps {
-  onSuccess?: () => void;
-}
-
-export default function PreciosUploader({ onSuccess }: PreciosUploaderProps) {
+export default function PreciosUploader() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<ProductRow[]>([]);
   const [parsed, setParsed] = useState<ProductRow[]>([]);
@@ -31,7 +27,7 @@ export default function PreciosUploader({ onSuccess }: PreciosUploaderProps) {
   const KEYWORDS: Record<string, string[]> = {
     "Aceites y Aderezos": ["aceite", "aceituna", "aderezo", "mayonesa", "ketchup", "mostaza", "barbacoa", "vinagre", "salsa"],
     "Bebidas": ["agua", "jugo", "gaseosa", "cerveza", "vino", "refresco", "bebida", "sidra", "fernet", "whisky", "sprite", "pepsi", "coca"],
-    "Caf\u00E9, T\u00E9 y Yerba": ["cafe", "te ", "yerba", "bracafe", "nescafe"],
+    "Café, Té y Yerba": ["cafe", "te ", "yerba", "bracafe", "nescafe"],
     "Cereales y Granola": ["avena", "copos", "granola", "cereal"],
     "Congelados": ["cong", "mccain", "boreal", "nugget", "espinaca", "brocoli"],
     "Conservas de Pescado": ["atun", "sardina", "lomito", "pescado", "grated"],
@@ -40,12 +36,12 @@ export default function PreciosUploader({ onSuccess }: PreciosUploaderProps) {
     "Fiambres y Carnes": ["jamon", "mortadela", "salchicha", "pancho", "chorizo", "bondiola", "morcilla", "fiambre", "carne", "arrollado"],
     "Golosinas y Dulces": ["alfajor", "caramelo", "chocolate", "gomita", "chicle", "dulce de membrillo", "galleta rellena", "fini", "barrita"],
     "Harinas, Pastas y Legumbres": ["harina", "faina", "fideo", "arroz", "lenteja", "garbanzo", "almidon", "pasta", "polenta"],
-    "L\u00E1cteos": ["leche", "queso", "yogur", "crema de leche", "manteca", "ricota", "dulce de leche", "muzzarel", "conaprole"],
+    "Lácteos": ["leche", "queso", "yogur", "crema de leche", "manteca", "ricota", "dulce de leche", "muzzarel", "conaprole"],
     "Limpieza": ["jabon en polvo", "jabon liquido", "lavandina", "desinfectante", "limpiador", "detergente", "amoniaco"],
     "Mermeladas y Conservas Dulces": ["mermelada", "anana en alm", "membrillo", "miel", "dulce de fruta", "conserva"],
-    "Panader\u00EDa": ["pan de molde", "pan catalan", "pan de viena", "pan rallado", "tostada"],
+    "Panadería": ["pan de molde", "pan catalan", "pan de viena", "pan rallado", "tostada"],
     "Papel e Higiene": ["papel higien", "servilleta", "toalla de cocina", "rollo"],
-    "Higiene Personal": ["jabon de manos", "afeitar", "desodorante", "shampoo", "pa\u00F1al", "toallita"],
+    "Higiene Personal": ["jabon de manos", "afeitar", "desodorante", "shampoo", "pañal", "toallita"],
   };
 
   function categorizar(nombre: string): string {
@@ -59,8 +55,6 @@ export default function PreciosUploader({ onSuccess }: PreciosUploaderProps) {
   function parseWorkbook(workbook: WorkBook): ProductRow[] {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-    // Skip header row, map expected columns: codigo, _, nombre, _, _, precio, _
     const products: ProductRow[] = [];
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
@@ -94,42 +88,17 @@ export default function PreciosUploader({ onSuccess }: PreciosUploaderProps) {
         const products = parseWorkbook(workbook);
 
         if (products.length === 0) {
-          setError("No se encontraron productos v\u00E1lidos en el archivo.");
+          setError("No se encontraron productos válidos en el archivo.");
           return;
         }
 
         setParsed(products);
         setPreview(products.slice(0, 10));
       } catch {
-        setError("Error al leer el archivo. Verific\u00E1 que sea un .xlsx v\u00E1lido.");
+        setError("Error al leer el archivo. Verificá que sea un .xlsx válido.");
       }
     };
     reader.readAsArrayBuffer(fileObj);
-  }
-
-  function handleDrop(e: DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    setIsDragOver(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && (droppedFile.name.endsWith(".xlsx") || droppedFile.name.endsWith(".xls"))) {
-      handleFile(droppedFile);
-    } else {
-      setError("Solo se aceptan archivos .xlsx o .xls");
-    }
-  }
-
-  function handleDragOver(e: DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    setIsDragOver(true);
-  }
-
-  function handleDragLeave() {
-    setIsDragOver(false);
-  }
-
-  function handleFileInput(e: ChangeEvent<HTMLInputElement>) {
-    const selected = e.target.files?.[0];
-    if (selected) handleFile(selected);
   }
 
   async function handleConfirm() {
@@ -139,24 +108,16 @@ export default function PreciosUploader({ onSuccess }: PreciosUploaderProps) {
     setError(null);
 
     try {
-      // Write in batches to show progress
       const batchSize = 50;
-      const batches = Math.ceil(parsed.length / batchSize);
-
-      // Build the full catalog object
       const catalogoActivo: Record<string, ProductRow> = {};
       for (let i = 0; i < parsed.length; i++) {
         catalogoActivo[parsed[i].codigo] = parsed[i];
         if ((i + 1) % batchSize === 0) {
           setUploadProgress(Math.round(((i + 1) / parsed.length) * 100));
-          // Yield to the event loop for UI update
           await new Promise((r) => setTimeout(r, 10));
         }
       }
-
       setUploadProgress(100);
-
-      // Write to Firestore /catalogo_activo
       await setDoc(doc(db, "catalogo_activo", "productos"), {
         items: catalogoActivo,
         actualizadoEn: new Date().toISOString(),
@@ -164,9 +125,6 @@ export default function PreciosUploader({ onSuccess }: PreciosUploaderProps) {
       });
 
       setSuccess(true);
-      onSuccess?.();
-
-      // Reset after 3s
       setTimeout(() => {
         setSuccess(false);
         setFile(null);
@@ -176,7 +134,7 @@ export default function PreciosUploader({ onSuccess }: PreciosUploaderProps) {
         if (fileInputRef.current) fileInputRef.current.value = "";
       }, 3000);
     } catch {
-      setError("Error al actualizar los precios. Intent\u00E1 de nuevo.");
+      setError("Error al actualizar los precios en la base de datos.");
     } finally {
       setUploading(false);
     }
@@ -187,55 +145,56 @@ export default function PreciosUploader({ onSuccess }: PreciosUploaderProps) {
       style: "currency",
       currency: "UYU",
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
     });
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* Drop zone */}
+    <div className="space-y-6">
       {!file && (
         <div
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onClick={() => fileInputRef.current?.click()}
-          className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 transition-colors"
-          style={{
-            borderColor: isDragOver ? "var(--rojo)" : "var(--border2)",
-            background: isDragOver ? "rgba(76, 201, 240, 0.04)" : "transparent",
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragOver(false);
+            const droppedFile = e.dataTransfer.files[0];
+            if (droppedFile && (droppedFile.name.endsWith(".xlsx") || droppedFile.name.endsWith(".xls"))) {
+              handleFile(droppedFile);
+            } else {
+              setError("Solo se aceptan archivos .xlsx o .xls");
+            }
           }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragOver(true);
+          }}
+          onDragLeave={() => setIsDragOver(false)}
+          onClick={() => fileInputRef.current?.click()}
+          className={`group relative flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed px-6 py-20 transition-all duration-300 ${
+            isDragOver
+              ? "border-[#00E5FF] bg-[#00E5FF]/10 shadow-[0_0_30px_rgba(0,229,255,0.1)]"
+              : "border-white/20 bg-[#0A0F1C] hover:border-[#00E5FF]/50 hover:bg-white/5"
+          }`}
         >
-          <span className="mb-3 text-4xl">\uD83D\uDCCB</span>
-          <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>
-            Arrastr\u00E1 la lista de precios ac\u00E1
-          </p>
-          <p className="mt-1 text-xs" style={{ color: "var(--muted)" }}>
-            o hac\u00E9 click para seleccionar
-          </p>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleFileInput}
-            className="hidden"
-          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#00E5FF]/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="relative z-10 flex flex-col items-center">
+            <span className="mb-6 rounded-2xl bg-white/5 p-4 text-5xl shadow-xl transition-transform duration-300 group-hover:-translate-y-2 group-hover:scale-110">
+              📊
+            </span>
+            <h3 className="text-xl font-bold text-white">Arrastrá el archivo aquí</h3>
+            <p className="mt-2 text-sm text-gray-400">o hacé click para explorar tus carpetas</p>
+          </div>
+          <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} className="hidden" />
         </div>
       )}
 
-      {/* File info */}
       {file && !success && (
-        <div
-          className="flex items-center justify-between rounded-lg px-4 py-3"
-          style={{ background: "var(--bg2)" }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-lg">\uD83D\uDCC4</span>
+        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0A0F1C] p-4 shadow-lg">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/10 text-2xl text-green-400">
+              📄
+            </div>
             <div>
-              <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>{file.name}</p>
-              <p className="text-xs" style={{ color: "var(--muted)" }}>
-                {parsed.length} productos encontrados
-              </p>
+              <p className="font-semibold text-white">{file.name}</p>
+              <p className="text-sm text-gray-400">{parsed.length} productos detectados listos para importar</p>
             </div>
           </div>
           <button
@@ -245,43 +204,56 @@ export default function PreciosUploader({ onSuccess }: PreciosUploaderProps) {
               setPreview([]);
               if (fileInputRef.current) fileInputRef.current.value = "";
             }}
-            className="rounded-md px-2 py-1 text-xs font-bold text-gray-500 hover:text-red-500"
+            className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-gray-400 transition-colors hover:bg-red-500/20 hover:text-red-400"
           >
-            \u2715
+            ✕
           </button>
         </div>
       )}
 
-      {/* Preview table */}
-      {preview.length > 0 && (
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
-            Vista previa (primeros {preview.length} de {parsed.length})
-          </p>
-          <div className="overflow-x-auto rounded-lg border" style={{ borderColor: "var(--border)" }}>
-            <table className="w-full text-xs">
+      {error && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center text-sm font-medium text-red-400">
+          ⚠️ {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="rounded-xl border border-[#00E5FF]/20 bg-[#00E5FF]/10 p-6 text-center shadow-[0_0_30px_rgba(0,229,255,0.1)]">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#00E5FF] text-3xl text-black shadow-lg">
+            ✓
+          </div>
+          <h3 className="font-bebas text-3xl tracking-wide text-white">Catálogo Actualizado</h3>
+          <p className="text-[#00E5FF] font-medium mt-1">Los productos se sincronizaron con éxito.</p>
+        </div>
+      )}
+
+      {preview.length > 0 && !success && (
+        <div className="animate-in slide-in-from-bottom-4 overflow-hidden rounded-2xl border border-white/10 bg-[#0A0F1C] shadow-xl">
+          <div className="border-b border-white/10 bg-white/5 px-6 py-4">
+            <h3 className="font-bold text-white">Vista Previa</h3>
+            <p className="text-xs text-gray-400">Mostrando los primeros {preview.length} resultados</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
               <thead>
-                <tr style={{ background: "var(--oscuro)" }}>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-300">C\u00F3digo</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-300">Producto</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-300">Categor\u00EDa</th>
-                  <th className="px-3 py-2 text-right font-semibold text-gray-300">Precio</th>
+                <tr className="border-b border-white/5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-4">Código</th>
+                  <th className="px-6 py-4">Producto</th>
+                  <th className="px-6 py-4">Categoría</th>
+                  <th className="px-6 py-4 text-right">Precio</th>
                 </tr>
               </thead>
-              <tbody>
-                {preview.map((p, i) => (
-                  <tr
-                    key={p.codigo}
-                    className="border-t"
-                    style={{
-                      borderColor: "var(--border)",
-                      background: i % 2 === 0 ? "var(--white)" : "var(--bg)",
-                    }}
-                  >
-                    <td className="px-3 py-2 font-mono" style={{ color: "var(--text2)" }}>{p.codigo}</td>
-                    <td className="px-3 py-2 font-medium" style={{ color: "var(--text)" }}>{p.nombre}</td>
-                    <td className="px-3 py-2" style={{ color: "var(--muted)" }}>{p.categoria}</td>
-                    <td className="px-3 py-2 text-right font-bold" style={{ color: "var(--oscuro)" }}>
+              <tbody className="divide-y divide-white/5">
+                {preview.map((p) => (
+                  <tr key={p.codigo} className="transition-colors hover:bg-white/5">
+                    <td className="px-6 py-3 font-mono text-xs text-[#00E5FF]">{p.codigo}</td>
+                    <td className="px-6 py-3 font-medium text-gray-200">{p.nombre}</td>
+                    <td className="px-6 py-3 text-gray-400">
+                      <span className="inline-flex rounded-md bg-white/5 px-2 py-1 text-xs">
+                        {p.categoria}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3 text-right font-mono font-bold text-white">
                       {formatCurrency(p.precio)}
                     </td>
                   </tr>
@@ -292,74 +264,30 @@ export default function PreciosUploader({ onSuccess }: PreciosUploaderProps) {
         </div>
       )}
 
-      {/* Progress bar */}
       {uploading && (
-        <div>
-          <div className="mb-1 flex items-center justify-between">
-            <span className="text-xs font-semibold" style={{ color: "var(--text2)" }}>
-              Actualizando precios...
-            </span>
-            <span className="text-xs font-bold" style={{ color: "var(--rojo)" }}>
-              {uploadProgress}%
-            </span>
+        <div className="rounded-2xl border border-[#00E5FF]/20 bg-[#00E5FF]/5 p-6">
+          <div className="mb-2 flex items-center justify-between text-sm">
+            <span className="font-semibold text-white">Actualizando Base de Datos...</span>
+            <span className="font-bold text-[#00E5FF]">{uploadProgress}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--bg3)" }}>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-black">
             <div
-              className="h-full rounded-full transition-all duration-300"
-              style={{
-                width: `${uploadProgress}%`,
-                background: "var(--rojo)",
-              }}
+              className="h-full bg-gradient-to-r from-blue-500 to-[#00E5FF] transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
             />
           </div>
         </div>
       )}
 
-      {/* Error */}
-      {error && (
-        <div
-          className="rounded-lg px-4 py-3 text-center text-sm font-semibold"
-          style={{
-            background: "rgba(239, 35, 60, 0.08)",
-            color: "var(--rojo)",
-            border: "1px solid rgba(239, 35, 60, 0.2)",
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {/* Success */}
-      {success && (
-        <div
-          className="rounded-lg px-4 py-3 text-center text-sm font-semibold"
-          style={{
-            background: "rgba(34, 197, 94, 0.08)",
-            color: "var(--verde)",
-            border: "1px solid rgba(34, 197, 94, 0.2)",
-          }}
-        >
-          Precios actualizados \u2713
-        </div>
-      )}
-
-      {/* Confirm button */}
       {parsed.length > 0 && !uploading && !success && (
         <button
           onClick={handleConfirm}
-          className="w-full rounded-xl py-3 text-sm font-bold uppercase tracking-wider text-white transition-all"
-          style={{
-            background: "var(--rojo)",
-            boxShadow: "0 4px 18px rgba(239, 35, 60, 0.28)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "var(--rojo-dark)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "var(--rojo)";
-          }}
+          className="group relative w-full overflow-hidden rounded-xl bg-white p-[1px] font-bold uppercase tracking-widest text-black transition-transform hover:scale-[1.02] active:scale-95"
         >
-          Confirmar actualizaci\u00F3n ({parsed.length} productos)
+          <div className="absolute inset-0 bg-gradient-to-r from-[#00E5FF] via-blue-500 to-[#00E5FF] opacity-100 transition-opacity duration-300 group-hover:opacity-80" />
+          <div className="relative flex items-center justify-center gap-2 bg-white px-8 py-4 text-sm transition-colors group-hover:bg-transparent group-hover:text-white">
+            Confirmar Importación <span>→</span>
+          </div>
         </button>
       )}
     </div>
