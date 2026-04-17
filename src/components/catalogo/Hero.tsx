@@ -128,7 +128,7 @@ export default function Hero({
           {/* Título principal */}
           <h1
             style={{
-              fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif",
+              fontFamily: "var(--font-display)",
               fontSize: "clamp(3rem, 9vw, 5rem)",
               letterSpacing: "2.5px",
               lineHeight: 0.88,
@@ -179,7 +179,7 @@ export default function Hero({
             />
             <p
               style={{
-                fontFamily: "var(--font-serif, 'DM Serif Display'), Georgia, serif",
+                fontFamily: "var(--font-serif)",
                 fontStyle: "italic",
                 fontSize: "clamp(0.95rem, 2vw, 1.1rem)",
                 color: "var(--on-dark-mid, #C8C3BC)",
@@ -270,7 +270,7 @@ export default function Hero({
                   background: "rgba(0,0,0,0.22)",
                   borderRadius: "5px",
                   padding: "1px 8px",
-                  fontFamily: "var(--font-body, 'DM Sans'), sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: "0.82rem",
                   fontWeight: 800,
                   color: "#fff",

@@ -52,7 +52,8 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                 }}>{emoji}</div>
                 <span className="cat-circle-label" style={{ 
-                  fontSize: "11px", 
+                  fontFamily: "var(--font-body)",
+                  fontSize: "var(--text-xs)", 
                   marginTop: "8px",
                   fontWeight: isActive ? 800 : 600,
                   color: isActive ? "var(--oscuro)" : "var(--muted)",

@@ -193,7 +193,7 @@ export default function ProductoCard({
         </span>
 
         <h3 className="card-name" style={{ 
-          fontSize: "14px", 
+          fontSize: "var(--text-base)", 
           fontWeight: 600, 
           color: "var(--oscuro)", 
           lineHeight: "1.25", 
@@ -209,11 +209,12 @@ export default function ProductoCard({
 
         <div style={{ marginTop: "auto" }}>
           <div className="card-price" style={{ 
-            fontSize: "20px", 
-            fontWeight: 900,
+            fontFamily: "var(--font-display)",
+            fontSize: "var(--text-xl)", 
+            fontWeight: 400,
             color: "var(--oscuro)", 
             lineHeight: "1",
-            letterSpacing: "-0.5px"
+            letterSpacing: "0.5px"
           }}>
             {formatPrice(producto.precio)}
           </div>
