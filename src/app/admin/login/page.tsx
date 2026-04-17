@@ -23,6 +23,11 @@ export default function AdminLoginPage() {
       if (!user) return;
       try {
         const snap = await getDoc(doc(db, "usuarios", user.uid));
+        console.log("DEBUG ADMIN LOGIN:", {
+          uid: user.uid,
+          exists: snap.exists(),
+          data: snap.exists() ? snap.data() : null
+        });
         if (snap.exists() && snap.data().role === "admin") {
           router.replace("/admin/pedidos");
         } else {
