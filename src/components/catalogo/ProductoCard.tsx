@@ -195,10 +195,4 @@ export default function ProductoCard({
       </div>
     </div>
   );
-}ton>
-          )}
-        </div>
-      </div>
-    </div>
-  );
 }
