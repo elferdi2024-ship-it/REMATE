@@ -98,7 +98,7 @@ export default function PedidosPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+    <div className="w-full max-w-full overflow-hidden space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 px-1 md:px-0">
       <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
         <div>
           <h1 className="font-bebas text-4xl tracking-wide text-white md:text-5xl">

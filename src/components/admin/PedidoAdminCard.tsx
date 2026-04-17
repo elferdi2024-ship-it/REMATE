@@ -91,82 +91,77 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
       {/* Main Content Area */}
       <div className="p-6">
         {/* Top Meta Info */}
-        <div className="mb-4 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+        <div className="mb-3 flex items-center justify-between border-b border-white/5 pb-3">
           <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-[#00E5FF] animate-ping" />
-            <span>Recibido: {formatDate(pedido.fecha)}</span>
+            <span className="flex h-1.5 w-1.5 rounded-full bg-[#00E5FF]" />
+            <span className="text-[10px] font-bold text-gray-500">{formatDate(pedido.fecha)}</span>
           </div>
-          <span className={status === "no_leido" ? "text-red-500" : status === "pendiente" ? "text-yellow-500" : "text-green-500"}>
-            ID: {pedido.id.slice(-6).toUpperCase()}
-          </span>
+          <span className="text-[10px] font-black text-red-500/80">ID: {pedido.id.slice(-6).toUpperCase()}</span>
         </div>
 
-        {/* Customer Info Section */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <h3 className="mb-1 truncate font-bebas text-3xl tracking-wide text-white">
-              {pedido.clienteNombre}
-            </h3>
-            <div className="flex flex-wrap items-center gap-3">
-              <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${statusColors[status]}`}>
-                {status.replace("_", " ")}
-              </span>
-              <p className="text-[11px] font-bold text-gray-400">
-                {pedido.items.length} {pedido.items.length === 1 ? "ÍTEM" : "ÍTEMS"}
-              </p>
-            </div>
-          </div>
+        {/* Customer & Price Section - Vertical on mobile */}
+        <div className="space-y-2">
+          <h3 className="break-words font-bebas text-2xl leading-tight tracking-wide text-white">
+            {pedido.clienteNombre}
+          </h3>
           
-          <div className="text-right">
-            <p className="font-bebas text-4xl leading-none text-white">
+          <div className="flex items-center justify-between">
+            <p className="font-bebas text-3xl text-[#00E5FF]">
               {formatCurrency(pedido.total)}
             </p>
+            <span className={`rounded-full border px-2 py-0.5 text-[8px] font-black uppercase ${statusColors[status]}`}>
+              {status.replace("_", " ")}
+            </span>
           </div>
+          
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+            {pedido.items.length} {pedido.items.length === 1 ? "ÍTEM" : "ÍTEMS"}
+          </p>
         </div>
 
-        {/* Contact & Quick Actions Row */}
-        <div className="mt-6 flex items-center gap-2 border-t border-white/5 pt-5">
+        {/* Contact & Quick Actions */}
+        <div className="mt-5 flex gap-2">
           {pedido.clienteTelefono && (
             <a 
               href={`https://wa.me/598${pedido.clienteTelefono.replace(/\s+/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#25D366]/10 border border-[#25D366]/20 py-3 text-xs font-bold text-[#25D366] transition-all hover:bg-[#25D366]/20"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#25D366]/10 border border-[#25D366]/20 py-3 text-[10px] font-black text-[#25D366] transition-all"
             >
-              <span>HABLAR POR WHATSAPP</span>
+              WHATSAPP
             </a>
           )}
           <button
             onClick={() => {
               const text = `PEDIDO: ${pedido.clienteNombre}\nTEL: ${pedido.clienteTelefono}\nTOTAL: ${formatCurrency(pedido.total)}\n\nITEMS:\n${pedido.items.map(i => `- ${i.cantidad}x ${i.nombre} [${i.codigo}]`).join("\n")}`;
               navigator.clipboard.writeText(text);
-              alert("Pedido copiado");
+              handleStatusChange("cargado");
+              alert("Pedido copiado y marcado como CARGADO");
             }}
-            className="flex h-[46px] w-[46px] items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-xl transition-all hover:bg-white/10"
-            title="Copiar pedido"
+            className="flex h-[44px] w-[44px] items-center justify-center rounded-xl border border-white/10 bg-white/5 text-lg"
+            title="Copiar y Cargar"
           >
             📋
           </button>
         </div>
 
-        {/* Status Selector Grid */}
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          {(["no_leido", "pendiente", "cargado"] as const).map((s) => (
+        {/* Status Selector - More compact */}
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {(["no_leido", "cargado"] as const).map((s) => (
             <button
               key={s}
               disabled={isUpdating}
               onClick={() => handleStatusChange(s)}
-              className={`flex flex-col items-center justify-center rounded-2xl border py-2.5 transition-all ${
+              className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 transition-all ${
                 status === s
                   ? s === "no_leido" ? "border-red-500 bg-red-500/20 text-red-400" :
-                    s === "pendiente" ? "border-yellow-500 bg-yellow-500/20 text-yellow-400" :
                     "border-green-500 bg-green-500/20 text-green-400"
                   : "border-white/5 bg-white/5 text-gray-500"
               }`}
             >
-              <span className="text-sm mb-1">{s === "no_leido" ? "🔴" : s === "pendiente" ? "🟡" : "🟢"}</span>
-              <span className="text-[8px] font-black uppercase tracking-tighter">
-                {s === "no_leido" ? "No Leído" : s === "pendiente" ? "Pendiente" : "Cargado"}
+              <span className="text-xs">{s === "no_leido" ? "🔴" : "🟢"}</span>
+              <span className="text-[9px] font-black uppercase tracking-tight">
+                {s === "no_leido" ? "No Leído" : "Cargado"}
               </span>
             </button>
           ))}
