@@ -74,97 +74,117 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[24px] border transition-all duration-300 ${
+      className={`group relative overflow-hidden rounded-[32px] border transition-all duration-500 ${
         isFresh
-          ? "border-[#00E5FF]/40 bg-[#0A0F1C] shadow-[0_10px_40px_rgba(0,229,255,0.1)]"
-          : "border-white/5 bg-[#0D121F] hover:border-white/20"
+          ? "border-[#00E5FF]/40 bg-gradient-to-br from-[#0A0F1C] to-[#00E5FF]/5 shadow-[0_20px_50px_rgba(0,229,255,0.15)]"
+          : "border-white/5 bg-[#0A0F1C] hover:border-white/20 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
       }`}
     >
+      {/* Glossy Overlay Effect */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+
       {isFresh && (
-        <div className="absolute right-0 top-0 bg-[#00E5FF] px-4 py-1 rounded-bl-xl shadow-[0_0_15px_rgba(0,229,255,0.4)]">
-          <span className="text-[9px] font-black uppercase tracking-widest text-black animate-pulse">
-            NUEVO
-          </span>
+        <div className="absolute right-6 top-0 z-10">
+          <div className="rounded-b-2xl bg-[#00E5FF] px-4 py-1.5 shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+            <span className="text-[10px] font-black uppercase tracking-widest text-black">NUEVO</span>
+          </div>
         </div>
       )}
 
-      {/* Main Content Area */}
-      <div className="p-6">
-        {/* Top Meta Info */}
-        <div className="mb-3 flex items-center justify-between border-b border-white/5 pb-3">
-          <div className="flex items-center gap-2">
-            <span className="flex h-1.5 w-1.5 rounded-full bg-[#00E5FF]" />
-            <span className="text-[10px] font-bold text-gray-500">{formatDate(pedido.fecha)}</span>
-          </div>
-          <span className="text-[10px] font-black text-red-500/80">ID: {pedido.id.slice(-6).toUpperCase()}</span>
-        </div>
-
-        {/* Customer & Price Section - Vertical on mobile */}
-        <div className="space-y-2">
-          <h3 className="break-words font-bebas text-2xl leading-tight tracking-wide text-white">
-            {pedido.clienteNombre}
-          </h3>
-          
-          <div className="flex items-center justify-between">
-            <p className="font-bebas text-3xl text-[#00E5FF]">
-              {formatCurrency(pedido.total)}
-            </p>
-            <span className={`rounded-full border px-2 py-0.5 text-[8px] font-black uppercase ${statusColors[status]}`}>
-              {status.replace("_", " ")}
+      {/* Main Content */}
+      <div className="relative z-10 p-8">
+        {/* Header Meta */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`h-2.5 w-2.5 rounded-full ${status === 'no_leido' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'} animate-pulse`} />
+            <span className="font-mono text-[11px] font-bold tracking-tighter text-gray-500">
+              {formatDate(pedido.fecha)}
             </span>
           </div>
-          
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-            {pedido.items.length} {pedido.items.length === 1 ? "ÍTEM" : "ÍTEMS"}
-          </p>
+          <div className="rounded-lg bg-white/5 px-3 py-1 border border-white/5">
+            <span className="font-mono text-[10px] font-bold text-gray-400">ID: {pedido.id.slice(-6).toUpperCase()}</span>
+          </div>
         </div>
 
-        {/* Contact & Quick Actions */}
-        <div className="mt-5 flex gap-2">
+        {/* Info Grid */}
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-2">
+            <h3 className="font-bebas text-5xl tracking-wide text-white leading-none">
+              {pedido.clienteNombre}
+            </h3>
+            <div className="flex items-center gap-4">
+               <p className="text-sm font-bold text-gray-500 uppercase tracking-[0.2em]">
+                {pedido.items.length} {pedido.items.length === 1 ? "Artículo" : "Artículos"}
+              </p>
+              <div className={`h-1 w-1 rounded-full bg-white/20`} />
+              <span className={`text-[10px] font-black uppercase tracking-widest ${status === 'no_leido' ? 'text-red-400' : 'text-green-400'}`}>
+                {status.replace("_", " ")}
+              </span>
+            </div>
+          </div>
+
+          <div className="relative">
+            <p className="bg-gradient-to-r from-[#00E5FF] to-blue-400 bg-clip-text font-bebas text-6xl text-transparent leading-none">
+              {formatCurrency(pedido.total)}
+            </p>
+          </div>
+        </div>
+
+        {/* Action Bar */}
+        <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-white/5 pt-8">
           {pedido.clienteTelefono && (
             <a 
               href={`https://wa.me/598${pedido.clienteTelefono.replace(/\s+/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#25D366]/10 border border-[#25D366]/20 py-3 text-[10px] font-black text-[#25D366] transition-all"
+              className="group/btn flex flex-1 items-center justify-center gap-3 rounded-2xl bg-[#25D366] px-6 py-4 text-xs font-black text-black transition-all hover:scale-[1.02] hover:shadow-[0_10px_20px_rgba(37,211,102,0.3)] active:scale-95"
             >
-              WHATSAPP
+              <span className="text-lg">💬</span>
+              <span>WHATSAPP</span>
             </a>
           )}
+          
           <button
             onClick={() => {
               const text = `PEDIDO: ${pedido.clienteNombre}\nTEL: ${pedido.clienteTelefono}\nTOTAL: ${formatCurrency(pedido.total)}\n\nITEMS:\n${pedido.items.map(i => `- ${i.cantidad}x ${i.nombre} [${i.codigo}]`).join("\n")}`;
               navigator.clipboard.writeText(text);
               handleStatusChange("cargado");
-              alert("Pedido copiado y marcado como CARGADO");
+              alert("Copiado y Cargado ✅");
             }}
-            className="flex h-[44px] w-[44px] items-center justify-center rounded-xl border border-white/10 bg-white/5 text-lg"
+            className="flex h-[56px] w-[56px] items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-2xl transition-all hover:bg-white/10 hover:border-[#00E5FF]/40 active:scale-90"
             title="Copiar y Cargar"
           >
             📋
           </button>
         </div>
 
-        {/* Status Selector - More compact */}
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          {(["no_leido", "cargado"] as const).map((s) => (
-            <button
-              key={s}
-              disabled={isUpdating}
-              onClick={() => handleStatusChange(s)}
-              className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 transition-all ${
-                status === s
-                  ? s === "no_leido" ? "border-red-500 bg-red-500/20 text-red-400" :
-                    "border-green-500 bg-green-500/20 text-green-400"
-                  : "border-white/5 bg-white/5 text-gray-500"
-              }`}
-            >
-              <span className="text-xs">{s === "no_leido" ? "🔴" : "🟢"}</span>
-              <span className="text-[9px] font-black uppercase tracking-tight">
-                {s === "no_leido" ? "No Leído" : "Cargado"}
-              </span>
-            </button>
-          ))}
+        {/* Status Switcher - Premium Look */}
+        <div className="mt-4 flex gap-2">
+          <button
+            disabled={isUpdating}
+            onClick={() => handleStatusChange("no_leido")}
+            className={`flex flex-1 items-center justify-center gap-3 rounded-2xl border py-4 transition-all ${
+              status === "no_leido"
+                ? "border-red-500/50 bg-red-500/10 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
+                : "border-white/5 bg-white/5 text-gray-500 hover:border-white/20"
+            }`}
+          >
+            <div className={`h-2 w-2 rounded-full ${status === 'no_leido' ? 'bg-red-500' : 'bg-gray-600'}`} />
+            <span className="text-[10px] font-black uppercase tracking-widest">NO LEÍDO</span>
+          </button>
+          
+          <button
+            disabled={isUpdating}
+            onClick={() => handleStatusChange("cargado")}
+            className={`flex flex-1 items-center justify-center gap-3 rounded-2xl border py-4 transition-all ${
+              status === "cargado"
+                ? "border-green-500/50 bg-green-500/10 text-green-400 shadow-[0_0_20px_rgba(34,197,94,0.1)]"
+                : "border-white/5 bg-white/5 text-gray-500 hover:border-white/20"
+            }`}
+          >
+            <div className={`h-2 w-2 rounded-full ${status === 'cargado' ? 'bg-green-500' : 'bg-gray-600'}`} />
+            <span className="text-[10px] font-black uppercase tracking-widest">CARGADO</span>
+          </button>
         </div>
 
         <button
@@ -172,10 +192,10 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
             setIsViewingFull(!isViewingFull);
             onViewFull(pedido);
           }}
-          className={`mt-4 w-full rounded-2xl py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
+          className={`mt-6 w-full rounded-2xl border py-4 text-[11px] font-black uppercase tracking-[0.3em] transition-all ${
             isViewingFull
-              ? "bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]"
-              : "bg-white/5 text-gray-400 border border-white/5"
+              ? "border-[#00E5FF] bg-[#00E5FF] text-black shadow-[0_0_30px_rgba(0,229,255,0.4)]"
+              : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
           }`}
         >
           {isViewingFull ? "OCULTAR DETALLES" : "VER DETALLES COMPLETOS"}

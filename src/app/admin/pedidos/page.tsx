@@ -121,31 +121,20 @@ export default function PedidosPage() {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <div className="relative overflow-hidden rounded-[24px] border border-white/5 bg-white/5 p-5 transition-all hover:border-white/20 group">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Pedidos Hoy</p>
-          <p className="mt-1 font-bebas text-3xl text-white">{counts.todos}</p>
-          <div className="absolute -right-2 -top-2 text-3xl opacity-5 group-hover:scale-110 transition-transform">📋</div>
-        </div>
-
-        <div className="relative overflow-hidden rounded-[24px] border border-[#00E5FF]/20 bg-gradient-to-br from-[#00E5FF]/10 to-transparent p-5">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00E5FF]">Ingresos Hoy</p>
-          <p className="mt-1 font-bebas text-3xl text-white">{formatCurrency(totalGeneral)}</p>
-          <div className="absolute -right-2 -top-2 text-3xl opacity-10">💰</div>
-        </div>
-
-        <div className="relative overflow-hidden rounded-[24px] border border-white/5 bg-white/5 p-5 transition-all hover:border-red-500/30 group">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">No Leídos</p>
-          <p className="mt-1 font-bebas text-3xl text-red-400">{counts.no_leido}</p>
-          <div className="absolute -right-2 -top-2 text-3xl opacity-10">🔴</div>
-        </div>
-
-        <div className="relative overflow-hidden rounded-[24px] border border-white/5 bg-white/5 p-5 transition-all hover:border-yellow-500/30 group">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-500">Pendientes</p>
-          <p className="mt-1 font-bebas text-3xl text-yellow-400">{counts.pendiente}</p>
-          <div className="absolute -right-2 -top-2 text-3xl opacity-10">🟡</div>
-        </div>
+      {/* Luxury Stats Grid */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        {[
+          { label: "Ventas Hoy", value: formatCurrency(totalGeneral), icon: "💰", color: "from-[#00E5FF]/20 to-transparent", border: "border-[#00E5FF]/30" },
+          { label: "Artículos", value: totalItems, icon: "📦", color: "from-blue-500/20 to-transparent", border: "border-blue-500/30" },
+          { label: "No Leídos", value: counts.no_leido, icon: "🔴", color: "from-red-500/20 to-transparent", border: "border-red-500/30", highlight: "text-red-400" },
+          { label: "Pendientes", value: counts.pendiente, icon: "🟡", color: "from-yellow-500/20 to-transparent", border: "border-yellow-500/30", highlight: "text-yellow-400" },
+        ].map((s, idx) => (
+          <div key={idx} className={`relative overflow-hidden rounded-[32px] border ${s.border} bg-gradient-to-br ${s.color} p-6 transition-all hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] group`}>
+            <div className="absolute -right-2 -top-2 text-4xl opacity-10 transition-transform group-hover:scale-125 group-hover:rotate-12">{s.icon}</div>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-1">{s.label}</p>
+            <p className={`font-bebas text-4xl leading-none ${s.highlight || 'text-white'}`}>{s.value}</p>
+          </div>
+        ))}
       </div>
 
       {/* Filter Badges */}
