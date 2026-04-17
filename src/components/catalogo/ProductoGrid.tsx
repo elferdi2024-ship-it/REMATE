@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import type { Producto, Vista } from "@/types";
 import ProductoCard from "./ProductoCard";
 import ProductoRow from "./ProductoRow";
@@ -17,6 +15,25 @@ interface ProductoGridProps {
 
 const PAGE_SIZE = 40;
 
+// Corrección de categorías para productos mal catalogados
+const CATEGORY_CORRECTIONS: Record<string, string> = {
+  "ALFAJOR": "Golosinas y Dulces",
+  "PILAS": "Otros",
+  "LAMPARA": "Otros",
+  "SHAMPOO": "Higiene Personal",
+  "ACONDICIONADOR": "Higiene Personal",
+  "JABON TOCADOR": "Higiene Personal",
+  "DENTAL": "Higiene Personal",
+  "AFEITADORA": "Higiene Personal",
+  "ACEITUNAS": "Conservas y Enlatados",
+  "CHOCLO": "Conservas y Enlatados",
+  "ARVEJAS": "Conservas y Enlatados",
+  "POROTOS": "Conservas y Enlatados",
+  "LENTEJAS": "Conservas y Enlatados",
+  "PAN DULCE": "Panadería",
+  "BUDIN": "Panadería",
+};
+
 export default function ProductoGrid({
   productos,
   vista,
@@ -26,22 +43,91 @@ export default function ProductoGrid({
   onQtyChange,
 }: ProductoGridProps) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [columns, setColumns] = useState(2);
+
+  // Detectar columnas para inyectar banners cada 2 líneas
+  useEffect(() => {
+    const updateColumns = () => {
+      const w = window.innerWidth;
+      if (w >= 1300) setColumns(6);
+      else if (w >= 1060) setColumns(5);
+      else if (w >= 780) setColumns(4);
+      else if (w >= 520) setColumns(3);
+      else setColumns(2);
+    };
+    updateColumns();
+    window.addEventListener("resize", updateColumns);
+    return () => window.removeEventListener("resize", updateColumns);
+  }, []);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [productos.length]);
 
   const handleLoadMore = useCallback(() => {
     setVisibleCount((prev) => prev + PAGE_SIZE);
   }, []);
 
-  const handleReset = useCallback(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, []);
+  // Agrupar y corregir productos
+  const grouped = useMemo(() => {
+    return productos.reduce((acc, p) => {
+      let categoria = p.categoria;
+      const nombreUpper = p.nombre.toUpperCase();
+      
+      // Aplicar correcciones basadas en palabras clave
+      for (const [key, corrected] of Object.entries(CATEGORY_CORRECTIONS)) {
+        if (nombreUpper.includes(key)) {
+          categoria = corrected;
+          break;
+        }
+      }
 
-  // Reset visible count when products change (e.g., new filter/search)
-  useEffect(() => {
-    handleReset();
-  }, [productos.length, handleReset]);
+      if (!acc[categoria]) acc[categoria] = [];
+      acc[categoria].push(p);
+      return acc;
+    }, {} as Record<string, Producto[]>);
+  }, [productos]);
 
-  const visible = productos.slice(0, visibleCount);
-  const hasMore = visibleCount < productos.length;
+  const categories = Object.keys(grouped).sort();
+
+  const banners = [
+    {
+      id: "banner-weekend",
+      type: "html" as const,
+      backgroundColor: "#FEF3C7",
+      htmlContent: (
+        <div style={{ textAlign: "center", width: "100%", padding: "20px" }}>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", color: "#D97706", margin: 0 }}>LOS ROMPE DEL FINDE</h3>
+          <p style={{ margin: "4px 0 0", color: "#5C4A35", fontWeight: 600 }}>Aprovechá estas ofertas exclusivas hasta el domingo.</p>
+        </div>
+      )
+    },
+    {
+      id: "banner-cleaning",
+      type: "html" as const,
+      backgroundColor: "#EBF7F0",
+      htmlContent: (
+        <div style={{ textAlign: "center", width: "100%", padding: "20px" }}>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", color: "#1A7A42", margin: 0 }}>¡HASTA 25% OFF EN LIMPIEZA!</h3>
+          <p style={{ margin: "4px 0 0", color: "#145E33", fontWeight: 600 }}>Stockeate con los mejores precios mayoristas.</p>
+        </div>
+      )
+    },
+    {
+      id: "banner-drinks",
+      type: "html" as const,
+      backgroundColor: "#DBEAFE",
+      htmlContent: (
+        <div style={{ textAlign: "center", width: "100%", padding: "20px" }}>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", color: "#1D4ED8", margin: 0 }}>BEBIDAS AL MEJOR PRECIO</h3>
+          <p style={{ margin: "4px 0 0", color: "#1E3A8A", fontWeight: 600 }}>Refrescate con El Remate - Mayorista Premium.</p>
+        </div>
+      )
+    }
+  ];
+
+  let globalProductIndex = 0;
+  let bannerIndex = 0;
 
   if (productos.length === 0) {
     return (
@@ -53,80 +139,94 @@ export default function ProductoGrid({
   }
 
   return (
-    <>
-      {vista === "grilla" ? (
-        <div className="grid">
-          {visible.map((producto, index) => {
-            const isBannerSlot = index > 0 && index % 12 === 0;
-            const bannerIndex = Math.floor(index / 12);
-            
-            // Alternar entre estilos de banners
-            const banners = [
-              {
-                id: `banner-${bannerIndex}-a`,
-                type: "html" as const,
-                backgroundColor: "var(--amber-pale, #FEF3C7)",
-                htmlContent: (
-                  <div style={{ textAlign: "center", width: "100%" }}>
-                    <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", color: "var(--amber, #D97706)", margin: 0, lineHeight: 1 }}>LOS ROMPE DEL FINDE</h3>
-                    <p style={{ margin: "4px 0 0", color: "var(--tierra, #5C4A35)", fontWeight: 500, fontSize: "0.9rem" }}>Aprovechá estas ofertas exclusivas hasta el domingo.</p>
-                  </div>
-                )
-              },
-              {
-                id: `banner-${bannerIndex}-b`,
-                type: "html" as const,
-                backgroundColor: "var(--rojo-pale, #FEE2E2)",
-                htmlContent: (
-                  <div style={{ textAlign: "center", width: "100%" }}>
-                    <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", color: "var(--rojo, #E8302A)", margin: 0, lineHeight: 1 }}>¡HASTA 25% OFF EN LIMPIEZA!</h3>
-                    <p style={{ margin: "4px 0 0", color: "var(--tierra, #5C4A35)", fontWeight: 500, fontSize: "0.9rem" }}>Stockeate con los mejores precios mayoristas.</p>
-                  </div>
-                )
-              }
-            ];
-            
-            const banner = banners[bannerIndex % banners.length];
+    <div className="catalogo-container" style={{ padding: "0 4px 40px" }}>
+      {categories.map((cat) => {
+        const catProds = grouped[cat];
+        const visibleInCat = catProds.filter(() => {
+          const isVisible = globalProductIndex < visibleCount;
+          globalProductIndex++;
+          return isVisible;
+        });
 
-            return (
-              <React.Fragment key={producto.codigo}>
-                {isBannerSlot && (
-                  <div className="banner-full-width">
-                    <AdBanner {...banner} />
-                  </div>
-                )}
-                <ProductoCard
-                  producto={producto}
-                  qty={qtyMap[producto.codigo] || 0}
-                  searchTerm={searchTerm}
-                  onAdd={onAdd}
-                  onQtyChange={onQtyChange}
-                />
-              </React.Fragment>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="product-list">
-          {visible.map((producto) => (
-            <ProductoRow
-              key={producto.codigo}
-              producto={producto}
-              qty={qtyMap[producto.codigo] || 0}
-              onAdd={onAdd}
-              onQtyChange={onQtyChange}
-            />
-          ))}
-        </div>
-      )}
+        if (visibleInCat.length === 0) return null;
 
-      {hasMore && (
-        <div className="load-more-wrap">
+        const bannerInterval = columns * 2; // Inyectar cada 2 líneas
+
+        return (
+          <section key={cat} className="cat-section" style={{ marginBottom: "32px" }}>
+            <div style={{ 
+              display: "flex", 
+              alignItems: "center", 
+              gap: "12px", 
+              marginBottom: "16px",
+              padding: "0 12px"
+            }}>
+              <h2 className="cat-section-title" style={{ 
+                fontFamily: "var(--font-display)", 
+                fontSize: "2rem", 
+                color: "var(--oscuro)", 
+                margin: 0,
+                letterSpacing: "1px"
+              }}>
+                {cat}
+              </h2>
+              <div style={{ flex: 1, height: "1px", background: "var(--border)", marginTop: "8px" }}></div>
+              <span style={{ fontSize: "var(--text-xs)", color: "var(--muted)", fontWeight: 700, textTransform: "uppercase" }}>
+                {catProds.length} items
+              </span>
+            </div>
+
+            <div className={vista === "grilla" ? "grid" : "product-list"}>
+              {visibleInCat.map((p, idx) => {
+                const elements = [];
+                
+                // El producto
+                elements.push(
+                  vista === "grilla" ? (
+                    <ProductoCard
+                      key={p.codigo}
+                      producto={p}
+                      qty={qtyMap[p.codigo] || 0}
+                      searchTerm={searchTerm}
+                      onAdd={onAdd}
+                      onQtyChange={onQtyChange}
+                    />
+                  ) : (
+                    <ProductoRow
+                      key={p.codigo}
+                      producto={p}
+                      qty={qtyMap[p.codigo] || 0}
+                      onAdd={onAdd}
+                      onQtyChange={onQtyChange}
+                    />
+                  )
+                );
+
+                // Inyectar banner después de cada N productos (dentro de la categoría)
+                if (idx > 0 && (idx + 1) % bannerInterval === 0 && idx < visibleInCat.length - 1) {
+                  const banner = banners[bannerIndex % banners.length];
+                  bannerIndex++;
+                  elements.push(
+                    <div key={`banner-${p.codigo}`} className="grid-banner-row">
+                      <AdBanner {...banner} />
+                    </div>
+                  );
+                }
+
+                return elements;
+              })}
+            </div>
+          </section>
+        );
+      })}
+
+      {visibleCount < productos.length && (
+        <div className="load-more-wrap" style={{ textAlign: "center", marginTop: "20px" }}>
           <button className="btn-load-more" onClick={handleLoadMore}>
-            VER MÁS PRODUCTOS &#8595;
+            CARGAR MÁS PRODUCTOS ↓
           </button>
         </div>
       )}
-    </>
+    </div>
   );
 }
