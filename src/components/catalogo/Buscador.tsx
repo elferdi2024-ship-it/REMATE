@@ -70,6 +70,7 @@ export default function Buscador({
 
       recognitionRef.current = recognition;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync external value

@@ -80,9 +80,15 @@ export function usePedidosCloud(): UsePedidosCloudReturn {
             ? localStorage.getItem("elremate_alias") || ""
             : "") ||
           "Cliente",
+        clienteTelefono:
+          (typeof window !== "undefined"
+            ? localStorage.getItem("elremate_tel") || ""
+            : "") ||
+          "",
         items: pedidoItems,
         total,
         notas,
+        status: "no_leido",
       });
 
       // 2. If authenticated, also save to user's private orders
