@@ -75,7 +75,7 @@ function getCatBadgeColors(cat: string): { bg: string; color: string } {
 function highlightText(text: string, searchTerm: string | undefined): React.ReactNode {
   if (!searchTerm || !searchTerm.trim()) return text;
   const regex = new RegExp(
-    `(${searchTerm.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+    `(${searchTerm.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")})`,
     "gi"
   );
   const parts = text.split(regex);
@@ -138,9 +138,38 @@ export default function ProductoCard({
     >
       {/* Thumbnail */}
       <div className="card-thumb">
-        <span role="img" aria-hidden="true" style={{ fontSize: "1.9rem" }}>
+        <span role="img" aria-hidden="true" style={{ fontSize: "4rem" }}>
           {emoji}
         </span>
+        
+        {/* Floating Action */}
+        <div className="card-floating-action">
+          {isInCart ? (
+            <div className="float-qty-ctrl">
+              <button
+                className="float-qty-btn minus"
+                onClick={handleDec}
+                aria-label="Reducir cantidad"
+              >
+                &#8722;
+              </button>
+              <span className="float-qty-val">{qty}</span>
+              <button
+                className="float-qty-btn plus"
+                onClick={handleInc}
+                aria-label="Aumentar cantidad"
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <button className="btn-float-add" onClick={handleAdd} aria-label={`Agregar ${producto.nombre}`}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Body */}
@@ -163,32 +192,10 @@ export default function ProductoCard({
 
         {/* Label secundario — 11px, --muted (ratio 7:1) */}
         <div className="card-price-label">precio por unidad</div>
-
-        {/* Actions */}
-        <div className="card-actions">
-          {isInCart ? (
-            <div className="qty-ctrl">
-              <button
-                className="qty-btn"
-                onClick={handleDec}
-                aria-label="Reducir cantidad"
-              >
-                &#8722;
-              </button>
-              <span className="qty-val">{qty}</span>
-              <button
-                className="qty-btn"
-                onClick={handleInc}
-                aria-label="Aumentar cantidad"
-                style={{ background: "var(--verde)", color: "#fff", border: "none" }}
-              >
-                +
-              </button>
-            </div>
-          ) : (
-            <button className="btn-add" onClick={handleAdd}>
-              + Agregar
-            </button>
+      </div>
+    </div>
+  );
+}ton>
           )}
         </div>
       </div>

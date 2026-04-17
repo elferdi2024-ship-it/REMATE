@@ -556,12 +556,12 @@ html.dark-mode body { background: var(--bg); }
   gap: 5px;
   padding: 6px 14px;
   border-radius: var(--r-sm);
-  font-size: var(--text-sm);  /* era 0.74rem sin referencia — ahora 13px fijo */
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   border: 1.5px solid transparent;
   background: var(--bg2);
-  color: var(--muted);   /* era text2 = #3A3330 sobre crema OK, pero muted es mejor para inactivo */
+  color: var(--muted);
   transition: all 0.13s;
   white-space: nowrap;
   user-select: none;
@@ -576,9 +576,70 @@ html.dark-mode body { background: var(--bg); }
 
 .cat-pill.active {
   background: var(--oscuro);
-  color: var(--on-dark-hi);  /* era #fff — ahora usa token */
+  color: var(--on-dark-hi);
   border-color: rgba(232,48,42,0.35);
   box-shadow: 0 2px 8px rgba(17,11,8,0.20);
+}
+
+/* ── Categorías Circulares ── */
+.cats-inner-circular {
+  display: inline-flex;
+  gap: 16px;
+  padding: 12px 4px 16px;
+}
+
+.cat-circle-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 72px; 
+}
+
+.cat-circle-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--bg2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.cat-circle-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.2;
+  transition: color 0.2s ease;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cat-circle-btn:hover .cat-circle-icon {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: var(--white);
+}
+
+.cat-circle-btn.active .cat-circle-icon {
+  border-color: var(--rojo);
+  background: var(--rojo-pale);
+}
+
+.cat-circle-btn.active .cat-circle-label {
+  color: var(--rojo-dark);
+  font-weight: 700;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -675,14 +736,13 @@ html.dark-mode body { background: var(--bg); }
 .card.popped { animation: cardPop 0.22s ease-out; }
 
 .card-thumb {
-  background: var(--bg2);
-  height: 120px; /* Aumentado para más espacio a la imagen/emoji */
+  background: var(--white);
+  height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem; /* Emoji más grande */
-  flex-shrink: 0;
   position: relative;
+  border-bottom: 1px solid var(--border);
 }
 
 .card.in-cart .card-thumb::after {
@@ -697,8 +757,78 @@ html.dark-mode body { background: var(--bg); }
   display: flex; align-items: center; justify-content: center;
 }
 
+.card-floating-action {
+  position: absolute;
+  bottom: -20px;
+  right: 12px;
+  z-index: 10;
+}
+
+.btn-float-add {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--rojo);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+.btn-float-add:hover {
+  background: var(--rojo);
+  color: var(--white);
+  border-color: var(--rojo);
+  transform: scale(1.05);
+}
+
+.float-qty-ctrl {
+  height: 44px;
+  background: var(--white);
+  border-radius: 22px;
+  border: 1.5px solid var(--rojo);
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+  min-width: 100px;
+}
+
+.float-qty-btn {
+  width: 34px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.float-qty-btn.minus { color: var(--muted); }
+.float-qty-btn.plus { color: var(--white); background: var(--rojo); }
+.float-qty-btn.plus:hover { background: var(--rojo-dark); }
+.float-qty-btn.minus:hover { background: var(--bg2); }
+
+.float-qty-val {
+  flex: 1;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--texto);
+  min-width: 32px;
+}
+
 .card-body {
-  padding: 16px 14px 18px; /* Más aire dentro de la tarjeta */
+  padding: 24px 14px 18px; 
+  background: var(--bg);
   flex: 1;
   display: flex;
   flex-direction: column;

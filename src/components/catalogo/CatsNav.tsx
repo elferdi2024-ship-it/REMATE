@@ -11,20 +11,21 @@ interface CatsNavProps {
 
 export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProps) {
   return (
-    <nav className="sticky-nav" aria-label="Categor\u00edas de productos">
+    <nav className="sticky-nav" aria-label="Categorías de productos">
       <div className="cats-wrap">
-        <div className="cats-inner">
+        <div className="cats-inner-circular">
           {categorias.map((cat) => {
-            const emoji = EMOJI_POR_CATEGORIA[cat] || "\ud83d\udce6";
+            const emoji = EMOJI_POR_CATEGORIA[cat] || "📦";
             const isActive = cat === activeCat;
             return (
               <button
                 key={cat}
-                className={`cat-pill${isActive ? " active" : ""}`}
+                className={`cat-circle-btn${isActive ? " active" : ""}`}
                 onClick={() => onSelect(cat)}
                 aria-pressed={isActive}
               >
-                {emoji} {cat}
+                <div className="cat-circle-icon">{emoji}</div>
+                <span className="cat-circle-label">{cat}</span>
               </button>
             );
           })}
