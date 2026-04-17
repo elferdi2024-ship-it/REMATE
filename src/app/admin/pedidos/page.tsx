@@ -23,10 +23,12 @@ export default function PedidosPage() {
       id: d.id,
       uid: d.uid ?? null,
       clienteNombre: d.clienteNombre ?? "Cliente",
+      clienteTelefono: d.clienteTelefono ?? "",
       fecha: d.fecha?.toDate?.() ?? new Date(),
       items: d.items ?? [],
       total: d.total ?? 0,
       notas: d.notas ?? "",
+      status: d.status ?? "no_leido",
     }));
     // Sort descending by date
     mapped.sort((a, b) => {

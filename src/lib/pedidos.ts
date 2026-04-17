@@ -28,9 +28,11 @@ export interface PedidoItem {
 export interface PedidoGlobal {
   uid: string | null;
   clienteNombre: string;
+  clienteTelefono?: string;
   items: PedidoItem[];
   total: number;
   notas?: string;
+  status: "no_leido" | "pendiente" | "cargado";
 }
 
 export interface PedidoUsuario {
@@ -64,12 +66,25 @@ export async function guardarPedidoGlobal(
   const docRef = await addDoc(ref, {
     uid: pedido.uid ?? null,
     clienteNombre: pedido.clienteNombre,
+    clienteTelefono: pedido.clienteTelefono ?? "",
     items: pedido.items,
     total: pedido.total,
     notas: pedido.notas ?? "",
+    status: pedido.status || "no_leido",
     fecha: Timestamp.now(),
   });
   return docRef.id;
+}
+
+/**
+ * Update the status of an order.
+ */
+export async function actualizarEstadoPedido(
+  id: string,
+  status: "no_leido" | "pendiente" | "cargado"
+): Promise<void> {
+  const ref = doc(db, "pedidos_globales", id);
+  await updateDoc(ref, { status });
 }
 
 // ── Pedido Usuario (private, per-user) ─────────────────────────────────

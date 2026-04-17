@@ -148,6 +148,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [vista, setVista] = useState<Vista>(() => ls.getVista());
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [alias, setAlias] = useState(() => ls.getAlias());
+  const [telefono, setTelefono] = useState(() => ls.getTelefono());
   const [clientNotes, setClientNotes] = useState("");
   const [sharedCart, setSharedCart] = useState<CartItem[] | null>(null);
   const [shareLink, setShareLink] = useState<string | null>(null);
@@ -268,11 +269,18 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     ls.setAlias(a);
   }, []);
 
+  const handleSaveTelefono = useCallback((t: string) => {
+    setTelefono(t);
+    ls.setTelefono(t);
+  }, []);
+
   const handleClearData = useCallback(() => {
     ls.setAlias("");
+    ls.setTelefono("");
     ls.setHistory([]);
     ls.setBusquedas([]);
     setAlias("");
+    setTelefono("");
     toast.info("Datos locales limpiados");
   }, [toast]);
 
@@ -330,7 +338,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     setConfirmModalOpen(false);
 
     const nombre = alias || "Cliente";
-    const mensaje = armarMensajeWA(nombre, cartItems, clientNotes);
+    const tel = telefono || "No proporcionado";
+    const mensaje = armarMensajeWA(nombre, tel, cartItems, clientNotes);
     const waNumber = process.env.NEXT_PUBLIC_WA_NUMBER || "";
     enviarWhatsApp(waNumber, mensaje);
 
@@ -345,9 +354,11 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     guardarPedidoGlobal({
       uid: user?.uid ?? null,
       clienteNombre: nombre,
+      clienteTelefono: tel,
       items: pedidoItems,
       total,
       notas: clientNotes || undefined,
+      status: "no_leido",
     }).catch((err) => console.warn("Failed to save pedido global:", err));
 
     const codigos = cartItems.map((i) => i.codigo);
@@ -359,7 +370,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     clearCart();
 
     toast.success("\u00a1Listo! Te esperamos pronto. \ud83d\ude4c");
-  }, [alias, cartItems, clientNotes, total, user, clearCart, saveLocalPedido, toast]);
+  }, [alias, telefono, cartItems, clientNotes, total, user, clearCart, saveLocalPedido, toast]);
 
   const handleLoadSharedCart = useCallback(() => {
     if (sharedCart) {
@@ -532,6 +543,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onSendWA={handleSendWA}
         alias={alias}
         onAliasChange={handleSaveAlias}
+        telefono={telefono}
+        onTelefonoChange={handleSaveTelefono}
         onShare={handleShareCart}
         onClear={() => {
           clearCart();

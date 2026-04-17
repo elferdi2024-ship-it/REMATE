@@ -18,6 +18,8 @@ interface CartPanelProps {
   onClear: () => void;
   shareLink: string | null;
   onCopyShareLink: () => void;
+  telefono: string;
+  onTelefonoChange: (tel: string) => void;
   clientNotes?: string;
   onClientNotesChange?: (notes: string) => void;
   onSaveLista?: () => void;
@@ -37,6 +39,8 @@ export default function CartPanel({
   onClear,
   shareLink,
   onCopyShareLink,
+  telefono,
+  onTelefonoChange,
   clientNotes,
   onClientNotesChange,
   onSaveLista,
@@ -96,6 +100,8 @@ export default function CartPanel({
             onClear={onClear}
             shareLink={shareLink}
             onCopyShareLink={onCopyShareLink}
+            telefono={telefono}
+            onTelefonoChange={onTelefonoChange}
             clientNotes={clientNotes}
             onClientNotesChange={onClientNotesChange}
             onSaveLista={onSaveLista}

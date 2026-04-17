@@ -11,32 +11,41 @@ interface CartItem {
  */
 export function armarMensajeWA(
   nombre: string,
+  telefono: string,
   items: CartItem[],
   notas?: string
 ): string {
   const displayName = nombre.trim() || "Cliente";
+  const displayTel = telefono.trim() || "No proporcionado";
   const lines: string[] = [];
 
-  // Header
-  lines.push(`*Pedido — ${displayName}*`);
+  // Header - Cliente
+  lines.push(`*INFORMACIÓN DEL CLIENTE*`);
+  lines.push(`👤 Nombre: ${displayName}`);
+  lines.push(`📱 Teléfono: ${displayTel}`);
   lines.push("");
+
+  // Header - Pedido
+  lines.push(`*DETALLE DEL PEDIDO*`);
+  lines.push(`_Concepto | Unidades | Código_`);
+  lines.push(`----------------------------------`);
 
   // Items
   for (const item of items) {
-    lines.push(
-      `• ${item.cantidad}x ${item.nombre} (Cód: ${item.codigo}) — $${(item.precio * item.cantidad).toLocaleString("es-UY")}`
-    );
+    // Limit name length for table view
+    const shortName = item.nombre.length > 20 ? item.nombre.substring(0, 18) + ".." : item.nombre;
+    lines.push(`${shortName} | *${item.cantidad}* | ${item.codigo}`);
   }
 
-  lines.push("");
+  lines.push(`----------------------------------`);
   lines.push(
-    `*TOTAL: $${items.reduce((sum, i) => sum + i.precio * i.cantidad, 0).toLocaleString("es-UY")}*`
+    `*TOTAL ESTIMADO: $${items.reduce((sum, i) => sum + i.precio * i.cantidad, 0).toLocaleString("es-UY")}*`
   );
 
   // Notes
   if (notas?.trim()) {
     lines.push("");
-    lines.push(`Notas: ${notas.trim()}`);
+    lines.push(`*Notas:* ${notas.trim()}`);
   }
 
   return lines.join("\n");

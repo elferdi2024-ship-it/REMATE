@@ -1,5 +1,6 @@
 // localStorage helpers con tipos seguros
 const LS_ALIAS = "elremate_alias";
+const LS_TEL = "elremate_tel";
 const LS_HISTORY = "elremate_history";
 const LS_VISTA = "elremate_vista";
 const LS_BUSQUEDAS = "elremate_busquedas";
@@ -12,6 +13,16 @@ export function getAlias(): string {
 export function setAlias(v: string): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(LS_ALIAS, v);
+}
+
+export function getTelefono(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(LS_TEL) || "";
+}
+
+export function setTelefono(v: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(LS_TEL, v);
 }
 
 export function getHistory(): any[] {

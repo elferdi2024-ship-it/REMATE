@@ -9,6 +9,8 @@ interface CartFooterProps {
   onClear: () => void;
   shareLink: string | null;
   onCopyShareLink: () => void;
+  telefono: string;
+  onTelefonoChange: (tel: string) => void;
   clientNotes?: string;
   onClientNotesChange?: (notes: string) => void;
   onSaveLista?: () => void;
@@ -23,6 +25,8 @@ export default function CartFooter({
   onClear,
   shareLink,
   onCopyShareLink,
+  telefono,
+  onTelefonoChange,
   clientNotes,
   onClientNotesChange,
   onSaveLista,
@@ -62,18 +66,34 @@ export default function CartFooter({
       <div className="cart-order-section">
         <div className="cart-section-title">Completá tu pedido</div>
 
-        <label className="field-label" htmlFor="clientName">
-          👤 Tu nombre o negocio
-        </label>
-        <input
-          id="clientName"
-          type="text"
-          className="field-input"
-          placeholder="Ej: Almacén Don Pepe"
-          value={alias}
-          onChange={(e) => onAliasChange(e.target.value)}
-          style={{ marginBottom: '10px' }}
-        />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+          <div>
+            <label className="field-label" htmlFor="clientName">
+              👤 Nombre / Negocio
+            </label>
+            <input
+              id="clientName"
+              type="text"
+              className="field-input"
+              placeholder="Ej: Don Pepe"
+              value={alias}
+              onChange={(e) => onAliasChange(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="clientTel">
+              📱 Teléfono
+            </label>
+            <input
+              id="clientTel"
+              type="text"
+              className="field-input"
+              placeholder="099..."
+              value={telefono}
+              onChange={(e) => onTelefonoChange(e.target.value)}
+            />
+          </div>
+        </div>
 
         {onClientNotesChange && (
           <>

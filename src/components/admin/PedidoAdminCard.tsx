@@ -1,16 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { PedidoItem } from "@/lib/pedidos";
+import { actualizarEstadoPedido, type PedidoItem } from "@/lib/pedidos";
 
 export interface PedidoAdmin {
   id: string;
   uid: string | null;
   clienteNombre: string;
+  clienteTelefono?: string;
   fecha: { seconds: number; nanoseconds: number } | Date;
   items: PedidoItem[];
   total: number;
   notas?: string;
+  status?: "no_leido" | "pendiente" | "cargado";
 }
 
 interface PedidoAdminCardProps {
@@ -31,6 +33,8 @@ function isNew(ts: { seconds: number; nanoseconds: number } | Date): boolean {
 export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardProps) {
   const [isViewingFull, setIsViewingFull] = useState(false);
   const [isFresh, setIsFresh] = useState(isNew(pedido.fecha));
+  const [status, setStatus] = useState(pedido.status || "no_leido");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -38,6 +42,18 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
     }, 30000);
     return () => clearInterval(interval);
   }, [pedido.fecha]);
+
+  const handleStatusChange = async (newStatus: "no_leido" | "pendiente" | "cargado") => {
+    try {
+      setIsUpdating(true);
+      await actualizarEstadoPedido(pedido.id, newStatus);
+      setStatus(newStatus);
+    } catch (err) {
+      console.error("Error updating status:", err);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const previewItems = pedido.items.slice(0, 3);
   const remaining = pedido.items.length - 3;
@@ -49,6 +65,12 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
       minimumFractionDigits: 0,
     });
   }
+
+  const statusColors = {
+    no_leido: "bg-red-500/20 text-red-400 border-red-500/30",
+    pendiente: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    cargado: "bg-green-500/20 text-green-400 border-green-500/30",
+  };
 
   return (
     <div
@@ -73,18 +95,43 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
             {formatDate(pedido.fecha)}
           </div>
           <div>
-            <h3 className="text-lg font-bold uppercase tracking-wide text-white">
-              {pedido.clienteNombre}
-            </h3>
-            <p className="text-xs font-semibold text-gray-500">
-              {pedido.items.length} ARTÍCULOS
-            </p>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold uppercase tracking-wide text-white">
+                {pedido.clienteNombre}
+              </h3>
+              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-black uppercase tracking-tighter ${statusColors[status]}`}>
+                {status.replace("_", " ")}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <p className="text-xs font-semibold text-[#00E5FF]">
+                {pedido.items.length} ARTÍCULOS
+              </p>
+              {pedido.clienteTelefono && (
+                <p className="text-xs font-medium text-gray-500">
+                  📞 {pedido.clienteTelefono}
+                </p>
+              )}
+            </div>
           </div>
         </div>
-        <div className="text-right">
-          <p className="font-bebas text-3xl tracking-wide text-white">
+
+        <div className="flex flex-col items-end gap-2">
+          <p className="font-bebas text-3xl tracking-wide text-white leading-none">
             {formatCurrency(pedido.total)}
           </p>
+          <div className="flex gap-1">
+            <select
+              value={status}
+              disabled={isUpdating}
+              onChange={(e) => handleStatusChange(e.target.value as any)}
+              className="rounded-lg bg-white/5 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-none focus:ring-1 focus:ring-[#00E5FF] cursor-pointer outline-none transition-all hover:bg-white/10"
+            >
+              <option value="no_leido">🔴 No leído</option>
+              <option value="pendiente">🟡 Pendiente</option>
+              <option value="cargado">🟢 Cargado</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -127,9 +174,9 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  <th className="pb-3 pr-4 font-medium">Producto</th>
-                  <th className="pb-3 text-right font-medium">Cant.</th>
-                  <th className="pb-3 text-right font-medium">Subtotal</th>
+                  <th className="pb-3 pr-4 font-medium">Concepto</th>
+                  <th className="pb-3 text-center font-medium">Unidades</th>
+                  <th className="pb-3 text-right font-medium">Código</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -138,11 +185,11 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
                     <td className="py-3 pr-4 font-medium text-gray-300 group-hover:text-white">
                       {item.nombre}
                     </td>
-                    <td className="py-3 text-right font-bold text-[#00E5FF]">
+                    <td className="py-3 text-center font-bold text-[#00E5FF]">
                       {item.cantidad}
                     </td>
-                    <td className="py-3 text-right font-mono font-medium text-gray-400">
-                      {formatCurrency(item.cantidad * item.precioUnitario)}
+                    <td className="py-3 text-right font-mono text-xs font-medium text-gray-500">
+                      {item.codigo}
                     </td>
                   </tr>
                 ))}
