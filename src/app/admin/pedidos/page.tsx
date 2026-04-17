@@ -122,21 +122,29 @@ export default function PedidosPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-[#0A0F1C] p-6 shadow-xl transition-all hover:border-white/10 group">
-          <div className="absolute -right-4 -top-4 text-6xl opacity-5 group-hover:scale-110 transition-transform">📦</div>
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Total Pedidos</p>
-          <p className="mt-2 font-bebas text-4xl text-white">{counts.todos}</p>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="relative overflow-hidden rounded-[24px] border border-white/5 bg-white/5 p-5 transition-all hover:border-white/20 group">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Pedidos Hoy</p>
+          <p className="mt-1 font-bebas text-3xl text-white">{counts.todos}</p>
+          <div className="absolute -right-2 -top-2 text-3xl opacity-5 group-hover:scale-110 transition-transform">📋</div>
         </div>
-        <div className="relative overflow-hidden rounded-2xl border border-[#00E5FF]/20 bg-gradient-to-br from-[#00E5FF]/10 to-transparent p-6 shadow-[0_0_30px_rgba(0,229,255,0.05)]">
-          <div className="absolute -right-4 -top-4 text-6xl opacity-5">💰</div>
-          <p className="text-xs font-bold uppercase tracking-wider text-[#00E5FF]">Ingresos Hoy</p>
-          <p className="mt-2 font-bebas text-4xl text-white">{formatCurrency(totalGeneral)}</p>
+
+        <div className="relative overflow-hidden rounded-[24px] border border-[#00E5FF]/20 bg-gradient-to-br from-[#00E5FF]/10 to-transparent p-5">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00E5FF]">Ingresos Hoy</p>
+          <p className="mt-1 font-bebas text-3xl text-white">{formatCurrency(totalGeneral)}</p>
+          <div className="absolute -right-2 -top-2 text-3xl opacity-10">💰</div>
         </div>
-        <div className="relative col-span-2 overflow-hidden rounded-2xl border border-white/5 bg-[#0A0F1C] p-6 shadow-xl md:col-span-1 group">
-          <div className="absolute -right-4 -top-4 text-6xl opacity-5 group-hover:scale-110 transition-transform">🛒</div>
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Artículos Vendidos</p>
-          <p className="mt-2 font-bebas text-4xl text-white">{totalItems}</p>
+
+        <div className="relative overflow-hidden rounded-[24px] border border-white/5 bg-white/5 p-5 transition-all hover:border-red-500/30 group">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">No Leídos</p>
+          <p className="mt-1 font-bebas text-3xl text-red-400">{counts.no_leido}</p>
+          <div className="absolute -right-2 -top-2 text-3xl opacity-10">🔴</div>
+        </div>
+
+        <div className="relative overflow-hidden rounded-[24px] border border-white/5 bg-white/5 p-5 transition-all hover:border-yellow-500/30 group">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-500">Pendientes</p>
+          <p className="mt-1 font-bebas text-3xl text-yellow-400">{counts.pendiente}</p>
+          <div className="absolute -right-2 -top-2 text-3xl opacity-10">🟡</div>
         </div>
       </div>
 
