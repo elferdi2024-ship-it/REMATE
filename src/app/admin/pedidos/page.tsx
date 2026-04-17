@@ -17,28 +17,47 @@ function formatHeaderDate(): string {
 export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<PedidoAdmin[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("todos");
+
+  const playNotification = useCallback(() => {
+    try {
+      const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+      audio.volume = 0.5;
+      audio.play().catch(() => {}); // Autoplay might be blocked
+    } catch (e) {}
+  }, []);
 
   const handleUpdate = useCallback((docs: any[]) => {
-    const mapped: PedidoAdmin[] = docs.map((d) => ({
-      id: d.id,
-      uid: d.uid ?? null,
-      clienteNombre: d.clienteNombre ?? "Cliente",
-      clienteTelefono: d.clienteTelefono ?? "",
-      fecha: d.fecha?.toDate?.() ?? new Date(),
-      items: d.items ?? [],
-      total: d.total ?? 0,
-      notas: d.notas ?? "",
-      status: d.status ?? "no_leido",
-    }));
-    // Sort descending by date
-    mapped.sort((a, b) => {
-      const ta = a.fecha instanceof Date ? a.fecha.getTime() : a.fecha.seconds * 1000;
-      const tb = b.fecha instanceof Date ? b.fecha.getTime() : b.fecha.seconds * 1000;
-      return tb - ta;
+    setPedidos((prev) => {
+      const mapped: PedidoAdmin[] = docs.map((d) => ({
+        id: d.id,
+        uid: d.uid ?? null,
+        clienteNombre: d.clienteNombre ?? "Cliente",
+        clienteTelefono: d.clienteTelefono ?? "",
+        fecha: d.fecha?.toDate?.() ?? new Date(),
+        items: d.items ?? [],
+        total: d.total ?? 0,
+        notas: d.notas ?? "",
+        status: d.status ?? "no_leido",
+      }));
+
+      // Sort descending by date
+      mapped.sort((a, b) => {
+        const ta = a.fecha instanceof Date ? a.fecha.getTime() : a.fecha.seconds * 1000;
+        const tb = b.fecha instanceof Date ? b.fecha.getTime() : b.fecha.seconds * 1000;
+        return tb - ta;
+      });
+
+      // If we have more orders than before, play sound
+      if (prev.length > 0 && mapped.length > prev.length) {
+        playNotification();
+      }
+
+      return mapped;
     });
-    setPedidos(mapped);
     setError(null);
-  }, []);
+  }, [playNotification]);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
@@ -52,8 +71,16 @@ export default function PedidosPage() {
     };
   }, [handleUpdate]);
 
-  const totalGeneral = pedidos.reduce((sum, p) => sum + (p.total || 0), 0);
-  const totalItems = pedidos.reduce((sum, p) => sum + p.items.reduce((acc, i) => acc + i.cantidad, 0), 0);
+  const filteredPedidos = pedidos.filter((p) => {
+    const matchesSearch =
+      p.clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.clienteTelefono?.includes(searchTerm);
+    const matchesStatus = statusFilter === "todos" || p.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const totalGeneral = filteredPedidos.reduce((sum, p) => sum + (p.total || 0), 0);
+  const totalItems = filteredPedidos.reduce((sum, p) => sum + p.items.reduce((acc, i) => acc + i.cantidad, 0), 0);
 
   function formatCurrency(value: number): string {
     return value.toLocaleString("es-UY", {
@@ -63,33 +90,83 @@ export default function PedidosPage() {
     });
   }
 
+  const counts = {
+    todos: pedidos.length,
+    no_leido: pedidos.filter((p) => p.status === "no_leido").length,
+    pendiente: pedidos.filter((p) => p.status === "pendiente").length,
+    cargado: pedidos.filter((p) => p.status === "cargado").length,
+  };
+
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+      <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
         <div>
           <h1 className="font-bebas text-4xl tracking-wide text-white md:text-5xl">
             PEDIDOS DE <span className="text-[#00E5FF]">HOY</span>
           </h1>
-          <p className="text-gray-400 mt-2 font-medium">{formatHeaderDate()}</p>
+          <p className="text-gray-400 mt-1 font-medium">{formatHeaderDate()}</p>
+        </div>
+
+        <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
+          {/* Search Bar */}
+          <div className="relative flex-1 md:w-64">
+            <input
+              type="text"
+              placeholder="Buscar por cliente o tel..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-gray-500 focus:border-[#00E5FF]/50 focus:outline-none focus:ring-1 focus:ring-[#00E5FF]/50"
+            />
+          </div>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-[#0A0F1C] to-[#0A0F1C]/50 p-6 shadow-xl">
-          <div className="absolute -right-4 -top-4 text-6xl opacity-5">📦</div>
-          <p className="text-sm font-semibold text-gray-400">Total Pedidos</p>
-          <p className="mt-2 font-bebas text-4xl text-white">{pedidos.length}</p>
+        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-[#0A0F1C] p-6 shadow-xl transition-all hover:border-white/10 group">
+          <div className="absolute -right-4 -top-4 text-6xl opacity-5 group-hover:scale-110 transition-transform">📦</div>
+          <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Total Pedidos</p>
+          <p className="mt-2 font-bebas text-4xl text-white">{counts.todos}</p>
         </div>
-        <div className="relative overflow-hidden rounded-2xl border border-[#00E5FF]/20 bg-gradient-to-br from-[#00E5FF]/10 to-[#0A0F1C] p-6 shadow-[0_0_30px_rgba(0,229,255,0.05)]">
+        <div className="relative overflow-hidden rounded-2xl border border-[#00E5FF]/20 bg-gradient-to-br from-[#00E5FF]/10 to-transparent p-6 shadow-[0_0_30px_rgba(0,229,255,0.05)]">
           <div className="absolute -right-4 -top-4 text-6xl opacity-5">💰</div>
-          <p className="text-sm font-semibold text-[#00E5FF]">Ingresos Hoy</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-[#00E5FF]">Ingresos Hoy</p>
           <p className="mt-2 font-bebas text-4xl text-white">{formatCurrency(totalGeneral)}</p>
         </div>
-        <div className="relative col-span-2 overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-[#0A0F1C] to-[#0A0F1C]/50 p-6 shadow-xl md:col-span-1">
-          <div className="absolute -right-4 -top-4 text-6xl opacity-5">🛒</div>
-          <p className="text-sm font-semibold text-gray-400">Artículos Vendidos</p>
+        <div className="relative col-span-2 overflow-hidden rounded-2xl border border-white/5 bg-[#0A0F1C] p-6 shadow-xl md:col-span-1 group">
+          <div className="absolute -right-4 -top-4 text-6xl opacity-5 group-hover:scale-110 transition-transform">🛒</div>
+          <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Artículos Vendidos</p>
           <p className="mt-2 font-bebas text-4xl text-white">{totalItems}</p>
+        </div>
+      </div>
+
+      {/* Filter Badges */}
+      <div className="sticky top-0 z-20 -mx-4 overflow-x-auto bg-[#050914]/80 px-4 py-4 backdrop-blur-md md:static md:mx-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+        <div className="flex flex-nowrap gap-2 md:flex-wrap">
+          {[
+            { id: "todos", label: "Todos", count: counts.todos, color: "gray" },
+            { id: "no_leido", label: "No leídos", count: counts.no_leido, color: "red" },
+            { id: "pendiente", label: "Pendientes", count: counts.pendiente, color: "yellow" },
+            { id: "cargado", label: "Cargados", count: counts.cargado, color: "green" },
+          ].map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setStatusFilter(f.id)}
+              className={`flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all ${
+                statusFilter === f.id
+                  ? f.color === "red" ? "border-red-500 bg-red-500 text-white" :
+                    f.color === "yellow" ? "border-yellow-500 bg-yellow-500 text-black" :
+                    f.color === "green" ? "border-green-500 bg-green-500 text-white" :
+                    "border-[#00E5FF] bg-[#00E5FF] text-black shadow-[0_0_15px_rgba(0,229,255,0.3)]"
+                  : "border-white/10 bg-white/5 text-gray-500 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              {f.label}
+              <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-lg bg-black/20 px-1.5 text-[10px]`}>
+                {f.count}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -99,16 +176,16 @@ export default function PedidosPage() {
         </div>
       )}
 
-      {!error && pedidos.length === 0 && (
+      {!error && filteredPedidos.length === 0 && (
         <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-dashed border-white/10 bg-[#0A0F1C]/30 text-center">
-          <span className="mb-4 text-5xl opacity-50">💤</span>
-          <h3 className="font-bebas text-2xl text-gray-400">Sin Movimiento</h3>
-          <p className="mt-2 text-sm text-gray-500">Esperando que ingresen nuevos pedidos...</p>
+          <span className="mb-4 text-5xl opacity-50">🔍</span>
+          <h3 className="font-bebas text-2xl text-gray-400">Sin resultados</h3>
+          <p className="mt-2 text-sm text-gray-500">Prueba ajustando los filtros o la búsqueda.</p>
         </div>
       )}
 
-      <div className="grid gap-6">
-        {pedidos.map((pedido) => (
+      <div className="grid gap-6 xl:grid-cols-2">
+        {filteredPedidos.map((pedido) => (
           <PedidoAdminCard key={pedido.id} pedido={pedido} onViewFull={() => {}} />
         ))}
       </div>
