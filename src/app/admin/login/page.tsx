@@ -23,10 +23,10 @@ export default function AdminLoginPage() {
       if (!user) return;
       try {
         const snap = await getDoc(doc(db, "usuarios", user.uid));
-        console.log("DEBUG ADMIN LOGIN:", {
-          uid: user.uid,
-          exists: snap.exists(),
-          data: snap.exists() ? snap.data() : null
+        console.log("DEBUG DATA DE FIRESTORE:", {
+          buscando_uid: user.uid,
+          documento_existe: snap.exists(),
+          data_recibida: snap.exists() ? snap.data() : "DOCUMENTO NO ENCONTRADO"
         });
         if (snap.exists() && snap.data().role === "admin") {
           router.replace("/admin/pedidos");
