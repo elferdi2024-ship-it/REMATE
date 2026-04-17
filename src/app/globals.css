@@ -90,50 +90,33 @@
   --green-dark: var(--verde-dark);
 
   /* ── Backgrounds ── */
-  --bg:  var(--crema);
-  --bg2: var(--crema-2);
-  --bg3: var(--crema-3);
+  --bg:  #f8fafc; /* Fondo claro optimizado */
+  --bg2: #f1f5f9;
+  --bg3: #e2e8f0;
 
   /* ── Text aliases ── */
   --text:  var(--texto);
   --text2: var(--tierra);
 
-  /* ── Colores por Categoría — 17 semánticos ── */
-  --cat-aceites:  #92400E;
-  --cat-bebidas:  #1D4ED8;
-  --cat-cafe:     #5C3317;
-  --cat-cereales: #C26A00;
-  --cat-congelados:#0369A1;
-  --cat-pescado:  #0F766E;
-  --cat-descart:  #4B5563;
-  --cat-especias: #065F46;
-  --cat-fiambres: #991B1B;
-  --cat-golosinas:#6D28D9;
-  --cat-harinas:  #78350F;
-  --cat-higiene:  #0369A1;
-  --cat-lacteos:  #9A3412;
-  --cat-limpieza: #0E7490;
-  --cat-mermeladas:#9D174D;
-  --cat-otros:    #374151;
-  --cat-panaderia:#2A6B3E;
-  --cat-papel:    #374151;
+  /* ── Sombras Premium ── */
+  --shadow-premium: 0 10px 25px -5px rgba(0,0,0,0.04), 0 8px 10px -6px rgba(0,0,0,0.04);
 }
 
 /* ── DARK MODE automático ── */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg:    #0D0B09;
-    --bg2:   #171310;
-    --bg3:   #252018;
-    --white: #1E1A14;
+    --bg:    #0f172a;
+    --bg2:   #1e293b;
+    --bg3:   #334155;
+    --white: #1e293b;
 
-    --texto:    #F0EBE3;
-    --tierra:   #D4CEC6;
-    --muted:    #A89E94;
-    --faint:    #7A7068;
+    --texto:    #f8fafc;
+    --tierra:   #e2e8f0;
+    --muted:    #94a3b8;
+    --faint:    #64748b;
 
-    --border:   #3A342C;
-    --border-2: #4E4538;
+    --border:   #334155;
+    --border-2: #475569;
     --border2:  var(--border-2);
 
     --text:  var(--texto);
@@ -282,8 +265,9 @@ html.dark-mode body { background: var(--bg); }
 
 .hero-descriptor {
   display: flex;
+  gap: 16px;
   align-items: flex-start;
-  gap: 12px;
+  max-width: 600px;
   margin-bottom: 20px;
 }
 
@@ -325,7 +309,7 @@ html.dark-mode body { background: var(--bg); }
 
 .hero-stat-val {
   font-family: var(--font-display), sans-serif;
-  font-size: 1.5rem;
+  font-size: var(--text-xl);
   color: var(--rojo);
   letter-spacing: 1px;
   line-height: 1;

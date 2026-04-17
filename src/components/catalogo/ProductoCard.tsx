@@ -45,6 +45,7 @@ function getCatBadgeColors(cat: string): { bg: string; color: string } {
     "Café, Té y Yerba":              { bg: "#FEF3C7", color: "#5C3317" },
     "Cereales y Granola":            { bg: "#FEF3C7", color: "#C26A00" },
     "Congelados":                     { bg: "#E0F2FE", color: "#0369A1" },
+    "Conservas de Pescado":          { bg: "#CCFBF1", color: "#0F766E" },
     "Conservas y Enlatados":         { bg: "#CCFBF1", color: "#0F766E" },
     "Descartables y Embalaje":       { bg: "#F3F4F6", color: "#4B5563" },
     "Especias y Condimentos":        { bg: "#D1FAE5", color: "#065F46" },
@@ -88,12 +89,6 @@ export default function ProductoCard({
   const handleAdd = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     onAdd(producto);
-    const el = cardRef.current;
-    if (el) {
-      el.classList.remove("popped");
-      void el.offsetWidth;
-      el.classList.add("popped");
-    }
   }, [onAdd, producto]);
 
   const handleDec = useCallback((e: React.MouseEvent) => {
@@ -107,30 +102,72 @@ export default function ProductoCard({
   }, [onQtyChange, producto.codigo, qty]);
 
   const emoji = EMOJI_POR_CATEGORIA[producto.categoria] || "📦";
-  const catColor = getCatColorVar(producto.categoria);
   const { bg: badgeBg, color: badgeColor } = getCatBadgeColors(producto.categoria);
 
   return (
     <div
       ref={cardRef}
-      className={`card${isInCart ? " in-cart" : ""}`}
-      style={{ "--cat-color": catColor } as React.CSSProperties}
+      className={`card${isInCart ? " in-cart" : ""} group`}
+      style={{
+        background: "var(--white)",
+        border: "1px solid var(--border)",
+        borderRadius: "20px",
+        padding: "12px",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+      } as React.CSSProperties}
     >
-      <div className="card-thumb" style={{ background: "white", padding: "20px" }}>
-        <span role="img" aria-hidden="true" style={{ fontSize: "3.5rem", filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.08))" }}>
+      <div className="card-thumb" style={{ 
+        background: "var(--bg2)", 
+        borderRadius: "14px",
+        height: "140px",
+        marginBottom: "12px",
+        border: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative"
+      }}>
+        <span role="img" aria-hidden="true" style={{ 
+          fontSize: "3rem", 
+          transition: "transform 0.5s ease",
+        }} className="group-hover:scale-110">
           {emoji}
         </span>
         
-        <div className="card-floating-action">
+        <div className="card-floating-action" style={{ position: "absolute", bottom: "-14px", right: "8px", zIndex: 10 }}>
           {isInCart ? (
-            <div className="float-qty-ctrl">
-              <button className="float-qty-btn minus" onClick={handleDec}>&#8722;</button>
-              <span className="float-qty-val">{qty}</span>
-              <button className="float-qty-btn plus" onClick={handleInc}>+</button>
+            <div className="float-qty-ctrl" style={{ 
+              display: "flex",
+              alignItems: "center",
+              background: "var(--white)",
+              borderRadius: "22px",
+              height: "44px",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+              border: "1px solid var(--border-2)",
+              padding: "0 4px"
+            }}>
+              <button className="float-qty-btn minus" onClick={handleDec} style={{ padding: "0 10px", fontSize: "1.2rem", fontWeight: "bold" }}>&#8722;</button>
+              <span className="float-qty-val" style={{ fontWeight: 800, minWidth: "24px", textAlign: "center" }}>{qty}</span>
+              <button className="float-qty-btn plus" onClick={handleInc} style={{ padding: "0 10px", fontSize: "1.2rem", fontWeight: "bold" }}>+</button>
             </div>
           ) : (
-            <button className="btn-float-add" onClick={handleAdd}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <button className="btn-float-add" onClick={handleAdd} style={{
+              background: "var(--oscuro)",
+              color: "white",
+              border: "none",
+              borderRadius: "50%",
+              width: "40px",
+              height: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 8px 16px rgba(0,0,0,0.15)",
+              cursor: "pointer"
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 5v14M5 12h14"/>
               </svg>
             </button>
@@ -138,21 +175,50 @@ export default function ProductoCard({
         </div>
       </div>
 
-      <div className="card-body" style={{ padding: "12px 14px 16px" }}>
-        <span className="card-cat-badge" style={{ background: badgeBg, color: badgeColor, fontSize: "10px", fontWeight: 800, textTransform: "uppercase", padding: "2px 8px", borderRadius: "10px", marginBottom: "8px", display: "inline-block" }}>
+      <div className="card-body" style={{ padding: "4px 2px 8px", flex: 1, display: "flex", flexDirection: "column" }}>
+        <span className="card-cat-badge" style={{ 
+          background: badgeBg, 
+          color: badgeColor, 
+          fontSize: "9px", 
+          fontWeight: 800, 
+          textTransform: "uppercase", 
+          padding: "2px 8px", 
+          borderRadius: "6px", 
+          marginBottom: "6px", 
+          display: "inline-block",
+          letterSpacing: "0.5px",
+          width: "fit-content"
+        }}>
           {producto.categoria}
         </span>
 
-        <div className="card-name" style={{ fontSize: "14px", fontWeight: 600, color: "var(--tierra)", lineHeight: "1.3", marginBottom: "8px", height: "2.6em", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+        <h3 className="card-name" style={{ 
+          fontSize: "14px", 
+          fontWeight: 600, 
+          color: "var(--oscuro)", 
+          lineHeight: "1.25", 
+          marginBottom: "10px", 
+          height: "2.5em", 
+          overflow: "hidden", 
+          display: "-webkit-box", 
+          WebkitLineClamp: 2, 
+          WebkitBoxOrient: "vertical" 
+        }}>
           {highlightText(producto.nombre, searchTerm)}
-        </div>
+        </h3>
 
         <div style={{ marginTop: "auto" }}>
-          <div className="card-price" style={{ fontSize: "22px", fontFamily: "var(--font-display)", color: "var(--oscuro)", lineHeight: "1" }}>
+          <div className="card-price" style={{ 
+            fontSize: "20px", 
+            fontWeight: 900,
+            color: "var(--oscuro)", 
+            lineHeight: "1",
+            letterSpacing: "-0.5px"
+          }}>
             {formatPrice(producto.precio)}
           </div>
-          <div style={{ fontSize: "11px", color: "var(--muted)", fontWeight: 500 }}>
-            precio por unidad
+          <div style={{ fontSize: "10px", color: "var(--muted)", fontWeight: 600, textTransform: "uppercase", marginTop: "2px" }}>
+            Unidad IVA Incl.
           </div>
         </div>
       </div>

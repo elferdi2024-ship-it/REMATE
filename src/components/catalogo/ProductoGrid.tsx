@@ -92,13 +92,24 @@ export default function ProductoGrid({
 
   const banners = [
     {
+      id: "banner-premium-1",
+      type: "html" as const,
+      backgroundColor: "var(--oscuro)",
+      htmlContent: (
+        <div style={{ textAlign: "center", width: "100%", padding: "12px" }}>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2.8rem", color: "var(--rojo)", margin: 0, letterSpacing: "2px" }}>PATROCINADOR EXCLUSIVO</h3>
+          <p style={{ margin: "2px 0 0", color: "var(--on-dark-mid)", fontWeight: 700, textTransform: "uppercase", fontSize: "0.9rem", letterSpacing: "1px" }}>Confianza y Calidad en cada entrega</p>
+        </div>
+      )
+    },
+    {
       id: "banner-weekend",
       type: "html" as const,
       backgroundColor: "#FEF3C7",
       htmlContent: (
         <div style={{ textAlign: "center", width: "100%", padding: "20px" }}>
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", color: "#D97706", margin: 0 }}>LOS ROMPE DEL FINDE</h3>
-          <p style={{ margin: "4px 0 0", color: "#5C4A35", fontWeight: 600 }}>Aprovechá estas ofertas exclusivas hasta el domingo.</p>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2.2rem", color: "#D97706", margin: 0 }}>LOS ROMPE DEL FINDE</h3>
+          <p style={{ margin: "4px 0 0", color: "#5C4A35", fontWeight: 700 }}>Aprovechá estas ofertas exclusivas hasta el domingo.</p>
         </div>
       )
     },
@@ -108,19 +119,8 @@ export default function ProductoGrid({
       backgroundColor: "#EBF7F0",
       htmlContent: (
         <div style={{ textAlign: "center", width: "100%", padding: "20px" }}>
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", color: "#1A7A42", margin: 0 }}>¡HASTA 25% OFF EN LIMPIEZA!</h3>
-          <p style={{ margin: "4px 0 0", color: "#145E33", fontWeight: 600 }}>Stockeate con los mejores precios mayoristas.</p>
-        </div>
-      )
-    },
-    {
-      id: "banner-drinks",
-      type: "html" as const,
-      backgroundColor: "#DBEAFE",
-      htmlContent: (
-        <div style={{ textAlign: "center", width: "100%", padding: "20px" }}>
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", color: "#1D4ED8", margin: 0 }}>BEBIDAS AL MEJOR PRECIO</h3>
-          <p style={{ margin: "4px 0 0", color: "#1E3A8A", fontWeight: 600 }}>Refrescate con El Remate - Mayorista Premium.</p>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2.2rem", color: "#1A7A42", margin: 0 }}>¡HASTA 25% OFF EN LIMPIEZA!</h3>
+          <p style={{ margin: "4px 0 0", color: "#145E33", fontWeight: 700 }}>Stockeate con los mejores precios mayoristas.</p>
         </div>
       )
     }
