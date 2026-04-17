@@ -91,9 +91,9 @@
   --green-dark: var(--verde-dark);
 
   /* ── Backgrounds ── */
-  --bg:  #f8fafc; /* Fondo claro optimizado */
-  --bg2: #f1f5f9;
-  --bg3: #e2e8f0;
+  --bg:  #FFFFFF; /* Fondo blanco puro para máxima legibilidad */
+  --bg2: #F8FAFC;
+  --bg3: #F1F5F9;
 
   /* ── Text aliases ── */
   --text:  var(--texto);
@@ -103,29 +103,12 @@
   --shadow-premium: 0 10px 25px -5px rgba(0,0,0,0.04), 0 8px 10px -6px rgba(0,0,0,0.04);
 }
 
-/* ── DARK MODE automático ── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg:    #0f172a;
-    --bg2:   #1e293b;
-    --bg3:   #334155;
-    --white: #1e293b;
+/* 
+   ELIMINADO: Dark mode automático por sistema. 
+   Forzamos esquema claro para garantizar legibilidad premium del catálogo.
+*/
 
-    --texto:    #f8fafc;
-    --tierra:   #e2e8f0;
-    --muted:    #94a3b8;
-    --faint:    #64748b;
-
-    --border:   #334155;
-    --border-2: #475569;
-    --border2:  var(--border-2);
-
-    --text:  var(--texto);
-    --text2: var(--tierra);
-  }
-}
-
-/* ── DARK MODE class-based (toggle manual) ── */
+/* ── DARK MODE class-based (solo si se activa manualmente) ── */
 .dark-mode {
   --bg:    #0D0B09;
   --bg2:   #171310;

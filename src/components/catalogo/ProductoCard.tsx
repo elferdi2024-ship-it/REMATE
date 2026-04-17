@@ -111,8 +111,8 @@ export default function ProductoCard({
       style={{
         background: "var(--white)",
         border: "1px solid var(--border)",
-        borderRadius: "20px",
-        padding: "12px",
+        borderRadius: "24px",
+        padding: "16px",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         display: "flex",
         flexDirection: "column",
@@ -121,9 +121,9 @@ export default function ProductoCard({
     >
       <div className="card-thumb" style={{ 
         background: "var(--bg2)", 
-        borderRadius: "14px",
-        height: "140px",
-        marginBottom: "12px",
+        borderRadius: "18px",
+        height: "150px",
+        marginBottom: "16px",
         border: "none",
         display: "flex",
         alignItems: "center",
@@ -194,15 +194,16 @@ export default function ProductoCard({
 
         <h3 className="card-name" style={{ 
           fontSize: "var(--text-base)", 
-          fontWeight: 600, 
+          fontWeight: 700, 
           color: "var(--oscuro)", 
-          lineHeight: "1.25", 
-          marginBottom: "10px", 
-          height: "2.5em", 
+          lineHeight: "1.3", 
+          marginBottom: "12px", 
+          height: "2.6em", 
           overflow: "hidden", 
           display: "-webkit-box", 
           WebkitLineClamp: 2, 
-          WebkitBoxOrient: "vertical" 
+          WebkitBoxOrient: "vertical",
+          letterSpacing: "-0.01em"
         }}>
           {highlightText(producto.nombre, searchTerm)}
         </h3>
@@ -210,15 +211,15 @@ export default function ProductoCard({
         <div style={{ marginTop: "auto" }}>
           <div className="card-price" style={{ 
             fontFamily: "var(--font-display)",
-            fontSize: "var(--text-xl)", 
+            fontSize: "2.1rem", 
             fontWeight: 400,
-            color: "var(--oscuro)", 
+            color: "var(--rojo)", 
             lineHeight: "1",
             letterSpacing: "0.5px"
           }}>
             {formatPrice(producto.precio)}
           </div>
-          <div style={{ fontSize: "10px", color: "var(--muted)", fontWeight: 600, textTransform: "uppercase", marginTop: "2px" }}>
+          <div style={{ fontSize: "11px", color: "var(--muted)", fontWeight: 700, textTransform: "uppercase", marginTop: "4px", letterSpacing: "0.5px" }}>
             Unidad IVA Incl.
           </div>
         </div>
