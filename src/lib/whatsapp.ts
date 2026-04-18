@@ -104,10 +104,11 @@ export async function enviarFacturaWhatsApp(
   telefono: string,
   items: CartItem[],
   notas?: string,
-  logoUrl?: string
+  logoUrl?: string,
+  numeroPedido?: string
 ): Promise<void> {
   const phone = numero || process.env.NEXT_PUBLIC_WA_NUMBER || "";
-  const numeroPedido = generarNumeroPedido();
+  const numFinal = numeroPedido || generarNumeroPedido();
 
   // 1. Generar imagen de la factura
   let blob: Blob | null = null;
@@ -117,7 +118,7 @@ export async function enviarFacturaWhatsApp(
       telefono,
       items,
       notas,
-      numeroPedido,
+      numeroPedido: numFinal,
       logoUrl,
     });
   } catch (err) {
@@ -126,7 +127,7 @@ export async function enviarFacturaWhatsApp(
 
   // 2. Intentar Web Share API (mobile)
   if (blob && supportsShareFiles()) {
-    const file = new File([blob], `pedido-${numeroPedido}.png`, {
+    const file = new File([blob], `pedido-${numFinal}.png`, {
       type: "image/png",
     });
 
@@ -135,7 +136,7 @@ export async function enviarFacturaWhatsApp(
         await navigator.share({
           files: [file],
           // El texto aparece como caption en WhatsApp mobile
-          text: `Pedido #${numeroPedido} — el remate`,
+          text: `Pedido #${numFinal} — el remate`,
         });
         return; // éxito: usuario eligió WhatsApp desde el selector nativo
       } catch (err: any) {
@@ -155,7 +156,7 @@ export async function enviarFacturaWhatsApp(
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `pedido-${numeroPedido}.png`;
+      a.download = `pedido-${numFinal}.png`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -164,7 +165,7 @@ export async function enviarFacturaWhatsApp(
   }
 
   // Abrir WhatsApp con el mensaje formateado
-  const mensaje = armarMensajeWA(nombre, telefono, items, notas, numeroPedido);
+  const mensaje = armarMensajeWA(nombre, telefono, items, notas, numFinal);
   const encoded = encodeURIComponent(mensaje);
   const url = `https://wa.me/${phone}?text=${encoded}`;
   window.open(url, "_blank");
