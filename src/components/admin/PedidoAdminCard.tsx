@@ -306,10 +306,20 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
             <div className="space-y-3 font-mono text-[11px]">
               {pedido.items.map((item, idx) => (
-                <div key={idx} className="flex flex-col">
-                  <div className="font-bold">{item.nombre}</div>
+                <div key={idx} className="flex flex-col group/receipt-item">
+                  <button 
+                    onClick={() => copyToClipboard(item.nombre, "Copiado: " + item.nombre)}
+                    className="text-left font-bold hover:text-[#00E5FF] transition-colors uppercase"
+                  >
+                    {item.nombre}
+                  </button>
                   <div className="flex justify-between text-gray-600">
-                    <span>{item.cantidad} x {formatCurrency(item.precioUnitario)}</span>
+                    <span className="flex gap-2">
+                      <button onClick={() => copyToClipboard(item.cantidad.toString(), "Copiado: " + item.cantidad)} className="hover:text-black hover:underline">{item.cantidad}</button>
+                      <span>x</span>
+                      <span>{formatCurrency(item.precioUnitario)}</span>
+                      <button onClick={() => copyToClipboard(item.codigo, "Copiado: " + item.codigo)} className="ml-2 text-[9px] text-gray-400 hover:text-black">({item.codigo})</button>
+                    </span>
                     <span className="text-black font-bold">{formatCurrency(item.cantidad * item.precioUnitario)}</span>
                   </div>
                 </div>
@@ -353,65 +363,91 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
       {/* Expandable Details Area */}
       {isViewingFull && (
-        <div className="animate-in slide-in-from-top-2 border-t border-white/5 bg-black/60 backdrop-blur-sm p-4 sm:p-6">
-          <div className="mb-4 space-y-3">
-            <div className="flex items-center justify-between border-b border-white/10 pb-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
-              <span>Detalle de Productos</span>
-              <span className="text-[#00E5FF]">Total {pedido.items.length}</span>
-            </div>
+        <div className="animate-in slide-in-from-top-2 border-t border-white/5 bg-[#0F172A] p-4 sm:p-8">
+          {/* White Receipt Container */}
+          <div className="relative mx-auto max-w-2xl overflow-hidden rounded-xl bg-white p-6 sm:p-10 text-black shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+            {/* Cut line decoration */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[linear-gradient(90deg,#fff_0%,#fff_50%,#f1f5f9_50%,#f1f5f9_100%)] bg-[length:20px_100%]" />
             
-            <div className="divide-y divide-white/5">
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between border-b-2 border-black pb-4">
+              <div>
+                <h4 className="font-mono text-2xl font-black tracking-tighter">ORDEN DE PEDIDO</h4>
+                <p className="font-mono text-[10px] text-gray-500">#{pedido.id.toUpperCase()}</p>
+              </div>
+              <div className="mt-2 text-right sm:mt-0">
+                <p className="font-mono text-xs font-bold uppercase">{pedido.clienteNombre}</p>
+                <p className="font-mono text-[10px] text-gray-400">{new Date(pedido.fecha instanceof Date ? pedido.fecha : pedido.fecha.seconds * 1000).toLocaleString("es-UY")}</p>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <div className="grid grid-cols-[40px_1fr_100px] border-b border-black pb-2 mb-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                <span>Cant</span>
+                <span>Producto / Código</span>
+                <span className="text-right">Subtotal</span>
+              </div>
+
               {pedido.items.map((item, i) => (
-                <div key={i} className="flex flex-col py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:gap-4">
-                  {/* Item Main Info */}
-                  <div className="flex flex-1 items-start gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#00E5FF]/10 text-sm font-black text-[#00E5FF] border border-[#00E5FF]/20">
-                      {item.cantidad}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-200 leading-snug break-words">
-                        {item.nombre}
-                      </p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[9px] font-bold text-gray-500 border border-white/5 uppercase">
-                          COD: {item.codigo}
-                        </span>
-                        <span className="text-[10px] text-gray-600 font-medium">
-                          {formatCurrency(item.precioUnitario)} c/u
-                        </span>
-                      </div>
+                <div key={i} className="group/item grid grid-cols-[40px_1fr_100px] items-start py-2 border-b border-dashed border-gray-200 hover:bg-gray-50 transition-colors">
+                  {/* Cantidad */}
+                  <button
+                    onClick={() => copyToClipboard(item.cantidad.toString(), "Cantidad: " + item.cantidad)}
+                    className="h-8 w-8 rounded bg-black text-white text-[11px] font-bold hover:bg-[#00E5FF] hover:text-black transition-colors"
+                  >
+                    {item.cantidad}
+                  </button>
+
+                  <div className="px-2">
+                    {/* Nombre */}
+                    <button
+                      onClick={() => copyToClipboard(item.nombre, "Producto: " + item.nombre)}
+                      className="text-left font-mono text-[12px] font-bold uppercase hover:text-[#00E5FF] transition-colors leading-tight"
+                    >
+                      {item.nombre}
+                    </button>
+                    {/* Código */}
+                    <div className="mt-0.5">
+                      <button
+                        onClick={() => copyToClipboard(item.codigo, "Código: " + item.codigo)}
+                        className="font-mono text-[9px] text-gray-400 hover:text-black hover:underline"
+                      >
+                        {item.codigo}
+                      </button>
                     </div>
                   </div>
-                  
-                  {/* Item Subtotal (Optional for admin) */}
-                  <div className="mt-2 flex items-center justify-end border-t border-white/5 pt-2 sm:mt-0 sm:border-none sm:pt-0">
-                    <p className="font-mono text-xs font-bold text-gray-400">
-                      Sub: {formatCurrency(item.cantidad * item.precioUnitario)}
-                    </p>
+
+                  <div className="text-right font-mono text-xs font-bold pt-1">
+                    {formatCurrency(item.cantidad * item.precioUnitario)}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
 
-          {pedido.notas && (
-            <div className="flex items-start gap-3 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-4">
-              <span className="text-xl">💬</span>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-yellow-500">
-                  Instrucciones del cliente
-                </p>
-                <p className="mt-1 text-sm italic text-yellow-100/70 leading-relaxed">&quot;{pedido.notas}&quot;</p>
+            <div className="mt-8 flex flex-col items-end gap-1 border-t-2 border-black pt-4">
+              <div className="flex w-full justify-between text-[10px] font-bold text-gray-400">
+                <span>SUBTOTAL:</span>
+                <span>{formatCurrency(pedido.total)}</span>
+              </div>
+              <div className="flex w-full justify-between text-xl font-black">
+                <span>TOTAL:</span>
+                <span>{formatCurrency(pedido.total)}</span>
               </div>
             </div>
-          )}
+
+            {pedido.notas && (
+              <div className="mt-8 rounded-lg border-2 border-black border-dashed p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Observaciones</p>
+                <p className="font-mono text-xs italic text-gray-700 leading-relaxed">&quot;{pedido.notas}&quot;</p>
+              </div>
+            )}
+          </div>
           
-          <div className="mt-4 flex justify-end">
+          <div className="mt-8 flex justify-center">
              <button 
-              className="text-[10px] font-bold text-gray-500 hover:text-white underline uppercase tracking-tighter"
+              className="group flex items-center gap-2 rounded-full bg-white/5 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-gray-500 transition-all hover:bg-white/10 hover:text-white"
               onClick={() => setIsViewingFull(false)}
              >
-               Cerrar Panel
+               <span className="text-lg">↑</span> OCULTAR FACTURA
              </button>
           </div>
         </div>
