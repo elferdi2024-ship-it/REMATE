@@ -131,8 +131,9 @@ export async function enviarFacturaWhatsApp(
     console.error("Error generando factura:", err);
   }
 
-  // 2. Intentar Web Share API (mobile)
-  if (blob && supportsShareFiles()) {
+  // 2. Intentar Web Share API (SOLO EN MÓVILES)
+  // En PC evitamos navigator.share porque abre el selector de sistema molesto
+  if (blob && isMobile() && supportsShareFiles()) {
     const file = new File([blob], `pedido-${numFinal}.png`, {
       type: "image/png",
     });
