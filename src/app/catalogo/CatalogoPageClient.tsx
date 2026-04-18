@@ -19,6 +19,7 @@ import {
 import CartPanel from "@/components/carrito/CartPanel";
 import UserPanel from "@/components/usuario/UserPanel";
 import ConfirmModal from "@/components/carrito/ConfirmModal";
+import FacturaModal from "@/components/catalogo/FacturaModal";
 import OnlineBanner from "@/components/ui/OnlineBanner";
 import {
   armarMensajeWA,
@@ -152,6 +153,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [clientNotes, setClientNotes] = useState("");
   const [sharedCart, setSharedCart] = useState<CartItem[] | null>(null);
   const [shareLink, setShareLink] = useState<string | null>(null);
+  const [facturaModalOpen, setFacturaModalOpen] = useState(false);
 
   // Search & filter state (client-side only)
   const [search, setSearch] = useState("");
@@ -339,11 +341,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
     const nombre = alias || "Cliente";
     const tel = telefono || "No proporcionado";
-    const mensaje = armarMensajeWA(nombre, tel, cartItems, clientNotes);
-    const waNumber = process.env.NEXT_PUBLIC_WA_NUMBER || "";
-    enviarWhatsApp(waNumber, mensaje);
 
-    // Non-blocking: save order
+    // 1. Guardar pedido en Firebase (Global y Local) + Incrementar Stats
     const pedidoItems = cartItems.map((i) => ({
       codigo: i.codigo,
       nombre: i.nombre,
@@ -367,10 +366,16 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     );
 
     saveLocalPedido(cartItems, total, clientNotes || undefined);
-    clearCart();
 
-    toast.success("\u00a1Listo! Te esperamos pronto. \ud83d\ude4c");
-  }, [alias, telefono, cartItems, clientNotes, total, user, clearCart, saveLocalPedido, toast]);
+    // 2. Abrir el modal de factura para el envío final a WhatsApp
+    setFacturaModalOpen(true);
+  }, [alias, telefono, cartItems, clientNotes, total, user, saveLocalPedido]);
+
+  const handleFinalizado = useCallback(() => {
+    clearCart();
+    setClientNotes("");
+    toast.success("¡Pedido enviado correctamente! 🚀");
+  }, [clearCart, toast]);
 
   const handleLoadSharedCart = useCallback(() => {
     if (sharedCart) {
@@ -576,6 +581,17 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         total={total}
         onConfirm={handleConfirmSend}
         onCancel={() => setConfirmModalOpen(false)}
+      />
+
+      {/* Factura Modal (Preview & WhatsApp send) */}
+      <FacturaModal
+        isOpen={facturaModalOpen}
+        nombre={alias || "Cliente"}
+        telefono={telefono || ""}
+        items={cartItems}
+        notas={clientNotes}
+        onClose={() => setFacturaModalOpen(false)}
+        onEnviado={handleFinalizado}
       />
     </>
   );
