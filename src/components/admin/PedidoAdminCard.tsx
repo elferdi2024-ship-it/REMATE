@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { actualizarEstadoPedido, eliminarPedido, type PedidoItem } from "@/lib/pedidos";
+import { armarMensajeWA } from "@/lib/whatsapp";
 
 export interface PedidoAdmin {
   id: string;
@@ -32,6 +33,7 @@ function isNew(ts: { seconds: number; nanoseconds: number } | Date): boolean {
 
 export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardProps) {
   const [isViewingFull, setIsViewingFull] = useState(false);
+  const [isViewingReceipt, setIsViewingReceipt] = useState(false);
   const [isFresh, setIsFresh] = useState(isNew(pedido.fecha));
   const [status, setStatus] = useState(pedido.status || "no_leido");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -76,15 +78,37 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
       `${item.nombre}\t${item.cantidad}\t\t${item.precioUnitario}`
     );
     const textoFinal = lineas.join('\n');
+    copyToClipboard(textoFinal, "¡Copiado para Facturación! ✅\nListo para pegar en el programa.");
+  };
 
-    navigator.clipboard.writeText(textoFinal)
+  const copyToClipboard = (text: string, message: string) => {
+    navigator.clipboard.writeText(text)
       .then(() => {
         handleStatusChange("cargado");
-        alert("¡Copiado para Facturación! ✅\nListo para pegar en el programa.");
+        alert(message);
       })
       .catch(err => {
         console.error("Error al copiar", err);
       });
+  };
+
+  const handleCopiadoRecibo = () => {
+    const itemsWA = pedido.items.map(i => ({
+      codigo: i.codigo,
+      nombre: i.nombre,
+      precio: i.precioUnitario,
+      cantidad: i.cantidad
+    }));
+    
+    const texto = armarMensajeWA(
+      pedido.clienteNombre,
+      pedido.clienteTelefono || "",
+      itemsWA,
+      pedido.notas,
+      pedido.id.slice(-6).toUpperCase()
+    );
+    
+    copyToClipboard(texto, "¡Recibo de texto copiado! ✅");
   };
 
   const previewItems = pedido.items.slice(0, 3);
@@ -177,13 +201,25 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           )}
           
           <button
+            onClick={() => setIsViewingReceipt(!isViewingReceipt)}
+            className={`flex h-[56px] flex-1 items-center justify-center gap-3 rounded-2xl border transition-all active:scale-95 ${
+              isViewingReceipt 
+                ? "border-amber-500/50 bg-amber-500/20 text-amber-400" 
+                : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10"
+            }`}
+            title="Ver Recibo de Texto"
+          >
+            <span className="text-xl">🧾</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">RECIBO</span>
+          </button>
+
+          <button
             onClick={handleCopiadoFacturacion}
             disabled={isUpdating}
-            className="flex h-[56px] flex-1 items-center justify-center gap-3 rounded-2xl border border-[#00E5FF]/30 bg-[#00E5FF]/10 text-[#00E5FF] transition-all hover:bg-[#00E5FF]/20 active:scale-95"
+            className="flex h-[56px] w-[56px] items-center justify-center rounded-2xl border border-[#00E5FF]/30 bg-[#00E5FF]/10 text-xl text-[#00E5FF] transition-all hover:bg-[#00E5FF]/20 active:scale-95"
             title="Copiar para Facturación"
           >
-            <span className="text-xl">📄</span>
-            <span className="text-[10px] font-black uppercase tracking-widest">FACTURACIÓN</span>
+            📄
           </button>
 
           <button
@@ -239,6 +275,81 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           {isViewingFull ? "OCULTAR DETALLES" : "VER DETALLES COMPLETOS"}
         </button>
       </div>
+
+      {/* ── Text Receipt View (Canva tipo texto) ── */}
+      {isViewingReceipt && (
+        <div className="animate-in fade-in zoom-in-95 duration-300 border-t border-white/5 bg-[#0F172A] p-6">
+          <div className="relative mx-auto max-w-md overflow-hidden rounded-xl bg-white p-8 text-black shadow-2xl">
+            {/* Decoración de recibo cortado */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[linear-gradient(90deg,#fff_0%,#fff_50%,#000_50%,#000_100%)] bg-[length:10px_100%]" />
+            
+            <div className="mb-6 text-center">
+              <h4 className="font-mono text-xl font-black uppercase tracking-widest">EL REMATE</h4>
+              <p className="font-mono text-[10px] text-gray-500 uppercase">Distribuidora · Canelones</p>
+            </div>
+
+            <div className="mb-4 space-y-1 font-mono text-[11px] leading-tight">
+              <div className="flex justify-between">
+                <span>PEDIDO:</span>
+                <span className="font-bold">#{pedido.id.slice(-6).toUpperCase()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>FECHA:</span>
+                <span>{new Date(pedido.fecha instanceof Date ? pedido.fecha : pedido.fecha.seconds * 1000).toLocaleString("es-UY")}</span>
+              </div>
+              <div className="border-b border-dashed border-gray-300 my-2" />
+              <div>CLIENTE: <span className="font-bold">{pedido.clienteNombre}</span></div>
+              {pedido.clienteTelefono && <div>TEL: {pedido.clienteTelefono}</div>}
+            </div>
+
+            <div className="mb-4 border-b border-dashed border-gray-300 pb-2" />
+
+            <div className="space-y-3 font-mono text-[11px]">
+              {pedido.items.map((item, idx) => (
+                <div key={idx} className="flex flex-col">
+                  <div className="font-bold">{item.nombre}</div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>{item.cantidad} x {formatCurrency(item.precioUnitario)}</span>
+                    <span className="text-black font-bold">{formatCurrency(item.cantidad * item.precioUnitario)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="my-4 border-b border-dashed border-gray-300" />
+
+            <div className="flex justify-between font-mono text-lg font-black">
+              <span>TOTAL:</span>
+              <span>{formatCurrency(pedido.total)}</span>
+            </div>
+
+            {pedido.notas && (
+              <div className="mt-4 rounded bg-gray-100 p-2 font-mono text-[10px] italic">
+                OBS: {pedido.notas}
+              </div>
+            )}
+
+            <div className="mt-8 text-center font-mono text-[9px] text-gray-400">
+              *** GRACIAS POR SU PREFERENCIA ***
+            </div>
+
+            {/* Botón flotante para copiar dentro del canva */}
+            <button
+              onClick={handleCopiadoRecibo}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-black py-3 text-[10px] font-bold text-white transition-all hover:bg-gray-800 active:scale-95"
+            >
+              <span>📋</span> COPIAR TEXTO FORMATEADO
+            </button>
+          </div>
+          
+          <button 
+            onClick={() => setIsViewingReceipt(false)}
+            className="mt-4 w-full text-center text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest"
+          >
+            Cerrar Recibo
+          </button>
+        </div>
+      )}
 
       {/* Expandable Details Area */}
       {isViewingFull && (

@@ -16,6 +16,7 @@ interface CartFooterProps {
   direccion?: string;
   onDireccionChange?: (dir: string) => void;
   onSaveLista?: () => void;
+  isProcessing?: boolean;
 }
 
 export default function CartFooter({
@@ -34,6 +35,7 @@ export default function CartFooter({
   direccion,
   onDireccionChange,
   onSaveLista,
+  isProcessing,
 }: CartFooterProps) {
   return (
     <div className="cart-footer">
@@ -139,12 +141,26 @@ export default function CartFooter({
         )}
 
         {/* ── WhatsApp Button ── */}
-        <button className="btn-whatsapp" onClick={onSendWA}>
-          <WhatsAppIcon />
-          <div className="btn-whatsapp-text">
-            <span className="btn-wa-main">ENVIAR PEDIDO</span>
-            <span className="btn-wa-sub">Abre WhatsApp al instante</span>
-          </div>
+        <button 
+          className="btn-whatsapp" 
+          onClick={onSendWA}
+          disabled={isProcessing}
+          style={{ opacity: isProcessing ? 0.7 : 1, cursor: isProcessing ? 'not-allowed' : 'pointer' }}
+        >
+          {isProcessing ? (
+            <div className="btn-whatsapp-text">
+              <span className="btn-wa-main">PROCESANDO...</span>
+              <span className="btn-wa-sub">Estamos preparando tu pedido</span>
+            </div>
+          ) : (
+            <>
+              <WhatsAppIcon />
+              <div className="btn-whatsapp-text">
+                <span className="btn-wa-main">ENVIAR PEDIDO</span>
+                <span className="btn-wa-sub">Abre WhatsApp al instante</span>
+              </div>
+            </>
+          )}
         </button>
       </div>
 

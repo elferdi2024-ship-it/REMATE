@@ -18,12 +18,12 @@ import {
 } from "@/components/catalogo";
 import CartPanel from "@/components/carrito/CartPanel";
 import UserPanel from "@/components/usuario/UserPanel";
-import ConfirmModal from "@/components/carrito/ConfirmModal";
 import FacturaModal from "@/components/catalogo/FacturaModal";
 import OnlineBanner from "@/components/ui/OnlineBanner";
 import {
   armarMensajeWA,
   enviarWhatsApp,
+  enviarFacturaWhatsApp,
 } from "@/lib/whatsapp";
 import {
   guardarPedidoGlobal,
@@ -148,7 +148,6 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [cartOpen, setCartOpen] = useState(false);
   const [userPanelOpen, setUserPanelOpen] = useState(false);
   const [vista, setVista] = useState<Vista>(() => ls.getVista());
-  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [alias, setAlias] = useState(() => ls.getAlias());
   const [telefono, setTelefono] = useState(() => ls.getTelefono());
   const [clientNotes, setClientNotes] = useState("");
@@ -157,6 +156,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [facturaModalOpen, setFacturaModalOpen] = useState(false);
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [direccion, setDireccion] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Search & filter state (client-side only)
   const [search, setSearch] = useState("");
@@ -333,14 +333,14 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     }
   }, [shareLink, toast]);
 
-  // Send WA flow
-  const handleSendWA = useCallback(() => {
-    setCartOpen(false);
-    setConfirmModalOpen(true);
-  }, []);
+  const handleFinalizado = useCallback(() => {
+    clearCart();
+    setClientNotes("");
+    toast.success("¡Pedido enviado correctamente! 🚀");
+  }, [clearCart, toast]);
 
   const handleConfirmSend = useCallback(async () => {
-    setConfirmModalOpen(false);
+    setCartOpen(false);
     setActiveOrderId(null); // Reset anterior
 
     const nombre = alias || "Cliente";
@@ -355,6 +355,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     }));
 
     try {
+      setIsProcessing(true);
       const orderId = await guardarPedidoGlobal({
         uid: user?.uid ?? null,
         clienteNombre: nombre,
@@ -366,39 +367,51 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         status: "no_leido",
       });
       setActiveOrderId(orderId);
+
+      const codigos = cartItems.map((i) => i.codigo);
+      incrementarStats(codigos).catch((err) =>
+        console.warn("Failed to increment stats:", err)
+      );
+
+      // 2. Si hay usuario, guardar en su historial privado (Cloud)
+      if (user) {
+        guardarPedidoUsuario(user.uid, {
+          items: pedidoItems,
+          total,
+          notas: clientNotes || undefined,
+          mensajeWA: "", 
+        }).catch((err) => console.warn("Failed to save user pedido cloud:", err));
+      }
+
+      // 3. Guardar siempre en local (para usuarios invitados)
+      saveLocalPedido(cartItems, total, clientNotes || undefined);
+
+      // 4. GENERAR Y ENVIAR AUTOMÁTICAMENTE
+      await enviarFacturaWhatsApp(
+        process.env.NEXT_PUBLIC_WA_NUMBER!,
+        nombre,
+        tel,
+        cartItems,
+        clientNotes || undefined,
+        "/logo.png",
+        orderId,
+        direccion
+      );
+
+      handleFinalizado();
     } catch (err) {
-      console.warn("Failed to save pedido global:", err);
-      // Fallback a un ID temporal si falla la red para no bloquear al usuario
-      setActiveOrderId("TEMP-" + Math.random().toString(36).slice(-4).toUpperCase());
+      console.error("Error en flujo de confirmación:", err);
+      toast.error("Hubo un problema al procesar el pedido");
+    } finally {
+      setIsProcessing(false);
     }
+  }, [alias, telefono, direccion, cartItems, clientNotes, total, user, saveLocalPedido, handleFinalizado, toast]);
 
-    const codigos = cartItems.map((i) => i.codigo);
-    incrementarStats(codigos).catch((err) =>
-      console.warn("Failed to increment stats:", err)
-    );
+  // Send WA flow
+  const handleSendWA = useCallback(() => {
+    handleConfirmSend();
+  }, [handleConfirmSend]);
 
-    // 2. Si hay usuario, guardar en su historial privado (Cloud)
-    if (user) {
-      guardarPedidoUsuario(user.uid, {
-        items: pedidoItems,
-        total,
-        notas: clientNotes || undefined,
-        mensajeWA: "", // El mensaje real se genera en el modal de factura
-      }).catch((err) => console.warn("Failed to save user pedido cloud:", err));
-    }
-
-    // 3. Guardar siempre en local (para usuarios invitados)
-    saveLocalPedido(cartItems, total, clientNotes || undefined);
-
-    // 4. Abrir el modal de factura para el envío final a WhatsApp
-    setFacturaModalOpen(true);
-  }, [alias, telefono, direccion, cartItems, clientNotes, total, user, saveLocalPedido]);
-
-  const handleFinalizado = useCallback(() => {
-    clearCart();
-    setClientNotes("");
-    toast.success("¡Pedido enviado correctamente! 🚀");
-  }, [clearCart, toast]);
 
   const handleLoadSharedCart = useCallback(() => {
     if (sharedCart) {
@@ -584,6 +597,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onClientNotesChange={setClientNotes}
         direccion={direccion}
         onDireccionChange={setDireccion}
+        isProcessing={isProcessing}
       />
 
       {/* User Panel */}
@@ -599,27 +613,10 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onClearData={handleClearData}
       />
 
-      {/* Confirm Modal */}
-      <ConfirmModal
-        isOpen={confirmModalOpen}
-        items={cartItems}
-        total={total}
-        onConfirm={handleConfirmSend}
-        onCancel={() => setConfirmModalOpen(false)}
-      />
+      {/* User Panel */}
 
       {/* Factura Modal (Preview & WhatsApp send) */}
-      <FacturaModal
-        isOpen={facturaModalOpen}
-        nombre={alias || "Cliente"}
-        telefono={telefono || ""}
-        items={cartItems}
-        notas={clientNotes}
-        direccion={direccion}
-        numeroPedido={activeOrderId || undefined}
-        onClose={() => setFacturaModalOpen(false)}
-        onEnviado={handleFinalizado}
-      />
+      {/* El modal de factura ya no es necesario como paso intermedio */}
     </>
   );
 }

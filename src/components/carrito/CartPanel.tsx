@@ -25,6 +25,7 @@ interface CartPanelProps {
   direccion?: string;
   onDireccionChange?: (dir: string) => void;
   onSaveLista?: () => void;
+  isProcessing?: boolean;
 }
 
 export default function CartPanel({
@@ -48,6 +49,7 @@ export default function CartPanel({
   direccion,
   onDireccionChange,
   onSaveLista,
+  isProcessing,
 }: CartPanelProps) {
   return (
     <>
@@ -111,6 +113,7 @@ export default function CartPanel({
             direccion={direccion}
             onDireccionChange={onDireccionChange}
             onSaveLista={onSaveLista}
+            isProcessing={isProcessing}
           />
         )}
       </div>
