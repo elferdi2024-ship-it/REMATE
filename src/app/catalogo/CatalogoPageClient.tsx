@@ -155,6 +155,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [sharedCart, setSharedCart] = useState<CartItem[] | null>(null);
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [facturaModalOpen, setFacturaModalOpen] = useState(false);
+  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
 
   // Search & filter state (client-side only)
   const [search, setSearch] = useState("");
@@ -337,8 +338,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     setConfirmModalOpen(true);
   }, []);
 
-  const handleConfirmSend = useCallback(() => {
+  const handleConfirmSend = useCallback(async () => {
     setConfirmModalOpen(false);
+    setActiveOrderId(null); // Reset anterior
 
     const nombre = alias || "Cliente";
     const tel = telefono || "No proporcionado";
@@ -351,15 +353,22 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       precioUnitario: i.precio,
     }));
 
-    guardarPedidoGlobal({
-      uid: user?.uid ?? null,
-      clienteNombre: nombre,
-      clienteTelefono: tel,
-      items: pedidoItems,
-      total,
-      notas: clientNotes || undefined,
-      status: "no_leido",
-    }).catch((err) => console.warn("Failed to save pedido global:", err));
+    try {
+      const orderId = await guardarPedidoGlobal({
+        uid: user?.uid ?? null,
+        clienteNombre: nombre,
+        clienteTelefono: tel,
+        items: pedidoItems,
+        total,
+        notas: clientNotes || undefined,
+        status: "no_leido",
+      });
+      setActiveOrderId(orderId);
+    } catch (err) {
+      console.warn("Failed to save pedido global:", err);
+      // Fallback a un ID temporal si falla la red para no bloquear al usuario
+      setActiveOrderId("TEMP-" + Math.random().toString(36).slice(-4).toUpperCase());
+    }
 
     const codigos = cartItems.map((i) => i.codigo);
     incrementarStats(codigos).catch((err) =>
@@ -602,6 +611,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         telefono={telefono || ""}
         items={cartItems}
         notas={clientNotes}
+        numeroPedido={activeOrderId || undefined}
         onClose={() => setFacturaModalOpen(false)}
         onEnviado={handleFinalizado}
       />

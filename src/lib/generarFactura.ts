@@ -11,31 +11,10 @@ interface FacturaOptions {
   items: CartItem[];
   notas?: string;
   numeroPedido?: string;
-  logoUrl?: string; // ruta a tu logo, ej: "/images/logo.png"
+  logoUrl?: string;
 }
 
 // ── Helpers de canvas ────────────────────────────────────────────────────────
-
-function roundRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r: number
-): void {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-}
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -45,14 +24,6 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     img.onerror = () => reject(new Error(`No se pudo cargar la imagen: ${src}`));
     img.src = src;
   });
-}
-
-function generarNumeroPedido(): string {
-  const now = new Date();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  const ts = String(now.getTime()).slice(-4);
-  return `${now.getFullYear()}${mm}${dd}-${ts}`;
 }
 
 function formatFecha(): string {
@@ -75,248 +46,223 @@ function formatPrecio(valor: number): string {
 export async function generarFacturaBlob(
   opciones: FacturaOptions
 ): Promise<Blob> {
-  const { nombre, telefono, items, notas, logoUrl } = opciones;
-  const numeroPedido = opciones.numeroPedido ?? generarNumeroPedido();
+  const { nombre, telefono, items, notas, logoUrl, numeroPedido } = opciones;
+  const idPedido = numeroPedido || "S/N";
   const fecha = formatFecha();
   const total = items.reduce((s, i) => s + i.precio * i.cantidad, 0);
 
   // ── Dimensiones ────────────────────────────────────────────────────────────
   const W = 640;
-  const PADDING = 36;
+  const PADDING = 40;
   const COL_W = W - PADDING * 2;
 
-  const HEADER_H = 120;
-  const INFO_H = 90;
-  const TABLE_ROW_H = 44;
-  const TABLE_HEADER_H = 36;
-  const FOOTER_H = notas?.trim() ? 130 : 90;
-  const H =
-    HEADER_H + INFO_H + TABLE_HEADER_H + items.length * TABLE_ROW_H + FOOTER_H;
+  const HEADER_H = 140;
+  const INFO_H = 100;
+  const TABLE_HEADER_H = 40;
+  const TABLE_ROW_H = 50; // Más alto para legibilidad
+  const FOOTER_MIN_H = 120;
+  
+  // Calcular altura dinámica
+  const itemsH = items.length * TABLE_ROW_H;
+  const notasH = notas?.trim() ? 60 + (notas.length / 50) * 20 : 0;
+  const H = HEADER_H + INFO_H + TABLE_HEADER_H + itemsH + FOOTER_MIN_H + notasH;
 
   const canvas = document.createElement("canvas");
-  // 2x para pantallas retina
   canvas.width = W * 2;
   canvas.height = H * 2;
-  canvas.style.width = `${W}px`;
-  canvas.style.height = `${H}px`;
-
   const ctx = canvas.getContext("2d")!;
   ctx.scale(2, 2);
 
-  // ── Fondo ──────────────────────────────────────────────────────────────────
+  // Fondo blanco limpio
   ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, W, H);
 
-  // ── Header negro ───────────────────────────────────────────────────────────
-  ctx.fillStyle = "#0A0A0A";
+  // ── Header Premium ──────────────────────────────────────────────────────────
+  ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, W, HEADER_H);
 
-  // Logo (si existe)
+  // Logo
   let logoLoaded = false;
   if (logoUrl) {
     try {
       const img = await loadImage(logoUrl);
-      const logoH = 64;
+      const logoH = 70;
       const logoW = (img.width / img.height) * logoH;
       ctx.drawImage(img, PADDING, (HEADER_H - logoH) / 2, logoW, logoH);
       logoLoaded = true;
-    } catch {
-      // fallback: solo texto
-    }
+    } catch { /* fallback */ }
   }
 
   if (!logoLoaded) {
-    // Texto "el remate" como fallback
     ctx.fillStyle = "#FFFFFF";
-    ctx.font = "bold 28px Georgia, serif";
+    ctx.font = "bold 32px sans-serif";
     ctx.fillText("el remate", PADDING, HEADER_H / 2 + 10);
   }
 
-  // Número de pedido (derecha del header)
-  ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 13px 'Courier New', monospace";
+  // ID de Pedido (Derecha, Muy Legible)
   ctx.textAlign = "right";
-  ctx.fillText(`PEDIDO #${numeroPedido}`, W - PADDING, HEADER_H / 2 - 8);
-  ctx.font = "12px 'Courier New', monospace";
-  ctx.fillStyle = "#AAAAAA";
-  ctx.fillText(fecha, W - PADDING, HEADER_H / 2 + 12);
+  ctx.fillStyle = "#00E5FF"; // Cyan neón para el ID como en la web
+  ctx.font = "bold 14px monospace";
+  ctx.fillText("ID DE PEDIDO", W - PADDING, HEADER_H / 2 - 10);
+  ctx.font = "bold 24px monospace";
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillText(idPedido, W - PADDING, HEADER_H / 2 + 18);
+  
   ctx.textAlign = "left";
 
-  // ── Sección: datos del cliente ─────────────────────────────────────────────
-  let y = HEADER_H + 24;
+  // ── Info Cliente ───────────────────────────────────────────────────────────
+  let y = HEADER_H + 30;
+  ctx.fillStyle = "#666666";
+  ctx.font = "bold 10px sans-serif";
+  ctx.fillText("DETALLES DEL CLIENTE", PADDING, y);
+  
+  y += 25;
+  ctx.fillStyle = "#000000";
+  ctx.font = "bold 18px sans-serif";
+  ctx.fillText(nombre || "Cliente", PADDING, y);
+  
+  ctx.textAlign = "right";
+  ctx.font = "14px sans-serif";
+  ctx.fillStyle = "#444444";
+  ctx.fillText(telefono || "Sin teléfono", W - PADDING, y);
+  ctx.textAlign = "left";
 
-  ctx.fillStyle = "#0A0A0A";
-  ctx.font = "bold 11px 'Courier New', monospace";
-  ctx.fillText("DATOS DEL CLIENTE", PADDING, y);
+  // Separador
+  y += 15;
+  ctx.strokeStyle = "#EEEEEE";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(PADDING, y);
+  ctx.lineTo(W - PADDING, y);
+  ctx.stroke();
 
-  // Línea separadora delgada
-  ctx.fillStyle = "#E0E0E0";
-  ctx.fillRect(PADDING, y + 6, COL_W, 1);
-
-  y += 20;
-  ctx.fillStyle = "#555555";
-  ctx.font = "13px Georgia, serif";
-  ctx.fillText("👤  " + (nombre || "Cliente"), PADDING, y);
-  y += 22;
-  ctx.fillText("📱  " + (telefono || "No proporcionado"), PADDING, y);
-
-  // ── Tabla de productos ─────────────────────────────────────────────────────
-  y = HEADER_H + INFO_H;
-
-  // Header de la tabla
-  ctx.fillStyle = "#0A0A0A";
-  ctx.fillRect(0, y, W, TABLE_HEADER_H);
-
+  // ── Tabla de Productos ─────────────────────────────────────────────────────
+  y += 30;
+  ctx.fillStyle = "#F8F8F8";
+  ctx.fillRect(PADDING, y, COL_W, TABLE_HEADER_H);
+  
+  ctx.fillStyle = "#000000";
+  ctx.font = "bold 11px sans-serif";
   const COL = {
-    nombre: PADDING,
-    cod: PADDING + 248,
-    cant: PADDING + 350,
-    precio: PADDING + 408,
-    subtotal: W - PADDING,
+    prod: PADDING + 10,
+    cod: PADDING + 280,
+    cant: PADDING + 380,
+    unit: PADDING + 450,
+    sub: W - PADDING - 10
   };
-
-  ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 11px 'Courier New', monospace";
-  ctx.textAlign = "left";
-  ctx.fillText("PRODUCTO", COL.nombre, y + TABLE_HEADER_H / 2 + 4);
-  ctx.fillText("CÓD.", COL.cod, y + TABLE_HEADER_H / 2 + 4);
-  ctx.fillText("CANT.", COL.cant, y + TABLE_HEADER_H / 2 + 4);
-  ctx.fillText("P.UNIT.", COL.precio, y + TABLE_HEADER_H / 2 + 4);
+  
+  const ty = y + TABLE_HEADER_H / 2 + 4;
+  ctx.fillText("PRODUCTO", COL.prod, ty);
+  ctx.fillText("CÓDIGO", COL.cod, ty);
+  ctx.fillText("CANT", COL.cant, ty);
+  ctx.fillText("P.UNIT", COL.unit, ty);
   ctx.textAlign = "right";
-  ctx.fillText("SUBTOTAL", COL.subtotal, y + TABLE_HEADER_H / 2 + 4);
+  ctx.fillText("TOTAL", COL.sub, ty);
+  ctx.textAlign = "left";
 
   y += TABLE_HEADER_H;
 
-  // Filas de productos
-  items.forEach((item, idx) => {
-    const isEven = idx % 2 === 0;
-    ctx.fillStyle = isEven ? "#F9F9F9" : "#FFFFFF";
-    ctx.fillRect(0, y, W, TABLE_ROW_H);
-
-    // Borde inferior
-    ctx.fillStyle = "#EEEEEE";
-    ctx.fillRect(0, y + TABLE_ROW_H - 1, W, 1);
-
-    const cy = y + TABLE_ROW_H / 2 + 5;
-    const subtotal = item.precio * item.cantidad;
-
-    ctx.textAlign = "left";
-    ctx.fillStyle = "#1A1A1A";
-    ctx.font = "13px Georgia, serif";
-
-    // Nombre truncado
-    const maxNombreW = 220;
-    let nombreDisplay = item.nombre;
-    ctx.font = "13px Georgia, serif";
-    while (
-      ctx.measureText(nombreDisplay).width > maxNombreW &&
-      nombreDisplay.length > 4
-    ) {
-      nombreDisplay = nombreDisplay.slice(0, -1);
+  // Filas
+  items.forEach((item, i) => {
+    if (i % 2 !== 0) {
+      ctx.fillStyle = "#FAFAFA";
+      ctx.fillRect(PADDING, y, COL_W, TABLE_ROW_H);
     }
-    if (nombreDisplay !== item.nombre) nombreDisplay += "…";
-    ctx.fillText(nombreDisplay, COL.nombre, cy);
-
-    ctx.font = "12px 'Courier New', monospace";
+    
+    const cy = y + TABLE_ROW_H / 2 + 5;
+    
+    // Nombre
+    ctx.fillStyle = "#000000";
+    ctx.font = "bold 13px sans-serif";
+    let n = item.nombre;
+    if (ctx.measureText(n).width > 240) {
+        while(ctx.measureText(n + "...").width > 240) n = n.slice(0, -1);
+        n += "...";
+    }
+    ctx.fillText(n, COL.prod, cy - 2);
+    
+    // Código y P.Unit abajo en gris si es necesario, pero aquí pedimos legibilidad
+    ctx.font = "11px monospace";
+    ctx.fillStyle = "#888888";
+    ctx.fillText(item.codigo, COL.cod, cy - 2);
+    
+    ctx.fillStyle = "#000000";
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText(String(item.cantidad), COL.cant + 5, cy - 2);
+    
+    ctx.font = "12px sans-serif";
     ctx.fillStyle = "#666666";
-    ctx.fillText(item.codigo, COL.cod, cy);
-
-    ctx.fillStyle = "#1A1A1A";
-    ctx.textAlign = "left";
-    ctx.fillText(String(item.cantidad), COL.cant + 10, cy);
-
-    ctx.fillText(formatPrecio(item.precio), COL.precio, cy);
-
+    ctx.fillText(formatPrecio(item.precio), COL.unit, cy - 2);
+    
     ctx.textAlign = "right";
-    ctx.font = "bold 13px Georgia, serif";
-    ctx.fillStyle = "#0A0A0A";
-    ctx.fillText(formatPrecio(subtotal), COL.subtotal, cy);
-
+    ctx.fillStyle = "#000000";
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText(formatPrecio(item.precio * item.cantidad), COL.sub, cy - 2);
+    ctx.textAlign = "left";
+    
     y += TABLE_ROW_H;
   });
 
-  // ── Total ──────────────────────────────────────────────────────────────────
-  ctx.fillStyle = "#0A0A0A";
-  ctx.fillRect(0, y, W, 52);
-
+  // ── Total Final ───────────────────────────────────────────────────────────
+  y += 20;
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(PADDING, y, COL_W, 60);
+  
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "13px 'Courier New', monospace";
-  ctx.textAlign = "left";
-  ctx.fillText("TOTAL ESTIMADO", PADDING, y + 32);
-
-  ctx.font = "bold 22px Georgia, serif";
+  ctx.font = "bold 14px sans-serif";
+  ctx.fillText("TOTAL DEL PEDIDO", PADDING + 20, y + 35);
+  
   ctx.textAlign = "right";
-  ctx.fillText(formatPrecio(total), W - PADDING, y + 33);
+  ctx.font = "bold 28px sans-serif";
+  ctx.fillText(formatPrecio(total), W - PADDING - 20, y + 42);
+  ctx.textAlign = "left";
 
-  y += 52;
+  y += 80;
 
-  // ── Notas ──────────────────────────────────────────────────────────────────
+  // Observaciones
   if (notas?.trim()) {
-    y += 16;
-    ctx.fillStyle = "#0A0A0A";
-    ctx.font = "bold 11px 'Courier New', monospace";
-    ctx.textAlign = "left";
+    ctx.fillStyle = "#666666";
+    ctx.font = "bold 10px sans-serif";
     ctx.fillText("OBSERVACIONES", PADDING, y);
-
-    ctx.fillStyle = "#E0E0E0";
-    ctx.fillRect(PADDING, y + 6, COL_W, 1);
-
-    y += 22;
-    ctx.fillStyle = "#444444";
-    ctx.font = "13px Georgia, serif";
-
-    // Wrap de texto para notas largas
-    const maxW = COL_W;
-    const words = notas.trim().split(" ");
+    y += 20;
+    ctx.fillStyle = "#333333";
+    ctx.font = "italic 13px sans-serif";
+    
+    // Wrap simple
+    const words = notas.split(" ");
     let line = "";
-    for (const word of words) {
-      const test = line ? `${line} ${word}` : word;
-      if (ctx.measureText(test).width > maxW && line) {
-        ctx.fillText(line, PADDING, y);
-        y += 18;
-        line = word;
-      } else {
-        line = test;
-      }
-    }
-    if (line) ctx.fillText(line, PADDING, y);
-    y += 22;
+    words.forEach(w => {
+        if (ctx.measureText(line + w).width > COL_W) {
+            ctx.fillText(line, PADDING, y);
+            y += 18;
+            line = w + " ";
+        } else {
+            line += w + " ";
+        }
+    });
+    ctx.fillText(line, PADDING, y);
+    y += 30;
   }
 
-  // ── Pie de página ──────────────────────────────────────────────────────────
-  y += 16;
-  ctx.fillStyle = "#F0F0F0";
-  ctx.fillRect(0, y, W, 1);
-  y += 16;
-
-  ctx.fillStyle = "#AAAAAA";
-  ctx.font = "12px Georgia, serif";
+  // Footer
   ctx.textAlign = "center";
-  ctx.fillText("¡Gracias por tu pedido en el remate!", W / 2, y);
-  ctx.font = "11px 'Courier New', monospace";
-  ctx.fillText("Este comprobante es orientativo — precios sujetos a confirmación", W / 2, y + 16);
+  ctx.fillStyle = "#999999";
+  ctx.font = "11px sans-serif";
+  ctx.fillText("Pedido realizado a través de elremate.com.uy", W/2, H - 40);
+  ctx.font = "bold 10px sans-serif";
+  ctx.fillText("FECHA: " + fecha, W/2, H - 25);
 
-  // ── Exportar como Blob ─────────────────────────────────────────────────────
   return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error("Error al generar la imagen"));
-      },
-      "image/png",
-      1.0
-    );
+    canvas.toBlob(b => b ? resolve(b) : reject("Canvas error"), "image/png");
   });
 }
-
-// ── Descarga directa (fallback desktop) ─────────────────────────────────────
 
 export async function descargarFactura(opciones: FacturaOptions): Promise<void> {
   const blob = await generarFacturaBlob(opciones);
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `pedido-elremate-${opciones.numeroPedido ?? Date.now()}.png`;
+  a.download = `pedido-${opciones.numeroPedido || "remate"}.png`;
   a.click();
   URL.revokeObjectURL(url);
 }
