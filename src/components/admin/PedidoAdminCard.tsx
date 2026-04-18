@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { actualizarEstadoPedido, eliminarPedido, type PedidoItem } from "@/lib/pedidos";
-import { armarMensajeWA } from "@/lib/whatsapp";
 
 export interface PedidoAdmin {
   id: string;
@@ -93,22 +92,14 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
   };
 
   const handleCopiadoRecibo = () => {
-    const itemsWA = pedido.items.map(i => ({
-      codigo: i.codigo,
-      nombre: i.nombre,
-      precio: i.precioUnitario,
-      cantidad: i.cantidad
-    }));
-    
-    const texto = armarMensajeWA(
-      pedido.clienteNombre,
-      pedido.clienteTelefono || "",
-      itemsWA,
-      pedido.notas,
-      pedido.id.slice(-6).toUpperCase()
+    // Formato solicitado: SOLO CÓDIGO, NOMBRE Y CANTIDAD (Sin precios ni totales)
+    const lineas = pedido.items.map(i => 
+      `${i.codigo} | ${i.nombre} | Cant: ${i.cantidad}`
     );
     
-    copyToClipboard(texto, "¡Recibo de texto copiado! ✅");
+    const textoFinal = lineas.join('\n');
+    
+    copyToClipboard(textoFinal, "¡Lista de productos copiada! ✅\n(Código, Nombre y Cantidad)");
   };
 
   const previewItems = pedido.items.slice(0, 3);
