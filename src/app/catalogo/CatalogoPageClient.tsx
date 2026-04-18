@@ -27,6 +27,7 @@ import {
 } from "@/lib/whatsapp";
 import {
   guardarPedidoGlobal,
+  guardarPedidoUsuario,
   incrementarStats,
 } from "@/lib/pedidos";
 import { encodeCartToURL, decodeCartFromURL } from "@/lib/cart-share";
@@ -365,9 +366,20 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       console.warn("Failed to increment stats:", err)
     );
 
+    // 2. Si hay usuario, guardar en su historial privado (Cloud)
+    if (user) {
+      guardarPedidoUsuario(user.uid, {
+        items: pedidoItems,
+        total,
+        notas: clientNotes || undefined,
+        mensajeWA: "", // El mensaje real se genera en el modal de factura
+      }).catch((err) => console.warn("Failed to save user pedido cloud:", err));
+    }
+
+    // 3. Guardar siempre en local (para usuarios invitados)
     saveLocalPedido(cartItems, total, clientNotes || undefined);
 
-    // 2. Abrir el modal de factura para el envío final a WhatsApp
+    // 4. Abrir el modal de factura para el envío final a WhatsApp
     setFacturaModalOpen(true);
   }, [alias, telefono, cartItems, clientNotes, total, user, saveLocalPedido]);
 
