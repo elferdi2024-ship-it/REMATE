@@ -44,7 +44,7 @@ export default function FacturaModal({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const blobRef = useRef<Blob | null>(null);
 
-  // Generar factura cada vez que se abre el modal
+  // Generar factura cada vez que se abre el modal o cambian los datos
   useEffect(() => {
     if (!isOpen) return;
 
@@ -64,9 +64,13 @@ export default function FacturaModal({
       });
 
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      // Limpiar URL anterior para evitar fugas de memoria
+      setPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
     };
-  }, [isOpen]);
+  }, [isOpen, nombre, telefono, items, notas, direccion, numeroPedido, logoUrl]);
 
   async function handleEnviar() {
     setEstado("enviando");

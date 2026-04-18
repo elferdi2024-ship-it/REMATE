@@ -392,7 +392,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
     // 4. Abrir el modal de factura para el envío final a WhatsApp
     setFacturaModalOpen(true);
-  }, [alias, telefono, cartItems, clientNotes, total, user, saveLocalPedido]);
+  }, [alias, telefono, direccion, cartItems, clientNotes, total, user, saveLocalPedido]);
 
   const handleFinalizado = useCallback(() => {
     clearCart();

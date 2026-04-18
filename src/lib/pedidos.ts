@@ -30,6 +30,7 @@ export interface PedidoGlobal {
   uid: string | null;
   clienteNombre: string;
   clienteTelefono?: string;
+  clienteDireccion?: string;
   items: PedidoItem[];
   total: number;
   notas?: string;
@@ -68,6 +69,7 @@ export async function guardarPedidoGlobal(
     uid: pedido.uid ?? null,
     clienteNombre: pedido.clienteNombre,
     clienteTelefono: pedido.clienteTelefono ?? "",
+    clienteDireccion: pedido.clienteDireccion ?? "",
     items: pedido.items,
     total: pedido.total,
     notas: pedido.notas ?? "",
