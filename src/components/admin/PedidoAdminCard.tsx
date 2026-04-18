@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { actualizarEstadoPedido, type PedidoItem } from "@/lib/pedidos";
+import { actualizarEstadoPedido, eliminarPedido, type PedidoItem } from "@/lib/pedidos";
 
 export interface PedidoAdmin {
   id: string;
@@ -53,6 +53,38 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const handleEliminar = async () => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este pedido? Esta acción no se puede deshacer.")) {
+      try {
+        setIsUpdating(true);
+        await eliminarPedido(pedido.id);
+      } catch (err) {
+        console.error("Error deleting order:", err);
+        alert("Error al eliminar el pedido");
+      } finally {
+        setIsUpdating(false);
+      }
+    }
+  };
+
+  const handleCopiadoFacturacion = () => {
+    // Formato exacto para programa de facturación: Concepto [TAB] Uni [TAB] [TAB] Precio
+    // Según instrucciones: item.nombre + '\t' + item.cantidad + '\t' + '\t' + item.precioUnitario
+    const lineas = pedido.items.map(item => 
+      `${item.nombre}\t${item.cantidad}\t\t${item.precioUnitario}`
+    );
+    const textoFinal = lineas.join('\n');
+
+    navigator.clipboard.writeText(textoFinal)
+      .then(() => {
+        handleStatusChange("cargado");
+        alert("¡Copiado para Facturación! ✅\nListo para pegar en el programa.");
+      })
+      .catch(err => {
+        console.error("Error al copiar", err);
+      });
   };
 
   const previewItems = pedido.items.slice(0, 3);
@@ -145,16 +177,22 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           )}
           
           <button
-            onClick={() => {
-              const text = `PEDIDO: ${pedido.clienteNombre}\nTEL: ${pedido.clienteTelefono}\nTOTAL: ${formatCurrency(pedido.total)}\n\nITEMS:\n${pedido.items.map(i => `- ${i.cantidad}x ${i.nombre} [${i.codigo}]`).join("\n")}`;
-              navigator.clipboard.writeText(text);
-              handleStatusChange("cargado");
-              alert("Copiado y Cargado ✅");
-            }}
-            className="flex h-[56px] w-[56px] items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-2xl transition-all hover:bg-white/10 hover:border-[#00E5FF]/40 active:scale-90"
-            title="Copiar y Cargar"
+            onClick={handleCopiadoFacturacion}
+            disabled={isUpdating}
+            className="flex h-[56px] flex-1 items-center justify-center gap-3 rounded-2xl border border-[#00E5FF]/30 bg-[#00E5FF]/10 text-[#00E5FF] transition-all hover:bg-[#00E5FF]/20 active:scale-95"
+            title="Copiar para Facturación"
           >
-            📋
+            <span className="text-xl">📄</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">FACTURACIÓN</span>
+          </button>
+
+          <button
+            onClick={handleEliminar}
+            disabled={isUpdating}
+            className="flex h-[56px] w-[56px] items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/5 text-xl text-red-400 transition-all hover:bg-red-500/20 active:scale-90"
+            title="Eliminar Pedido"
+          >
+            🗑️
           </button>
         </div>
 

@@ -8,6 +8,7 @@ import {
   getDocs,
   onSnapshot,
   updateDoc,
+  deleteDoc,
   doc,
   increment,
   Timestamp,
@@ -85,6 +86,14 @@ export async function actualizarEstadoPedido(
 ): Promise<void> {
   const ref = doc(db, "pedidos_globales", id);
   await updateDoc(ref, { status });
+}
+
+/**
+ * Delete an order from /pedidos_globales.
+ */
+export async function eliminarPedido(id: string): Promise<void> {
+  const ref = doc(db, "pedidos_globales", id);
+  await deleteDoc(ref);
 }
 
 // ── Pedido Usuario (private, per-user) ─────────────────────────────────
