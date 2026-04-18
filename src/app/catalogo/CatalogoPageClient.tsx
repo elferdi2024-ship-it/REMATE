@@ -156,6 +156,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [facturaModalOpen, setFacturaModalOpen] = useState(false);
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
+  const [direccion, setDireccion] = useState("");
 
   // Search & filter state (client-side only)
   const [search, setSearch] = useState("");
@@ -358,6 +359,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         uid: user?.uid ?? null,
         clienteNombre: nombre,
         clienteTelefono: tel,
+        clienteDireccion: direccion || undefined,
         items: pedidoItems,
         total,
         notas: clientNotes || undefined,
@@ -580,6 +582,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onCopyShareLink={handleCopyShareLink}
         clientNotes={clientNotes}
         onClientNotesChange={setClientNotes}
+        direccion={direccion}
+        onDireccionChange={setDireccion}
       />
 
       {/* User Panel */}
@@ -611,6 +615,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         telefono={telefono || ""}
         items={cartItems}
         notas={clientNotes}
+        direccion={direccion}
         numeroPedido={activeOrderId || undefined}
         onClose={() => setFacturaModalOpen(false)}
         onEnviado={handleFinalizado}

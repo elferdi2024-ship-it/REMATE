@@ -13,6 +13,8 @@ interface CartFooterProps {
   onTelefonoChange: (tel: string) => void;
   clientNotes?: string;
   onClientNotesChange?: (notes: string) => void;
+  direccion?: string;
+  onDireccionChange?: (dir: string) => void;
   onSaveLista?: () => void;
 }
 
@@ -29,6 +31,8 @@ export default function CartFooter({
   onTelefonoChange,
   clientNotes,
   onClientNotesChange,
+  direccion,
+  onDireccionChange,
   onSaveLista,
 }: CartFooterProps) {
   return (
@@ -94,6 +98,22 @@ export default function CartFooter({
             />
           </div>
         </div>
+
+        {onDireccionChange && (
+          <div style={{ marginBottom: '10px' }}>
+            <label className="field-label" htmlFor="clientDir">
+              📍 Dirección de entrega (opcional)
+            </label>
+            <input
+              id="clientDir"
+              type="text"
+              className="field-input"
+              placeholder="Calle, Barrio, Ciudad..."
+              value={direccion || ''}
+              onChange={(e) => onDireccionChange(e.target.value)}
+            />
+          </div>
+        )}
 
         {onClientNotesChange && (
           <>

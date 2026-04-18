@@ -17,6 +17,7 @@ interface FacturaModalProps {
   telefono: string;
   items: CartItem[];
   notas?: string;
+  direccion?: string;
   numeroPedido?: string;
   numeroWhatsApp?: string;
   logoUrl?: string;
@@ -32,6 +33,7 @@ export default function FacturaModal({
   telefono,
   items,
   notas,
+  direccion,
   numeroPedido,
   numeroWhatsApp,
   logoUrl = "/logo.png",
@@ -49,7 +51,7 @@ export default function FacturaModal({
     setEstado("generando");
     setPreviewUrl(null);
 
-    generarFacturaBlob({ nombre, telefono, items, notas, numeroPedido, logoUrl })
+    generarFacturaBlob({ nombre, telefono, items, notas, direccion, numeroPedido, logoUrl })
       .then((blob) => {
         blobRef.current = blob;
         const url = URL.createObjectURL(blob);
@@ -76,7 +78,8 @@ export default function FacturaModal({
         items,
         notas,
         logoUrl,
-        numeroPedido
+        numeroPedido,
+        direccion
       );
       onEnviado?.();
       onClose();

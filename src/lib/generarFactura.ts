@@ -10,6 +10,7 @@ interface FacturaOptions {
   telefono: string;
   items: CartItem[];
   notas?: string;
+  direccion?: string;
   numeroPedido?: string;
   logoUrl?: string;
 }
@@ -46,8 +47,13 @@ function formatPrecio(valor: number): string {
 export async function generarFacturaBlob(
   opciones: FacturaOptions
 ): Promise<Blob> {
-  const { nombre, telefono, items, notas, logoUrl, numeroPedido } = opciones;
-  const idPedido = numeroPedido || "S/N";
+  const { nombre, telefono, items, notas, direccion, logoUrl, numeroPedido } = opciones;
+  
+  // Sincronización de ID: Mostramos los últimos 6 en grande para búsqueda rápida en Admin
+  // Pero mantenemos el ID completo por debajo o legible.
+  const idCompleto = numeroPedido || "S/N";
+  const idResumen = idCompleto.length > 8 ? idCompleto.slice(-6).toUpperCase() : idCompleto;
+  
   const fecha = formatFecha();
   const total = items.reduce((s, i) => s + i.precio * i.cantidad, 0);
 
@@ -56,16 +62,16 @@ export async function generarFacturaBlob(
   const PADDING = 40;
   const COL_W = W - PADDING * 2;
 
-  const HEADER_H = 140;
-  const INFO_H = 100;
+  const HEADER_H = 150;
+  const INFO_H = direccion?.trim() ? 120 : 100;
   const TABLE_HEADER_H = 40;
-  const TABLE_ROW_H = 50; // Más alto para legibilidad
+  const TABLE_ROW_H = 50; 
   const FOOTER_MIN_H = 120;
+  const DISCLAIMER_H = 130;
   
-  // Calcular altura dinámica
   const itemsH = items.length * TABLE_ROW_H;
   const notasH = notas?.trim() ? 60 + (notas.length / 50) * 20 : 0;
-  const H = HEADER_H + INFO_H + TABLE_HEADER_H + itemsH + FOOTER_MIN_H + notasH;
+  const H = HEADER_H + INFO_H + TABLE_HEADER_H + itemsH + FOOTER_MIN_H + notasH + DISCLAIMER_H;
 
   const canvas = document.createElement("canvas");
   canvas.width = W * 2;
@@ -73,15 +79,13 @@ export async function generarFacturaBlob(
   const ctx = canvas.getContext("2d")!;
   ctx.scale(2, 2);
 
-  // Fondo blanco limpio
   ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, W, H);
 
-  // ── Header Premium ──────────────────────────────────────────────────────────
+  // ── Header ──────────────────────────────────────────────────────────
   ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, W, HEADER_H);
 
-  // Logo
   let logoLoaded = false;
   if (logoUrl) {
     try {
@@ -99,14 +103,17 @@ export async function generarFacturaBlob(
     ctx.fillText("el remate", PADDING, HEADER_H / 2 + 10);
   }
 
-  // ID de Pedido (Derecha, Muy Legible)
+  // ID de Pedido (Sincronizado con Admin)
   ctx.textAlign = "right";
-  ctx.fillStyle = "#00E5FF"; // Cyan neón para el ID como en la web
-  ctx.font = "bold 14px monospace";
-  ctx.fillText("ID DE PEDIDO", W - PADDING, HEADER_H / 2 - 10);
-  ctx.font = "bold 24px monospace";
+  ctx.fillStyle = "#00E5FF";
+  ctx.font = "bold 12px monospace";
+  ctx.fillText("BÚSQUEDA ADMIN (ÚLT. 6)", W - PADDING, HEADER_H / 2 - 15);
+  ctx.font = "bold 34px monospace";
   ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(idPedido, W - PADDING, HEADER_H / 2 + 18);
+  ctx.fillText(idResumen, W - PADDING, HEADER_H / 2 + 15);
+  ctx.font = "10px monospace";
+  ctx.fillStyle = "#666666";
+  ctx.fillText(idCompleto, W - PADDING, HEADER_H / 2 + 30);
   
   ctx.textAlign = "left";
 
@@ -127,7 +134,13 @@ export async function generarFacturaBlob(
   ctx.fillText(telefono || "Sin teléfono", W - PADDING, y);
   ctx.textAlign = "left";
 
-  // Separador
+  if (direccion?.trim()) {
+    y += 22;
+    ctx.fillStyle = "#555555";
+    ctx.font = "13px sans-serif";
+    ctx.fillText("📍 " + direccion, PADDING, y);
+  }
+
   y += 15;
   ctx.strokeStyle = "#EEEEEE";
   ctx.lineWidth = 1;
@@ -136,7 +149,7 @@ export async function generarFacturaBlob(
   ctx.lineTo(W - PADDING, y);
   ctx.stroke();
 
-  // ── Tabla de Productos ─────────────────────────────────────────────────────
+  // ── Tabla ─────────────────────────────────────────────────────
   y += 30;
   ctx.fillStyle = "#F8F8F8";
   ctx.fillRect(PADDING, y, COL_W, TABLE_HEADER_H);
@@ -162,16 +175,12 @@ export async function generarFacturaBlob(
 
   y += TABLE_HEADER_H;
 
-  // Filas
   items.forEach((item, i) => {
     if (i % 2 !== 0) {
       ctx.fillStyle = "#FAFAFA";
       ctx.fillRect(PADDING, y, COL_W, TABLE_ROW_H);
     }
-    
     const cy = y + TABLE_ROW_H / 2 + 5;
-    
-    // Nombre
     ctx.fillStyle = "#000000";
     ctx.font = "bold 13px sans-serif";
     let n = item.nombre;
@@ -180,63 +189,53 @@ export async function generarFacturaBlob(
         n += "...";
     }
     ctx.fillText(n, COL.prod, cy - 2);
-    
-    // Código y P.Unit abajo en gris si es necesario, pero aquí pedimos legibilidad
     ctx.font = "11px monospace";
     ctx.fillStyle = "#888888";
     ctx.fillText(item.codigo, COL.cod, cy - 2);
-    
     ctx.fillStyle = "#000000";
     ctx.font = "bold 14px sans-serif";
     ctx.fillText(String(item.cantidad), COL.cant + 5, cy - 2);
-    
     ctx.font = "12px sans-serif";
     ctx.fillStyle = "#666666";
     ctx.fillText(formatPrecio(item.precio), COL.unit, cy - 2);
-    
     ctx.textAlign = "right";
     ctx.fillStyle = "#000000";
     ctx.font = "bold 14px sans-serif";
     ctx.fillText(formatPrecio(item.precio * item.cantidad), COL.sub, cy - 2);
     ctx.textAlign = "left";
-    
     y += TABLE_ROW_H;
   });
 
-  // ── Total Final ───────────────────────────────────────────────────────────
+  // ── Total ───────────────────────────────────────────────────────────
   y += 20;
   ctx.fillStyle = "#000000";
   ctx.fillRect(PADDING, y, COL_W, 60);
-  
   ctx.fillStyle = "#FFFFFF";
   ctx.font = "bold 14px sans-serif";
   ctx.fillText("TOTAL DEL PEDIDO", PADDING + 20, y + 35);
-  
   ctx.textAlign = "right";
   ctx.font = "bold 28px sans-serif";
   ctx.fillText(formatPrecio(total), W - PADDING - 20, y + 42);
   ctx.textAlign = "left";
 
-  y += 80;
+  y += 85;
 
-  // Disclaimer / Advertencia (Solicitado por el usuario)
-  ctx.fillStyle = "#FFF9C4"; // Amarillo muy suave de fondo
-  ctx.fillRect(PADDING, y, COL_W, 45);
+  // Disclaimer
+  ctx.fillStyle = "#FFF9C4";
+  ctx.fillRect(PADDING, y, COL_W, 50);
   ctx.strokeStyle = "#FBC02D";
   ctx.lineWidth = 1;
-  ctx.strokeRect(PADDING, y, COL_W, 45);
-
+  ctx.strokeRect(PADDING, y, COL_W, 50);
   ctx.textAlign = "center";
   ctx.fillStyle = "#444444";
-  ctx.font = "bold 11px sans-serif";
-  ctx.fillText("⚠️ DOCUMENTO NO VÁLIDO COMO FACTURA FISCAL", W / 2, y + 20);
-  ctx.font = "10px sans-serif";
-  ctx.fillText("Este documento es una NOTA DE PEDIDO. El pago y la factura final se coordinan por privado.", W / 2, y + 34);
+  ctx.font = "bold 12px sans-serif";
+  ctx.fillText("⚠️ DOCUMENTO NO VÁLIDO COMO FACTURA FISCAL", W / 2, y + 22);
+  ctx.font = "10.5px sans-serif";
+  ctx.fillText("Este documento es una NOTA DE PEDIDO. El pago y la factura final se coordinan por privado.", W / 2, y + 38);
   ctx.textAlign = "left";
 
-  y += 75;
+  y += 85;
 
-  // Observaciones
   if (notas?.trim()) {
     ctx.fillStyle = "#666666";
     ctx.font = "bold 10px sans-serif";
@@ -244,8 +243,6 @@ export async function generarFacturaBlob(
     y += 20;
     ctx.fillStyle = "#333333";
     ctx.font = "italic 13px sans-serif";
-    
-    // Wrap simple
     const words = notas.split(" ");
     let line = "";
     words.forEach(w => {
@@ -261,7 +258,6 @@ export async function generarFacturaBlob(
     y += 30;
   }
 
-  // Footer
   ctx.textAlign = "center";
   ctx.fillStyle = "#999999";
   ctx.font = "11px sans-serif";

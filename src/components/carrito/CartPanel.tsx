@@ -22,6 +22,8 @@ interface CartPanelProps {
   onTelefonoChange: (tel: string) => void;
   clientNotes?: string;
   onClientNotesChange?: (notes: string) => void;
+  direccion?: string;
+  onDireccionChange?: (dir: string) => void;
   onSaveLista?: () => void;
 }
 
@@ -43,6 +45,8 @@ export default function CartPanel({
   onTelefonoChange,
   clientNotes,
   onClientNotesChange,
+  direccion,
+  onDireccionChange,
   onSaveLista,
 }: CartPanelProps) {
   return (
@@ -104,6 +108,8 @@ export default function CartPanel({
             onTelefonoChange={onTelefonoChange}
             clientNotes={clientNotes}
             onClientNotesChange={onClientNotesChange}
+            direccion={direccion}
+            onDireccionChange={onDireccionChange}
             onSaveLista={onSaveLista}
           />
         )}

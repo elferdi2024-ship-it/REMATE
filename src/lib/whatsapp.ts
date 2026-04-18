@@ -43,7 +43,8 @@ export function armarMensajeWA(
   telefono: string,
   items: CartItem[],
   notas?: string,
-  numeroPedido?: string
+  numeroPedido?: string,
+  direccion?: string
 ): string {
   const num = numeroPedido ?? generarNumeroPedido();
   const fecha = new Date().toLocaleDateString("es-UY", {
@@ -63,6 +64,9 @@ export function armarMensajeWA(
   lines.push(`*CLIENTE*`);
   lines.push(`👤 ${nombre.trim() || "Cliente"}`);
   lines.push(`📱 ${telefono.trim() || "No proporcionado"}`);
+  if (direccion?.trim()) {
+    lines.push(`📍 ${direccion.trim()}`);
+  }
   lines.push(`━━━━━━━━━━━━━━━━━━━━━`);
 
   lines.push(`*PRODUCTOS*`);
@@ -105,7 +109,8 @@ export async function enviarFacturaWhatsApp(
   items: CartItem[],
   notas?: string,
   logoUrl?: string,
-  numeroPedido?: string
+  numeroPedido?: string,
+  direccion?: string
 ): Promise<void> {
   const phone = numero || process.env.NEXT_PUBLIC_WA_NUMBER || "";
   const numFinal = numeroPedido || generarNumeroPedido();
@@ -120,6 +125,7 @@ export async function enviarFacturaWhatsApp(
       notas,
       numeroPedido: numFinal,
       logoUrl,
+      direccion,
     });
   } catch (err) {
     console.error("Error generando factura:", err);
@@ -165,7 +171,7 @@ export async function enviarFacturaWhatsApp(
   }
 
   // Abrir WhatsApp con el mensaje formateado
-  const mensaje = armarMensajeWA(nombre, telefono, items, notas, numFinal);
+  const mensaje = armarMensajeWA(nombre, telefono, items, notas, numFinal, direccion);
   const encoded = encodeURIComponent(mensaje);
   const url = `https://wa.me/${phone}?text=${encoded}`;
   window.open(url, "_blank");
