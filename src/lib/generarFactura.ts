@@ -219,6 +219,23 @@ export async function generarFacturaBlob(
 
   y += 80;
 
+  // Disclaimer / Advertencia (Solicitado por el usuario)
+  ctx.fillStyle = "#FFF9C4"; // Amarillo muy suave de fondo
+  ctx.fillRect(PADDING, y, COL_W, 45);
+  ctx.strokeStyle = "#FBC02D";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(PADDING, y, COL_W, 45);
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#444444";
+  ctx.font = "bold 11px sans-serif";
+  ctx.fillText("⚠️ DOCUMENTO NO VÁLIDO COMO FACTURA FISCAL", W / 2, y + 20);
+  ctx.font = "10px sans-serif";
+  ctx.fillText("Este documento es una NOTA DE PEDIDO. El pago y la factura final se coordinan por privado.", W / 2, y + 34);
+  ctx.textAlign = "left";
+
+  y += 75;
+
   // Observaciones
   if (notas?.trim()) {
     ctx.fillStyle = "#666666";
