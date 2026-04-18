@@ -295,7 +295,7 @@ export default function LandingPage() {
               🛒 VER CATÁLOGO
             </Link>
             <a
-              href="https://wa.me/59894717052"
+              href="https://wa.me/59899322325"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -859,7 +859,7 @@ export default function LandingPage() {
               🛒 IR AL CATÁLOGO
             </Link>
             <a
-              href="https://wa.me/59894717052"
+              href="https://wa.me/59899322325"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -1106,7 +1106,7 @@ export default function LandingPage() {
               e.currentTarget.style.boxShadow = "0 6px 24px rgba(26,122,66,0.5), 0 0 0 2px rgba(255,255,255,0.15)";
             }}
           >
-            📱 094 717 052
+            📱 099 322 325
           </a>
         </div>
       </section>
