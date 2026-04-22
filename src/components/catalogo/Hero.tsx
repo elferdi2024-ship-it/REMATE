@@ -1,3 +1,4 @@
+// filepath: src/components/catalogo/Hero.tsx
 "use client";
 
 import React from "react";
@@ -10,6 +11,7 @@ interface HeroProps {
   onOpenUser?: () => void;
   onShareCart?: () => void;
   isLoggedIn?: boolean;
+  userDisplayName?: string;
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
 }
@@ -25,11 +27,12 @@ export default function Hero({
   onOpenUser,
   onShareCart,
   isLoggedIn = false,
+  userDisplayName,
   searchQuery = "",
   onSearchChange,
 }: HeroProps) {
   return (
-    <section className="hero" style={{ minHeight: "85vh", display: "flex", alignItems: "center" }}>
+    <section className="hero hero-compact">
       {/* ── Fondo imagen ── */}
       <div style={{ position: "absolute", inset: 0, zIndex: 0, background: "var(--oscuro, #111111)" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -39,151 +42,77 @@ export default function Hero({
           aria-hidden="true"
           style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
           onError={(e) => {
-            // Si la imagen falla, el fondo oscuro sigue visible
             (e.target as HTMLImageElement).style.display = "none";
           }}
         />
-        {/* Overlay oscuro cálido — contraste alto para texto claro */}
         <div
           style={{
             position: "absolute",
             inset: 0,
             background:
-              "linear-gradient(135deg, rgba(17,11,8,0.97) 0%, rgba(17,11,8,0.92) 40%, rgba(17,11,8,0.70) 75%, rgba(17,11,8,0.40) 100%)",
+              "linear-gradient(135deg, rgba(17,11,8,0.97) 0%, rgba(17,11,8,0.92) 40%, rgba(17,11,8,0.72) 75%, rgba(17,11,8,0.45) 100%)",
           }}
         />
       </div>
 
-      {/* ── Glow rojo sutil a la izquierda ── */}
+      {/* Glow rojo */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          background:
-            "radial-gradient(ellipse 50% 90% at -5% 50%, rgba(214,40,40,0.15) 0%, transparent 60%)",
+          background: "radial-gradient(ellipse 55% 100% at -5% 50%, rgba(214,40,40,0.18) 0%, transparent 60%)",
           pointerEvents: "none",
           zIndex: 1,
         }}
       />
 
       {/* ── Contenido ── */}
-      <div className="hero-inner" style={{ position: "relative", zIndex: 2 }}>
+      <div className="hero-inner hero-inner-v2" style={{ position: "relative", zIndex: 2 }}>
 
         {/* ════ IZQUIERDA: Marca ════ */}
         <div className="hero-brand">
-
-          {/* Enlace volver */}
           <Link
             href="/"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              marginBottom: "20px",
-              fontSize: "0.68rem",
-              fontWeight: 600,
-              color: "rgba(255,255,255,0.6)",
-              textDecoration: "none",
-              padding: "5px 10px",
-              borderRadius: "6px",
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              transition: "all 0.2s",
-              letterSpacing: "0.5px",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#fff";
-              e.currentTarget.style.background = "rgba(255,255,255,0.12)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "rgba(255,255,255,0.6)";
-              e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-            }}
+            className="hero-back-link"
           >
             ← Inicio
           </Link>
 
-          {/* Eyebrow — pill roja única con separadores */}
-          <div style={{ marginBottom: "18px" }}>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                background: "var(--rojo, #D62828)",
-                color: "#fff",
-                fontSize: "0.6rem",
-                fontWeight: 700,
-                letterSpacing: "2.5px",
-                textTransform: "uppercase",
-                padding: "5px 14px",
-                borderRadius: "4px",
-                boxShadow: "0 2px 12px rgba(214,40,40,0.4)",
-              }}
-            >
+          {/* Eyebrow */}
+          <div style={{ marginBottom: "10px" }}>
+            <span className="hero-eyebrow-badge">
               MAYORISTA · DISTRIBUIDORA · CANELONES
             </span>
           </div>
 
-          {/* Título principal */}
+          {/* Título */}
           <h1
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "clamp(3rem, 9vw, 5rem)",
-              letterSpacing: "2.5px",
-              lineHeight: 0.88,
-              marginBottom: "20px",
+              fontSize: "clamp(2.5rem, 7vw, 4.2rem)",
+              letterSpacing: "2px",
+              lineHeight: 0.9,
+              marginBottom: "16px",
             }}
           >
-            {/* EL REMATE — blanco */}
-            <span
-              style={{
-                display: "block",
-                color: "#fff",
-                textShadow: "0 2px 16px rgba(0,0,0,0.4)",
-              }}
-            >
+            <span style={{ display: "block", color: "#fff", textShadow: "0 2px 16px rgba(0,0,0,0.4)" }}>
               EL REMATE
             </span>
-            {/* CANELONES — rojo */}
-            <span
-              style={{
-                display: "block",
-                color: "var(--rojo, #D62828)",
-                textShadow: "0 0 30px rgba(214,40,40,0.3)",
-              }}
-            >
+            <span style={{ display: "block", color: "var(--rojo, #D62828)", textShadow: "0 0 30px rgba(214,40,40,0.3)" }}>
               CANELONES
             </span>
           </h1>
 
-          {/* Descriptor — DM Serif Display italic + barra roja vertical */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "12px",
-              marginBottom: "20px",
-            }}
-          >
-            {/* Barra roja vertical 4px */}
-            <div
-              style={{
-                width: "4px",
-                minHeight: "48px",
-                background: "var(--rojo, #D62828)",
-                borderRadius: "2px",
-                flexShrink: 0,
-                marginTop: "2px",
-              }}
-            />
+          {/* Descriptor */}
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "16px" }}>
+            <div style={{ width: "3px", minHeight: "36px", background: "var(--rojo)", borderRadius: "2px", flexShrink: 0, marginTop: "2px" }} />
             <p
               style={{
                 fontFamily: "var(--font-serif)",
                 fontStyle: "italic",
-                fontSize: "clamp(0.95rem, 2vw, 1.1rem)",
+                fontSize: "clamp(0.85rem, 1.8vw, 1rem)",
                 color: "var(--on-dark-mid, #C8C3BC)",
-                lineHeight: 1.55,
+                lineHeight: 1.5,
                 fontWeight: 400,
                 margin: 0,
               }}
@@ -194,9 +123,8 @@ export default function Hero({
             </p>
           </div>
 
-          {/* Stats strip — fondo oscuro, borde rojo, texto claro */}
+          {/* Stats strip */}
           <div
-            className="hero-stats"
             style={{
               background: "rgba(26,20,16,0.55)",
               backdropFilter: "blur(8px)",
@@ -210,33 +138,73 @@ export default function Hero({
             {[
               { val: "1900+", lbl: "Productos" },
               { val: "17", lbl: "Categorías" },
-              { val: "WA", lbl: "Pedido Express" },
+              { val: "WA", lbl: "Express" },
             ].map((stat, i) => (
               <div
                 key={i}
-                className="hero-stat"
                 style={{
-                  padding: "10px 18px",
+                  padding: "8px 16px",
                   textAlign: "center",
                   borderRight: i < 2 ? "1px solid rgba(214,40,40,0.15)" : "none",
                 }}
               >
                 <div
-                  className="hero-stat-val"
-                  style={{ color: "var(--rojo, #D62828)" }}
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1rem",
+                    color: "var(--rojo, #D62828)",
+                    letterSpacing: "-0.5px",
+                    lineHeight: 1,
+                    fontWeight: 800,
+                  }}
                 >
                   {stat.val}
                 </div>
-                <div className="hero-stat-lbl" style={{ color: "var(--on-dark-mid, #C8C3BC)" }}>{stat.lbl}</div>
+                <div
+                  style={{
+                    fontSize: "0.62rem",
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    letterSpacing: "1.5px",
+                    color: "var(--on-dark-mid, #C8C3BC)",
+                    marginTop: "2px",
+                  }}
+                >
+                  {stat.lbl}
+                </div>
               </div>
             ))}
           </div>
         </div>
 
         {/* ════ DERECHA: Controles ════ */}
-        <div className="hero-controls">
+        <div className="hero-controls-v2">
 
-          {/* Buscador — fondo translúcido claro, texto oscuro */}
+          {/* ── BOTÓN USUARIO — prominente ── */}
+          {onOpenUser && (
+            <button
+              className={`btn-hero-user-v2${isLoggedIn ? " logged-in" : ""}`}
+              onClick={onOpenUser}
+              aria-label={isLoggedIn ? "Mi cuenta" : "Iniciar sesión"}
+            >
+              <div className="btn-hero-user-icon">
+                {isLoggedIn ? "✓" : "👤"}
+              </div>
+              <div className="btn-hero-user-text">
+                <span className="btn-hero-user-label">
+                  {isLoggedIn ? "MI CUENTA" : "INICIAR SESIÓN"}
+                </span>
+                <span className="btn-hero-user-sub">
+                  {isLoggedIn
+                    ? (userDisplayName || "Mi perfil y pedidos")
+                    : "Ver historial y repetir pedidos"}
+                </span>
+              </div>
+              <span className="btn-hero-user-arrow">›</span>
+            </button>
+          )}
+
+          {/* ── Buscador ── */}
           <div className="hero-search-wrap">
             <span className="hero-search-icon" style={{ color: "rgba(255,255,255,0.4)" }}>🔍</span>
             <input
@@ -253,39 +221,48 @@ export default function Hero({
                 color: "#fff",
               }}
             />
+            {searchQuery && (
+              <button
+                onClick={() => onSearchChange?.("")}
+                style={{
+                  position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)",
+                  background: "none", border: "none", color: "rgba(255,255,255,0.5)",
+                  cursor: "pointer", fontSize: "0.9rem", lineHeight: 1,
+                }}
+                aria-label="Limpiar búsqueda"
+              >
+                ✕
+              </button>
+            )}
           </div>
 
-          {/* Acciones */}
+          {/* ── Carrito + compartir ── */}
           <div className="hero-actions">
-            {/* Botón carrito — rojo, texto blanco, total visible */}
             <button
               className="btn-hero-cart"
               onClick={onOpenCart}
               aria-label="Abrir carrito"
-              style={{ boxShadow: "0 4px 20px rgba(214,40,40,0.35)" }}
             >
-              🛒 VER PEDIDO
+              <span>🛒</span>
+              <span>VER PEDIDO</span>
               <span
                 style={{
-                  background: "rgba(0,0,0,0.22)",
+                  background: "rgba(0,0,0,0.25)",
                   borderRadius: "5px",
-                  padding: "1px 8px",
+                  padding: "2px 10px",
                   fontFamily: "var(--font-body)",
-                  fontSize: "0.82rem",
+                  fontSize: "0.85rem",
                   fontWeight: 800,
-                  color: "#fff",
-                  letterSpacing: "0",
-                  marginLeft: "4px",
+                  marginLeft: "2px",
                 }}
               >
-                — {formatPrice(cartTotal)}
+                {formatPrice(cartTotal)}
               </span>
               {cartQty > 0 && (
                 <span className="cart-badge">{cartQty}</span>
               )}
             </button>
 
-            {/* Compartir carrito */}
             {onShareCart && cartQty > 0 && (
               <button
                 className="btn-hero-share"
@@ -294,18 +271,6 @@ export default function Hero({
               >
                 ✉
                 <span className="share-tooltip">Compartir carrito</span>
-              </button>
-            )}
-
-            {/* Usuario */}
-            {onOpenUser && (
-              <button
-                className={`btn-hero-user${isLoggedIn ? " logged-in" : ""}`}
-                onClick={onOpenUser}
-                aria-label={isLoggedIn ? "Mi cuenta" : "Iniciar sesión"}
-              >
-                👤
-                <span className="user-dot" />
               </button>
             )}
           </div>

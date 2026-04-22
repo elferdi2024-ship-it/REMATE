@@ -317,6 +317,20 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     [totalQty, addItem, toast]
   );
 
+  // Agregar solo items seleccionados (historial granular)
+  const handleReorderItems = useCallback(
+    (items: { codigo: string; nombre: string; cantidad: number; precioUnitario: number }[]) => {
+      items.forEach((item) => {
+        for (let i = 0; i < item.cantidad; i++) {
+          addItem({ codigo: item.codigo, nombre: item.nombre, precio: item.precioUnitario ?? 0 });
+        }
+      });
+      setUserPanelOpen(false);
+      toast.success(`${items.length} producto${items.length > 1 ? "s" : ""} agregado${items.length > 1 ? "s" : ""} al pedido.`);
+    },
+    [addItem, toast]
+  );
+
   const handleShareCart = useCallback(() => {
     const encoded = encodeCartToURL(cartItems);
     if (!encoded) return;
@@ -532,6 +546,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onOpenUser={() => setUserPanelOpen(true)}
         onShareCart={cartItems.length > 0 ? handleShareCart : undefined}
         isLoggedIn={!!user}
+        userDisplayName={user?.displayName || alias || undefined}
         searchQuery={search}
         onSearchChange={setSearchDebounced}
       />
@@ -539,32 +554,38 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       {/* Ticker */}
       <Ticker />
 
-      {/* Category nav */}
-      {categorias.length > 0 && (
-        <CatsNav
-          categorias={["Todos", ...categorias]}
-          activeCat={activeCat}
-          onSelect={(cat) => setCategoria(cat === "Todos" ? "" : cat)}
+      {/* Contenido del catálogo — max-width desktop */}
+      <div className="page-wrapper">
+        {/* Category nav */}
+        {categorias.length > 0 && (
+          <CatsNav
+            categorias={["Todos", ...categorias]}
+            activeCat={activeCat}
+            onSelect={(cat) => setCategoria(cat === "Todos" ? "" : cat)}
+          />
+        )}
+
+        {/* Results bar */}
+        <ResultsBar
+          showing={filtrados.length}
+          total={filtrados.length}
+          vista={vista}
+          onToggleVista={handleToggleVista}
+          searchQuery={search}
+          onSearchChange={setSearchDebounced}
         />
-      )}
 
-      {/* Results bar */}
-      <ResultsBar
-        showing={Math.min(filtrados.length, 40)}
-        total={filtrados.length}
-        vista={vista}
-        onToggleVista={handleToggleVista}
-      />
+        {/* Product grid/list */}
+        <ProductoGrid
+          productos={filtrados}
+          vista={vista}
+          qtyMap={qtyMap}
+          searchTerm={search}
+          onAdd={handleAddProduct}
+          onQtyChange={handleQtyChange}
+        />
+      </div>
 
-      {/* Product grid/list */}
-      <ProductoGrid
-        productos={filtrados}
-        vista={vista}
-        qtyMap={qtyMap}
-        searchTerm={search}
-        onAdd={handleAddProduct}
-        onQtyChange={handleQtyChange}
-      />
 
       {/* Float cart button */}
       <FloatCartBtn
@@ -609,6 +630,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         pedidos={pedidos}
         onAliasSave={handleSaveAlias}
         onReorder={handleReorder}
+        onReorderItems={handleReorderItems}
         onLogout={handleLogout}
         onClearData={handleClearData}
       />

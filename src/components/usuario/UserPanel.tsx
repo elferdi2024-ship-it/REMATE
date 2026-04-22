@@ -1,13 +1,21 @@
+// filepath: src/components/usuario/UserPanel.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 
-// ── Types ───────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────
+
+interface PedidoItem {
+  codigo: string;
+  nombre: string;
+  cantidad: number;
+  precioUnitario: number;
+}
 
 interface PedidoRecord {
   id?: string;
-  fecha: any; // Timestamp or Date or ISO string
-  items: Array<{ codigo: string; nombre: string; cantidad: number; precioUnitario: number }>;
+  fecha: any;
+  items: PedidoItem[];
   total: number;
   notas?: string;
 }
@@ -15,43 +23,30 @@ interface PedidoRecord {
 interface UserPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Guest alias from localStorage */
   alias: string;
-  /** Firebase user (null if guest) */
-  user: any; // Firebase User | null
-  /** Recent orders (last 10) */
+  user: any;
   pedidos: PedidoRecord[];
-  /** Called when alias is saved (localStorage) */
   onAliasSave: (alias: string) => void;
-  /** Called when user wants to repeat last order */
+  /** Legacy: agrega todos los items del pedido */
   onReorder: (pedido: PedidoRecord) => void;
-  /** Called on logout */
+  /** Nuevo: agrega solo items seleccionados con cantidades custom */
+  onReorderItems?: (items: PedidoItem[]) => void;
   onLogout: () => void;
-  /** Called on clear local data */
   onClearData: () => void;
-  /** Show "Mis Listas" section */
   onOpenListas?: () => void;
-  /** Trigger auth form */
   onOpenAuth?: () => void;
 }
 
-// ── Helpers ─────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────
 
 function timeAgo(date: any): string {
   const now = new Date();
   let d: Date;
-  if (date instanceof Date) {
-    d = date;
-  } else if (typeof date === "string") {
-    d = new Date(date);
-  } else if (date?.toDate) {
-    // Firebase Timestamp
-    d = date.toDate();
-  } else if (date?.seconds) {
-    d = new Date(date.seconds * 1000);
-  } else {
-    return "hace tiempo";
-  }
+  if (date instanceof Date) d = date;
+  else if (typeof date === "string") d = new Date(date);
+  else if (date?.toDate) d = date.toDate();
+  else if (date?.seconds) d = new Date(date.seconds * 1000);
+  else return "hace tiempo";
 
   const diffMs = now.getTime() - d.getTime();
   const diffDays = Math.floor(diffMs / 86400000);
@@ -65,34 +60,213 @@ function timeAgo(date: any): string {
 
 function formatDate(date: any): string {
   let d: Date;
-  if (date instanceof Date) {
-    d = date;
-  } else if (typeof date === "string") {
-    d = new Date(date);
-  } else if (date?.toDate) {
-    d = date.toDate();
-  } else if (date?.seconds) {
-    d = new Date(date.seconds * 1000);
-  } else {
-    return "";
-  }
-
-  const months = [
-    "Ene", "Feb", "Mar", "Abr", "May", "Jun",
-    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
-  ];
-  const day = d.getDate();
-  const month = months[d.getMonth()];
-  const hours = d.getHours().toString().padStart(2, "0");
-  const mins = d.getMinutes().toString().padStart(2, "0");
-  return `${day} ${month} · ${hours}:${mins}`;
+  if (date instanceof Date) d = date;
+  else if (typeof date === "string") d = new Date(date);
+  else if (date?.toDate) d = date.toDate();
+  else if (date?.seconds) d = new Date(date.seconds * 1000);
+  else return "";
+  const months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  return `${d.getDate()} ${months[d.getMonth()]} · ${d.getHours().toString().padStart(2,"0")}:${d.getMinutes().toString().padStart(2,"0")}`;
 }
 
 function formatPrice(n: number): string {
   return `$${n.toLocaleString("es-UY", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
-// ── Component ───────────────────────────────────────────────────────────
+// ── PedidoCard con historial granular ─────────────────────────────────────
+
+function PedidoCard({
+  pedido,
+  onReorder,
+  onReorderItems,
+}: {
+  pedido: PedidoRecord;
+  onReorder: (p: PedidoRecord) => void;
+  onReorderItems?: (items: PedidoItem[]) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  // Estado local: qty por cada item (usando codigo como key)
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [quantities, setQuantities] = useState<Record<string, number>>(() =>
+    Object.fromEntries(pedido.items.map((i) => [i.codigo, i.cantidad]))
+  );
+
+  const toggleSelect = (codigo: string) => {
+    setSelected((prev) => ({ ...prev, [codigo]: !prev[codigo] }));
+  };
+
+  const selectAll = () => {
+    const allSelected = pedido.items.every((i) => selected[i.codigo]);
+    if (allSelected) {
+      setSelected({});
+    } else {
+      setSelected(Object.fromEntries(pedido.items.map((i) => [i.codigo, true])));
+    }
+  };
+
+  const setQty = (codigo: string, delta: number) => {
+    setQuantities((prev) => ({
+      ...prev,
+      [codigo]: Math.max(1, (prev[codigo] ?? 1) + delta),
+    }));
+  };
+
+  const selectedItems = pedido.items.filter((i) => selected[i.codigo]);
+  const selectedTotal = selectedItems.reduce(
+    (sum, i) => sum + (quantities[i.codigo] ?? i.cantidad) * i.precioUnitario,
+    0
+  );
+  const allChecked = pedido.items.length > 0 && pedido.items.every((i) => selected[i.codigo]);
+  const someChecked = selectedItems.length > 0 && !allChecked;
+
+  const handleAddSelected = useCallback(() => {
+    if (selectedItems.length === 0) return;
+    const itemsToAdd = selectedItems.map((i) => ({
+      ...i,
+      cantidad: quantities[i.codigo] ?? i.cantidad,
+    }));
+    if (onReorderItems) {
+      onReorderItems(itemsToAdd);
+    } else {
+      // Fallback al comportamiento legacy
+      onReorder({ ...pedido, items: itemsToAdd });
+    }
+  }, [selectedItems, quantities, onReorderItems, onReorder, pedido]);
+
+  return (
+    <div className="pedido-card-v2">
+      {/* Header del pedido — siempre visible */}
+      <button
+        className="pedido-card-v2-header"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+      >
+        <div className="pedido-card-v2-meta">
+          <span className="pedido-card-v2-date">{formatDate(pedido.fecha)}</span>
+          <span className="pedido-card-v2-items-count">{pedido.items.length} productos</span>
+        </div>
+        <div className="pedido-card-v2-right">
+          <span className="pedido-card-v2-total">{formatPrice(pedido.total)}</span>
+          <span className={`pedido-card-v2-chevron${expanded ? " open" : ""}`}>›</span>
+        </div>
+      </button>
+
+      {/* Preview de items cuando está colapsado */}
+      {!expanded && (
+        <div className="pedido-card-v2-preview">
+          {pedido.items.slice(0, 3).map((item, idx) => (
+            <span key={idx} className="pedido-card-v2-preview-chip">
+              {item.cantidad}× {item.nombre.length > 20 ? item.nombre.slice(0, 20) + "…" : item.nombre}
+            </span>
+          ))}
+          {pedido.items.length > 3 && (
+            <span className="pedido-card-v2-preview-more">+{pedido.items.length - 3} más</span>
+          )}
+        </div>
+      )}
+
+      {/* Expanded — lista completa con checkboxes y steppers */}
+      {expanded && (
+        <div className="pedido-card-v2-body">
+          {/* Seleccionar todos */}
+          <div className="pedido-select-all-row">
+            <label className="pedido-select-all-label">
+              <input
+                type="checkbox"
+                checked={allChecked}
+                ref={(el) => {
+                  if (el) el.indeterminate = someChecked;
+                }}
+                onChange={selectAll}
+                className="pedido-checkbox"
+              />
+              <span>Seleccionar todos</span>
+            </label>
+            <span className="pedido-item-count-badge">{pedido.items.length} items</span>
+          </div>
+
+          {/* Lista de items */}
+          <div className="pedido-items-list">
+            {pedido.items.map((item) => {
+              const isSelected = !!selected[item.codigo];
+              const qty = quantities[item.codigo] ?? item.cantidad;
+              return (
+                <div
+                  key={item.codigo}
+                  className={`pedido-item-row${isSelected ? " selected" : ""}`}
+                >
+                  {/* Checkbox */}
+                  <label className="pedido-item-check-label" aria-label={`Seleccionar ${item.nombre}`}>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleSelect(item.codigo)}
+                      className="pedido-checkbox"
+                    />
+                  </label>
+
+                  {/* Nombre */}
+                  <div className="pedido-item-name-wrap">
+                    <span className="pedido-item-name">{item.nombre}</span>
+                    {item.precioUnitario > 0 && (
+                      <span className="pedido-item-price">
+                        {formatPrice(item.precioUnitario)} c/u
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Stepper */}
+                  <div className={`pedido-item-stepper${!isSelected ? " disabled" : ""}`}>
+                    <button
+                      onClick={() => {
+                        if (!isSelected) toggleSelect(item.codigo);
+                        setQty(item.codigo, -1);
+                      }}
+                      className="pedido-step-btn"
+                      aria-label="Disminuir"
+                    >
+                      −
+                    </button>
+                    <span className="pedido-step-val">{qty}</span>
+                    <button
+                      onClick={() => {
+                        if (!isSelected) toggleSelect(item.codigo);
+                        setQty(item.codigo, 1);
+                      }}
+                      className="pedido-step-btn"
+                      aria-label="Aumentar"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Footer con totales y CTA */}
+          <div className="pedido-card-v2-footer">
+            {selectedItems.length > 0 ? (
+              <>
+                <div className="pedido-selected-summary">
+                  <span>{selectedItems.length} seleccionado{selectedItems.length > 1 ? "s" : ""}</span>
+                  <span className="pedido-selected-total">{formatPrice(selectedTotal)}</span>
+                </div>
+                <button className="btn-add-selected" onClick={handleAddSelected}>
+                  ⚡ Agregar al pedido
+                </button>
+              </>
+            ) : (
+              <p className="pedido-select-hint">Seleccioná los productos que querés agregar</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Componente principal ──────────────────────────────────────────────────
 
 export default function UserPanel({
   isOpen,
@@ -102,6 +276,7 @@ export default function UserPanel({
   pedidos,
   onAliasSave,
   onReorder,
+  onReorderItems,
   onLogout,
   onClearData,
   onOpenListas,
@@ -132,26 +307,35 @@ export default function UserPanel({
           <div className="panel-header-inner">
             <div className="panel-header-brand">
               <span className="panel-eyebrow">El Remate · Canelones</span>
-              <span className="panel-title">Tu Espacio</span>
+              <span className="panel-title">
+                {user
+                  ? (user.displayName || alias || "Mi Cuenta")
+                  : alias
+                  ? alias
+                  : "Tu Espacio"}
+              </span>
               <span className="panel-sub">
-                {user ? "Usuario registrado" : alias ? `Invitado · ${alias}` : "Identificate"}
+                {user
+                  ? `✓ Usuario registrado${pedidos.length > 0 ? ` · ${pedidos.length} pedidos` : ""}`
+                  : alias
+                  ? `Invitado · Último pedido ${lastPedidoAgo || "sin pedidos"}`
+                  : "Identificate para guardar tu historial"}
               </span>
             </div>
-            <button className="panel-close" onClick={onClose} aria-label="Cerrar">
-              ✕
-            </button>
+            <button className="panel-close" onClick={onClose} aria-label="Cerrar">✕</button>
           </div>
         </div>
 
         {/* Body */}
         <div className="user-panel-body">
-          {/* ── State A: No alias ── */}
+
+          {/* ── Estado A: Sin alias ni user ── */}
           {!alias && !user && (
             <div className="auth-setup">
               <div className="auth-welcome">
-                <span className="auth-welcome-emoji">&#127960;</span>
+                <span className="auth-welcome-emoji">🏪</span>
                 <h3>¿Cómo se llama tu negocio?</h3>
-                <p>Así personalizamos tu pedido.</p>
+                <p>Para guardar tus pedidos y repetirlos fácilmente.</p>
               </div>
               <div className="form-group">
                 <input
@@ -166,31 +350,23 @@ export default function UserPanel({
                   Guardar
                 </button>
               </div>
-              <div className="auth-divider">
-                <span>o</span>
-              </div>
-              <button
-                className="btn-secondary-link"
-                onClick={() => onOpenAuth?.()}
-              >
-                Crear cuenta gratis &#8594;
+              <div className="auth-divider"><span>o</span></div>
+              <button className="btn-secondary-link" onClick={() => onOpenAuth?.()}>
+                Crear cuenta gratis — guardar en la nube &#8594;
               </button>
             </div>
           )}
 
-          {/* ── State B: Guest with alias ── */}
+          {/* ── Estado B: Invitado con alias ── */}
           {alias && !user && (
             <div className="guest-panel">
-              {/* Alias display */}
+              {/* Alias */}
               <div className="guest-alias-header">
                 <span className="guest-alias-eyebrow">NEGOCIO</span>
                 <span className="guest-alias-name">{alias.toUpperCase()}</span>
                 <button
                   className="btn-edit-alias"
-                  onClick={() => {
-                    setAliasInput(alias);
-                    setEditingAlias(true);
-                  }}
+                  onClick={() => { setAliasInput(alias); setEditingAlias(true); }}
                 >
                   Editar
                 </button>
@@ -206,109 +382,90 @@ export default function UserPanel({
                     onKeyDown={(e) => e.key === "Enter" && handleSaveAlias()}
                   />
                   <div className="alias-edit-actions">
-                    <button className="btn-small-primary" onClick={handleSaveAlias}>
-                      Guardar
-                    </button>
-                    <button
-                      className="btn-small-secondary"
-                      onClick={() => {
-                        setEditingAlias(false);
-                        setAliasInput(alias);
-                      }}
-                    >
-                      Cancelar
-                    </button>
+                    <button className="btn-small-primary" onClick={handleSaveAlias}>Guardar</button>
+                    <button className="btn-small-secondary" onClick={() => { setEditingAlias(false); setAliasInput(alias); }}>Cancelar</button>
                   </div>
                 </div>
               )}
 
-              {/* Recent orders */}
-              {pedidos.length > 0 && (
+              {/* Historial */}
+              {pedidos.length > 0 ? (
                 <div className="pedidos-section">
-                  <div className="pedidos-section-title">Últimos pedidos</div>
-                  {pedidos.slice(0, 5).map((p, idx) => (
+                  <div className="pedidos-section-header">
+                    <span className="pedidos-section-title">Historial de pedidos</span>
+                    <span className="pedidos-section-hint">Tocá un pedido para elegir qué repetir</span>
+                  </div>
+                  {pedidos.slice(0, 8).map((p, idx) => (
                     <PedidoCard
                       key={p.id || idx}
                       pedido={p}
                       onReorder={onReorder}
+                      onReorderItems={onReorderItems}
                     />
                   ))}
-                  {pedidos.length > 5 && (
-                    <div className="pedidos-more">
-                      {pedidos.length - 5} más...
-                    </div>
-                  )}
+                </div>
+              ) : (
+                <div className="pedidos-empty">
+                  <span className="pedidos-empty-icon">📋</span>
+                  <p>Aún no tenés pedidos guardados.</p>
+                  <p className="pedidos-empty-sub">Cuando hagas tu primer pedido, lo vas a ver acá.</p>
                 </div>
               )}
 
-              {/* CTA to create account */}
-              <button
-                className="btn-create-account"
-                onClick={() => onOpenAuth?.()}
-              >
-                Crear cuenta para guardar en la nube &#8594;
+              <button className="btn-create-account" onClick={() => onOpenAuth?.()}>
+                Crear cuenta — historial en la nube &#8594;
               </button>
-
-              {/* Clear data */}
               <button className="btn-clear-data" onClick={onClearData}>
                 Limpiar mis datos
               </button>
             </div>
           )}
 
-          {/* ── State C: Registered user ── */}
+          {/* ── Estado C: Usuario registrado ── */}
           {user && (
             <div className="user-panel">
-              {/* User header */}
               <div className="user-header">
                 <span className="user-alias-eyebrow">NEGOCIO</span>
                 <span className="user-alias-name">
                   {(user.displayName || alias || "Usuario").toUpperCase()}
                 </span>
                 <span className="user-stats">
-                  {pedidos.length} pedidos · último hace {lastPedidoAgo || "tiempo"}
+                  {pedidos.length} pedidos · último {lastPedidoAgo || "reciente"}
                 </span>
               </div>
 
-              {/* Recent orders */}
-              {pedidos.length > 0 && (
+              {/* Historial granular */}
+              {pedidos.length > 0 ? (
                 <div className="pedidos-section">
-                  <div className="pedidos-section-title">
-                    Últimos pedidos
+                  <div className="pedidos-section-header">
+                    <span className="pedidos-section-title">Historial de pedidos</span>
+                    <span className="pedidos-section-hint">Tocá un pedido para elegir qué repetir</span>
                   </div>
-                  {pedidos.slice(0, 5).map((p, idx) => (
+                  {pedidos.slice(0, 10).map((p, idx) => (
                     <PedidoCard
                       key={p.id || idx}
                       pedido={p}
                       onReorder={onReorder}
+                      onReorderItems={onReorderItems}
                     />
                   ))}
                 </div>
+              ) : (
+                <div className="pedidos-empty">
+                  <span className="pedidos-empty-icon">📋</span>
+                  <p>Sin pedidos registrados aún.</p>
+                </div>
               )}
 
-              {/* Mis Listas */}
               {onOpenListas && (
                 <div className="listas-section">
                   <div className="listas-section-header">
                     <span className="listas-section-title">Mis Listas</span>
-                    <button className="btn-new-lista" onClick={onOpenListas}>
-                      Nueva lista
-                    </button>
+                    <button className="btn-new-lista" onClick={onOpenListas}>Nueva lista</button>
                   </div>
                 </div>
               )}
 
-              {/* Repeat last order */}
-              {lastPedido && (
-                <button
-                  className="btn-reorder"
-                  onClick={() => onReorder(lastPedido)}
-                >
-                  Repetir último pedido &#9889;
-                </button>
-              )}
-
-              {/* Logout */}
               <button className="btn-logout" onClick={onLogout}>
                 Cerrar sesión
               </button>
@@ -317,47 +474,5 @@ export default function UserPanel({
         </div>
       </div>
     </>
-  );
-}
-
-// ── Sub-components ──────────────────────────────────────────────────────
-
-function PedidoCard({
-  pedido,
-  onReorder,
-}: {
-  pedido: PedidoRecord;
-  onReorder: (p: PedidoRecord) => void;
-}) {
-  const totalItems = pedido.items.reduce((s, i) => s + i.cantidad, 0);
-  const showItems = pedido.items.slice(0, 2);
-  const remaining = pedido.items.length - 2;
-
-  return (
-    <div className="pedido-card">
-      <div className="pedido-card-header">
-        <span className="pedido-card-date">{formatDate(pedido.fecha)}</span>
-        <span className="pedido-card-total">{formatPrice(pedido.total)}</span>
-      </div>
-      <div className="pedido-card-items">
-        {showItems.map((item, idx) => (
-          <div key={idx} className="pedido-card-item">
-            <span className="pedido-card-item-qty">{item.cantidad}x</span>
-            <span className="pedido-card-item-name">{item.nombre}</span>
-          </div>
-        ))}
-        {remaining > 0 && (
-          <div className="pedido-card-item pedido-card-item-more">
-            + {remaining} más...
-          </div>
-        )}
-      </div>
-      <button
-        className="btn-reorder-small"
-        onClick={() => onReorder(pedido)}
-      >
-        &#9889; Repetir
-      </button>
-    </div>
   );
 }

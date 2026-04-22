@@ -1,8 +1,10 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+// filepath: src/components/catalogo/ProductoGrid.tsx
+"use client";
+
+import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import type { Producto, Vista } from "@/types";
 import ProductoCard from "./ProductoCard";
 import ProductoRow from "./ProductoRow";
-import AdBanner from "../ui/AdBanner";
 
 interface ProductoGridProps {
   productos: Producto[];
@@ -13,9 +15,6 @@ interface ProductoGridProps {
   onQtyChange: (codigo: string, qty: number) => void;
 }
 
-const PAGE_SIZE = 40;
-
-// Corrección de categorías para productos mal catalogados
 const CATEGORY_CORRECTIONS: Record<string, string> = {
   "ALFAJOR": "Golosinas y Dulces",
   "PILAS": "Otros",
@@ -34,6 +33,168 @@ const CATEGORY_CORRECTIONS: Record<string, string> = {
   "BUDIN": "Panadería",
 };
 
+// Banners responsive
+const BANNERS = [
+  { desktop: "/banners/banner1-desktop.jpg", mobile: "/banners/banner1-mobile.jpg", alt: "Oferta especial" },
+  { desktop: "/banners/banner2-desktop.jpg", mobile: "/banners/banner2-mobile.jpg", alt: "Promoción" },
+  { desktop: "/banners/banner3-desktop.jpg", mobile: "/banners/banner3-mobile.jpg", alt: "Descuentos" },
+  { desktop: "/banners/banner4-desktop.jpg", mobile: "/banners/banner4-mobile.jpg", alt: "Oferta exclusiva" },
+];
+
+function CategoryBanner({ index }: { index: number }) {
+  const banner = BANNERS[index % BANNERS.length];
+  return (
+    <div className="cat-banner-between">
+      <picture>
+        <source media="(max-width: 600px)" srcSet={banner.mobile} />
+        <source media="(min-width: 601px)" srcSet={banner.desktop} />
+        <img
+          src={banner.desktop}
+          alt={banner.alt}
+          className="cat-banner-img"
+          loading="lazy"
+        />
+      </picture>
+    </div>
+  );
+}
+
+// ─── Componente carrusel horizontal por categoría ───────────────────────────
+function CategoryCarousel({
+  cat,
+  catProds,
+  columns,
+  qtyMap,
+  searchTerm,
+  vista,
+  onAdd,
+  onQtyChange,
+}: {
+  cat: string;
+  catProds: Producto[];
+  columns: number;
+  qtyMap: Record<string, number>;
+  searchTerm?: string;
+  vista: Vista;
+  onAdd: (p: Producto) => void;
+  onQtyChange: (codigo: string, qty: number) => void;
+}) {
+  const [showAll, setShowAll] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Reset cuando cambia la categoría
+  useEffect(() => {
+    setShowAll(false);
+    if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+  }, [cat]);
+
+  const total = catProds.length;
+  // Cuántos caben en 1 "página" del carrusel (1 fila = columns cards)
+  const pageSize = columns;
+  const hasMore = total > pageSize;
+
+  const handleArrow = useCallback(() => {
+    if (!scrollRef.current) return;
+    // Calcular ancho de una "página" (columns × card width + gap)
+    const container = scrollRef.current;
+    const cardWidth = container.scrollWidth / total;
+    const pageWidth = cardWidth * pageSize;
+    container.scrollBy({ left: pageWidth, behavior: "smooth" });
+  }, [total, pageSize]);
+
+  const handleShowAll = () => setShowAll(true);
+  const handleShowLess = () => {
+    setShowAll(false);
+    if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+  };
+
+  if (vista === "lista") {
+    return (
+      <div className="product-list">
+        {catProds.map((p) => (
+          <ProductoRow
+            key={p.codigo}
+            producto={p}
+            qty={qtyMap[p.codigo] || 0}
+            onAdd={onAdd}
+            onQtyChange={onQtyChange}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (showAll) {
+    return (
+      <>
+        <div className="grid">
+          {catProds.map((p) => (
+            <ProductoCard
+              key={p.codigo}
+              producto={p}
+              qty={qtyMap[p.codigo] || 0}
+              searchTerm={searchTerm}
+              onAdd={onAdd}
+              onQtyChange={onQtyChange}
+            />
+          ))}
+        </div>
+        <div className="cat-section-controls">
+          <button className="btn-show-less" onClick={handleShowLess}>
+            MOSTRAR MENOS ↑
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  // MODO CARRUSEL HORIZONTAL
+  return (
+    <>
+      <div className="cat-carousel-wrap">
+        <div
+          ref={scrollRef}
+          className="cat-carousel-track"
+        >
+          {catProds.map((p) => (
+            <div key={p.codigo} className="cat-carousel-item">
+              <ProductoCard
+                producto={p}
+                qty={qtyMap[p.codigo] || 0}
+                searchTerm={searchTerm}
+                onAdd={onAdd}
+                onQtyChange={onQtyChange}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Flecha → solo si hay más productos */}
+        {hasMore && (
+          <button
+            className="cat-expand-arrow"
+            onClick={handleArrow}
+            title="Ver más"
+            aria-label="Ver más productos"
+          >
+            ›
+          </button>
+        )}
+      </div>
+
+      {/* MOSTRAR TODO */}
+      {hasMore && (
+        <div className="cat-section-controls">
+          <button className="btn-show-all" onClick={handleShowAll}>
+            MOSTRAR TODO ({total})
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── Componente principal ────────────────────────────────────────────────────
 export default function ProductoGrid({
   productos,
   vista,
@@ -42,10 +203,8 @@ export default function ProductoGrid({
   onAdd,
   onQtyChange,
 }: ProductoGridProps) {
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [columns, setColumns] = useState(2);
 
-  // Detectar columnas para inyectar banners cada 2 líneas
   useEffect(() => {
     const updateColumns = () => {
       const w = window.innerWidth;
@@ -60,28 +219,16 @@ export default function ProductoGrid({
     return () => window.removeEventListener("resize", updateColumns);
   }, []);
 
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [productos.length]);
-
-  const handleLoadMore = useCallback(() => {
-    setVisibleCount((prev) => prev + PAGE_SIZE);
-  }, []);
-
-  // Agrupar y corregir productos
   const grouped = useMemo(() => {
     return productos.reduce((acc, p) => {
       let categoria = p.categoria;
       const nombreUpper = p.nombre.toUpperCase();
-      
-      // Aplicar correcciones basadas en palabras clave
       for (const [key, corrected] of Object.entries(CATEGORY_CORRECTIONS)) {
         if (nombreUpper.includes(key)) {
           categoria = corrected;
           break;
         }
       }
-
       if (!acc[categoria]) acc[categoria] = [];
       acc[categoria].push(p);
       return acc;
@@ -89,45 +236,6 @@ export default function ProductoGrid({
   }, [productos]);
 
   const categories = Object.keys(grouped).sort();
-
-  const banners = [
-    {
-      id: "banner-premium-1",
-      type: "html" as const,
-      backgroundColor: "var(--oscuro)",
-      htmlContent: (
-        <div style={{ textAlign: "center", width: "100%", padding: "12px" }}>
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2.8rem", color: "var(--rojo)", margin: 0, letterSpacing: "2px" }}>PATROCINADOR EXCLUSIVO</h3>
-          <p style={{ margin: "2px 0 0", color: "var(--on-dark-mid)", fontWeight: 700, textTransform: "uppercase", fontSize: "0.9rem", letterSpacing: "1px" }}>Confianza y Calidad en cada entrega</p>
-        </div>
-      )
-    },
-    {
-      id: "banner-weekend",
-      type: "html" as const,
-      backgroundColor: "#FEF3C7",
-      htmlContent: (
-        <div style={{ textAlign: "center", width: "100%", padding: "20px" }}>
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2.2rem", color: "#D97706", margin: 0 }}>LOS ROMPE DEL FINDE</h3>
-          <p style={{ margin: "4px 0 0", color: "#5C4A35", fontWeight: 700 }}>Aprovechá estas ofertas exclusivas hasta el domingo.</p>
-        </div>
-      )
-    },
-    {
-      id: "banner-cleaning",
-      type: "html" as const,
-      backgroundColor: "#EBF7F0",
-      htmlContent: (
-        <div style={{ textAlign: "center", width: "100%", padding: "20px" }}>
-          <h3 style={{ fontFamily: "var(--font-display)", fontSize: "2.2rem", color: "#1A7A42", margin: 0 }}>¡HASTA 25% OFF EN LIMPIEZA!</h3>
-          <p style={{ margin: "4px 0 0", color: "#145E33", fontWeight: 700 }}>Stockeate con los mejores precios mayoristas.</p>
-        </div>
-      )
-    }
-  ];
-
-  let globalProductIndex = 0;
-  let bannerIndex = 0;
 
   if (productos.length === 0) {
     return (
@@ -139,94 +247,41 @@ export default function ProductoGrid({
   }
 
   return (
-    <div className="catalogo-container" style={{ padding: "0 4px 40px" }}>
-      {categories.map((cat) => {
+    <div className="catalogo-container">
+      {categories.map((cat, catIdx) => {
         const catProds = grouped[cat];
-        const visibleInCat = catProds.filter(() => {
-          const isVisible = globalProductIndex < visibleCount;
-          globalProductIndex++;
-          return isVisible;
-        });
-
-        if (visibleInCat.length === 0) return null;
-
-        const bannerInterval = columns * 2; // Inyectar cada 2 líneas
+        const total = catProds.length;
 
         return (
-          <section key={cat} className="cat-section" style={{ marginBottom: "32px" }}>
-            <div style={{ 
-              display: "flex", 
-              alignItems: "center", 
-              gap: "12px", 
-              marginBottom: "16px",
-              padding: "0 12px"
-            }}>
-              <h2 className="cat-section-title" style={{ 
-                fontFamily: "var(--font-display)", 
-                fontSize: "2rem", 
-                color: "var(--oscuro)", 
-                margin: 0,
-                letterSpacing: "1px"
-              }}>
-                {cat}
-              </h2>
-              <div style={{ flex: 1, height: "1px", background: "var(--border)", marginTop: "8px" }}></div>
-              <span style={{ fontSize: "var(--text-xs)", color: "var(--muted)", fontWeight: 700, textTransform: "uppercase" }}>
-                {catProds.length} items
-              </span>
-            </div>
+          <React.Fragment key={cat}>
+            {/* Banner entre secciones (no antes de la primera) */}
+            {catIdx > 0 && vista === "grilla" && (
+              <CategoryBanner index={catIdx - 1} />
+            )}
 
-            <div className={vista === "grilla" ? "grid" : "product-list"}>
-              {visibleInCat.map((p, idx) => {
-                const elements = [];
-                
-                // El producto
-                elements.push(
-                  vista === "grilla" ? (
-                    <ProductoCard
-                      key={p.codigo}
-                      producto={p}
-                      qty={qtyMap[p.codigo] || 0}
-                      searchTerm={searchTerm}
-                      onAdd={onAdd}
-                      onQtyChange={onQtyChange}
-                    />
-                  ) : (
-                    <ProductoRow
-                      key={p.codigo}
-                      producto={p}
-                      qty={qtyMap[p.codigo] || 0}
-                      onAdd={onAdd}
-                      onQtyChange={onQtyChange}
-                    />
-                  )
-                );
+            <section className="cat-section">
+              {/* Header */}
+              <div className="cat-section-header">
+                <h2 className="cat-section-title">{cat}</h2>
+                <div className="cat-section-divider" />
+                <span className="cat-section-count">{total} items</span>
+              </div>
 
-                // Inyectar banner después de cada N productos (dentro de la categoría)
-                if (idx > 0 && (idx + 1) % bannerInterval === 0 && idx < visibleInCat.length - 1) {
-                  const banner = banners[bannerIndex % banners.length];
-                  bannerIndex++;
-                  elements.push(
-                    <div key={`banner-${p.codigo}`} className="grid-banner-row">
-                      <AdBanner {...banner} />
-                    </div>
-                  );
-                }
-
-                return elements;
-              })}
-            </div>
-          </section>
+              {/* Carrusel o lista */}
+              <CategoryCarousel
+                cat={cat}
+                catProds={catProds}
+                columns={columns}
+                qtyMap={qtyMap}
+                searchTerm={searchTerm}
+                vista={vista}
+                onAdd={onAdd}
+                onQtyChange={onQtyChange}
+              />
+            </section>
+          </React.Fragment>
         );
       })}
-
-      {visibleCount < productos.length && (
-        <div className="load-more-wrap" style={{ textAlign: "center", marginTop: "20px" }}>
-          <button className="btn-load-more" onClick={handleLoadMore}>
-            CARGAR MÁS PRODUCTOS ↓
-          </button>
-        </div>
-      )}
     </div>
   );
 }
