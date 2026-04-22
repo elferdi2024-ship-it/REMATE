@@ -191,11 +191,12 @@ export default function Hero({
           <img
             src="/logo.png"
             alt="El Remate Logo"
-            width={150}
-            height={85}
             style={{ 
+              width: "100%",
+              maxWidth: "280px",
+              height: "auto",
               objectFit: "contain", 
-              filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))" 
+              filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.6)) drop-shadow(0 0 15px rgba(214,40,40,0.25))" 
             }}
           />
         </div>
