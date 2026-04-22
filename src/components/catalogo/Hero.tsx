@@ -177,6 +177,29 @@ export default function Hero({
           </div>
         </div>
 
+        {/* ════ MEDIO: Logo ════ */}
+        <div 
+          className="hero-logo-center" 
+          style={{ 
+            display: "flex", 
+            justifyContent: "center", 
+            alignItems: "center",
+            padding: "20px 0"
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="El Remate Logo"
+            width={150}
+            height={85}
+            style={{ 
+              objectFit: "contain", 
+              filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))" 
+            }}
+          />
+        </div>
+
         {/* ════ DERECHA: Controles ════ */}
         <div className="hero-controls-v2">
 
