@@ -30,7 +30,7 @@ export default function ResultsBar({
           <input
             type="search"
             className="results-search-input"
-            placeholder="Buscar producto..."
+            placeholder="Buscar por nombre, marca o código..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             aria-label="Buscar productos"

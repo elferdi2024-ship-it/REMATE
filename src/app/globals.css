@@ -623,14 +623,23 @@ html.dark-mode body { background: var(--bg); }
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap; /* Cambiado a wrap para mobile */
 }
 
 /* Buscador inline en la results-bar */
 .results-search-wrap {
-  flex: 1;
+  flex: 1 1 100%; /* Ocupa todo el ancho en mobile */
   position: relative;
   min-width: 0;
+}
+
+@media (min-width: 700px) {
+  .results-bar {
+    flex-wrap: nowrap;
+  }
+  .results-search-wrap {
+    flex: 1; /* Comportamiento normal en PC */
+  }
 }
 
 .results-search-input {

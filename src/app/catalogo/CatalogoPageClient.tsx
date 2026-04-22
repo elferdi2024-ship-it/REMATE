@@ -219,12 +219,17 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     }
 
     if (debouncedSearch.trim()) {
-      const term = debouncedSearch.trim().toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.nombre.toLowerCase().includes(term) ||
-          p.codigo.toLowerCase().includes(term)
-      );
+      const normalize = (s: string) =>
+        s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        
+      const searchTerms = normalize(debouncedSearch.trim()).split(/\s+/);
+      
+      result = result.filter((p) => {
+        // Buscamos en nombre, codigo y tambien en la categoria (que funciona como filtro extra)
+        // Como la DB actual no tiene el campo "marca", las marcas suelen estar en el "nombre"
+        const searchableText = normalize(`${p.nombre} ${p.codigo} ${p.categoria}`);
+        return searchTerms.every((term) => searchableText.includes(term));
+      });
     }
 
     return result;
