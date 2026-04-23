@@ -3,6 +3,7 @@
 import { CartItem } from '@/types';
 import CartItemRow from './CartItem';
 import CartFooter from './CartFooter';
+import AdPopup from './AdPopup';
 
 interface CartPanelProps {
   isOpen: boolean;
@@ -57,6 +58,13 @@ export default function CartPanel({
       <div
         className={`overlay ${isOpen ? 'open' : ''}`}
         onClick={onClose}
+      />
+
+      {/* ── Ad Popup (Doña Coca) ── */}
+      <AdPopup
+        isCartOpen={isOpen}
+        imageSrc="/ads/donacoca.png"
+        altText="Doña Coca - Oferta especial"
       />
 
       {/* ── Slide-in panel ── */}
