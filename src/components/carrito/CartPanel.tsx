@@ -93,51 +93,54 @@ export default function CartPanel({
           </div>
         </div>
 
-        {/* Items list */}
-        <div className="cart-items">
-          {items.length === 0 ? (
-            <div className="cart-empty">
-              <span className="cart-empty-icon">🛒</span>
-              <strong>Todavía no agregaste nada</strong>
-              <p>Agregá productos desde el catálogo para armar tu pedido.</p>
-            </div>
-          ) : (
-            items.map((item) => (
-              <CartItemRow
-                key={item.codigo}
-                item={item}
-                onUpdateQty={onUpdateQty}
-                onRemove={onRemove}
-              />
-            ))
+        {/* Scrollable Body */}
+        <div className="cart-body">
+          {/* Items list */}
+          <div className="cart-items">
+            {items.length === 0 ? (
+              <div className="cart-empty">
+                <span className="cart-empty-icon">🛒</span>
+                <strong>Todavía no agregaste nada</strong>
+                <p>Agregá productos desde el catálogo para armar tu pedido.</p>
+              </div>
+            ) : (
+              items.map((item) => (
+                <CartItemRow
+                  key={item.codigo}
+                  item={item}
+                  onUpdateQty={onUpdateQty}
+                  onRemove={onRemove}
+                />
+              ))
+            )}
+          </div>
+
+          {/* Footer — only show when cart has items */}
+          {items.length > 0 && (
+            <CartFooter
+              total={total}
+              alias={alias}
+              onAliasChange={onAliasChange}
+              onSendWA={onSendWA}
+              onShare={onShare}
+              onClear={onClear}
+              shareLink={shareLink}
+              onCopyShareLink={onCopyShareLink}
+              telefono={telefono}
+              onTelefonoChange={onTelefonoChange}
+              clientNotes={clientNotes}
+              onClientNotesChange={onClientNotesChange}
+              direccion={direccion}
+              onDireccionChange={onDireccionChange}
+              onSaveLista={onSaveLista}
+              isProcessing={isProcessing}
+              metodoEntrega={metodoEntrega}
+              onMetodoEntregaChange={onMetodoEntregaChange}
+              sucursalId={sucursalId}
+              onSucursalChange={onSucursalChange}
+            />
           )}
         </div>
-
-        {/* Footer — only show when cart has items */}
-        {items.length > 0 && (
-          <CartFooter
-            total={total}
-            alias={alias}
-            onAliasChange={onAliasChange}
-            onSendWA={onSendWA}
-            onShare={onShare}
-            onClear={onClear}
-            shareLink={shareLink}
-            onCopyShareLink={onCopyShareLink}
-            telefono={telefono}
-            onTelefonoChange={onTelefonoChange}
-            clientNotes={clientNotes}
-            onClientNotesChange={onClientNotesChange}
-            direccion={direccion}
-            onDireccionChange={onDireccionChange}
-            onSaveLista={onSaveLista}
-            isProcessing={isProcessing}
-            metodoEntrega={metodoEntrega}
-            onMetodoEntregaChange={onMetodoEntregaChange}
-            sucursalId={sucursalId}
-            onSucursalChange={onSucursalChange}
-          />
-        )}
       </div>
     </>
   );
