@@ -88,18 +88,24 @@ export default function Hero({
           {/* Título */}
           <h1
             style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(2.5rem, 7vw, 4.2rem)",
-              letterSpacing: "2px",
-              lineHeight: 0.9,
-              marginBottom: "16px",
+              fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+              fontSize: "clamp(3.6rem, 9vw, 6rem)",
+              fontWeight: 900,
+              letterSpacing: "-1px",
+              lineHeight: 0.88,
+              marginBottom: "14px",
+              textTransform: "uppercase",
             }}
           >
-            <span style={{ display: "block", color: "#fff", textShadow: "0 2px 16px rgba(0,0,0,0.4)" }}>
+            <span
+              style={{
+                display: "block",
+                color: "#fff",
+                textShadow: "0 4px 24px rgba(0,0,0,0.6), 0 0 60px rgba(214,40,40,0.15)",
+                WebkitTextStroke: "1px rgba(255,255,255,0.08)",
+              }}
+            >
               EL REMATE
-            </span>
-            <span style={{ display: "block", color: "var(--rojo, #D62828)", textShadow: "0 0 30px rgba(214,40,40,0.3)" }}>
-              CANELONES
             </span>
           </h1>
 
@@ -108,18 +114,20 @@ export default function Hero({
             <div style={{ width: "3px", minHeight: "36px", background: "var(--rojo)", borderRadius: "2px", flexShrink: 0, marginTop: "2px" }} />
             <p
               style={{
-                fontFamily: "var(--font-serif)",
-                fontStyle: "italic",
-                fontSize: "clamp(0.85rem, 1.8vw, 1rem)",
-                color: "var(--on-dark-mid, #C8C3BC)",
-                lineHeight: 1.5,
-                fontWeight: 400,
+                fontFamily: "var(--font-display, 'Arial Black', sans-serif)",
+                fontStyle: "normal",
+                fontSize: "clamp(0.95rem, 2vw, 1.15rem)",
+                color: "#fff",
+                lineHeight: 1.35,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
                 margin: 0,
               }}
             >
-              Más de 1.900 productos al mejor precio.
+              Pedí tu Surtido
               <br />
-              Pedí por WhatsApp, te lo llevamos.
+              <span style={{ color: "var(--rojo, #D62828)" }}>y Olvidate del Resto</span>
             </p>
           </div>
 

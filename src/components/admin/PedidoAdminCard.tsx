@@ -71,13 +71,12 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
   };
 
   const handleCopiadoFacturacion = () => {
-    // Formato exacto para programa de facturación: Concepto [TAB] Uni [TAB] [TAB] Precio
-    // Según instrucciones: item.nombre + '\t' + item.cantidad + '\t' + '\t' + item.precioUnitario
-    const lineas = pedido.items.map(item => 
-      `${item.nombre}\t${item.cantidad}\t\t${item.precioUnitario}`
+    // Formato para sistema de facturación: CÓDIGO [TAB] PRODUCTO [TAB] CANTIDAD
+    const lineas = pedido.items.map(item =>
+      `${item.codigo}\t${item.nombre}\t${item.cantidad}`
     );
     const textoFinal = lineas.join('\n');
-    copyToClipboard(textoFinal, "¡Copiado para Facturación! ✅\nListo para pegar en el programa.");
+    copyToClipboard(textoFinal, "¡Copiado para Facturación! ✅\nListo para pegar en el sistema.");
   };
 
   const copyToClipboard = (text: string, message: string) => {
@@ -207,10 +206,13 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           <button
             onClick={handleCopiadoFacturacion}
             disabled={isUpdating}
-            className="flex h-[56px] w-[56px] items-center justify-center rounded-2xl border border-[#00E5FF]/30 bg-[#00E5FF]/10 text-xl text-[#00E5FF] transition-all hover:bg-[#00E5FF]/20 active:scale-95"
+            className="relative flex h-[56px] flex-1 items-center justify-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-[#00E5FF] to-blue-400 font-black text-black shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(0,229,255,0.6)] active:scale-95 disabled:opacity-50"
             title="Copiar para Facturación"
           >
-            📄
+            {/* Pulse ring */}
+            <span className="absolute inset-0 animate-ping rounded-2xl bg-[#00E5FF]/20" />
+            <span className="relative text-lg">📋</span>
+            <span className="relative text-[11px] uppercase tracking-[0.15em]">Copiar para Facturación</span>
           </button>
 
           <button
