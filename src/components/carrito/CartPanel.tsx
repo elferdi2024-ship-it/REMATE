@@ -1,6 +1,8 @@
+// filepath: src/components/carrito/CartPanel.tsx
 'use client';
 
 import { CartItem } from '@/types';
+import type { MetodoEntrega } from '@/lib/sucursales';
 import CartItemRow from './CartItem';
 import CartFooter from './CartFooter';
 import AdPopup from './AdPopup';
@@ -27,6 +29,10 @@ interface CartPanelProps {
   onDireccionChange?: (dir: string) => void;
   onSaveLista?: () => void;
   isProcessing?: boolean;
+  metodoEntrega: MetodoEntrega;
+  onMetodoEntregaChange: (m: MetodoEntrega) => void;
+  sucursalId: string | null;
+  onSucursalChange: (id: string) => void;
 }
 
 export default function CartPanel({
@@ -51,6 +57,10 @@ export default function CartPanel({
   onDireccionChange,
   onSaveLista,
   isProcessing,
+  metodoEntrega,
+  onMetodoEntregaChange,
+  sucursalId,
+  onSucursalChange,
 }: CartPanelProps) {
   return (
     <>
@@ -122,6 +132,10 @@ export default function CartPanel({
             onDireccionChange={onDireccionChange}
             onSaveLista={onSaveLista}
             isProcessing={isProcessing}
+            metodoEntrega={metodoEntrega}
+            onMetodoEntregaChange={onMetodoEntregaChange}
+            sucursalId={sucursalId}
+            onSucursalChange={onSucursalChange}
           />
         )}
       </div>

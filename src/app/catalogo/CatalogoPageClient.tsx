@@ -33,6 +33,7 @@ import {
 import { encodeCartToURL, decodeCartFromURL } from "@/lib/cart-share";
 import { haptic } from "@/lib/haptic";
 import * as ls from "@/lib/ls";
+import { SUCURSALES, type MetodoEntrega } from "@/lib/sucursales";
 import type { Vista, CartItem, Producto } from "@/types";
 
 interface CatalogoPageClientProps {
@@ -157,6 +158,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [direccion, setDireccion] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [metodoEntrega, setMetodoEntrega] = useState<MetodoEntrega>('envio');
+  const [sucursalId, setSucursalId] = useState<string | null>(null);
 
   // Search & filter state (client-side only)
   const [search, setSearch] = useState("");
@@ -365,6 +368,23 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     const nombre = alias || "Cliente";
     const tel = telefono || "No proporcionado";
 
+    // Build delivery info based on method
+    let deliveryDireccion = direccion || "";
+    let deliveryNotas = clientNotes || "";
+    const selectedSucursal = SUCURSALES.find((s) => s.id === sucursalId);
+
+    if (metodoEntrega === 'retiro' && selectedSucursal) {
+      deliveryDireccion = `RETIRO EN LOCAL: ${selectedSucursal.nombre} — ${selectedSucursal.direccion} (Tel: ${selectedSucursal.telefono})`;
+      // Prepend delivery method to notes
+      const retiroLine = `🏪 RETIRO EN SUCURSAL: ${selectedSucursal.nombre} (${selectedSucursal.direccion})`;
+      deliveryNotas = deliveryNotas ? `${retiroLine}\n${deliveryNotas}` : retiroLine;
+    } else {
+      if (deliveryDireccion) {
+        const envioLine = `🏠 ENVÍO A DOMICILIO: ${deliveryDireccion}`;
+        deliveryNotas = deliveryNotas ? `${envioLine}\n${deliveryNotas}` : envioLine;
+      }
+    }
+
     // 1. Guardar pedido en Firebase (Global y Local) + Incrementar Stats
     const pedidoItems = cartItems.map((i) => ({
       codigo: i.codigo,
@@ -379,10 +399,10 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         uid: user?.uid ?? null,
         clienteNombre: nombre,
         clienteTelefono: tel,
-        clienteDireccion: direccion || undefined,
+        clienteDireccion: deliveryDireccion || undefined,
         items: pedidoItems,
         total,
-        notas: clientNotes || undefined,
+        notas: deliveryNotas || undefined,
         status: "no_leido",
       });
       setActiveOrderId(orderId);
@@ -397,13 +417,13 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         guardarPedidoUsuario(user.uid, {
           items: pedidoItems,
           total,
-          notas: clientNotes || undefined,
+          notas: deliveryNotas || undefined,
           mensajeWA: "", 
         }).catch((err) => console.warn("Failed to save user pedido cloud:", err));
       }
 
       // 3. Guardar siempre en local (para usuarios invitados)
-      saveLocalPedido(cartItems, total, clientNotes || undefined);
+      saveLocalPedido(cartItems, total, deliveryNotas || undefined);
 
       // 4. GENERAR Y ENVIAR AUTOMÁTICAMENTE
       await enviarFacturaWhatsApp(
@@ -411,12 +431,15 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         nombre,
         tel,
         cartItems,
-        clientNotes || undefined,
+        deliveryNotas || undefined,
         "/logo.png",
         orderId,
-        direccion
+        deliveryDireccion
       );
 
+      // Reset delivery state after success
+      setMetodoEntrega('envio');
+      setSucursalId(null);
       handleFinalizado();
     } catch (err) {
       console.error("Error en flujo de confirmación:", err);
@@ -424,7 +447,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     } finally {
       setIsProcessing(false);
     }
-  }, [alias, telefono, direccion, cartItems, clientNotes, total, user, saveLocalPedido, handleFinalizado, toast]);
+  }, [alias, telefono, direccion, metodoEntrega, sucursalId, cartItems, clientNotes, total, user, saveLocalPedido, handleFinalizado, toast]);
 
   // Send WA flow
   const handleSendWA = useCallback(() => {
@@ -624,6 +647,10 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         direccion={direccion}
         onDireccionChange={setDireccion}
         isProcessing={isProcessing}
+        metodoEntrega={metodoEntrega}
+        onMetodoEntregaChange={setMetodoEntrega}
+        sucursalId={sucursalId}
+        onSucursalChange={setSucursalId}
       />
 
       {/* User Panel */}

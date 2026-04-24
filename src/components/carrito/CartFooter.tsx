@@ -1,4 +1,8 @@
+// filepath: src/components/carrito/CartFooter.tsx
 'use client';
+
+import DeliveryMethodSelector from './DeliveryMethodSelector';
+import type { MetodoEntrega } from '@/lib/sucursales';
 
 interface CartFooterProps {
   total: number;
@@ -17,6 +21,10 @@ interface CartFooterProps {
   onDireccionChange?: (dir: string) => void;
   onSaveLista?: () => void;
   isProcessing?: boolean;
+  metodoEntrega: MetodoEntrega;
+  onMetodoEntregaChange: (m: MetodoEntrega) => void;
+  sucursalId: string | null;
+  onSucursalChange: (id: string) => void;
 }
 
 export default function CartFooter({
@@ -36,6 +44,10 @@ export default function CartFooter({
   onDireccionChange,
   onSaveLista,
   isProcessing,
+  metodoEntrega,
+  onMetodoEntregaChange,
+  sucursalId,
+  onSucursalChange,
 }: CartFooterProps) {
   return (
     <div className="cart-footer">
@@ -101,10 +113,19 @@ export default function CartFooter({
           </div>
         </div>
 
-        {onDireccionChange && (
+        {/* ── Delivery method selector ── */}
+        <DeliveryMethodSelector
+          metodo={metodoEntrega}
+          onMetodoChange={onMetodoEntregaChange}
+          sucursalId={sucursalId}
+          onSucursalChange={onSucursalChange}
+        />
+
+        {/* ── Address field — only for home delivery ── */}
+        {metodoEntrega === 'envio' && onDireccionChange && (
           <div style={{ marginBottom: '10px' }}>
             <label className="field-label" htmlFor="clientDir">
-              📍 Dirección de entrega (opcional)
+              📍 Dirección de entrega
             </label>
             <input
               id="clientDir"
@@ -144,13 +165,21 @@ export default function CartFooter({
         <button 
           className="btn-whatsapp" 
           onClick={onSendWA}
-          disabled={isProcessing}
-          style={{ opacity: isProcessing ? 0.7 : 1, cursor: isProcessing ? 'not-allowed' : 'pointer' }}
+          disabled={isProcessing || (metodoEntrega === 'retiro' && !sucursalId)}
+          style={{ 
+            opacity: isProcessing || (metodoEntrega === 'retiro' && !sucursalId) ? 0.7 : 1, 
+            cursor: isProcessing || (metodoEntrega === 'retiro' && !sucursalId) ? 'not-allowed' : 'pointer' 
+          }}
         >
           {isProcessing ? (
             <div className="btn-whatsapp-text">
               <span className="btn-wa-main">PROCESANDO...</span>
               <span className="btn-wa-sub">Estamos preparando tu pedido</span>
+            </div>
+          ) : (metodoEntrega === 'retiro' && !sucursalId) ? (
+            <div className="btn-whatsapp-text">
+              <span className="btn-wa-main">ELEGÍ UNA SUCURSAL</span>
+              <span className="btn-wa-sub">Seleccioná dónde retirar arriba ☝️</span>
             </div>
           ) : (
             <>
