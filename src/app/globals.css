@@ -1683,6 +1683,15 @@ html.dark-mode body { background: var(--bg); }
   font-size: var(--text-xs); font-weight: 700;
   text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px;
 }
+.cart-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+@media (max-width: 380px) {
+  .cart-form-row { grid-template-columns: 1fr; gap: 6px; }
+}
 
 .field-label {
   display: block; font-size: var(--text-xs); font-weight: 600;
@@ -1691,7 +1700,7 @@ html.dark-mode body { background: var(--bg); }
 .field-input {
   width: 100%; padding: 10px 12px;
   border: 1.5px solid var(--border); border-radius: var(--r-sm);
-  font-family: var(--font-body), sans-serif; font-size: 0.9rem;
+  font-family: var(--font-body), sans-serif; font-size: 16px;
   outline: none; transition: border 0.15s;
   color: var(--texto); background: var(--bg); margin-bottom: 10px;
 }

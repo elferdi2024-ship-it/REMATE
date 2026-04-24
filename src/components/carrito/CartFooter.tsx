@@ -84,7 +84,7 @@ export default function CartFooter({
       <div className="cart-order-section">
         <div className="cart-section-title">Completá tu pedido</div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+        <div className="cart-form-row">
           <div>
             <label className="field-label" htmlFor="clientName">
               👤 Nombre / Negocio
