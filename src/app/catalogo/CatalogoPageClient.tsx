@@ -152,9 +152,16 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [userPanelOpen, setUserPanelOpen] = useState(false);
-  const [vista, setVista] = useState<Vista>(() => ls.getVista());
-  const [alias, setAlias] = useState(() => ls.getAlias());
-  const [telefono, setTelefono] = useState(() => ls.getTelefono());
+  const [vista, setVista] = useState<Vista>("grilla");
+  const [alias, setAlias] = useState("");
+  const [telefono, setTelefono] = useState("");
+
+  // Hydration fix: Load client-only data after mount
+  useEffect(() => {
+    setVista(ls.getVista());
+    setAlias(ls.getAlias());
+    setTelefono(ls.getTelefono());
+  }, []);
   const [clientNotes, setClientNotes] = useState("");
   const [sharedCart, setSharedCart] = useState<CartItem[] | null>(null);
   const [shareLink, setShareLink] = useState<string | null>(null);
@@ -269,9 +276,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Derive unique categories from ALL products (not just enriched or filtered)
   // This ensures categories don't disappear when searching
   const categorias = useMemo(() => {
-    // We use CATEGORIAS from types as the baseline to maintain order and completeness
+    if (productos.length === 0) return Array.from(CATEGORIAS);
     const productCats = new Set(productos.map((p) => p.categoria));
-    // Filter CATEGORIAS to only those present in the current products batch
     return Array.from(productCats).sort();
   }, [productos]);
 
