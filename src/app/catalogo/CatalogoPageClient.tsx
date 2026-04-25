@@ -228,6 +228,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   // Category correction logic (centralized)
   const getCorrectedCategory = useCallback((p: Producto) => {
+    // Si ya tiene una categoría que no sea "Otros", la respetamos (viene del Excel/Admin)
+    if (p.categoria && p.categoria !== "Otros") return p.categoria;
+
     const CATEGORY_CORRECTIONS: Record<string, string> = {
       "ALFAJOR": "Golosinas y Dulces",
       "PILAS": "Otros",
@@ -237,27 +240,25 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       "JABON TOCADOR": "Higiene Personal",
       "DENTAL": "Higiene Personal",
       "AFEITADORA": "Higiene Personal",
-      "ACEITUNAS": "Conservas y Enlatados",
-      "CHOCLO": "Conservas y Enlatados",
-      "ARVEJAS": "Conservas y Enlatados",
-      "POROTOS": "Conservas y Enlatados",
-      "LENTEJAS": "Conservas y Enlatados",
+      "ACEITUNAS": "Aceites y Aderezos",
+      "CHOCLO": "Harinas, Pastas y Legumbres",
+      "ARVEJAS": "Harinas, Pastas y Legumbres",
+      "POROTOS": "Harinas, Pastas y Legumbres",
+      "LENTEJAS": "Harinas, Pastas y Legumbres",
       "PAN DULCE": "Panadería",
       "BUDIN": "Panadería",
     };
 
-    let cat = p.categoria || "Otros";
     const nombreUpper = p.nombre.toUpperCase();
     for (const [key, corrected] of Object.entries(CATEGORY_CORRECTIONS)) {
       if (nombreUpper.includes(key)) {
-        cat = corrected;
-        break;
+        return corrected;
       }
     }
-    return cat;
+    return p.categoria || "Otros";
   }, []);
 
-  // Enrich productos with corrected categories
+  // Enrich productos with corrected categories (only for items marked as "Otros" or missing)
   const productosEnriquecidos = useMemo(() => {
     return productos.map(p => ({
       ...p,
