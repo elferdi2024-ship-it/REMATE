@@ -37,6 +37,7 @@ import { SUCURSALES, type MetodoEntrega } from "@/lib/sucursales";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import type { Vista, CartItem, Producto } from "@/types";
+import { CATEGORIAS } from "@/types";
 
 interface CatalogoPageClientProps {
   // In the future we can pass pre-loaded products from server
