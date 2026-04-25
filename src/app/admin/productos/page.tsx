@@ -57,6 +57,18 @@ export default function AdminProductos() {
     );
   }, [search, productos]);
 
+  const slugify = (text: string) => {
+    return text
+      .toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // remove accents
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/--+/g, '-');
+  };
+
   const handleUploadImage = async (codigo: string, file: File) => {
     if (!file.type.startsWith("image/")) {
       toast.error("Solo se permiten imágenes");
@@ -66,6 +78,9 @@ export default function AdminProductos() {
     setProgress(0);
 
     try {
+      const product = productos.find(p => p.codigo === codigo);
+      const productName = product ? product.nombre : "producto";
+      
       // Opciones de compresión: max 800x800, max 1MB
       const options = {
         maxSizeMB: 0.5,
@@ -75,7 +90,10 @@ export default function AdminProductos() {
       
       const compressedFile = await imageCompression(file, options);
       const ext = compressedFile.name.split('.').pop() || 'jpg';
-      const storageRef = ref(storage, `productos/${codigo}.${ext}`);
+      
+      // SEO: Nombre amigable (slug) + codigo para evitar duplicados
+      const fileName = `${slugify(productName)}-${codigo}.${ext}`;
+      const storageRef = ref(storage, `productos/${fileName}`);
 
       const uploadTask = uploadBytesResumable(storageRef, compressedFile);
 
@@ -99,7 +117,7 @@ export default function AdminProductos() {
           
           // Actualizar estado local
           setProductos(prev => prev.map(p => p.codigo === codigo ? { ...p, imagen: downloadURL } : p));
-          toast.success("Imagen actualizada");
+          toast.success("Imagen SEO optimizada cargada");
         } catch (e) {
           toast.error("Error al guardar URL");
         } finally {
