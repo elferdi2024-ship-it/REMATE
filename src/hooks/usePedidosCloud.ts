@@ -48,7 +48,13 @@ export function usePedidosCloud(): UsePedidosCloudReturn {
       })
       .catch((err) => {
         if (!cancelled) {
-          console.error("Error fetching pedidos:", err);
+          // Si es un error de permisos, probablemente no est\u00e1 logueado correctamente 
+          // o las reglas cambiaron. No saturamos la consola con errores cr\u00edticos.
+          if (err.code === "permission-denied") {
+            console.warn("🔒 Historial: Sin permisos para leer pedidos del usuario.");
+          } else {
+            console.error("Error fetching pedidos:", err);
+          }
           setLoading(false);
         }
       });

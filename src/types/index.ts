@@ -77,6 +77,7 @@ export const CATEGORIAS = [
 ] as const;
 
 export const EMOJI_POR_CATEGORIA: Record<string, string> = {
+  "Todos": "🏠",
   "ACEITES Y GRASAS": "🫗",
   "ARTÍCULOS DEL HOGAR": "🏠",
   "BEBIDAS ALCOHÓLICAS": "🍺",

@@ -149,6 +149,10 @@ function CategoryCarousel({
   }
 
   // MODO CARRUSEL HORIZONTAL
+  // Optimizaci\u00f3n: No renderizar miles de cards si no se van a ver.
+  // En modo carrusel, limitamos a 24 productos iniciales si no hay scroll/showAll.
+  const displayProds = showAll ? catProds : catProds.slice(0, 24);
+
   return (
     <>
       <div className="cat-carousel-wrap">
@@ -156,7 +160,7 @@ function CategoryCarousel({
           ref={scrollRef}
           className="cat-carousel-track"
         >
-          {catProds.map((p) => (
+          {displayProds.map((p) => (
             <div key={p.codigo} className="cat-carousel-item">
               <ProductoCard
                 producto={p}
@@ -243,24 +247,14 @@ export default function ProductoGrid({
     <div className="catalogo-container">
       {categories.map((cat, catIdx) => {
         const catProds = grouped[cat];
-        const total = catProds.length;
-
         return (
-          <React.Fragment key={cat}>
-            {/* Banner entre secciones (no antes de la primera) */}
-            {catIdx > 0 && vista === "grilla" && (
-              <CategoryBanner index={catIdx - 1} />
-            )}
-
+          <LazySection key={cat} index={catIdx} vista={vista}>
             <section className="cat-section">
-              {/* Header */}
               <div className="cat-section-header">
                 <h2 className="cat-section-title">{cat}</h2>
                 <div className="cat-section-divider" />
-                <span className="cat-section-count">{total} items</span>
+                <span className="cat-section-count">{catProds.length} items</span>
               </div>
-
-              {/* Carrusel o lista */}
               <CategoryCarousel
                 cat={cat}
                 catProds={catProds}
@@ -272,9 +266,42 @@ export default function ProductoGrid({
                 onQtyChange={onQtyChange}
               />
             </section>
-          </React.Fragment>
+          </LazySection>
         );
       })}
+    </div>
+  );
+}
+
+function LazySection({ children, index, vista }: { children: React.ReactNode; index: number; vista: Vista }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px" } // Cargar un poco antes de que sea visible
+    );
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="lazy-section-wrapper" style={{ minHeight: isVisible ? "auto" : "300px" }}>
+      {isVisible ? (
+        <>
+          {index > 0 && vista === "grilla" && <CategoryBanner index={index - 1} />}
+          {children}
+        </>
+      ) : (
+        <div className="section-placeholder animate-pulse bg-gray-100 rounded-xl h-[300px] mb-8" />
+      )}
     </div>
   );
 }

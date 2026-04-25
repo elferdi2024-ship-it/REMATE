@@ -257,9 +257,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Derive unique categories from ALL products (not just enriched or filtered)
   // This ensures categories don't disappear when searching
   const categorias = useMemo(() => {
-    // ALWAYS use CATEGORIAS from types as the baseline
-    // This prevents categories from disappearing while loading or filtering
-    return Array.from(CATEGORIAS);
+    // Inyectamos "Todos" al principio para la navegación
+    return ["Todos", ...CATEGORIAS];
   }, []);
 
   // Filter by search and category (memoized for performance)
@@ -444,23 +443,35 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
     try {
       setIsProcessing(true);
-      const orderId = await guardarPedidoGlobal({
-        uid: user?.uid ?? null,
-        clienteNombre: nombre,
-        clienteTelefono: tel,
-        clienteDireccion: deliveryDireccion || undefined,
-        items: pedidoItems,
-        total,
-        notas: deliveryNotas || undefined,
-        status: "no_leido",
-      });
-      setActiveOrderId(orderId);
+      
+      let orderId = `L-${Date.now().toString().slice(-6)}`; // Fallback ID
+      
+      // 1. Guardar pedido en Firebase Global (admin-visible)
+      try {
+        const generatedId = await guardarPedidoGlobal({
+          uid: user?.uid ?? null,
+          clienteNombre: nombre,
+          clienteTelefono: tel,
+          clienteDireccion: deliveryDireccion || undefined,
+          items: pedidoItems,
+          total,
+          notas: deliveryNotas || undefined,
+          status: "no_leido",
+        });
+        orderId = generatedId;
+        setActiveOrderId(orderId);
+      } catch (fErr) {
+        console.error("❌ Firestore: Error al guardar pedido global:", fErr);
+        // No bloqueamos el flujo completo si falla el guardado global, 
+        // pero avisamos en consola. El cliente igual querr\u00e1 enviar el WA.
+      }
 
+      // Stats (No bloqueante)
       const codigos = cartItems.map((i) => i.codigo);
       incrementarStats(codigos).catch((err) =>
-        console.warn("Failed to increment stats:", err)
+        console.warn("⚠️ Stats: Error al incrementar stats:", err)
       );
-
+      
       // 2. Si hay usuario, guardar en su historial privado (Cloud)
       if (user) {
         guardarPedidoUsuario(user.uid, {
@@ -468,31 +479,40 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           total,
           notas: deliveryNotas || undefined,
           mensajeWA: "", 
-        }).catch((err) => console.warn("Failed to save user pedido cloud:", err));
+        }).catch((err) => console.error("❌ Firestore: Error al guardar pedido usuario:", err));
       }
 
-      // 3. Guardar siempre en local (para usuarios invitados)
-      saveLocalPedido(cartItems, total, deliveryNotas || undefined);
+      // 3. Guardar siempre en local (resiliencia total)
+      try {
+        saveLocalPedido(cartItems, total, deliveryNotas || undefined);
+      } catch (lErr) {
+        console.error("❌ LocalStorage: Error al guardar historial local:", lErr);
+      }
 
-      // 4. GENERAR Y ENVIAR AUTOMÁTICAMENTE
-      await enviarFacturaWhatsApp(
-        process.env.NEXT_PUBLIC_WA_NUMBER!,
-        nombre,
-        tel,
-        cartItems,
-        deliveryNotas || undefined,
-        "/logo.png",
-        orderId,
-        deliveryDireccion
-      );
+      // 4. GENERAR Y ENVIAR POR WHATSAPP (Lo m\u00e1s importante)
+      try {
+        await enviarFacturaWhatsApp(
+          process.env.NEXT_PUBLIC_WA_NUMBER!,
+          nombre,
+          tel,
+          cartItems,
+          deliveryNotas || undefined,
+          "/logo.png",
+          orderId,
+          deliveryDireccion
+        );
+      } catch (waErr) {
+        console.error("❌ WhatsApp: Error al enviar factura:", waErr);
+        throw new Error("No se pudo abrir WhatsApp para enviar el pedido.");
+      }
 
       // Reset delivery state after success
       setMetodoEntrega('envio');
       setSucursalId(null);
       handleFinalizado();
-    } catch (err) {
-      console.error("Error en flujo de confirmación:", err);
-      toast.error("Hubo un problema al procesar el pedido");
+    } catch (err: any) {
+      console.error("🚨 Error crítico en flujo de pedido:", err);
+      toast.error(err.message || "Hubo un problema al procesar el pedido");
     } finally {
       setIsProcessing(false);
     }
@@ -524,7 +544,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const pedidos = user ? cloudPedidos : localPedidos;
 
   // Determine active category for CatsNav
-  const activeCat = categoria || (categorias.length > 0 ? categorias[0] : "");
+  // Corregido: Si categoria es "" (Todos), activeCat debe ser "Todos"
+  const activeCat = categoria === "" ? "Todos" : categoria;
 
   // Loading state
   // El estado de carga (loading) ahora se maneja directamente en el JSX principal 
