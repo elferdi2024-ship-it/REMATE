@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, DM_Sans, DM_Serif_Display } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import { CartProvider } from "@/lib/cart-context";
 import { ToastProvider } from "@/lib/toast-context";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -54,7 +55,10 @@ export default function RootLayout({
       <body style={{ margin: 0, minHeight: "100vh" }}>
         <AuthProvider>
           <CartProvider>
-            <ToastProvider>{children}</ToastProvider>
+            <ToastProvider>
+              {children}
+              <PWAInstallPrompt />
+            </ToastProvider>
           </CartProvider>
         </AuthProvider>
       </body>
