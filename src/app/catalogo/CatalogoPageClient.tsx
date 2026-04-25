@@ -266,11 +266,14 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     }));
   }, [productos, getCorrectedCategory]);
 
-  // Derive unique categories from enriched productos
+  // Derive unique categories from ALL products (not just enriched or filtered)
+  // This ensures categories don't disappear when searching
   const categorias = useMemo(() => {
-    const cats = new Set(productosEnriquecidos.map((p) => p.categoria));
-    return Array.from(cats).sort();
-  }, [productosEnriquecidos]);
+    // We use CATEGORIAS from types as the baseline to maintain order and completeness
+    const productCats = new Set(productos.map((p) => p.categoria));
+    // Filter CATEGORIAS to only those present in the current products batch
+    return Array.from(productCats).sort();
+  }, [productos]);
 
   // Filter by search and category (memoized for performance)
   const filtrados = useMemo(() => {

@@ -70,7 +70,7 @@ export function PWAInstallPrompt() {
       <div className="bg-white/90 backdrop-blur-xl rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-4 border border-white/20 flex items-center gap-4">
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-red-700 flex-shrink-0 flex items-center justify-center overflow-hidden shadow-inner relative">
           <Image 
-            src="/icon-512x512.png" 
+            src="/rematepwa.png" 
             alt="App Icon" 
             fill
             className="object-cover" 

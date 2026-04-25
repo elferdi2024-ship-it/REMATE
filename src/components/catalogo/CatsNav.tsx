@@ -16,8 +16,14 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
       backdropFilter: "blur(12px)",
       borderBottom: "1px solid rgba(0,0,0,0.05)"
     }}>
-      <div className="cats-wrap">
-        <div className="cats-inner-circular" style={{ gap: "20px", padding: "16px 8px" }}>
+      <div className="cats-wrap" style={{ width: "100%", overflowX: "auto" }}>
+        <div className="cats-inner-circular" style={{ 
+          gap: "20px", 
+          padding: "16px 20px",
+          display: "flex",
+          width: "max-content",
+          minWidth: "100%"
+        }}>
           {categorias.map((cat) => {
             const emoji = EMOJI_POR_CATEGORIA[cat] || "📦";
             const isActive = cat === activeCat;

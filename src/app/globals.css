@@ -154,6 +154,7 @@ body {
   transition: background 0.3s ease, color 0.3s ease;
   font-size: var(--text-md);
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 html.dark-mode body { background: var(--bg); }
@@ -733,6 +734,7 @@ html.dark-mode body { background: var(--bg); }
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 16px;
+  overflow-x: hidden;
 }
 
 @media (min-width: 780px) {
