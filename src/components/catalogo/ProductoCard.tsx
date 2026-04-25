@@ -139,7 +139,7 @@ export default function ProductoCard({
               width: "100%", 
               height: "100%", 
               objectFit: "contain", 
-              padding: "8px",
+              mixBlendMode: "multiply",
               transition: "transform 0.5s ease" 
             }} 
           />

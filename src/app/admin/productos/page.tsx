@@ -5,6 +5,7 @@ import { db, storage } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/lib/toast-context";
+import imageCompression from 'browser-image-compression';
 
 interface ProductoRow {
   codigo: string;
@@ -51,7 +52,7 @@ export default function AdminProductos() {
     );
   }, [search, productos]);
 
-  const handleUploadImage = (codigo: string, file: File) => {
+  const handleUploadImage = async (codigo: string, file: File) => {
     if (!file.type.startsWith("image/")) {
       toast.error("Solo se permiten imágenes");
       return;
@@ -59,12 +60,21 @@ export default function AdminProductos() {
     setUploadingItem(codigo);
     setProgress(0);
 
-    const ext = file.name.split('.').pop() || 'jpg';
-    const storageRef = ref(storage, `productos/${codigo}.${ext}`);
+    try {
+      // Opciones de compresión: max 800x800, max 1MB
+      const options = {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 800,
+        useWebWorker: true
+      };
+      
+      const compressedFile = await imageCompression(file, options);
+      const ext = compressedFile.name.split('.').pop() || 'jpg';
+      const storageRef = ref(storage, `productos/${codigo}.${ext}`);
 
-    const uploadTask = uploadBytesResumable(storageRef, file);
+      const uploadTask = uploadBytesResumable(storageRef, compressedFile);
 
-    uploadTask.on(
+      uploadTask.on(
       "state_changed",
       (snapshot) => {
         const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -92,6 +102,11 @@ export default function AdminProductos() {
         }
       }
     );
+    } catch (error) {
+      console.error(error);
+      toast.error("Error al comprimir la imagen");
+      setUploadingItem(null);
+    }
   };
 
   if (loading) {
