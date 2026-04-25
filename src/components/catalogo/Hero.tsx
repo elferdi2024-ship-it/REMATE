@@ -173,18 +173,21 @@ export default function Hero({
             padding: "20px 0"
           }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo.png"
-            alt="El Remate Logo"
-            style={{ 
-              width: "100%",
-              maxWidth: "280px",
-              height: "auto",
-              objectFit: "contain", 
-              filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.6)) drop-shadow(0 0 15px rgba(214,40,40,0.25))" 
-            }}
-          />
+          <Link href="/">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.png"
+              alt="El Remate Logo"
+              style={{ 
+                width: "100%",
+                maxWidth: "280px",
+                height: "auto",
+                objectFit: "contain", 
+                filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.6)) drop-shadow(0 0 15px rgba(214,40,40,0.25))",
+                cursor: "pointer"
+              }}
+            />
+          </Link>
         </div>
 
         {/* ════ DERECHA: Controles ════ */}
