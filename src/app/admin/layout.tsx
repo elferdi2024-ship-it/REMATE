@@ -36,16 +36,17 @@ export default function AdminLayout({
 
     async function checkRole() {
       if (!user) return;
+      
+      // 1. Hardcoded bypass for superadmin (Renato) to prevent any lockout
+      if (user.email === "rnt.atlantida@gmail.com") {
+        setRole("admin");
+        setChecking(false);
+        return;
+      }
+
       try {
         const snap = await getDoc(doc(db, "usuarios", user.uid));
         
-        if (user.email === "rnt.atlantida@gmail.com") {
-          // Hardcoded bypass for superadmin to prevent lockout
-          setRole("admin");
-          setChecking(false);
-          return;
-        }
-
         if (snap.exists()) {
           const userRole = snap.data().role;
           if (userRole === "admin" || userRole === "empleado") {
@@ -56,7 +57,8 @@ export default function AdminLayout({
         } else {
           router.replace("/admin/login");
         }
-      } catch {
+      } catch (err) {
+        console.error("Error checking role:", err);
         router.replace("/admin/login");
       } finally {
         setChecking(false);
