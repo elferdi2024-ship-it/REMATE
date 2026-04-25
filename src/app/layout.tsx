@@ -33,6 +33,7 @@ export const metadata: Metadata = {
   title: "El Remate Canelones — Distribuidora Mayorista",
   description:
     "Catálogo mayorista de El Remate Canelones. Más de 1900 productos, precios al público, pedidos por WhatsApp.",
+  manifest: "/manifest.json",
 };
 
 export const viewport = {
@@ -40,6 +41,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  themeColor: "#B42125",
 };
 
 export default function RootLayout({

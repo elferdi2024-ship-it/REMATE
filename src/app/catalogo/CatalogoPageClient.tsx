@@ -137,6 +137,8 @@ function SharedCartWatcher({
 }
 
 /* ── Client Component with pre-loaded productos ── */
+import { ProductoSkeleton } from "@/components/catalogo/ProductoSkeleton";
+
 export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Hooks
   const { items: cartItems, addItem, removeItem, updateQty, clearCart, total, totalQty } = useCart();
@@ -495,38 +497,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const activeCat = categoria || (categorias.length > 0 ? categorias[0] : "");
 
   // Loading state
-  if (loading) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-          gap: "20px",
-          background: "var(--oscuro, #1A1410)",
-        }}
-      >
-        <div
-          style={{
-            width: "56px",
-            height: "56px",
-            border: "4px solid rgba(232,48,42,0.15)",
-            borderTopColor: "var(--rojo, #E8302A)",
-            borderRadius: "50%",
-            animation: "spin 0.8s linear infinite",
-          }}
-        />
-        <p style={{ color: "var(--on-dark-mid, #C8C3BC)", fontSize: "0.9rem", fontWeight: 600 }}>
-          Cargando catálogo...
-        </p>
-        <style>{`
-          @keyframes spin { to { transform: rotate(360deg); } }
-        `}</style>
-      </div>
-    );
-  }
+  // El estado de carga (loading) ahora se maneja directamente en el JSX principal 
+  // debajo del ResultsBar mediante Skeleton Loaders para evitar el flicker.
+
 
   // Show error state if failed to load
   if (loadingError) {
@@ -621,14 +594,22 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         />
 
         {/* Product grid/list */}
-        <ProductoGrid
-          productos={filtrados}
-          vista={vista}
-          qtyMap={qtyMap}
-          searchTerm={search}
-          onAdd={handleAddProduct}
-          onQtyChange={handleQtyChange}
-        />
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            {[...Array(12)].map((_, i) => (
+              <ProductoSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <ProductoGrid
+            productos={filtrados}
+            vista={vista}
+            qtyMap={qtyMap}
+            searchTerm={search}
+            onAdd={handleAddProduct}
+            onQtyChange={handleQtyChange}
+          />
+        )}
       </div>
 
 

@@ -1,0 +1,17 @@
+{
+  "name": "El Remate Distribuidora",
+  "short_name": "El Remate",
+  "description": "Catálogo mayorista de El Remate Canelones",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#B42125",
+  "icons": [
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

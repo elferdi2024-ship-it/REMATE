@@ -1,6 +1,7 @@
 import React, { useRef, useCallback } from "react";
 import type { Producto } from "@/types";
 import { EMOJI_POR_CATEGORIA } from "@/types";
+import Image from "next/image";
 
 interface ProductoCardProps {
   producto: Producto;
@@ -131,13 +132,13 @@ export default function ProductoCard({
         position: "relative"
       }}>
         {producto.imagen ? (
-          <img 
+          <Image 
             src={producto.imagen} 
-            alt={producto.nombre} 
+            alt={producto.nombre}
+            fill
+            sizes="(max-width: 768px) 50vw, 33vw"
             className="group-hover:scale-110"
             style={{ 
-              width: "100%", 
-              height: "100%", 
               objectFit: "contain", 
               mixBlendMode: "multiply",
               transition: "transform 0.5s ease" 
