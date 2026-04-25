@@ -38,6 +38,14 @@ export default function AdminLayout({
       if (!user) return;
       try {
         const snap = await getDoc(doc(db, "usuarios", user.uid));
+        
+        if (user.email === "rnt.atlantida@gmail.com") {
+          // Hardcoded bypass for superadmin to prevent lockout
+          setRole("admin");
+          setChecking(false);
+          return;
+        }
+
         if (snap.exists()) {
           const userRole = snap.data().role;
           if (userRole === "admin" || userRole === "empleado") {
