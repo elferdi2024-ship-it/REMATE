@@ -7,7 +7,12 @@ import { db } from "@/lib/firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import categoryData from "@/lib/categoria_mapping.json";
 
-const CATEGORY_MAPPING = categoryData.mapping as Record<string, string>;
+const RAW_MAPPING = categoryData.mapping as Record<string, string>;
+// Normalizar mapping para búsqueda rápida e insensible a espacios/casos
+const CATEGORY_MAPPING: Record<string, string> = {};
+Object.entries(RAW_MAPPING).forEach(([code, cat]) => {
+  CATEGORY_MAPPING[code.trim()] = cat.trim().toUpperCase();
+});
 
 interface ProductRow {
   codigo: string;
@@ -43,9 +48,9 @@ export default function PreciosUploader() {
   };
 
   function categorizar(codigo: string, nombre: string): string {
-    // 1. Prioridad: Mapping exacto por código del Excel
-    if (CATEGORY_MAPPING[codigo]) {
-      return CATEGORY_MAPPING[codigo];
+    const cleanCode = codigo.trim();
+    if (CATEGORY_MAPPING[cleanCode]) {
+      return CATEGORY_MAPPING[cleanCode];
     }
 
     // 2. Fallback: Palabras clave por nombre
