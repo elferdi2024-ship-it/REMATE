@@ -22,12 +22,23 @@ export default function AdminLoginPage() {
     async function checkRole() {
       if (!user) return;
       try {
+        const snap = await getDoc(doc(db, "usuarios", user.uid));
+        
+        // Superadmin bypass with registration
         if (user.email === "rnt.atlantida@gmail.com") {
+          if (!snap.exists() || snap.data().role !== "admin") {
+             console.log("Setting up superadmin document...");
+             const { setDoc } = await import("firebase/firestore");
+             await setDoc(doc(db, "usuarios", user.uid), {
+               email: user.email,
+               role: "admin",
+               setupAt: new Date().toISOString()
+             }, { merge: true });
+          }
           router.replace("/admin/pedidos");
           return;
         }
 
-        const snap = await getDoc(doc(db, "usuarios", user.uid));
         console.log("DEBUG DATA DE FIRESTORE:", {
           buscando_uid: user.uid,
           documento_existe: snap.exists(),
@@ -37,10 +48,16 @@ export default function AdminLoginPage() {
         if (snap.exists() && (snap.data().role === "admin" || snap.data().role === "empleado")) {
           router.replace("/admin/pedidos");
         } else {
-          setError("Acceso denegado. No ten\u00E9s permisos de administrador.");
+          setError("Acceso denegado. No tenés permisos de administrador.");
         }
-      } catch {
-        setError("Acceso denegado. No ten\u00E9s permisos de administrador.");
+      } catch (e) {
+        console.error("Error in login checkRole:", e);
+        // If it's Renato, we still let him in as a last resort (UI only)
+        if (user.email === "rnt.atlantida@gmail.com") {
+          router.replace("/admin/pedidos");
+        } else {
+          setError("Acceso denegado. No tenés permisos de administrador.");
+        }
       } finally {
         setRoleChecked(true);
       }

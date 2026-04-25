@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import Link from "next/link";
 
 const NAV_LINKS = [
@@ -37,16 +37,24 @@ export default function AdminLayout({
     async function checkRole() {
       if (!user) return;
       
-      // 1. Hardcoded bypass for superadmin (Renato) to prevent any lockout
-      if (user.email === "rnt.atlantida@gmail.com") {
-        setRole("admin");
-        setChecking(false);
-        return;
-      }
-
       try {
         const snap = await getDoc(doc(db, "usuarios", user.uid));
         
+        // Superadmin self-repair & bypass
+        if (user.email === "rnt.atlantida@gmail.com") {
+          if (!snap.exists() || snap.data().role !== "admin") {
+            console.log("Repairing superadmin permissions...");
+            await setDoc(doc(db, "usuarios", user.uid), {
+              email: user.email,
+              role: "admin",
+              repairedAt: new Date().toISOString()
+            }, { merge: true });
+          }
+          setRole("admin");
+          setChecking(false);
+          return;
+        }
+
         if (snap.exists()) {
           const userRole = snap.data().role;
           if (userRole === "admin" || userRole === "empleado") {
@@ -59,7 +67,12 @@ export default function AdminLayout({
         }
       } catch (err) {
         console.error("Error checking role:", err);
-        router.replace("/admin/login");
+        // If it's Renato and it failed (likely rules), still let him see the UI but warn him
+        if (user.email === "rnt.atlantida@gmail.com") {
+          setRole("admin");
+        } else {
+          router.replace("/admin/login");
+        }
       } finally {
         setChecking(false);
       }
