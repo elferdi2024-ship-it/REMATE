@@ -141,15 +141,36 @@ export default function ProductoCard({
             style={{ 
               objectFit: "contain", 
               padding: "4px",
-              mixBlendMode: "multiply",
               transition: "transform 0.5s ease" 
             }} 
+            onError={(e) => {
+              // Si falla la imagen, removemos el src para que el estado de react 
+              // o el renderizado condicional muestre el emoji (aunque aquí es más difícil sin estado local)
+              // Por ahora forzamos ocultar la imagen y mostrar el fondo
+              const target = e.target as HTMLImageElement;
+              target.style.display = "none";
+              const parent = target.parentElement;
+              if (parent) {
+                const fallback = parent.querySelector('.fallback-emoji');
+                if (fallback) (fallback as HTMLElement).style.display = "flex";
+              }
+            }}
           />
-        ) : (
+        ) : null}
+        
+        {(!producto.imagen) ? (
           <span role="img" aria-hidden="true" style={{ 
             fontSize: "3rem", 
             transition: "transform 0.5s ease",
           }} className="group-hover:scale-110">
+            {emoji}
+          </span>
+        ) : (
+          <span role="img" aria-hidden="true" style={{ 
+            fontSize: "3rem", 
+            transition: "transform 0.5s ease",
+            display: "none"
+          }} className="group-hover:scale-110 fallback-emoji">
             {emoji}
           </span>
         )}

@@ -35,6 +35,10 @@ export const metadata: Metadata = {
   description:
     "Catálogo mayorista de El Remate Canelones. Más de 1900 productos, precios al público, pedidos por WhatsApp.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon-512x512.png",
+    apple: "/icon-512x512.png",
+  },
 };
 
 export const viewport = {

@@ -193,15 +193,23 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           if (snap.exists()) {
             const docData = snap.data();
             data = Object.values(docData.items || {}) as Producto[];
+            console.log(`📦 Catálogo cargado desde Firestore (${data.length} productos)`);
+          } else {
+            console.warn("⚠️ Documento de Firestore 'catalogo_activo/productos' no existe.");
           }
-        } catch (e) {
-          console.warn("Firestore fetch failed, falling back to local JSON", e);
+        } catch (e: any) {
+          console.error("❌ Falló la carga desde Firestore. Verificá reglas o conexión.", e);
+          if (e.code === 'permission-denied') {
+            console.error("⛔ Error de Permisos: El catálogo no es público en Firestore.");
+          }
         }
 
         if (data.length === 0) {
+          console.info("🔄 Intentando cargar desde fallback local (productos.json)...");
           const res = await fetch("/productos.json");
           if (!res.ok) throw new Error(`HTTP ${res.status}: failed to load productos`);
           data = (await res.json()) as Producto[];
+          console.log(`🏠 Catálogo cargado desde local JSON (${data.length} productos)`);
         }
 
         if (!cancelled) {

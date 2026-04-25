@@ -3,6 +3,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface HeroProps {
   onOpenCart: () => void;
@@ -35,15 +36,13 @@ export default function Hero({
     <section className="hero hero-compact">
       {/* ── Fondo imagen ── */}
       <div style={{ position: "absolute", inset: 0, zIndex: 0, background: "var(--oscuro, #111111)" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/catalogo-hero.jpg"
           alt=""
           aria-hidden="true"
-          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
-          }}
+          fill
+          priority
+          style={{ objectFit: "cover", objectPosition: "center" }}
         />
         <div
           style={{
@@ -174,10 +173,12 @@ export default function Hero({
           }}
         >
           <Link href="/">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/logo.png"
               alt="El Remate Logo"
+              width={280}
+              height={150}
+              priority
               style={{ 
                 width: "100%",
                 maxWidth: "280px",
