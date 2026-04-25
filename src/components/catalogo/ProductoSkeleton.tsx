@@ -36,12 +36,12 @@ export function ProductoSkeleton() {
         }}
       />
 
-      {/* Name skeleton */}
+      {/* Name skeleton (2 lines) */}
       <div
         className="animate-pulse"
         style={{
           background: "var(--bg2)",
-          height: "14px",
+          height: "1.2rem",
           width: "90%",
           borderRadius: "4px",
           marginBottom: "6px",
@@ -51,7 +51,7 @@ export function ProductoSkeleton() {
         className="animate-pulse"
         style={{
           background: "var(--bg2)",
-          height: "14px",
+          height: "1.2rem",
           width: "60%",
           borderRadius: "4px",
           marginBottom: "12px",

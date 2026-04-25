@@ -140,6 +140,7 @@ export default function ProductoCard({
             className="group-hover:scale-110"
             style={{ 
               objectFit: "contain", 
+              padding: "4px",
               mixBlendMode: "multiply",
               transition: "transform 0.5s ease" 
             }} 
@@ -212,7 +213,12 @@ export default function ProductoCard({
           fontSize: "0.85rem", 
           fontWeight: 600, 
           color: "var(--oscuro)", 
-          lineHeight: "1.25", 
+          lineHeight: "1.2", 
+          height: "2.4em",
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
           marginBottom: "12px", 
           letterSpacing: "-0.01em"
         }}>
