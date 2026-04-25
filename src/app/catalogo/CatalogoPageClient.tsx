@@ -242,46 +242,6 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Local orders (guest)
   const { pedidos: localPedidos, savePedido: saveLocalPedido } = usePedidosLocales();
 
-  // Category correction logic (centralized)
-  const getCorrectedCategory = useCallback((p: Producto) => {
-    // Si ya tiene una categoría que no sea "Otros", la respetamos (viene del Excel/Admin)
-    if (p.categoria && p.categoria !== "Otros") return p.categoria;
-
-    const CATEGORY_CORRECTIONS: Record<string, string> = {
-      "ALFAJOR": "Golosinas y Dulces",
-      "PILAS": "Otros",
-      "LAMPARA": "Otros",
-      "SHAMPOO": "Higiene Personal",
-      "ACONDICIONADOR": "Higiene Personal",
-      "JABON TOCADOR": "Higiene Personal",
-      "DENTAL": "Higiene Personal",
-      "AFEITADORA": "Higiene Personal",
-      "ACEITUNAS": "Aceites y Aderezos",
-      "CHOCLO": "Harinas, Pastas y Legumbres",
-      "ARVEJAS": "Harinas, Pastas y Legumbres",
-      "POROTOS": "Harinas, Pastas y Legumbres",
-      "LENTEJAS": "Harinas, Pastas y Legumbres",
-      "PAN DULCE": "Panadería",
-      "BUDIN": "Panadería",
-    };
-
-    const nombreUpper = p.nombre.toUpperCase();
-    for (const [key, corrected] of Object.entries(CATEGORY_CORRECTIONS)) {
-      if (nombreUpper.includes(key)) {
-        return corrected;
-      }
-    }
-    return p.categoria || "Otros";
-  }, []);
-
-  // Enrich productos with corrected categories (only for items marked as "Otros" or missing)
-  const productosEnriquecidos = useMemo(() => {
-    return productos.map(p => ({
-      ...p,
-      categoria: getCorrectedCategory(p)
-    }));
-  }, [productos, getCorrectedCategory]);
-
   // Derive unique categories from ALL products (not just enriched or filtered)
   // This ensures categories don't disappear when searching
   const categorias = useMemo(() => {
@@ -292,7 +252,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   // Filter by search and category (memoized for performance)
   const filtrados = useMemo(() => {
-    let result = productosEnriquecidos;
+    let result = productos;
 
     if (categoria) {
       result = result.filter((p) => p.categoria === categoria);
@@ -313,7 +273,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     }
 
     return result;
-  }, [productosEnriquecidos, categoria, debouncedSearch]);
+  }, [productos, categoria, debouncedSearch]);
 
   // Qty map for product grid
   const qtyMap = useMemo(() => {

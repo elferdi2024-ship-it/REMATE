@@ -5,6 +5,9 @@ import { type WorkBook } from "xlsx";
 import * as XLSX from "xlsx";
 import { db } from "@/lib/firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+import categoryData from "@/lib/categoria_mapping.json";
+
+const CATEGORY_MAPPING = categoryData.mapping as Record<string, string>;
 
 interface ProductRow {
   codigo: string;
@@ -25,31 +28,32 @@ export default function PreciosUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const KEYWORDS: Record<string, string[]> = {
-    "Aceites y Aderezos": ["aceite", "aceituna", "aderezo", "mayonesa", "ketchup", "mostaza", "barbacoa", "vinagre", "salsa"],
-    "Bebidas": ["agua", "jugo", "gaseosa", "cerveza", "vino", "refresco", "bebida", "sidra", "fernet", "whisky", "sprite", "pepsi", "coca"],
-    "Café, Té y Yerba": ["cafe", "te ", "yerba", "bracafe", "nescafe"],
-    "Cereales y Granola": ["avena", "copos", "granola", "cereal"],
-    "Congelados": ["cong", "mccain", "boreal", "nugget", "espinaca", "brocoli"],
-    "Conservas de Pescado": ["atun", "sardina", "lomito", "pescado", "grated"],
-    "Descartables y Embalaje": ["descart", "tenedor", "cuchara", "vaso plast", "bandeja", "caja", "bolsa"],
-    "Especias y Condimentos": ["sal ", "azucar", "oregano", "pimenton", "adobo", "ajo", "caldo", "condimento", "harina "],
-    "Fiambres y Carnes": ["jamon", "mortadela", "salchicha", "pancho", "chorizo", "bondiola", "morcilla", "fiambre", "carne", "arrollado"],
-    "Golosinas y Dulces": ["alfajor", "caramelo", "chocolate", "gomita", "chicle", "dulce de membrillo", "galleta rellena", "fini", "barrita"],
-    "Harinas, Pastas y Legumbres": ["harina", "faina", "fideo", "arroz", "lenteja", "garbanzo", "almidon", "pasta", "polenta"],
-    "Lácteos": ["leche", "queso", "yogur", "crema de leche", "manteca", "ricota", "dulce de leche", "muzzarel", "conaprole"],
-    "Limpieza": ["jabon en polvo", "jabon liquido", "lavandina", "desinfectante", "limpiador", "detergente", "amoniaco"],
-    "Mermeladas y Conservas Dulces": ["mermelada", "anana en alm", "membrillo", "miel", "dulce de fruta", "conserva"],
-    "Panadería": ["pan de molde", "pan catalan", "pan de viena", "pan rallado", "tostada"],
-    "Papel e Higiene": ["papel higien", "servilleta", "toalla de cocina", "rollo"],
-    "Higiene Personal": ["jabon de manos", "afeitar", "desodorante", "shampoo", "pañal", "toallita"],
+    "ACEITES Y GRASAS": ["aceite", "grasa", "manteca"],
+    "BEBIDAS ALCOHÓLICAS": ["cerveza", "vino", "fernet", "whisky", "sidra", "espumante"],
+    "BEBIDAS SIN ALCOHOL": ["agua", "jugo", "gaseosa", "refresco", "pepsi", "coca", "sprite"],
+    "CARNES Y EMBUTIDOS": ["jamon", "bondiola", "salchicha", "pancho", "chorizo", "morcilla", "fiambre", "carne", "arrollado", "mortadela"],
+    "CONSERVAS Y ENLATADOS": ["atun", "sardina", "choclo", "arveja", "poroto", "lenteja", "garbanzo", "lomito", "grated"],
+    "GOLOSINAS Y SNACKS": ["alfajor", "caramelo", "chocolate", "gomita", "chicle", "papas", "lay", "snack"],
+    "HARINAS, PASTAS Y CEREALES": ["harina", "fideo", "arroz", "pasta", "polenta", "avena", "cereal", "copos"],
+    "HIGIENE PERSONAL": ["jabon", "shampoo", "shampu", "dental", "afeitar", "desodorante", "pañal", "toallita"],
+    "LÁCTEOS Y HUEVOS": ["leche", "queso", "yogur", "crema", "manteca", "huevo", "ricota", "muzzarel", "conaprole"],
+    "LIMPIEZA DEL HOGAR": ["lavandina", "detergente", "limpiador", "suavizante", "jabon polvo", "desinfectante"],
+    "PANADERÍA Y REPOSTERÍA": ["pan ", "tostada", "galleta", "bizcocho", "budin", "reposteria"],
+    "YERBA, TÉ Y CAFÉ": ["yerba", "te ", "cafe", "nescafe", "bracafe"],
   };
 
-  function categorizar(nombre: string): string {
+  function categorizar(codigo: string, nombre: string): string {
+    // 1. Prioridad: Mapping exacto por código del Excel
+    if (CATEGORY_MAPPING[codigo]) {
+      return CATEGORY_MAPPING[codigo];
+    }
+
+    // 2. Fallback: Palabras clave por nombre
     const n = nombre.toLowerCase();
     for (const [cat, kws] of Object.entries(KEYWORDS)) {
       if (kws.some((k) => n.includes(k))) return cat;
     }
-    return "Otros";
+    return "OTROS";
   }
 
   function parseWorkbook(workbook: WorkBook): ProductRow[] {
@@ -67,7 +71,7 @@ export default function PreciosUploader() {
         codigo,
         nombre,
         precio,
-        categoria: categorizar(nombre),
+        categoria: categorizar(codigo, nombre),
       });
     }
     return products;

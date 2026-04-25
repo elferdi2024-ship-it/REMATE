@@ -122,7 +122,7 @@ export default function Hero({
           >
             {[
               { val: "1900+", lbl: "Productos" },
-              { val: "17", lbl: "Categorías" },
+              { val: "21", lbl: "Categorías" },
               { val: "WA", lbl: "Express" },
             ].map((stat, i) => (
               <div
