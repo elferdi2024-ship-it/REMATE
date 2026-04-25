@@ -7,7 +7,7 @@ import { db } from "@/lib/firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import categoryData from "@/lib/categoria_mapping.json";
 
-const RAW_MAPPING = categoryData.mapping as Record<string, string>;
+const RAW_MAPPING = categoryData as unknown as Record<string, string>;
 // Normalizar mapping para búsqueda rápida e insensible a espacios/casos
 const CATEGORY_MAPPING: Record<string, string> = {};
 Object.entries(RAW_MAPPING).forEach(([code, cat]) => {

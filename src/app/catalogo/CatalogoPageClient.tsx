@@ -38,6 +38,9 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import type { Vista, CartItem, Producto } from "@/types";
 import { CATEGORIAS } from "@/types";
+import categoriaMapping from "@/lib/categoria_mapping.json";
+
+const catMap = (categoriaMapping as any).mapping || categoriaMapping;
 
 interface CatalogoPageClientProps {
   // In the future we can pass pre-loaded products from server
@@ -211,6 +214,15 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           data = (await res.json()) as Producto[];
           console.log(`🏠 Catálogo cargado desde local JSON (${data.length} productos)`);
         }
+
+        // Aplicar mapping de categorías del Excel
+        data = data.map(p => {
+          const barcode = String(p.codigo || "").trim();
+          if (catMap[barcode]) {
+            return { ...p, categoria: catMap[barcode] };
+          }
+          return p;
+        });
 
         if (!cancelled) {
           setProductos(data);

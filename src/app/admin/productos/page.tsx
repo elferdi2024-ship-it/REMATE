@@ -2,11 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { db, storage } from "@/lib/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, writeBatch } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/lib/toast-context";
 import imageCompression from 'browser-image-compression';
 import Image from "next/image";
+import categoriaMapping from "@/lib/categoria_mapping.json";
+
+const catMap = (categoriaMapping as any).mapping || categoriaMapping;
 
 interface ProductoRow {
   codigo: string;
@@ -25,6 +28,7 @@ export default function AdminProductos() {
 
   const [uploadingItem, setUploadingItem] = useState<string | null>(null);
   const [progress, setProgress] = useState<number>(0);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -110,6 +114,40 @@ export default function AdminProductos() {
     }
   };
 
+  const handleSyncCategories = async () => {
+    if (!confirm("¿Estás seguro de que deseas sincronizar las categorías de TODO el catálogo con el Excel? Esto sobrescribirá las categorías actuales.")) return;
+    
+    setSyncing(true);
+    try {
+      const snap = await getDoc(doc(db, "catalogo_activo", "productos"));
+      if (!snap.exists()) throw new Error("No se encontró el documento de productos");
+      
+      const data = snap.data();
+      const items = data.items || {};
+      const updatedItems = { ...items };
+      let count = 0;
+
+      for (const codigo in updatedItems) {
+        if (catMap[codigo]) {
+          updatedItems[codigo].categoria = catMap[codigo];
+          count++;
+        }
+      }
+
+      await updateDoc(doc(db, "catalogo_activo", "productos"), {
+        items: updatedItems
+      });
+
+      setProductos(Object.values(updatedItems) as ProductoRow[]);
+      toast.success(`Se actualizaron ${count} productos exitosamente.`);
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Error al sincronizar: " + e.message);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   if (loading) {
     return <div className="p-8 text-white">Cargando catálogo...</div>;
   }
@@ -117,7 +155,14 @@ export default function AdminProductos() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="font-bebas text-3xl tracking-wider text-white">Gestión de Imágenes</h2>
+        <h2 className="font-bebas text-3xl tracking-wider text-white">Gestión de Productos</h2>
+        <button
+          onClick={handleSyncCategories}
+          disabled={syncing}
+          className="rounded-lg bg-[#00E5FF] px-4 py-2 text-sm font-bold text-black transition-all hover:scale-105 hover:bg-[#00E5FF]/80 disabled:opacity-50"
+        >
+          {syncing ? "Sincronizando..." : "🔄 Sincronizar Categorías (Excel)"}
+        </button>
       </div>
 
       <div className="relative">
