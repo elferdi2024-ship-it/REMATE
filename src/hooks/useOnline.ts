@@ -5,13 +5,13 @@ import { useState, useEffect } from "react";
  * Listens to window online/offline events for real-time updates.
  */
 export function useOnline(): boolean {
-  const [isOnline, setIsOnline] = useState(() => {
-    if (typeof navigator === "undefined") return true;
-    return navigator.onLine;
-  });
+  const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    
+    // Set initial state after mount
+    setIsOnline(navigator.onLine);
 
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
