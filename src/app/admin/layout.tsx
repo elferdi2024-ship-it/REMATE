@@ -36,25 +36,29 @@ export default function AdminLayout({
 
     async function checkRole() {
       if (!user) return;
+
+      // 1. Hardcoded bypass for superadmin (Renato) - Must be BEFORE getDoc to avoid permission errors
+      if (user.email === "rnt.atlantida@gmail.com") {
+        setRole("admin");
+        setChecking(false);
+        
+        // Silently try to ensure the record exists, but ignore errors if rules block it
+        try {
+          const { setDoc } = await import("firebase/firestore");
+          await setDoc(doc(db, "usuarios", user.uid), {
+            email: user.email,
+            role: "admin",
+            repairedAt: new Date().toISOString()
+          }, { merge: true });
+        } catch (e) {
+          console.warn("Could not auto-repair admin record, manual fix might be needed.");
+        }
+        return;
+      }
       
       try {
         const snap = await getDoc(doc(db, "usuarios", user.uid));
         
-        // Superadmin self-repair & bypass
-        if (user.email === "rnt.atlantida@gmail.com") {
-          if (!snap.exists() || snap.data().role !== "admin") {
-            console.log("Repairing superadmin permissions...");
-            await setDoc(doc(db, "usuarios", user.uid), {
-              email: user.email,
-              role: "admin",
-              repairedAt: new Date().toISOString()
-            }, { merge: true });
-          }
-          setRole("admin");
-          setChecking(false);
-          return;
-        }
-
         if (snap.exists()) {
           const userRole = snap.data().role;
           if (userRole === "admin" || userRole === "empleado") {
@@ -67,12 +71,7 @@ export default function AdminLayout({
         }
       } catch (err) {
         console.error("Error checking role:", err);
-        // If it's Renato and it failed (likely rules), still let him see the UI but warn him
-        if (user.email === "rnt.atlantida@gmail.com") {
-          setRole("admin");
-        } else {
-          router.replace("/admin/login");
-        }
+        router.replace("/admin/login");
       } finally {
         setChecking(false);
       }
