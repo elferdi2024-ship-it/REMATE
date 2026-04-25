@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -21,21 +22,14 @@ const isFirebaseConfigured = !!(
 let app: any = null;
 let auth: any = null;
 let db: any = null;
+let storage: any = null;
 
 if (isFirebaseConfigured) {
   try {
     app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
-
-    /* Persistencia desactivada temporalmente para evitar bloqueos en producción */
-    /*
-    if (typeof window !== "undefined") {
-      enableIndexedDbPersistence(db).catch((err) => {
-        ...
-      });
-    }
-    */
+    storage = getStorage(app);
   } catch (error) {
     console.warn("Firebase initialization failed:", error);
   }
@@ -43,4 +37,4 @@ if (isFirebaseConfigured) {
   console.warn("Firebase not configured. Set NEXT_PUBLIC_FIREBASE_* environment variables.");
 }
 
-export { app, auth, db, isFirebaseConfigured };
+export { app, auth, db, storage, isFirebaseConfigured, firebaseConfig };

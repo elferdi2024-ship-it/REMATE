@@ -10,6 +10,7 @@ import Link from "next/link";
 const NAV_LINKS = [
   { href: "/admin/pedidos", label: "Pedidos", icon: "📦" },
   { href: "/admin/precios", label: "Precios", icon: "📋" },
+  { href: "/admin/productos", label: "Imágenes", icon: "🖼️" },
   { href: "/admin/stats", label: "Estadísticas", icon: "📊" },
 ];
 
@@ -22,7 +23,7 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [checking, setChecking] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -37,8 +38,13 @@ export default function AdminLayout({
       if (!user) return;
       try {
         const snap = await getDoc(doc(db, "usuarios", user.uid));
-        if (snap.exists() && snap.data().role === "admin") {
-          setIsAdmin(true);
+        if (snap.exists()) {
+          const userRole = snap.data().role;
+          if (userRole === "admin" || userRole === "empleado") {
+            setRole(userRole);
+          } else {
+            router.replace("/admin/login");
+          }
         } else {
           router.replace("/admin/login");
         }
@@ -51,6 +57,13 @@ export default function AdminLayout({
 
     checkRole();
   }, [user, loading, router]);
+
+  // Enforce access control for empleados
+  useEffect(() => {
+    if (role === "empleado" && pathname !== "/admin/pedidos" && !pathname.startsWith("/admin/login")) {
+      router.replace("/admin/pedidos");
+    }
+  }, [role, pathname, router]);
 
   if (pathname === "/admin/login") {
     return <>{children}</>;
@@ -67,7 +80,19 @@ export default function AdminLayout({
     );
   }
 
-  if (!isAdmin) return null;
+  if (!role) return null;
+
+  const availableLinks = [...NAV_LINKS];
+  if (user?.email === "rnt.atlantida@gmail.com") {
+    availableLinks.push({ href: "/admin/usuarios", label: "Usuarios", icon: "👥" });
+  }
+
+  const linksToShow = availableLinks.filter((link) => {
+    if (role === "empleado") {
+      return link.href === "/admin/pedidos";
+    }
+    return true;
+  });
 
   return (
     <div className="flex min-h-screen bg-[#050914] text-gray-200 selection:bg-[#00E5FF] selection:text-black">
@@ -79,7 +104,7 @@ export default function AdminLayout({
           </h1>
         </div>
         <nav className="flex-1 space-y-2 p-6">
-          {NAV_LINKS.map((link) => {
+          {linksToShow.map((link) => {
             const isActive = pathname === link.href;
             return (
               <Link
@@ -157,7 +182,7 @@ export default function AdminLayout({
           </button>
         </div>
         <nav className="space-y-2 p-6">
-          {NAV_LINKS.map((link) => {
+          {linksToShow.map((link) => {
             const isActive = pathname === link.href;
             return (
               <Link

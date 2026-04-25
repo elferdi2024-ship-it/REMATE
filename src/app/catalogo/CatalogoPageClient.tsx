@@ -34,6 +34,8 @@ import { encodeCartToURL, decodeCartFromURL } from "@/lib/cart-share";
 import { haptic } from "@/lib/haptic";
 import * as ls from "@/lib/ls";
 import { SUCURSALES, type MetodoEntrega } from "@/lib/sucursales";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import type { Vista, CartItem, Producto } from "@/types";
 
 interface CatalogoPageClientProps {
@@ -174,9 +176,24 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       try {
         setLoading(true);
         setLoadingError(null);
-        const res = await fetch("/productos.json");
-        if (!res.ok) throw new Error(`HTTP ${res.status}: failed to load productos`);
-        const data = (await res.json()) as Producto[];
+        let data: Producto[] = [];
+        
+        try {
+          const snap = await getDoc(doc(db, "catalogo_activo", "productos"));
+          if (snap.exists()) {
+            const docData = snap.data();
+            data = Object.values(docData.items || {}) as Producto[];
+          }
+        } catch (e) {
+          console.warn("Firestore fetch failed, falling back to local JSON", e);
+        }
+
+        if (data.length === 0) {
+          const res = await fetch("/productos.json");
+          if (!res.ok) throw new Error(`HTTP ${res.status}: failed to load productos`);
+          data = (await res.json()) as Producto[];
+        }
+
         if (!cancelled) {
           setProductos(data);
           setLoading(false);

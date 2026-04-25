@@ -4,7 +4,7 @@ import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
 import { type WorkBook } from "xlsx";
 import * as XLSX from "xlsx";
 import { db } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 interface ProductRow {
   codigo: string;
@@ -108,10 +108,17 @@ export default function PreciosUploader() {
     setError(null);
 
     try {
+      const snap = await getDoc(doc(db, "catalogo_activo", "productos"));
+      const currentData = snap.exists() ? snap.data().items || {} : {};
+
       const batchSize = 50;
-      const catalogoActivo: Record<string, ProductRow> = {};
+      const catalogoActivo: Record<string, ProductRow & { imagen?: string }> = {};
       for (let i = 0; i < parsed.length; i++) {
-        catalogoActivo[parsed[i].codigo] = parsed[i];
+        const codigo = parsed[i].codigo;
+        catalogoActivo[codigo] = {
+          ...parsed[i],
+          ...(currentData[codigo]?.imagen ? { imagen: currentData[codigo].imagen } : {})
+        };
         if ((i + 1) % batchSize === 0) {
           setUploadProgress(Math.round(((i + 1) / parsed.length) * 100));
           await new Promise((r) => setTimeout(r, 10));

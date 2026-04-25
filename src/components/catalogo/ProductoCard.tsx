@@ -130,12 +130,27 @@ export default function ProductoCard({
         justifyContent: "center",
         position: "relative"
       }}>
-        <span role="img" aria-hidden="true" style={{ 
-          fontSize: "3rem", 
-          transition: "transform 0.5s ease",
-        }} className="group-hover:scale-110">
-          {emoji}
-        </span>
+        {producto.imagen ? (
+          <img 
+            src={producto.imagen} 
+            alt={producto.nombre} 
+            className="group-hover:scale-110"
+            style={{ 
+              width: "100%", 
+              height: "100%", 
+              objectFit: "contain", 
+              padding: "16px",
+              transition: "transform 0.5s ease" 
+            }} 
+          />
+        ) : (
+          <span role="img" aria-hidden="true" style={{ 
+            fontSize: "3rem", 
+            transition: "transform 0.5s ease",
+          }} className="group-hover:scale-110">
+            {emoji}
+          </span>
+        )}
         
         <div className="card-floating-action" style={{ position: "absolute", bottom: "-14px", right: "8px", zIndex: 10 }}>
           {isInCart ? (

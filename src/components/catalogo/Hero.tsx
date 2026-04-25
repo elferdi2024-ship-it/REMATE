@@ -85,29 +85,7 @@ export default function Hero({
             </span>
           </div>
 
-          {/* Título */}
-          <h1
-            style={{
-              fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-              fontSize: "clamp(3.6rem, 9vw, 6rem)",
-              fontWeight: 900,
-              letterSpacing: "-1px",
-              lineHeight: 0.88,
-              marginBottom: "14px",
-              textTransform: "uppercase",
-            }}
-          >
-            <span
-              style={{
-                display: "block",
-                color: "#fff",
-                textShadow: "0 4px 24px rgba(0,0,0,0.6), 0 0 60px rgba(214,40,40,0.15)",
-                WebkitTextStroke: "1px rgba(255,255,255,0.08)",
-              }}
-            >
-              EL REMATE
-            </span>
-          </h1>
+
 
           {/* Descriptor */}
           <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "16px" }}>
