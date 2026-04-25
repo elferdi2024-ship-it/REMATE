@@ -6,6 +6,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/lib/toast-context";
 import imageCompression from 'browser-image-compression';
+import Image from "next/image";
 
 interface ProductoRow {
   codigo: string;
@@ -133,9 +134,14 @@ export default function AdminProductos() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {filtrados.slice(0, 50).map((prod) => (
           <div key={prod.codigo} className="flex flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0A0F1C] shadow-lg">
-            <div className="relative flex h-40 items-center justify-center bg-white/5">
+            <div className="relative flex h-40 items-center justify-center bg-white/5 overflow-hidden">
               {prod.imagen ? (
-                <img src={prod.imagen} alt={prod.nombre} className="h-full w-full object-contain p-2" />
+                <Image 
+                  src={prod.imagen} 
+                  alt={prod.nombre} 
+                  fill
+                  className="object-contain p-2" 
+                />
               ) : (
                 <span className="text-4xl">📦</span>
               )}

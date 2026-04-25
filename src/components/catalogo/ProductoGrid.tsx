@@ -221,16 +221,9 @@ export default function ProductoGrid({
 
   const grouped = useMemo(() => {
     return productos.reduce((acc, p) => {
-      let categoria = p.categoria;
-      const nombreUpper = p.nombre.toUpperCase();
-      for (const [key, corrected] of Object.entries(CATEGORY_CORRECTIONS)) {
-        if (nombreUpper.includes(key)) {
-          categoria = corrected;
-          break;
-        }
-      }
-      if (!acc[categoria]) acc[categoria] = [];
-      acc[categoria].push(p);
+      const cat = p.categoria;
+      if (!acc[cat]) acc[cat] = [];
+      acc[cat].push(p);
       return acc;
     }, {} as Record<string, Producto[]>);
   }, [productos]);

@@ -226,15 +226,54 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Local orders (guest)
   const { pedidos: localPedidos, savePedido: saveLocalPedido } = usePedidosLocales();
 
-  // Derive unique categories from loaded productos
+  // Category correction logic (centralized)
+  const getCorrectedCategory = useCallback((p: Producto) => {
+    const CATEGORY_CORRECTIONS: Record<string, string> = {
+      "ALFAJOR": "Golosinas y Dulces",
+      "PILAS": "Otros",
+      "LAMPARA": "Otros",
+      "SHAMPOO": "Higiene Personal",
+      "ACONDICIONADOR": "Higiene Personal",
+      "JABON TOCADOR": "Higiene Personal",
+      "DENTAL": "Higiene Personal",
+      "AFEITADORA": "Higiene Personal",
+      "ACEITUNAS": "Conservas y Enlatados",
+      "CHOCLO": "Conservas y Enlatados",
+      "ARVEJAS": "Conservas y Enlatados",
+      "POROTOS": "Conservas y Enlatados",
+      "LENTEJAS": "Conservas y Enlatados",
+      "PAN DULCE": "Panadería",
+      "BUDIN": "Panadería",
+    };
+
+    let cat = p.categoria || "Otros";
+    const nombreUpper = p.nombre.toUpperCase();
+    for (const [key, corrected] of Object.entries(CATEGORY_CORRECTIONS)) {
+      if (nombreUpper.includes(key)) {
+        cat = corrected;
+        break;
+      }
+    }
+    return cat;
+  }, []);
+
+  // Enrich productos with corrected categories
+  const productosEnriquecidos = useMemo(() => {
+    return productos.map(p => ({
+      ...p,
+      categoria: getCorrectedCategory(p)
+    }));
+  }, [productos, getCorrectedCategory]);
+
+  // Derive unique categories from enriched productos
   const categorias = useMemo(() => {
-    const cats = new Set(productos.map((p) => p.categoria).filter(Boolean));
+    const cats = new Set(productosEnriquecidos.map((p) => p.categoria));
     return Array.from(cats).sort();
-  }, [productos]);
+  }, [productosEnriquecidos]);
 
   // Filter by search and category (memoized for performance)
   const filtrados = useMemo(() => {
-    let result = productos;
+    let result = productosEnriquecidos;
 
     if (categoria) {
       result = result.filter((p) => p.categoria === categoria);
@@ -255,7 +294,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     }
 
     return result;
-  }, [productos, categoria, debouncedSearch]);
+  }, [productosEnriquecidos, categoria, debouncedSearch]);
 
   // Qty map for product grid
   const qtyMap = useMemo(() => {
