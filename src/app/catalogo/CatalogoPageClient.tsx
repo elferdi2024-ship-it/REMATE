@@ -257,8 +257,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Derive unique categories from ALL products (not just enriched or filtered)
   // This ensures categories don't disappear when searching
   const categorias = useMemo(() => {
-    // Inyectamos "Todos" al principio para la navegación
-    return ["Todos", ...CATEGORIAS];
+    return [...CATEGORIAS];
   }, []);
 
   // Filter by search and category (memoized for performance)

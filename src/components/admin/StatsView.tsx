@@ -12,7 +12,7 @@ export default function StatsView() {
     async function fetchStats() {
       try {
         // Simplified fetching logic for demonstration
-        const q = query(collection(db, "pedidos"), orderBy("fecha", "desc"), limit(100));
+        const q = query(collection(db, "pedidos_globales"), orderBy("fecha", "desc"), limit(100));
         const snap = await getDocs(q);
         
         let totalRevenue = 0;

@@ -88,7 +88,41 @@ export default function AdminLayout({
     );
   }
 
-  if (!role) return null;
+  if (!role) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#050914] px-4 text-center">
+        <div className="mb-6 rounded-full bg-red-500/10 p-6 text-6xl shadow-[0_0_50px_rgba(239,35,60,0.2)]">
+          🚫
+        </div>
+        <h1 className="mb-2 font-bebas text-4xl tracking-widest text-white">ACCESO DENEGADO</h1>
+        <p className="mb-8 max-w-md text-gray-400">
+          Tu cuenta ({user?.email}) no tiene permisos para acceder al panel de administración. 
+          Contactá al administrador si creés que esto es un error.
+        </p>
+        <div className="flex flex-col gap-4 w-full max-w-xs">
+          <button
+            onClick={() => {
+              import("firebase/auth").then(({ getAuth, signOut }) => {
+                const auth = getAuth();
+                signOut(auth).then(() => {
+                  router.push("/admin/login");
+                });
+              });
+            }}
+            className="w-full rounded-xl bg-red-500 py-3 font-bold text-white transition-all hover:bg-red-600 shadow-[0_4px_20px_rgba(239,35,60,0.3)]"
+          >
+            CERRAR SESIÓN
+          </button>
+          <Link
+            href="/catalogo"
+            className="w-full rounded-xl border border-white/10 bg-white/5 py-3 font-bold text-gray-300 transition-all hover:bg-white/10"
+          >
+            VOLVER AL CATÁLOGO
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const availableLinks = [...NAV_LINKS];
   if (user?.email === "rnt.atlantida@gmail.com") {

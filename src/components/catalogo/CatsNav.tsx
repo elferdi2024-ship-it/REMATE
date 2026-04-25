@@ -47,7 +47,7 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
         }}>
           {categorias.map((cat) => {
             const emoji = EMOJI_POR_CATEGORIA[cat] || "📦";
-            const isActive = cat === activeCat;
+            const isActive = cat === activeCat || (cat === "Todos" && (activeCat === "" || activeCat === "Todos"));
             return (
               <button
                 key={cat}
