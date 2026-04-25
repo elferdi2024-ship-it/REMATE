@@ -111,8 +111,8 @@ export default function ProductoCard({
       style={{
         background: "var(--white)",
         border: "1px solid var(--border)",
-        borderRadius: "24px",
-        padding: "16px",
+        borderRadius: "16px",
+        padding: "10px",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         display: "flex",
         flexDirection: "column",
@@ -121,9 +121,9 @@ export default function ProductoCard({
     >
       <div className="card-thumb" style={{ 
         background: "var(--bg2)", 
-        borderRadius: "18px",
-        height: "150px",
-        marginBottom: "16px",
+        borderRadius: "12px",
+        height: "110px",
+        marginBottom: "8px",
         border: "none",
         display: "flex",
         alignItems: "center",
@@ -139,7 +139,7 @@ export default function ProductoCard({
               width: "100%", 
               height: "100%", 
               objectFit: "contain", 
-              padding: "16px",
+              padding: "8px",
               transition: "transform 0.5s ease" 
             }} 
           />
@@ -174,12 +174,12 @@ export default function ProductoCard({
               color: "white",
               border: "none",
               borderRadius: "50%",
-              width: "40px",
-              height: "40px",
+              width: "36px",
+              height: "36px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 8px 16px rgba(0,0,0,0.15)",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
               cursor: "pointer"
             }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -190,15 +190,15 @@ export default function ProductoCard({
         </div>
       </div>
 
-      <div className="card-body" style={{ padding: "4px 2px 8px", flex: 1, display: "flex", flexDirection: "column" }}>
+      <div className="card-body" style={{ padding: "0 4px 4px", flex: 1, display: "flex", flexDirection: "column" }}>
         <span className="card-cat-badge" style={{ 
           background: badgeBg, 
           color: badgeColor, 
-          fontSize: "9px", 
+          fontSize: "8px", 
           fontWeight: 800, 
           textTransform: "uppercase", 
-          padding: "2px 8px", 
-          borderRadius: "6px", 
+          padding: "2px 6px", 
+          borderRadius: "4px", 
           marginBottom: "6px", 
           display: "inline-block",
           letterSpacing: "0.5px",
@@ -208,16 +208,11 @@ export default function ProductoCard({
         </span>
 
         <h3 className="card-name" style={{ 
-          fontSize: "var(--text-base)", 
-          fontWeight: 700, 
+          fontSize: "0.85rem", 
+          fontWeight: 600, 
           color: "var(--oscuro)", 
-          lineHeight: "1.3", 
+          lineHeight: "1.25", 
           marginBottom: "12px", 
-          height: "2.6em", 
-          overflow: "hidden", 
-          display: "-webkit-box", 
-          WebkitLineClamp: 2, 
-          WebkitBoxOrient: "vertical",
           letterSpacing: "-0.01em"
         }}>
           {highlightText(producto.nombre, searchTerm)}
@@ -226,15 +221,15 @@ export default function ProductoCard({
         <div style={{ marginTop: "auto" }}>
           <div className="card-price" style={{ 
             fontFamily: "var(--font-display)",
-            fontSize: "2.1rem", 
-            fontWeight: 400,
+            fontSize: "1.4rem", 
+            fontWeight: 700,
             color: "var(--rojo)", 
             lineHeight: "1",
             letterSpacing: "0.5px"
           }}>
             {formatPrice(producto.precio)}
           </div>
-          <div style={{ fontSize: "11px", color: "var(--muted)", fontWeight: 700, textTransform: "uppercase", marginTop: "4px", letterSpacing: "0.5px" }}>
+          <div style={{ fontSize: "10px", color: "var(--muted)", fontWeight: 700, textTransform: "uppercase", marginTop: "4px", letterSpacing: "0.5px" }}>
             Unidad IVA Incl.
           </div>
         </div>
