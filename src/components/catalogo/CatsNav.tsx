@@ -1,7 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { EMOJI_POR_CATEGORIA } from "@/types";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import Image from "next/image";
 
 interface CatsNavProps {
   categorias: string[];
@@ -11,6 +14,21 @@ interface CatsNavProps {
 
 export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProps) {
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [configCats, setConfigCats] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const snap = await getDoc(doc(db, "configuracion", "categorias"));
+        if (snap.exists()) {
+          setConfigCats(snap.data());
+        }
+      } catch (e) {
+        console.error("Error cargando config de categorías:", e);
+      }
+    }
+    load();
+  }, []);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -79,7 +97,20 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
                   boxShadow: isActive ? "0 8px 16px var(--rojo-glow)" : "0 2px 4px rgba(0,0,0,0.04)",
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                   border: isActive ? "2px solid var(--rojo)" : "1px solid var(--border)"
-                }}>{emoji}</div>
+                }}>
+                  {configCats[cat] ? (
+                    <div style={{ position: "relative", width: "70%", height: "70%" }}>
+                      <Image 
+                        src={configCats[cat]} 
+                        alt={cat} 
+                        fill 
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : (
+                    emoji
+                  )}
+                </div>
                 <span className="cat-circle-label" style={{ 
                   fontFamily: "var(--font-body)",
                   fontSize: "10px", 

@@ -2,6 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 /* ═══════════════════════════════════════════════════════════════════
    LANDING PAGE — Distribuidora El Remate
@@ -94,6 +97,22 @@ const FEATURES = [
    ═══════════════════════════════════════════════════════════════════ */
 
 export default function LandingPage() {
+  const [configCats, setConfigCats] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const snap = await getDoc(doc(db, "configuracion", "categorias"));
+        if (snap.exists()) {
+          setConfigCats(snap.data());
+        }
+      } catch (e) {
+        console.error("Error cargando config de categorías:", e);
+      }
+    }
+    load();
+  }, []);
+
   return (
     <div style={{ fontFamily: "var(--font-body, 'DM Sans'), sans-serif" }}>
       {/* ══════ HERO (SECCIÓN PRINCIPAL) ══════ */}
@@ -639,7 +658,18 @@ export default function LandingPage() {
                   e.currentTarget.style.borderColor = "var(--border, #DDD8D0)";
                 }}
               >
-                <span style={{ fontSize: "2.2rem" }}>{cat.icono}</span>
+                <div style={{ position: "relative", width: "45px", height: "45px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {configCats[cat.nombre] ? (
+                    <Image 
+                      src={configCats[cat.nombre]} 
+                      alt={cat.titulo} 
+                      fill 
+                      className="object-contain"
+                    />
+                  ) : (
+                    <span style={{ fontSize: "2.2rem" }}>{cat.icono}</span>
+                  )}
+                </div>
                 <span
                   style={{
                     fontSize: "0.75rem",
