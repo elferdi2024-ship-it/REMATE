@@ -181,6 +181,15 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [categoria, setCategoria] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
+  // Sync category from URL if present
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("categoria");
+    if (cat) {
+      setCategoria(cat);
+    }
+  }, []);
+
   // Fetch productos on mount
   useEffect(() => {
     let cancelled = false;

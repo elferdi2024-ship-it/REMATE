@@ -36,18 +36,27 @@ const SUCURSALES = [
    📍 DATOS: CATEGORÍAS DE PRODUCTOS (editar nombres e íconos)
    ────────────────────────────────────────────────────────────── */
 const CATEGORIAS = [
-  { icono: "🫙", nombre: "Aceites y Aderezos" },
-  { icono: "🌾", nombre: "Harinas, Pastas y Legumbres" },
-  { icono: "☕", nombre: "Café, Té y Yerba" },
-  { icono: "🥤", nombre: "Bebidas" },
-  { icono: "🥛", nombre: "Lácteos" },
-  { icono: "🥩", nombre: "Fiambres y Carnes" },
-  { icono: "🍬", nombre: "Golosinas y Dulces" },
-  { icono: "🧂", nombre: "Especias y Condimentos" },
-  { icono: "🧹", nombre: "Limpieza" },
-  { icono: "🧴", nombre: "Higiene Personal" },
-  { icono: "❄️", nombre: "Congelados" },
-  { icono: "🥫", nombre: "Conservas y Enlatados" },
+  { icono: "🫗", nombre: "ACEITES Y GRASAS", titulo: "Aceites y Grasas" },
+  { icono: "🏠", nombre: "ARTÍCULOS DEL HOGAR", titulo: "Hogar" },
+  { icono: "🍺", nombre: "BEBIDAS ALCOHÓLICAS", titulo: "Bebidas Alcohólicas" },
+  { icono: "🥤", nombre: "BEBIDAS SIN ALCOHOL", titulo: "Bebidas sin Alcohol" },
+  { icono: "🥩", nombre: "CARNES Y EMBUTIDOS", titulo: "Fiambres y Carnes" },
+  { icono: "🌿", nombre: "CONDIMENTOS Y ESPECIAS", titulo: "Especias" },
+  { icono: "🧊", nombre: "CONGELADOS", titulo: "Congelados" },
+  { icono: "🥫", nombre: "CONSERVAS Y ENLATADOS", titulo: "Conservas" },
+  { icono: "📦", nombre: "DESCARTABLES Y ART. DEL HOGAR", titulo: "Descartables" },
+  { icono: "🍯", nombre: "DULCES Y MERMELADAS", titulo: "Dulces y Mermeladas" },
+  { icono: "🍎", nombre: "FRUTAS Y VERDURAS", titulo: "Frutas y Verduras" },
+  { icono: "🍬", nombre: "GOLOSINAS Y SNACKS", titulo: "Golosinas y Snacks" },
+  { icono: "🌾", nombre: "HARINAS, PASTAS Y CEREALES", titulo: "Harinas y Pastas" },
+  { icono: "🧴", nombre: "HIGIENE PERSONAL", titulo: "Higiene Personal" },
+  { icono: "🥛", nombre: "LÁCTEOS Y HUEVOS", titulo: "Lácteos y Huevos" },
+  { icono: "🧹", nombre: "LIMPIEZA DEL HOGAR", titulo: "Limpieza" },
+  { icono: "🐾", nombre: "MASCOTAS", titulo: "Mascotas" },
+  { icono: "🥖", nombre: "PANADERÍA Y REPOSTERÍA", titulo: "Panadería" },
+  { icono: "🥫", nombre: "SALSAS Y ADEREZOS", titulo: "Salsas y Aderezos" },
+  { icono: "☕", nombre: "YERBA, TÉ Y CAFÉ", titulo: "Yerba, Té y Café" },
+  { icono: "📦", nombre: "OTROS", titulo: "Otros" },
 ];
 
 /* ──────────────────────────────────────────────────────────────
@@ -604,7 +613,7 @@ export default function LandingPage() {
             {CATEGORIAS.map((cat, i) => (
               <Link
                 key={i}
-                href="/catalogo"
+                href={`/catalogo?categoria=${encodeURIComponent(cat.nombre)}`}
                 style={{
                   background: "var(--white, #FFFFFF)",
                   borderRadius: "var(--r-md, 12px)",
@@ -640,7 +649,7 @@ export default function LandingPage() {
                     lineHeight: 1.3,
                   }}
                 >
-                  {cat.nombre}
+                  {cat.titulo}
                 </span>
               </Link>
             ))}
