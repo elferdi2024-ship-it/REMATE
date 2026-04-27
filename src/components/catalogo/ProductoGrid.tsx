@@ -128,15 +128,22 @@ function CategoryCarousel({
     return (
       <>
         <div className="grid">
-          {catProds.map((p) => (
-            <ProductoCard
-              key={p.codigo}
-              producto={p}
-              qty={qtyMap[p.codigo] || 0}
-              searchTerm={searchTerm}
-              onAdd={onAdd}
-              onQtyChange={onQtyChange}
-            />
+          {catProds.map((p, pIdx) => (
+            <React.Fragment key={p.codigo}>
+              <ProductoCard
+                producto={p}
+                qty={qtyMap[p.codigo] || 0}
+                searchTerm={searchTerm}
+                onAdd={onAdd}
+                onQtyChange={onQtyChange}
+              />
+              {/* Intercalamos banner al final de cada fila completa */}
+              {(pIdx + 1) % columns === 0 && pIdx < catProds.length - 1 && (
+                <div className="grid-banner-row">
+                  <CategoryBanner index={pIdx + 1} />
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
         <div className="cat-section-controls">
@@ -296,7 +303,7 @@ function LazySection({ children, index, vista }: { children: React.ReactNode; in
     <div ref={ref} className="lazy-section-wrapper" style={{ minHeight: isVisible ? "auto" : "300px" }}>
       {isVisible ? (
         <>
-          {index > 0 && vista === "grilla" && <CategoryBanner index={index - 1} />}
+          {vista === "grilla" && <CategoryBanner index={index} />}
           {children}
         </>
       ) : (
