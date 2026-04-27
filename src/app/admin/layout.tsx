@@ -38,9 +38,8 @@ export default function AdminLayout({
     async function checkRole() {
       if (!user) return;
 
-      // 1. Hardcoded bypass for superadmins - Must be BEFORE getDoc to avoid permission errors
-      const superAdmins = ["rnt.atlantida@gmail.com", "adminremate1@elremate.com"];
-      if (superAdmins.includes(user.email || "")) {
+      // 1. Hardcoded bypass for superadmin (Renato) - Must be BEFORE getDoc to avoid permission errors
+      if (user.email === "rnt.atlantida@gmail.com") {
         setRole("admin");
         setChecking(false);
         
@@ -141,8 +140,7 @@ export default function AdminLayout({
   }
 
   const availableLinks = [...NAV_LINKS];
-  const isSuperAdmin = ["rnt.atlantida@gmail.com", "adminremate1@elremate.com"].includes(user?.email || "");
-  if (isSuperAdmin) {
+  if (user?.email === "rnt.atlantida@gmail.com") {
     availableLinks.push({ href: "/admin/usuarios", label: "Usuarios", icon: "👥" });
   }
 

@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Función para verificar si el usuario es admin
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Catálogo: Cualquiera lee, solo admin escribe
+    match /catalogo_activo/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Pedidos: Clientes crean, admin gestiona (lee/edita/borra)
+    match /pedidos/{pedidoId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    
+    // Pedidos Globales: Solo admin
+    match /pedidos_globales/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Usuarios: Cada uno lee lo suyo, admin lee todo
+    match /usuarios/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Configuración (Categorías, etc): Cualquiera lee, solo admin escribe
+    match /configuracion/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
