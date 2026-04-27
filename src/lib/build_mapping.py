@@ -43,6 +43,7 @@ MAPEO_EXCEL_A_APP = {
     "Conservas": "CONSERVAS Y ENLATADOS",
     "Descartables": "DESCARTABLES Y ART. DEL HOGAR",
     "Descartables y Embalaje": "DESCARTABLES Y ART. DEL HOGAR",
+    "DESCARTABLES Y ARTÍCULOS DEL HOGAR": "DESCARTABLES Y ART. DEL HOGAR",
     "Dulces": "GOLOSINAS Y SNACKS",
     "Golosinas y Dulces": "GOLOSINAS Y SNACKS",
     "Harinas": "HARINAS, PASTAS Y CEREALES",
@@ -89,7 +90,7 @@ def normalizar_categoria(cat_excel):
     return "OTROS"
 
 def run():
-    excel_path = r'd:\PROYECTOS\ELREMATE\modificaciones\lista_con_categorias.xlsx'
+    excel_path = r'd:\PROYECTOS\ELREMATE\modificaciones\lista_corregida.xlsx'
     mapping_path = r'd:\PROYECTOS\ELREMATE\distribuidora\src\lib\categoria_mapping.json'
     
     print(f"Leyendo Excel: {excel_path}")
