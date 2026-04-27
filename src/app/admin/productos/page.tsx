@@ -29,6 +29,10 @@ export default function AdminProductos() {
   const [uploadingItem, setUploadingItem] = useState<string | null>(null);
   const [progress, setProgress] = useState<number>(0);
   const [syncing, setSyncing] = useState(false);
+  
+  // Estado para edición de precio individual
+  const [editingPrice, setEditingPrice] = useState<{ codigo: string, value: string } | null>(null);
+  const [savingPrice, setSavingPrice] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -166,6 +170,32 @@ export default function AdminProductos() {
     }
   };
 
+  const handleUpdatePrice = async (codigo: string) => {
+    if (!editingPrice || editingPrice.codigo !== codigo) return;
+    
+    const newPrice = parseFloat(editingPrice.value);
+    if (isNaN(newPrice)) {
+      toast.error("Precio inválido");
+      return;
+    }
+
+    setSavingPrice(codigo);
+    try {
+      await updateDoc(doc(db, "catalogo_activo", "productos"), {
+        [`items.${codigo}.precio`]: newPrice
+      });
+      
+      setProductos(prev => prev.map(p => p.codigo === codigo ? { ...p, precio: newPrice } : p));
+      setEditingPrice(null);
+      toast.success("Precio actualizado");
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Error al actualizar precio");
+    } finally {
+      setSavingPrice(null);
+    }
+  };
+
   if (loading) {
     return <div className="p-8 text-white">Cargando catálogo...</div>;
   }
@@ -221,12 +251,44 @@ export default function AdminProductos() {
             </div>
             
             <div className="flex flex-1 flex-col p-4">
-              <div className="mb-1 text-xs font-mono text-[#00E5FF]">{prod.codigo}</div>
-              <h3 className="mb-2 flex-1 text-sm font-semibold text-white line-clamp-2">{prod.nombre}</h3>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">{prod.categoria}</span>
-                <label className="cursor-pointer rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#00E5FF] hover:text-black">
-                  {prod.imagen ? "Cambiar" : "Subir Imagen"}
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-xs font-mono text-[#00E5FF]">{prod.codigo}</span>
+                <span className="text-[10px] font-bold text-gray-500 uppercase">{prod.categoria}</span>
+              </div>
+              <h3 className="mb-3 flex-1 text-sm font-semibold text-white line-clamp-2">{prod.nombre}</h3>
+              
+              <div className="mb-4 space-y-2">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Precio Individual</label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">$</span>
+                    <input
+                      type="number"
+                      value={editingPrice?.codigo === prod.codigo ? editingPrice.value : prod.precio}
+                      onChange={(e) => setEditingPrice({ codigo: prod.codigo, value: e.target.value })}
+                      onFocus={() => {
+                        if (editingPrice?.codigo !== prod.codigo) {
+                          setEditingPrice({ codigo: prod.codigo, value: prod.precio.toString() });
+                        }
+                      }}
+                      className="w-full rounded-lg border border-white/5 bg-white/5 py-1.5 pl-6 pr-2 text-sm font-bold text-white focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF]"
+                    />
+                  </div>
+                  {editingPrice?.codigo === prod.codigo && (
+                    <button
+                      onClick={() => handleUpdatePrice(prod.codigo)}
+                      disabled={savingPrice === prod.codigo}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#00E5FF] text-black transition-all hover:scale-105 disabled:opacity-50"
+                    >
+                      {savingPrice === prod.codigo ? "..." : "✅"}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end border-t border-white/5 pt-3">
+                <label className="cursor-pointer rounded-lg bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 transition-colors hover:bg-white/10 hover:text-white">
+                  {prod.imagen ? "Cambiar Imagen" : "Subir Imagen"}
                   <input
                     type="file"
                     accept="image/*"
