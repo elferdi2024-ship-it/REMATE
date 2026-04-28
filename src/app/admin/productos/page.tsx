@@ -238,6 +238,11 @@ export default function AdminProductos() {
               ) : (
                 <span className="text-4xl">📦</span>
               )}
+              {prod.precio <= 0 && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+                  <span className="rounded-full bg-red-500/90 px-3 py-1 text-[10px] font-bold text-white shadow-lg">OCULTO EN WEB</span>
+                </div>
+              )}
               {uploadingItem === prod.codigo && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60">
                   <div className="text-center">
@@ -258,7 +263,10 @@ export default function AdminProductos() {
               <h3 className="mb-3 flex-1 text-sm font-semibold text-white line-clamp-2">{prod.nombre}</h3>
               
               <div className="mb-4 space-y-2">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Precio Individual</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Precio Individual</label>
+                  {prod.precio <= 0 && <span className="text-[9px] font-bold text-red-400 italic">Poner {">"} 0 para mostrar</span>}
+                </div>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">$</span>
@@ -281,6 +289,34 @@ export default function AdminProductos() {
                       className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#00E5FF] text-black transition-all hover:scale-105 disabled:opacity-50"
                     >
                       {savingPrice === prod.codigo ? "..." : "✅"}
+                    </button>
+                  )}
+                  {prod.precio > 0 ? (
+                    <button
+                      onClick={() => {
+                        if (confirm(`¿Ocultar "${prod.nombre}" de la web? (Se pondrá el precio en $0)`)) {
+                          setEditingPrice({ codigo: prod.codigo, value: "0" });
+                          setTimeout(() => handleUpdatePrice(prod.codigo), 0);
+                        }
+                      }}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10 text-red-500 transition-all hover:bg-red-500 hover:text-white"
+                      title="Ocultar de la web"
+                    >
+                      🚫
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        const val = prompt("Ingresa el precio para mostrar el producto:", "1");
+                        if (val && !isNaN(parseFloat(val))) {
+                          setEditingPrice({ codigo: prod.codigo, value: val });
+                          setTimeout(() => handleUpdatePrice(prod.codigo), 0);
+                        }
+                      }}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10 text-green-500 transition-all hover:bg-green-500 hover:text-white"
+                      title="Mostrar en la web"
+                    >
+                      👁️
                     </button>
                   )}
                 </div>

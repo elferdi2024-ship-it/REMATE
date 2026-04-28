@@ -271,7 +271,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   // Filter by search and category (memoized for performance)
   const filtrados = useMemo(() => {
-    let result = productos;
+    let result = productos.filter((p) => (p.precio || 0) > 0);
 
     if (categoria) {
       result = result.filter((p) => p.categoria === categoria);
