@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { BrandStrip, BrandShowcase } from "@/components/ads";
+import { useBrands } from "@/hooks/useBrands";
 
 /* ═══════════════════════════════════════════════════════════════════
    LANDING PAGE — Distribuidora El Remate
@@ -98,6 +100,7 @@ const FEATURES = [
 
 export default function LandingPage() {
   const [configCats, setConfigCats] = useState<Record<string, string>>({});
+  const { brands } = useBrands();
 
   useEffect(() => {
     async function load() {
@@ -473,6 +476,9 @@ export default function LandingPage() {
         `}</style>
       </div>
 
+      {/* ══════ MARCAS QUE NOS ACOMPAÑAN (BRAND STRIP) ══════ */}
+      <BrandStrip brands={brands} title="Marcas que nos acompañan" dark />
+
       {/* ══════ FEATURES (TARJETAS "COMPRÁ FÁCIL") ══════
           📌 Aquí se editan los textos de las 4 tarjetas:
           - TÍTULO: color: "var(--oscuro, #111111)" → línea ~485
@@ -571,6 +577,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ══════ BRAND SHOWCASE (MARCAS DESTACADAS) ══════ */}
+      <BrandShowcase brands={brands} />
 
       {/* ══════ CATEGORÍAS (TARJETAS DE CATEGORÍAS) ══════
           📌 Aquí se editan los textos de las tarjetas de categorías:

@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: "/admin/precios", label: "Precios", icon: "📋" },
   { href: "/admin/productos", label: "Imágenes", icon: "🖼️" },
   { href: "/admin/categorias", label: "Categorías", icon: "📁" },
+  { href: "/admin/publicidad", label: "Publicidad", icon: "📢" },
   { href: "/admin/stats", label: "Estadísticas", icon: "📊" },
 ];
 

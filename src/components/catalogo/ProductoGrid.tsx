@@ -5,6 +5,10 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import type { Producto, Vista } from "@/types";
 import ProductoCard from "./ProductoCard";
 import ProductoRow from "./ProductoRow";
+import { BrandSpotlight, BrandVideoCard, SponsoredBanner } from "@/components/ads";
+import { useBrands } from "@/hooks/useBrands";
+import { getActiveBrands, getBrandForCategory, getRandomImage, getRandomVideo, buildAdSequence } from "@/lib/brands";
+import type { BrandConfig } from "@/types/brands";
 
 interface ProductoGridProps {
   productos: Producto[];
@@ -14,6 +18,13 @@ interface ProductoGridProps {
   onAdd: (producto: Producto) => void;
   onQtyChange: (codigo: string, qty: number) => void;
 }
+
+/** How often to insert a BrandSpotlight inside carousels (every N products) */
+const AD_EVERY_N_PRODUCTS = 10;
+/** How often to insert a SponsoredBanner between categories */
+const BANNER_EVERY_N_CATEGORIES = 3;
+/** How often to insert a BrandVideoCard between categories */
+const VIDEO_EVERY_N_CATEGORIES = 5;
 
 const CATEGORY_CORRECTIONS: Record<string, string> = {
   "ALFAJOR": "Golosinas y Dulces",
@@ -69,6 +80,7 @@ function CategoryCarousel({
   vista,
   onAdd,
   onQtyChange,
+  adBrand,
 }: {
   cat: string;
   catProds: Producto[];
@@ -78,6 +90,7 @@ function CategoryCarousel({
   vista: Vista;
   onAdd: (p: Producto) => void;
   onQtyChange: (codigo: string, qty: number) => void;
+  adBrand?: BrandConfig | null;
 }) {
   const [showAll, setShowAll] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -156,7 +169,7 @@ function CategoryCarousel({
   }
 
   // MODO CARRUSEL HORIZONTAL
-  // Optimizaci\u00f3n: No renderizar miles de cards si no se van a ver.
+  // Optimización: No renderizar miles de cards si no se van a ver.
   // En modo carrusel, limitamos a 24 productos iniciales si no hay scroll/showAll.
   const displayProds = showAll ? catProds : catProds.slice(0, 24);
 
@@ -167,16 +180,27 @@ function CategoryCarousel({
           ref={scrollRef}
           className="cat-carousel-track"
         >
-          {displayProds.map((p) => (
-            <div key={p.codigo} className="cat-carousel-item">
-              <ProductoCard
-                producto={p}
-                qty={qtyMap[p.codigo] || 0}
-                searchTerm={searchTerm}
-                onAdd={onAdd}
-                onQtyChange={onQtyChange}
-              />
-            </div>
+          {displayProds.map((p, pIdx) => (
+            <React.Fragment key={p.codigo}>
+              <div className="cat-carousel-item">
+                <ProductoCard
+                  producto={p}
+                  qty={qtyMap[p.codigo] || 0}
+                  searchTerm={searchTerm}
+                  onAdd={onAdd}
+                  onQtyChange={onQtyChange}
+                />
+              </div>
+              {/* Intercalar BrandSpotlight cada N productos */}
+              {adBrand && (pIdx + 1) % AD_EVERY_N_PRODUCTS === 0 && pIdx < displayProds.length - 1 && (() => {
+                const img = adBrand.assets.filter(a => a.type === "image")[pIdx % adBrand.assets.filter(a => a.type === "image").length];
+                return img ? (
+                  <div className="cat-carousel-item">
+                    <BrandSpotlight brand={adBrand} asset={img} compact />
+                  </div>
+                ) : null;
+              })()}
+            </React.Fragment>
           ))}
         </div>
 
@@ -215,6 +239,7 @@ export default function ProductoGrid({
   onQtyChange,
 }: ProductoGridProps) {
   const [columns, setColumns] = useState(2);
+  const { brands } = useBrands();
 
   useEffect(() => {
     const updateColumns = () => {
@@ -241,6 +266,12 @@ export default function ProductoGrid({
 
   const categories = Object.keys(grouped).sort();
 
+  // Pre-compute ad sequence for banner slots between categories
+  const adSequence = useMemo(() => {
+    const totalSlots = Math.ceil(categories.length / BANNER_EVERY_N_CATEGORIES);
+    return buildAdSequence(brands, totalSlots);
+  }, [brands, categories.length]);
+
   if (productos.length === 0) {
     return (
       <div className="no-results">
@@ -254,8 +285,14 @@ export default function ProductoGrid({
     <div className="catalogo-container">
       {categories.map((cat, catIdx) => {
         const catProds = grouped[cat];
+        // Find matching brand for this category, or use round-robin
+        const matchingBrand = getBrandForCategory(brands, cat);
+        const adBrand = matchingBrand || (getActiveBrands(brands)[catIdx % getActiveBrands(brands).length] || null);
+        const slotIdx = Math.floor(catIdx / BANNER_EVERY_N_CATEGORIES);
+        const bannerBrand = adSequence[slotIdx] || null;
+
         return (
-          <LazySection key={cat} index={catIdx} vista={vista}>
+          <LazySection key={cat} index={catIdx} vista={vista} bannerBrand={bannerBrand} adBrand={adBrand}>
             <section className="cat-section">
               <div className="cat-section-header">
                 <h2 className="cat-section-title">{cat}</h2>
@@ -271,6 +308,7 @@ export default function ProductoGrid({
                 vista={vista}
                 onAdd={onAdd}
                 onQtyChange={onQtyChange}
+                adBrand={adBrand}
               />
             </section>
           </LazySection>
@@ -280,7 +318,19 @@ export default function ProductoGrid({
   );
 }
 
-function LazySection({ children, index, vista }: { children: React.ReactNode; index: number; vista: Vista }) {
+function LazySection({
+  children,
+  index,
+  vista,
+  bannerBrand,
+  adBrand,
+}: {
+  children: React.ReactNode;
+  index: number;
+  vista: Vista;
+  bannerBrand?: BrandConfig | null;
+  adBrand?: BrandConfig | null;
+}) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -299,10 +349,26 @@ function LazySection({ children, index, vista }: { children: React.ReactNode; in
     return () => observer.disconnect();
   }, []);
 
+  // Determine what ad to show between categories
+  const showSponsoredBanner = index > 0 && index % BANNER_EVERY_N_CATEGORIES === 0 && bannerBrand;
+  const showVideoAd = index > 0 && index % VIDEO_EVERY_N_CATEGORIES === 0 && adBrand;
+
   return (
     <div ref={ref} className="lazy-section-wrapper" style={{ minHeight: isVisible ? "auto" : "300px" }}>
       {isVisible ? (
         <>
+          {/* Sponsored banner between categories */}
+          {showSponsoredBanner && (() => {
+            const img = getRandomImage(bannerBrand!);
+            return img ? <SponsoredBanner brand={bannerBrand!} asset={img} variant="full" /> : null;
+          })()}
+
+          {/* Video ad between categories (less frequent) */}
+          {showVideoAd && !showSponsoredBanner && (() => {
+            const vid = getRandomVideo(adBrand!);
+            return vid ? <BrandVideoCard brand={adBrand!} asset={vid} /> : null;
+          })()}
+
           {vista === "grilla" && <CategoryBanner index={index} />}
           {children}
         </>
