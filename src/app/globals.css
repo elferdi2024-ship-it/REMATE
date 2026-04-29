@@ -848,6 +848,53 @@ html.dark-mode body { background: var(--bg); }
   margin: 16px 0;
 }
 
+/* ── Ad integration in product grid ── */
+.brand-grid-slot {
+  /* Occupies a single grid cell just like a product card */
+  min-height: 200px;
+}
+
+.brand-spotlight-v2 {
+  border-radius: 16px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.brand-spotlight-v2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+/* Tall ad slot — spans 2 rows in the grid */
+.brand-spotlight-tall {
+  grid-row: span 2;
+}
+
+.brand-video-v2 {
+  border-radius: 16px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.brand-video-v2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+.brand-video-tall {
+  grid-row: span 2;
+}
+
+.brand-video-inline {
+  height: 100%;
+  min-height: 200px;
+}
+
+/* Sponsored banner between categories */
+.sponsored-banner-v2 {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.sponsored-banner-v2:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
 
 /* ── Card ── */
 .card {

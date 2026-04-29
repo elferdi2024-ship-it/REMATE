@@ -9,16 +9,15 @@ import { TIER_COLORS } from "@/types/brands";
 interface BrandSpotlightProps {
   brand: BrandConfig;
   asset: BrandAsset;
-  /** Compact mode for inline grid placement */
-  compact?: boolean;
+  /** "card" = product card slot, "tall" = 2-row tall slot */
+  layout?: "card" | "tall";
 }
 
 /**
- * A product-card-sized spotlight showing a brand's image.
- * Styled to blend with the catalog grid but with a subtle premium feel.
- * NOT clickable — purely visual.
+ * An image ad that fits inside the product grid — either as a normal card
+ * or as a tall card spanning 2 rows.  NOT clickable — purely visual.
  */
-export default function BrandSpotlight({ brand, asset, compact = false }: BrandSpotlightProps) {
+export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandSpotlightProps) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -37,48 +36,30 @@ export default function BrandSpotlight({ brand, asset, compact = false }: BrandS
   }, []);
 
   const tierStyle = TIER_COLORS[brand.tier];
+  const isTall = layout === "tall";
 
   return (
     <div
       ref={ref}
-      className="brand-spotlight"
+      className={`brand-spotlight-v2 ${isTall ? "brand-spotlight-tall" : ""}`}
       style={{
-        background: "var(--white, #FFFFFF)",
-        border: `1.5px solid ${tierStyle.border}`,
         borderRadius: "16px",
-        padding: compact ? "8px" : "10px",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
         overflow: "hidden",
-        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        position: "relative",
         cursor: "default",
-        minHeight: compact ? "auto" : undefined,
+        background: "#0a0a0a",
+        height: "100%",
+        minHeight: isTall ? "340px" : "auto",
       }}
       aria-label={`Publicidad: ${brand.name}`}
     >
-      {/* Shimmer accent top border */}
+      {/* Full-bleed image */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "3px",
-          background: `linear-gradient(90deg, transparent, ${brand.color}, transparent)`,
-          opacity: 0.6,
-        }}
-      />
-
-      {/* Image area */}
-      <div
-        style={{
-          background: "var(--bg2, #F5F0E8)",
-          borderRadius: "12px",
-          height: compact ? "100px" : "110px",
-          marginBottom: "8px",
           position: "relative",
-          overflow: "hidden",
+          width: "100%",
+          height: "100%",
+          minHeight: isTall ? "340px" : "200px",
         }}
       >
         {isVisible && (
@@ -86,56 +67,70 @@ export default function BrandSpotlight({ brand, asset, compact = false }: BrandS
             src={asset.src}
             alt={asset.alt}
             fill
-            sizes="(max-width: 768px) 50vw, 33vw"
+            sizes={isTall ? "(max-width: 768px) 50vw, 20vw" : "(max-width: 768px) 50vw, 16vw"}
             style={{ objectFit: "cover" }}
             loading="lazy"
           />
         )}
 
-        {/* Subtle overlay gradient */}
+        {/* Gradient overlay */}
         <div
           style={{
             position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "40%",
-            background: "linear-gradient(transparent, rgba(0,0,0,0.3))",
+            inset: 0,
+            background: isTall
+              ? "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)"
+              : "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 40%)",
             pointerEvents: "none",
           }}
         />
-      </div>
 
-      {/* Brand badge */}
-      <div style={{ padding: "0 4px 4px", flex: 1, display: "flex", flexDirection: "column" }}>
-        <span
+        {/* Brand tag — pill bottom-left */}
+        <div
           style={{
-            background: tierStyle.bg,
-            color: tierStyle.text,
-            fontSize: "8px",
-            fontWeight: 800,
-            textTransform: "uppercase",
-            padding: "2px 6px",
-            borderRadius: "4px",
-            marginBottom: "6px",
-            display: "inline-block",
-            letterSpacing: "0.5px",
-            width: "fit-content",
+            position: "absolute",
+            bottom: "10px",
+            left: "10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            zIndex: 2,
           }}
         >
-          ⟐ {brand.name}
-        </span>
+          <span
+            style={{
+              background: "rgba(0,0,0,0.5)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              color: "#fff",
+              fontSize: "8px",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              padding: "3px 8px",
+              borderRadius: "5px",
+              letterSpacing: "0.8px",
+              border: `1px solid ${tierStyle.border}`,
+            }}
+          >
+            ⟐ {brand.name}
+          </span>
+        </div>
 
+        {/* "Publicidad" micro label — top right */}
         <span
           style={{
-            fontSize: "9px",
-            fontWeight: 600,
-            color: "var(--muted, #9C8570)",
+            position: "absolute",
+            top: "8px",
+            right: "8px",
+            fontSize: "7px",
+            fontWeight: 700,
+            color: "rgba(255,255,255,0.45)",
             textTransform: "uppercase",
-            letterSpacing: "1px",
+            letterSpacing: "1.2px",
+            zIndex: 2,
           }}
         >
-          Marca destacada
+          Publicidad
         </span>
       </div>
     </div>
