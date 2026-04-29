@@ -64,14 +64,14 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
       ref={containerRef}
       className={`brand-video-v2 ${isTall ? "brand-video-tall" : ""} ${isInline ? "brand-video-inline" : ""}`}
       style={{
-        background: "#0a0a0a",
+        background: "var(--white)",
         borderRadius: isWide ? "20px" : "16px",
         overflow: "hidden",
         position: "relative",
         cursor: "default",
         width: "100%",
-        height: isTall ? "100%" : "auto",
-        minHeight: isTall ? "340px" : isInline ? "200px" : undefined,
+        height: "100%",
+        minHeight: isTall ? "340px" : isWide ? "auto" : "100%",
       }}
       aria-label={`Video publicitario: ${brand.name}`}
     >
@@ -80,13 +80,9 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
         style={{
           position: "relative",
           width: "100%",
-          ...(isWide
-            ? { paddingTop: "0", height: "auto", aspectRatio: "16/9", maxHeight: "360px" }
-            : isTall
-              ? { height: "100%", minHeight: "340px" }
-              : { aspectRatio: "4/5", maxHeight: "280px" }
-          ),
-          background: "#0a0a0a",
+          height: "100%",
+          ...(isWide && { aspectRatio: "16/9", maxHeight: "360px" }),
+          background: "var(--white)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -104,7 +100,7 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
             style={{
               width: "100%",
               height: "100%",
-              objectFit: "contain",
+              objectFit: "cover",
               position: "absolute",
               top: 0,
               left: 0,

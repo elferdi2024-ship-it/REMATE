@@ -66,31 +66,7 @@ const CATEGORY_CORRECTIONS: Record<string, string> = {
   "BUDIN": "Panadería",
 };
 
-// Banners responsive (existing)
-const BANNERS = [
-  { desktop: "/banners/banner1-desktop.jpg", mobile: "/banners/banner1-mobile.jpg", alt: "Oferta especial" },
-  { desktop: "/banners/banner2-desktop.jpg", mobile: "/banners/banner2-mobile.jpg", alt: "Promoción" },
-  { desktop: "/banners/banner3-desktop.jpg", mobile: "/banners/banner3-mobile.jpg", alt: "Descuentos" },
-  { desktop: "/banners/banner4-desktop.jpg", mobile: "/banners/banner4-mobile.jpg", alt: "Oferta exclusiva" },
-];
-
-function CategoryBanner({ index }: { index: number }) {
-  const banner = BANNERS[index % BANNERS.length];
-  return (
-    <div className="cat-banner-between">
-      <picture>
-        <source media="(max-width: 600px)" srcSet={banner.mobile} />
-        <source media="(min-width: 601px)" srcSet={banner.desktop} />
-        <img
-          src={banner.desktop}
-          alt={banner.alt}
-          className="cat-banner-img"
-          loading="lazy"
-        />
-      </picture>
-    </div>
-  );
-}
+// Deleted CategoryBanner
 
 // ─── Componente carrusel horizontal por categoría ───────────────────────────
 function CategoryCarousel({
@@ -224,14 +200,21 @@ function CategoryCarousel({
             ];
 
             // Inject inline ad card every INLINE_AD_EVERY products
-            if (showInlineAds && adBrand && images.length > 0 && (pIdx + 1) % INLINE_AD_EVERY === 0 && pIdx < displayProds.length - 1) {
-              const img = images[carouselAdIdx % images.length];
-              carouselAdIdx++;
+            if (showInlineAds && adBrand && (images.length > 0 || adBrand.assets.some(a => a.type === "video")) && (pIdx + 1) % INLINE_AD_EVERY === 0 && pIdx < displayProds.length - 1) {
+              const hasVideo = adBrand.assets.some(a => a.type === "video");
+              // alternate between video and image if brand has video, otherwise just images
+              const useVideo = hasVideo && (carouselAdIdx % 3 === 0);
+              
               items.push(
-                <div key={`ad-carousel-${pIdx}`} className="cat-carousel-item">
-                  <BrandSpotlight brand={adBrand} asset={img} layout="card" />
+                <div key={`ad-carousel-${pIdx}`} className="cat-carousel-item" style={{ display: 'flex' }}>
+                  {useVideo ? (
+                    <BrandVideoCard brand={adBrand} asset={adBrand.assets.find(a => a.type === "video")!} layout="inline" />
+                  ) : (
+                    images.length > 0 && <BrandSpotlight brand={adBrand} asset={images[carouselAdIdx % images.length]} layout="card" />
+                  )}
                 </div>
               );
+              carouselAdIdx++;
             }
 
             return <React.Fragment key={`wrap-${p.codigo}`}>{items}</React.Fragment>;
@@ -319,7 +302,9 @@ export default function ProductoGrid({
 
         // Get the ad slot type for this category position
         const slotType = AD_PATTERN[catIdx % AD_PATTERN.length];
-        const showInlineAds = slotType === "inline-cards";
+        
+        // Show inline ads in every category by default
+        const showInlineAds = true;
 
         // Pick the brand for this slot
         const matchingBrand = getBrandForCategory(brands, cat);
@@ -409,7 +394,7 @@ function LazySection({
             return null;
           })()}
 
-          {vista === "grilla" && <CategoryBanner index={index} />}
+          {/* Removed static CategoryBanner */}
           {children}
         </>
       ) : (

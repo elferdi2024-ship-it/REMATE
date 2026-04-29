@@ -47,9 +47,9 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
         overflow: "hidden",
         position: "relative",
         cursor: "default",
-        background: "#0a0a0a",
+        background: "var(--white)",
         height: "100%",
-        minHeight: isTall ? "340px" : "auto",
+        minHeight: isTall ? "340px" : "100%",
       }}
       aria-label={`Publicidad: ${brand.name}`}
     >
@@ -59,7 +59,7 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
           position: "relative",
           width: "100%",
           height: "100%",
-          minHeight: isTall ? "340px" : "200px",
+          minHeight: isTall ? "340px" : "100%",
         }}
       >
         {isVisible && (
