@@ -192,15 +192,12 @@ export default function BrandStrip({ brands, title, dark = false }: BrandStripPr
                           fontWeight: 700,
                           textTransform: "uppercase",
                           letterSpacing: "1px",
-                          color: tierStyle.text,
-                          background: tierStyle.bg,
-                          padding: "1px 5px",
-                          borderRadius: "3px",
+                          color: "rgba(255,255,255,0.5)",
                           marginTop: "2px",
                           display: "inline-block",
                         }}
                       >
-                        {brand.tier}
+                        Marca Patrocinante
                       </span>
                     </div>
                   </div>

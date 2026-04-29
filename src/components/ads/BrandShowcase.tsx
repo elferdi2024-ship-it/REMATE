@@ -208,7 +208,7 @@ export default function BrandShowcase({ brands }: BrandShowcaseProps) {
                       letterSpacing: "1px",
                     }}
                   >
-                    ⟐ Publicidad
+                    ⟐ Marcas Destacadas
                   </span>
                 </div>
               </div>
