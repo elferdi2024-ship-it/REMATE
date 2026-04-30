@@ -2,34 +2,35 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { db } from "@/lib/firebase";
-import { doc, setDoc, increment } from "firebase/firestore";
 import { trackAdFrequency } from "@/lib/adFrequency";
+
+/**
+ * Envía un evento de ad al API Route propio (/api/ad-event).
+ * Al ir a nuestro dominio en vez de firestore.googleapis.com,
+ * los ad blockers no pueden interceptarlo.
+ */
+async function postAdEvent(brandId: string, assetId?: string, type = "impression") {
+  try {
+    await fetch("/api/ad-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ brandId, assetId, type }),
+      // keepalive permite que el request sobreviva si el usuario navega
+      keepalive: true,
+    });
+  } catch {
+    // Tracking nunca rompe UX — fallo silencioso
+  }
+}
 
 /** Registra apertura del modal de una marca */
 export async function trackModalOpen(brandId: string): Promise<void> {
-  try {
-    const month = new Date().toISOString().slice(0, 7);
-    await setDoc(
-      doc(db, "ads_impressions", brandId),
-      { 
-        modal_opens: increment(1),
-        [`modal_${month}`]: increment(1),
-      },
-      { merge: true }
-    );
-  } catch {}
+  await postAdEvent(brandId, undefined, "modal_open");
 }
 
 /** Registra que el usuario hizo click en "Ver en catálogo" desde el modal */
 export async function trackModalCta(brandId: string): Promise<void> {
-  try {
-    await setDoc(
-      doc(db, "ads_impressions", brandId),
-      { cta_clicks: increment(1) },
-      { merge: true }
-    );
-  } catch {}
+  await postAdEvent(brandId, undefined, "cta_click");
 }
 
 /**
@@ -50,22 +51,11 @@ export function useAdImpression<T extends HTMLElement>(brandId: string, assetId?
           recorded.current = true;
           observer.disconnect();
 
-          // Registrar impression en Firestore
-          const month = new Date().toISOString().slice(0, 7);
-          setDoc(
-            doc(db, "ads_impressions", brandId),
-            {
-              total: increment(1),
-              [month]: increment(1),
-              lastSeen: new Date().toISOString()
-            },
-            { merge: true }
-          ).catch(() => {});
+          // Registrar via API Route (evita ad blockers)
+          postAdEvent(brandId, assetId, "impression");
 
           // Incrementar sessionStorage cap
           trackAdFrequency(brandId);
-          
-          console.log(`[AdTracker] Impression recorded: Brand ${brandId}, Asset: ${assetId || "Global"}`);
         }
       },
       { threshold: 0.5 }
