@@ -2,6 +2,35 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { db } from "@/lib/firebase";
+import { doc, setDoc, increment } from "firebase/firestore";
+import { trackAdFrequency } from "@/lib/adFrequency";
+
+/** Registra apertura del modal de una marca */
+export async function trackModalOpen(brandId: string): Promise<void> {
+  try {
+    const month = new Date().toISOString().slice(0, 7);
+    await setDoc(
+      doc(db, "ads_impressions", brandId),
+      { 
+        modal_opens: increment(1),
+        [`modal_${month}`]: increment(1),
+      },
+      { merge: true }
+    );
+  } catch {}
+}
+
+/** Registra que el usuario hizo click en "Ver en catálogo" desde el modal */
+export async function trackModalCta(brandId: string): Promise<void> {
+  try {
+    await setDoc(
+      doc(db, "ads_impressions", brandId),
+      { cta_clicks: increment(1) },
+      { merge: true }
+    );
+  } catch {}
+}
 
 /**
  * Registra una "impresión" cuando el anuncio lleva visible más del 50%
@@ -21,8 +50,21 @@ export function useAdImpression<T extends HTMLElement>(brandId: string, assetId?
           recorded.current = true;
           observer.disconnect();
 
-          // TODO: Conectar con Firestore cuando se habilite el panel de analíticas
-          // await incrementAdImpression(brandId, assetId);
+          // Registrar impression en Firestore
+          const month = new Date().toISOString().slice(0, 7);
+          setDoc(
+            doc(db, "ads_impressions", brandId),
+            {
+              total: increment(1),
+              [month]: increment(1),
+              lastSeen: new Date().toISOString()
+            },
+            { merge: true }
+          ).catch(() => {});
+
+          // Incrementar sessionStorage cap
+          trackAdFrequency(brandId);
+          
           console.log(`[AdTracker] Impression recorded: Brand ${brandId}, Asset: ${assetId || "Global"}`);
         }
       },

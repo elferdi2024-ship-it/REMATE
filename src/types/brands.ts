@@ -6,11 +6,17 @@ export type BrandTier = "bronce" | "plata" | "oro";
 /** Asset individual de una marca */
 export interface BrandAsset {
   id: string;
-  type: "image" | "video";
+  type: "image" | "video" | "sponsored_product";
   src: string;
   alt: string;
   /** Categoría de producto asociada (para matching contextual) */
   category?: string;
+  /** Solo para sponsored_product: código del producto en el catálogo */
+  productCodigo?: string;
+  /** Solo para sponsored_product: nombre visible */
+  productName?: string;
+  /** Solo para sponsored_product: precio a mostrar */
+  productPrice?: number;
 }
 
 /** Configuración de una marca patrocinante */
@@ -34,8 +40,12 @@ export interface BrandConfig {
   createdAt?: string;
   /** Timestamp de última modificación */
   updatedAt?: string;
+  /** Fecha de inicio de la campaña (ISO string). Opcional. */
+  startAt?: string;
   /** Fecha de vencimiento de la campaña (ISO string). Si está en el pasado, la marca se desactiva automáticamente */
   expiresAt?: string;
+  /** Número máximo de impresiones para esta campaña. null = sin límite. */
+  impressionCap?: number | null;
 }
 
 /** Peso de frecuencia por tier */

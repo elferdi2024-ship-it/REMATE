@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import type { BrandConfig, BrandAsset } from "@/types/brands";
+import type { BrandConfig } from "@/types/brands";
+import { trackModalOpen, trackModalCta } from "@/hooks/useAdImpression";
 
 interface BrandMediaModalProps {
   brand: BrandConfig;
@@ -16,13 +17,14 @@ export default function BrandMediaModal({ brand, isOpen, onClose }: BrandMediaMo
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      trackModalOpen(brand.id);
     } else {
       document.body.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [isOpen, brand.id]);
 
   if (!isOpen) return null;
 
@@ -39,17 +41,18 @@ export default function BrandMediaModal({ brand, isOpen, onClose }: BrandMediaMo
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "20px"
+        padding: "clamp(10px, 3vw, 20px)"
       }}
       onClick={onClose}
     >
       <div
         style={{
           background: "#111",
-          borderRadius: "16px",
+          borderRadius: "20px",
           width: "100%",
           maxWidth: "800px",
-          height: "80vh",
+          height: "auto",
+          maxHeight: "90vh",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -80,12 +83,21 @@ export default function BrandMediaModal({ brand, isOpen, onClose }: BrandMediaMo
           &times;
         </button>
 
-        <div style={{ padding: "20px", borderBottom: "1px solid #333" }}>
+        <div style={{ padding: "clamp(12px, 3vw, 20px)", borderBottom: "1px solid #333" }}>
           <h2 style={{ color: "#fff", margin: 0, fontSize: "1.2rem" }}>{brand.name}</h2>
           <p style={{ color: "#aaa", fontSize: "0.85rem", margin: 0 }}>Publicidad de {brand.name}</p>
         </div>
 
-        <div style={{ flex: 1, position: "relative", background: "#000", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ 
+          position: "relative", 
+          background: `${brand.color}15`, 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          aspectRatio: "clamp(1, 1.5, 1.5)",
+          maxHeight: "50vh",
+          width: "100%"
+        }}>
           {activeAsset.type === "video" ? (
             <video
               src={activeAsset.src}
@@ -98,13 +110,13 @@ export default function BrandMediaModal({ brand, isOpen, onClose }: BrandMediaMo
               src={activeAsset.src}
               alt={activeAsset.alt}
               fill
-              style={{ objectFit: "contain" }}
+              style={{ objectFit: "contain", padding: "10px" }}
             />
           )}
         </div>
 
         {brand.assets.length > 1 && (
-          <div style={{ padding: "12px", background: "#1a1a1a", display: "flex", gap: "8px", overflowX: "auto" }}>
+          <div style={{ padding: "clamp(8px, 2vw, 12px)", background: "#1a1a1a", display: "flex", gap: "8px", overflowX: "auto" }}>
             {brand.assets.map((asset, idx) => (
               <button
                 key={asset.src}
@@ -130,6 +142,27 @@ export default function BrandMediaModal({ brand, isOpen, onClose }: BrandMediaMo
             ))}
           </div>
         )}
+
+        <div style={{ padding: "clamp(12px, 3vw, 20px)", background: "#111", borderTop: "1px solid #333", display: "flex", justifyContent: "center" }}>
+          <button 
+            onClick={() => {
+              trackModalCta(brand.id);
+              onClose();
+            }}
+            style={{
+              background: "var(--rojo)",
+              color: "#fff",
+              border: "none",
+              padding: "10px 24px",
+              borderRadius: "8px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              width: "100%"
+            }}
+          >
+            Ver catálogo de la marca
+          </button>
+        </div>
       </div>
     </div>
   );

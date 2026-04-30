@@ -160,10 +160,14 @@ const TIER_WEIGHT_VALUES: Record<BrandTier, number> = {
 
 /** Get active brands sorted by tier weight (highest first) */
 export function getActiveBrands(brands: BrandConfig[]): BrandConfig[] {
+  const now = new Date();
   return brands
     .filter((b) => {
       if (!b.active || b.assets.length === 0) return false;
-      if (b.expiresAt && new Date(b.expiresAt) < new Date()) return false;
+      // Verificar fecha de inicio
+      if (b.startAt && new Date(b.startAt) > now) return false;
+      // Verificar fecha de vencimiento
+      if (b.expiresAt && new Date(b.expiresAt) < now) return false;
       return true;
     })
     .sort((a, b) => TIER_WEIGHT_VALUES[b.tier] - TIER_WEIGHT_VALUES[a.tier]);

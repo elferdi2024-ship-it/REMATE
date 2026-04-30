@@ -5,9 +5,10 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import type { Producto, Vista } from "@/types";
 import ProductoCard from "./ProductoCard";
 import ProductoRow from "./ProductoRow";
-import { BrandSpotlight, BrandVideoCard, SponsoredBanner } from "@/components/ads";
+import { BrandSpotlight, BrandVideoCard, SponsoredBanner, SponsoredProduct } from "@/components/ads";
 import { useBrands } from "@/hooks/useBrands";
 import { getActiveBrands, getBrandForCategory, getImageAtIndex, getVideoAtIndex, buildAdSequence, buildAdSequenceWithCooldown } from "@/lib/brands";
+import { canShowAd } from "@/lib/adFrequency";
 import type { BrandConfig } from "@/types/brands";
 
 interface ProductoGridProps {
@@ -72,6 +73,7 @@ const CATEGORY_CORRECTIONS: Record<string, string> = {
 function CategoryCarousel({
   cat,
   catProds,
+  allProds,
   columns,
   qtyMap,
   searchTerm,
@@ -83,6 +85,7 @@ function CategoryCarousel({
 }: {
   cat: string;
   catProds: Producto[];
+  allProds: Producto[];
   columns: number;
   qtyMap: Record<string, number>;
   searchTerm?: string;
@@ -199,8 +202,6 @@ function CategoryCarousel({
   }
 
   // MODO CARRUSEL HORIZONTAL
-  const images = adBrand?.assets.filter(a => a.type === "image") || [];
-  
   return (
     <>
       <div className="cat-carousel-wrap">
@@ -219,27 +220,47 @@ function CategoryCarousel({
             ];
 
             // Inject inline ad card every INLINE_AD_EVERY products
-            if (showInlineAds && adBrand && (images.length > 0 || adBrand.assets.some(a => a.type === "video")) && (pIdx + 1) % INLINE_AD_EVERY === 0 && pIdx < displayProds.length - 1) {
-              const hasVideo = adBrand.assets.some(a => a.type === "video");
-              // alternate between video and image if brand has video, otherwise just images
+            if (showInlineAds && adBrand && adBrand.assets.length > 0 && (pIdx + 1) % INLINE_AD_EVERY === 0 && pIdx < displayProds.length - 1) {
               const adIdx = adIndices[pIdx];
-              const useVideo = hasVideo && (adIdx % 3 === 0);
               
-              items.push(
-                <div key={`ad-carousel-${pIdx}`} className="cat-carousel-item" style={{ 
-                  display: "flex",
-                  flexShrink: 0,
-                  width: `calc((100vw - 48px) / ${columns})`,
-                  minWidth: "140px",
-                  maxWidth: "220px",
-                }}>
-                  {useVideo ? (
-                    <BrandVideoCard brand={adBrand} asset={adBrand.assets.find(a => a.type === "video")!} layout="inline" />
-                  ) : (
-                    images.length > 0 && <BrandSpotlight brand={adBrand} asset={getImageAtIndex(adBrand, adIdx)!} layout="card" />
-                  )}
-                </div>
-              );
+              const adAsset = (() => {
+                const sponsored = adBrand.assets.find(a => a.type === "sponsored_product");
+                if (sponsored) return { asset: sponsored, type: "sponsored" as const };
+                const img = getImageAtIndex(adBrand, adIdx);
+                if (img) return { asset: img, type: "spotlight" as const };
+                const vid = getVideoAtIndex(adBrand, adIdx);
+                if (vid) return { asset: vid, type: "video" as const };
+                return null;
+              })();
+
+              if (adAsset) {
+                items.push(
+                  <div key={`ad-carousel-${pIdx}`} className="cat-carousel-item" style={{ 
+                    display: "flex",
+                    flexShrink: 0,
+                    width: `calc((100vw - 48px) / ${columns})`,
+                    minWidth: "140px",
+                    maxWidth: "220px",
+                  }}>
+                    {adAsset.type === "sponsored" ? (
+                      <SponsoredProduct 
+                        brand={adBrand} 
+                        asset={adAsset.asset} 
+                        onAdd={() => {
+                          if (adAsset.asset.productCodigo) {
+                            const prod = allProds.find(p => p.codigo === adAsset.asset.productCodigo);
+                            if (prod) onAdd(prod);
+                          }
+                        }}
+                      />
+                    ) : adAsset.type === "video" ? (
+                      <BrandVideoCard brand={adBrand} asset={adAsset.asset} layout="inline" />
+                    ) : (
+                      <BrandSpotlight brand={adBrand} asset={adAsset.asset} layout="card" />
+                    )}
+                  </div>
+                );
+              }
             }
 
             return <React.Fragment key={`wrap-${p.codigo}`}>{items}</React.Fragment>;
@@ -356,6 +377,7 @@ export default function ProductoGrid({
               <CategoryCarousel
                 cat={cat}
                 catProds={catProds}
+                allProds={productos}
                 columns={columns}
                 qtyMap={qtyMap}
                 searchTerm={searchTerm}
@@ -410,6 +432,9 @@ function LazySection({
         <>
           {/* Inter-category ad — only for specific slots with actual content */}
           {index > 0 && slotType && adBrand && (() => {
+            const canShow = canShowAd(adBrand.id, 4); // 4 veces por sesión
+            if (!canShow) return null;
+
             if (slotType === "banner") {
               const img = getImageAtIndex(adBrand, index);
               return img ? <SponsoredBanner brand={adBrand} asset={img} variant="full" /> : null;

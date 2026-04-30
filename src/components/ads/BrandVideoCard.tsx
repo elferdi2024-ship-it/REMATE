@@ -5,6 +5,9 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import type { BrandConfig, BrandAsset } from "@/types/brands";
 import { TIER_COLORS } from "@/types/brands";
 
+import { useAdImpression } from "@/hooks/useAdImpression";
+import { AD_TOKENS } from "./adStyles";
+
 interface BrandVideoCardProps {
   brand: BrandConfig;
   asset: BrandAsset;
@@ -24,9 +27,11 @@ interface BrandVideoCardProps {
  */
 export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandVideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [hasError, setHasError] = useState(false);
+  
+  // Usamos el hook the tracking que también usa IntersectionObserver
+  const containerRef = useAdImpression<HTMLDivElement>(brand.id, asset.id);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -47,7 +52,7 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, [hasError]);
+  }, [hasError, containerRef]);
 
   const handleError = useCallback(() => setHasError(true), []);
 
@@ -65,7 +70,7 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
       className={`brand-video-v2 ${isTall ? "brand-video-tall" : ""} ${isInline ? "brand-video-inline" : ""}`}
       style={{
         background: "transparent",
-        borderRadius: isWide ? "20px" : "16px",
+        borderRadius: isWide ? AD_TOKENS.borderRadius.banner : AD_TOKENS.borderRadius.card,
         overflow: "hidden",
         position: "relative",
         cursor: "default",
@@ -105,8 +110,7 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
               position: "absolute",
               top: 0,
               left: 0,
-              opacity: 1,
-              animation: "fadeIn 0.6s ease-in",
+              ...AD_TOKENS.fadeIn(isVisible)
             }}
           />
         )}
@@ -136,39 +140,13 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
             zIndex: 2,
           }}
         >
-          <span
-            style={{
-              background: "rgba(0,0,0,0.45)",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-              color: "#fff",
-              fontSize: "9px",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              padding: "3px 8px",
-              borderRadius: "5px",
-              letterSpacing: "0.8px",
-              border: `1px solid ${tierStyle.border}`,
-            }}
-          >
+          <span style={AD_TOKENS.brandPill(tierStyle.border)}>
             ▶ {brand.name}
           </span>
         </div>
 
         {/* "Publicidad" micro label */}
-        <span
-          style={{
-            position: "absolute",
-            top: "8px",
-            right: "8px",
-            fontSize: "7px",
-            fontWeight: 700,
-            color: "rgba(255,255,255,0.4)",
-            textTransform: "uppercase",
-            letterSpacing: "1.2px",
-            zIndex: 2,
-          }}
-        >
+        <span style={AD_TOKENS.publicidadLabel}>
           Publicidad
         </span>
       </div>

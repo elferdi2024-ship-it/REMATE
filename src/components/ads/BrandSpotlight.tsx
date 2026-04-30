@@ -6,6 +6,8 @@ import Image from "next/image";
 import type { BrandConfig, BrandAsset } from "@/types/brands";
 import { TIER_COLORS } from "@/types/brands";
 import BrandMediaModal from "./BrandMediaModal";
+import { AD_TOKENS } from "./adStyles";
+import { useAdImpression } from "@/hooks/useAdImpression";
 
 interface BrandSpotlightProps {
   brand: BrandConfig;
@@ -17,7 +19,9 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
   const [isVisible, setIsVisible] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  
+  // Usamos el hook the tracking que también usa IntersectionObserver
+  const ref = useAdImpression<HTMLDivElement>(brand.id, asset.id);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -31,7 +35,7 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
-  }, []);
+  }, [ref]);
 
   if (imgError) return null;
 
@@ -48,17 +52,15 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
         aria-label={`Publicidad: ${brand.name}`}
         onClick={() => setModalOpen(true)}
         style={{
-          borderRadius: "14px",
+          borderRadius: AD_TOKENS.borderRadius.card,
           overflow: "hidden",
           position: "relative",
           cursor: "pointer",
           width: "100%",
           height: containerHeight,       // ← altura fija, no depende del padre
           background: `${brand.color}18`,
-          opacity: isVisible ? 1 : 0,
-          transform: isVisible ? "translateY(0)" : "translateY(6px)",
-          transition: "opacity 0.35s ease, transform 0.35s ease",
           flexShrink: 0,
+          ...AD_TOKENS.fadeIn(isVisible)
         }}
       >
         {isVisible && !imgError && (
@@ -77,7 +79,7 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
         <div style={{
           position: "absolute",
           inset: 0,
-          background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 45%)",
+          background: isTall ? AD_TOKENS.overlay.tall : AD_TOKENS.overlay.card,
           pointerEvents: "none",
         }} />
 
@@ -91,19 +93,7 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
           alignItems: "center",
           gap: "4px",
         }}>
-          <span style={{
-            background: "rgba(0,0,0,0.55)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            color: "#fff",
-            fontSize: "8px",
-            fontWeight: 800,
-            textTransform: "uppercase",
-            padding: "3px 8px",
-            borderRadius: "5px",
-            letterSpacing: "0.8px",
-            border: `1px solid ${tierStyle.border}`,
-          }}>
+          <span style={AD_TOKENS.brandPill(tierStyle.border)}>
             ⟐ {brand.name}
           </span>
         </div>
@@ -113,15 +103,8 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
           position: "absolute",
           top: "6px",
           right: "6px",
-          fontSize: "7px",
-          fontWeight: 700,
-          color: "rgba(255,255,255,0.4)",
-          textTransform: "uppercase",
-          letterSpacing: "1.2px",
           zIndex: 2,
-          background: "rgba(0,0,0,0.3)",
-          padding: "2px 6px",
-          borderRadius: "4px",
+          ...AD_TOKENS.publicidadLabel
         }}>
           Publicidad
         </span>
