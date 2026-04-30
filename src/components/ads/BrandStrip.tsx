@@ -5,7 +5,7 @@ import React, { useRef, useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import type { BrandConfig } from "@/types/brands";
 import { TIER_COLORS } from "@/types/brands";
-import { getActiveBrands, getRandomImage } from "@/lib/brands";
+import { getActiveBrands } from "@/lib/brands";
 
 interface BrandStripProps {
   brands: BrandConfig[];

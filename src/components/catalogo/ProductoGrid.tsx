@@ -7,7 +7,7 @@ import ProductoCard from "./ProductoCard";
 import ProductoRow from "./ProductoRow";
 import { BrandSpotlight, BrandVideoCard, SponsoredBanner } from "@/components/ads";
 import { useBrands } from "@/hooks/useBrands";
-import { getActiveBrands, getBrandForCategory, getRandomImage, getRandomVideo, buildAdSequence } from "@/lib/brands";
+import { getActiveBrands, getBrandForCategory, getImageAtIndex, getVideoAtIndex, buildAdSequence, buildAdSequenceWithCooldown } from "@/lib/brands";
 import type { BrandConfig } from "@/types/brands";
 
 interface ProductoGridProps {
@@ -104,6 +104,20 @@ function CategoryCarousel({
   const pageSize = columns;
   const hasMore = total > pageSize;
 
+  const displayProds = useMemo(() => catProds.slice(0, 24), [catProds]);
+  const adIndices = useMemo(() => {
+    const result: number[] = [];
+    let adIdx = 0;
+    displayProds.forEach((_, pIdx) => {
+      if ((pIdx + 1) % INLINE_AD_EVERY === 0) {
+        result.push(adIdx++);
+      } else {
+        result.push(-1);
+      }
+    });
+    return result;
+  }, [displayProds]);
+
   const handleArrow = useCallback(() => {
     if (!scrollRef.current) return;
     const container = scrollRef.current;
@@ -137,7 +151,6 @@ function CategoryCarousel({
   if (showAll) {
     // Grid expandido — intercalamos ads de imagen como casillas dentro del grid
     const images = adBrand?.assets.filter(a => a.type === "image") || [];
-    let adImgIdx = 0;
 
     return (
       <>
@@ -154,15 +167,23 @@ function CategoryCarousel({
               />,
             ];
 
-            // Every 2 full rows (2 × columns), inject ONE image ad as a grid cell
-            if (showInlineAds && adBrand && images.length > 0 && (pIdx + 1) % (columns * 2) === 0 && pIdx < catProds.length - 1) {
-              const img = images[adImgIdx % images.length];
-              adImgIdx++;
-              items.push(
-                <div key={`ad-grid-${pIdx}`} className="brand-grid-slot">
-                  <BrandSpotlight brand={adBrand} asset={img} layout="card" />
-                </div>
-              );
+            // Every 2 full rows (2 × columns), inject ONE image or video ad as a grid cell
+            if (showInlineAds && adBrand && (images.length > 0 || adBrand.assets.some(a => a.type === "video")) && (pIdx + 1) % (columns * 2) === 0 && pIdx < catProds.length - 1) {
+              if (images.length > 0) {
+                const img = getImageAtIndex(adBrand, pIdx);
+                if (img) items.push(
+                  <div key={`ad-grid-${pIdx}`} className="brand-grid-slot">
+                    <BrandSpotlight brand={adBrand} asset={img} layout="card" />
+                  </div>
+                );
+              } else {
+                const vid = adBrand.assets.find(a => a.type === "video");
+                if (vid) items.push(
+                  <div key={`ad-grid-${pIdx}`} className="brand-grid-slot">
+                    <BrandVideoCard brand={adBrand} asset={vid} layout="inline" />
+                  </div>
+                );
+              }
             }
 
             return <React.Fragment key={p.codigo}>{items}</React.Fragment>;
@@ -178,10 +199,8 @@ function CategoryCarousel({
   }
 
   // MODO CARRUSEL HORIZONTAL
-  const displayProds = catProds.slice(0, 24);
   const images = adBrand?.assets.filter(a => a.type === "image") || [];
-  let carouselAdIdx = 0;
-
+  
   return (
     <>
       <div className="cat-carousel-wrap">
@@ -203,18 +222,24 @@ function CategoryCarousel({
             if (showInlineAds && adBrand && (images.length > 0 || adBrand.assets.some(a => a.type === "video")) && (pIdx + 1) % INLINE_AD_EVERY === 0 && pIdx < displayProds.length - 1) {
               const hasVideo = adBrand.assets.some(a => a.type === "video");
               // alternate between video and image if brand has video, otherwise just images
-              const useVideo = hasVideo && (carouselAdIdx % 3 === 0);
+              const adIdx = adIndices[pIdx];
+              const useVideo = hasVideo && (adIdx % 3 === 0);
               
               items.push(
-                <div key={`ad-carousel-${pIdx}`} className="cat-carousel-item" style={{ display: 'flex' }}>
+                <div key={`ad-carousel-${pIdx}`} className="cat-carousel-item" style={{ 
+                  display: "flex",
+                  flexShrink: 0,
+                  width: `calc((100vw - 48px) / ${columns})`,
+                  minWidth: "140px",
+                  maxWidth: "220px",
+                }}>
                   {useVideo ? (
                     <BrandVideoCard brand={adBrand} asset={adBrand.assets.find(a => a.type === "video")!} layout="inline" />
                   ) : (
-                    images.length > 0 && <BrandSpotlight brand={adBrand} asset={images[carouselAdIdx % images.length]} layout="card" />
+                    images.length > 0 && <BrandSpotlight brand={adBrand} asset={getImageAtIndex(adBrand, adIdx)!} layout="card" />
                   )}
                 </div>
               );
-              carouselAdIdx++;
             }
 
             return <React.Fragment key={`wrap-${p.codigo}`}>{items}</React.Fragment>;
@@ -272,7 +297,10 @@ export default function ProductoGrid({
 
   const grouped = useMemo(() => {
     return productos.reduce((acc, p) => {
-      const cat = p.categoria;
+      const correction = Object.entries(CATEGORY_CORRECTIONS).find(([keyword]) =>
+        p.nombre.toUpperCase().includes(keyword)
+      );
+      const cat = correction ? correction[1] : p.categoria;
       if (!acc[cat]) acc[cat] = [];
       acc[cat].push(p);
       return acc;
@@ -283,7 +311,7 @@ export default function ProductoGrid({
 
   // Build ad sequence — weighted by tier
   const adSequence = useMemo(() => {
-    return buildAdSequence(brands, categories.length);
+    return buildAdSequenceWithCooldown(brands, categories.length, 2);
   }, [brands, categories.length]);
 
   if (productos.length === 0) {
@@ -383,11 +411,11 @@ function LazySection({
           {/* Inter-category ad — only for specific slots with actual content */}
           {index > 0 && slotType && adBrand && (() => {
             if (slotType === "banner") {
-              const img = getRandomImage(adBrand);
+              const img = getImageAtIndex(adBrand, index);
               return img ? <SponsoredBanner brand={adBrand} asset={img} variant="full" /> : null;
             }
             if (slotType === "video-wide") {
-              const vid = getRandomVideo(adBrand);
+              const vid = getVideoAtIndex(adBrand, index);
               return vid ? <BrandVideoCard brand={adBrand} asset={vid} layout="wide" /> : null;
             }
             // "inline-cards" are handled inside the carousel, not between sections

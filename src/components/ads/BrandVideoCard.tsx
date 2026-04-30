@@ -81,7 +81,7 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
           position: "relative",
           width: "100%",
           height: "100%",
-          ...(isWide && { aspectRatio: "16/9", maxHeight: "360px" }),
+          ...(isWide && { aspectRatio: "16/9", maxHeight: "280px" }),
           background: "transparent",
           display: "flex",
           alignItems: "center",
@@ -96,7 +96,7 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
             loop
             playsInline
             autoPlay
-            preload="metadata"
+            preload="none"
             onError={handleError}
             style={{
               width: "100%",
@@ -105,6 +105,8 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
               position: "absolute",
               top: 0,
               left: 0,
+              opacity: 1,
+              animation: "fadeIn 0.6s ease-in",
             }}
           />
         )}

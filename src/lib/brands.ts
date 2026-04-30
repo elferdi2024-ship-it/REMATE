@@ -161,39 +161,58 @@ const TIER_WEIGHT_VALUES: Record<BrandTier, number> = {
 /** Get active brands sorted by tier weight (highest first) */
 export function getActiveBrands(brands: BrandConfig[]): BrandConfig[] {
   return brands
-    .filter((b) => b.active && b.assets.length > 0)
+    .filter((b) => {
+      if (!b.active || b.assets.length === 0) return false;
+      if (b.expiresAt && new Date(b.expiresAt) < new Date()) return false;
+      return true;
+    })
     .sort((a, b) => TIER_WEIGHT_VALUES[b.tier] - TIER_WEIGHT_VALUES[a.tier]);
 }
 
-/** Get a brand that matches a specific category */
-export function getBrandForCategory(brands: BrandConfig[], category: string): BrandConfig | null {
+/** Get a brand that matches a specific category (exact or partial) */
+export function getBrandForCategory(
+  brands: BrandConfig[], 
+  category: string
+): BrandConfig | null {
   const active = getActiveBrands(brands);
-  const catUpper = category.toUpperCase();
-  return active.find((b) => b.categories.some((c) => c.toUpperCase() === catUpper)) || null;
+  const catNormalized = category.toUpperCase().trim();
+  
+  // 1. Primero: match exacto (ya existía)
+  const exact = active.find((b) =>
+    b.categories.some((c) => c.toUpperCase().trim() === catNormalized)
+  );
+  if (exact) return exact;
+  
+  // 2. Match parcial: si alguna palabra clave de la categoría del brand 
+  //    aparece en la categoría del producto
+  const partial = active.find((b) =>
+    b.categories.some((c) => {
+      const keywords = c.toUpperCase().split(/[\s,&]+/).filter(w => w.length > 4);
+      return keywords.some(kw => catNormalized.includes(kw));
+    })
+  );
+  return partial || null;
 }
 
-/** Get a random image asset from a brand */
-export function getRandomImage(brand: BrandConfig): BrandAsset | null {
+/** Get a deterministic image asset from a brand based on an index */
+export function getImageAtIndex(brand: BrandConfig, index: number): BrandAsset | null {
   const images = brand.assets.filter((a) => a.type === "image");
   if (images.length === 0) return null;
-  return images[Math.floor(Math.random() * images.length)];
+  return images[index % images.length];
 }
 
-/** Get a random video asset from a brand */
-export function getRandomVideo(brand: BrandConfig): BrandAsset | null {
+/** Get a deterministic video asset from a brand based on an index */
+export function getVideoAtIndex(brand: BrandConfig, index: number): BrandAsset | null {
   const videos = brand.assets.filter((a) => a.type === "video");
   if (videos.length === 0) return null;
-  return videos[Math.floor(Math.random() * videos.length)];
+  return videos[index % videos.length];
 }
 
 /**
  * Build a deterministic ad sequence for a list of category indices.
- * Uses weighted round-robin based on tier.
+ * Uses Fisher-Yates shuffle for better distribution instead of round-robin.
  */
-export function buildAdSequence(
-  brands: BrandConfig[],
-  slots: number
-): BrandConfig[] {
+export function buildAdSequence(brands: BrandConfig[], slots: number): BrandConfig[] {
   const active = getActiveBrands(brands);
   if (active.length === 0) return [];
 
@@ -201,14 +220,53 @@ export function buildAdSequence(
   const pool: BrandConfig[] = [];
   for (const brand of active) {
     const weight = TIER_WEIGHT_VALUES[brand.tier];
-    for (let i = 0; i < weight; i++) {
-      pool.push(brand);
+    for (let i = 0; i < weight; i++) pool.push(brand);
+  }
+
+  // Fisher-Yates shuffle — distributivo en lugar de secuencial
+  function shuffle(arr: BrandConfig[]): BrandConfig[] {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
     }
+    return a;
   }
 
   const sequence: BrandConfig[] = [];
-  for (let i = 0; i < slots; i++) {
-    sequence.push(pool[i % pool.length]);
+  while (sequence.length < slots) {
+    sequence.push(...shuffle(pool));
   }
-  return sequence;
+  return sequence.slice(0, slots);
+}
+
+/**
+ * Build ad sequence with minimum distance between same brand.
+ */
+export function buildAdSequenceWithCooldown(
+  brands: BrandConfig[], 
+  slots: number,
+  cooldown = 2
+): BrandConfig[] {
+  const sequence = buildAdSequence(brands, slots * 2); // generar extra
+  const result: BrandConfig[] = [];
+  const recent: string[] = []; // últimos N brand ids
+
+  for (const brand of sequence) {
+    if (result.length >= slots) break;
+    
+    // Si el brand apareció recientemente, saltear
+    if (recent.slice(-cooldown).includes(brand.id)) continue;
+    
+    result.push(brand);
+    recent.push(brand.id);
+  }
+
+  // Fallback if we didn't get enough (e.g., too few brands)
+  if (result.length < slots) {
+      const remaining = buildAdSequence(brands, slots - result.length);
+      result.push(...remaining);
+  }
+
+  return result;
 }

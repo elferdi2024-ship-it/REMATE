@@ -40,11 +40,11 @@ export default function SponsoredBanner({ brand, asset, variant = "full" }: Spon
   const isCompact = variant === "compact";
 
   return (
-    <div
+      <div
       ref={ref}
       className="sponsored-banner-v2"
       style={{
-        borderRadius: isCompact ? "14px" : "16px",
+        borderRadius: isCompact ? "8px" : "12px",
         overflow: "hidden",
         position: "relative",
         width: "100%",
@@ -70,7 +70,11 @@ export default function SponsoredBanner({ brand, asset, variant = "full" }: Spon
             alt={asset.alt}
             fill
             sizes="(max-width: 600px) 100vw, (max-width: 1200px) 90vw, 1200px"
-            style={{ objectFit: "cover" }}
+            style={{ 
+              objectFit: "cover",
+              opacity: 1,
+              animation: "fadeIn 0.6s ease-in"
+            }}
             loading="lazy"
           />
         )}

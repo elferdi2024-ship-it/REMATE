@@ -5,20 +5,18 @@ import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import type { BrandConfig, BrandAsset } from "@/types/brands";
 import { TIER_COLORS } from "@/types/brands";
+import BrandMediaModal from "./BrandMediaModal";
 
 interface BrandSpotlightProps {
   brand: BrandConfig;
   asset: BrandAsset;
-  /** "card" = product card slot, "tall" = 2-row tall slot */
   layout?: "card" | "tall";
 }
 
-/**
- * An image ad that fits inside the product grid — either as a normal card
- * or as a tall card spanning 2 rows.  NOT clickable — purely visual.
- */
 export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandSpotlightProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,110 +27,109 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
           observer.disconnect();
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "300px" }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
 
+  if (imgError) return null;
+
   const tierStyle = TIER_COLORS[brand.tier];
   const isTall = layout === "tall";
 
+  // Altura auto-contenida — no depende del padre
+  const containerHeight = isTall ? "320px" : "180px";
+
   return (
-    <div
-      ref={ref}
-      className={`brand-spotlight-v2 ${isTall ? "brand-spotlight-tall" : ""}`}
-      style={{
-        borderRadius: "16px",
-        overflow: "hidden",
-        position: "relative",
-        cursor: "default",
-        background: "var(--white)",
-        height: "100%",
-        minHeight: isTall ? "340px" : "100%",
-      }}
-      aria-label={`Publicidad: ${brand.name}`}
-    >
-      {/* Full-bleed image */}
+    <>
       <div
+        ref={ref}
+        aria-label={`Publicidad: ${brand.name}`}
+        onClick={() => setModalOpen(true)}
         style={{
+          borderRadius: "14px",
+          overflow: "hidden",
           position: "relative",
+          cursor: "pointer",
           width: "100%",
-          height: "100%",
-          minHeight: isTall ? "340px" : "100%",
+          height: containerHeight,       // ← altura fija, no depende del padre
+          background: `${brand.color}18`,
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? "translateY(0)" : "translateY(6px)",
+          transition: "opacity 0.35s ease, transform 0.35s ease",
+          flexShrink: 0,
         }}
       >
-        {isVisible && (
+        {isVisible && !imgError && (
           <Image
             src={asset.src}
             alt={asset.alt}
             fill
-            sizes={isTall ? "(max-width: 768px) 50vw, 20vw" : "(max-width: 768px) 50vw, 16vw"}
-            style={{ objectFit: "cover" }}
+            sizes={isTall ? "20vw" : "16vw"}
+            style={{ objectFit: "contain", padding: "4px" }}
             loading="lazy"
+            onError={() => setImgError(true)}
           />
         )}
 
-        {/* Gradient overlay */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: isTall
-              ? "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)"
-              : "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 40%)",
-            pointerEvents: "none",
-          }}
-        />
+        {/* Gradiente bottom */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 45%)",
+          pointerEvents: "none",
+        }} />
 
-        {/* Brand tag — pill bottom-left */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "10px",
-            left: "10px",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            zIndex: 2,
-          }}
-        >
-          <span
-            style={{
-              background: "rgba(0,0,0,0.5)",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-              color: "#fff",
-              fontSize: "8px",
-              fontWeight: 800,
-              textTransform: "uppercase",
-              padding: "3px 8px",
-              borderRadius: "5px",
-              letterSpacing: "0.8px",
-              border: `1px solid ${tierStyle.border}`,
-            }}
-          >
+        {/* Brand pill — bottom left */}
+        <div style={{
+          position: "absolute",
+          bottom: "8px",
+          left: "8px",
+          zIndex: 2,
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
+        }}>
+          <span style={{
+            background: "rgba(0,0,0,0.55)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
+            color: "#fff",
+            fontSize: "8px",
+            fontWeight: 800,
+            textTransform: "uppercase",
+            padding: "3px 8px",
+            borderRadius: "5px",
+            letterSpacing: "0.8px",
+            border: `1px solid ${tierStyle.border}`,
+          }}>
             ⟐ {brand.name}
           </span>
         </div>
 
-        {/* "Publicidad" micro label — top right */}
-        <span
-          style={{
-            position: "absolute",
-            top: "8px",
-            right: "8px",
-            fontSize: "7px",
-            fontWeight: 700,
-            color: "rgba(255,255,255,0.45)",
-            textTransform: "uppercase",
-            letterSpacing: "1.2px",
-            zIndex: 2,
-          }}
-        >
+        {/* Publicidad label — top right */}
+        <span style={{
+          position: "absolute",
+          top: "6px",
+          right: "6px",
+          fontSize: "7px",
+          fontWeight: 700,
+          color: "rgba(255,255,255,0.4)",
+          textTransform: "uppercase",
+          letterSpacing: "1.2px",
+          zIndex: 2,
+          background: "rgba(0,0,0,0.3)",
+          padding: "2px 6px",
+          borderRadius: "4px",
+        }}>
           Publicidad
         </span>
       </div>
-    </div>
+      
+      {modalOpen && (
+        <BrandMediaModal brand={brand} isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+      )}
+    </>
   );
 }

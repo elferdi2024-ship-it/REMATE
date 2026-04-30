@@ -2679,3 +2679,8 @@ html.dark-mode body { background: var(--bg); }
   }
 }
 
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

@@ -123,7 +123,8 @@ export default function ProductoCard({
       <div className="card-thumb" style={{ 
         background: "var(--bg2)", 
         borderRadius: "12px",
-        height: "110px",
+        aspectRatio: "1 / 1",
+        height: "auto",
         marginBottom: "8px",
         border: "none",
         display: "flex",
@@ -175,7 +176,7 @@ export default function ProductoCard({
           </span>
         )}
         
-        <div className="card-floating-action" style={{ position: "absolute", bottom: "-14px", right: "8px", zIndex: 10 }}>
+        <div className="card-floating-action" style={{ position: "absolute", bottom: "8px", right: "8px", zIndex: 10 }}>
           {isInCart ? (
             <div className="float-qty-ctrl" style={{ 
               display: "flex",
@@ -213,7 +214,7 @@ export default function ProductoCard({
         </div>
       </div>
 
-      <div className="card-body" style={{ padding: "0 4px 4px", flex: 1, display: "flex", flexDirection: "column" }}>
+      <div className="card-body" style={{ padding: "0 4px 48px 4px", flex: 1, display: "flex", flexDirection: "column" }}>
         <span className="card-cat-badge" style={{ 
           background: badgeBg, 
           color: badgeColor, 

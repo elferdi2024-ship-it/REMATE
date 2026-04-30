@@ -34,6 +34,8 @@ export interface BrandConfig {
   createdAt?: string;
   /** Timestamp de última modificación */
   updatedAt?: string;
+  /** Fecha de vencimiento de la campaña (ISO string). Si está en el pasado, la marca se desactiva automáticamente */
+  expiresAt?: string;
 }
 
 /** Peso de frecuencia por tier */
