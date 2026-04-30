@@ -5,3 +5,6 @@ export { default as SponsoredBanner } from "./SponsoredBanner";
 export { default as BrandStrip } from "./BrandStrip";
 export { default as BrandShowcase } from "./BrandShowcase";
 export { default as SponsoredProduct } from "./SponsoredProduct";
+export { default as NativeStoryCard } from "./NativeStoryCard";
+export { default as BrandProductCard } from "./BrandProductCard";
+export { default as FlashDealCard } from "./FlashDealCard";

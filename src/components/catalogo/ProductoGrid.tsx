@@ -5,7 +5,7 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import type { Producto, Vista } from "@/types";
 import ProductoCard from "./ProductoCard";
 import ProductoRow from "./ProductoRow";
-import { BrandSpotlight, BrandVideoCard, SponsoredBanner, SponsoredProduct } from "@/components/ads";
+import { BrandSpotlight, BrandVideoCard, SponsoredBanner, SponsoredProduct, NativeStoryCard, FlashDealCard } from "@/components/ads";
 import { useBrands } from "@/hooks/useBrands";
 import { getActiveBrands, getBrandForCategory, getImageAtIndex, getVideoAtIndex, buildAdSequence, buildAdSequenceWithCooldown } from "@/lib/brands";
 import { canShowAd } from "@/lib/adFrequency";
@@ -25,14 +25,14 @@ interface ProductoGridProps {
  * Each pattern type determines what kind of ad goes between categories.
  * null = no ad (just products), giving breathing room.
  */
-type AdSlotType = "banner" | "video-wide" | "inline-cards" | null;
+type AdSlotType = "banner" | "video-wide" | "inline-cards" | "native-story" | null;
 
 // Pattern cycle for between-category ad slots — spread out, varied
 const AD_PATTERN: AdSlotType[] = [
   null,              // 1st category: no ad above
   null,              // 2nd: no ad — let user see products first
   "inline-cards",    // 3rd: subtle image cards mixed in the carousel
-  null,              // 4th: breathing room
+  "native-story",    // 4th: native story card
   "banner",          // 5th: horizontal banner
   null,              // 6th: rest
   null,              // 7th: rest
@@ -40,8 +40,8 @@ const AD_PATTERN: AdSlotType[] = [
   null,              // 9th: rest
   "inline-cards",    // 10th: image cards again
   null,              // 11th: rest
-  "banner",          // 12th: banner
-  null,              // 13th: rest
+  "native-story",    // 12th: native story
+  "banner",          // 13th: banner
   null,              // 14th: rest
   "video-wide",      // 15th: video
 ];
@@ -167,6 +167,7 @@ function CategoryCarousel({
                 searchTerm={searchTerm}
                 onAdd={onAdd}
                 onQtyChange={onQtyChange}
+                sponsorBrand={adBrand}
               />,
             ];
 
@@ -182,7 +183,7 @@ function CategoryCarousel({
               } else {
                 const vid = adBrand.assets.find(a => a.type === "video");
                 if (vid) items.push(
-                  <div key={`ad-grid-${pIdx}`} className="brand-grid-slot">
+                  <div key={`ad-grid-${pIdx}`} className="brand-grid-slot" style={{ gridColumn: "1 / -1", margin: "24px 0" }}>
                     <BrandVideoCard brand={adBrand} asset={vid} layout="inline" />
                   </div>
                 );
@@ -215,6 +216,7 @@ function CategoryCarousel({
                   searchTerm={searchTerm}
                   onAdd={onAdd}
                   onQtyChange={onQtyChange}
+                  sponsorBrand={adBrand}
                 />
               </div>,
             ];
@@ -369,10 +371,26 @@ export default function ProductoGrid({
             adBrand={adBrand}
           >
             <section className="cat-section">
-              <div className="cat-section-header">
+              <div className="cat-section-header" style={
+                adBrand?.sponsoredCategories?.includes(cat) ? {
+                  background: `linear-gradient(90deg, ${adBrand.color || 'var(--primary-color)'}18 0%, transparent 60%)`,
+                  borderLeft: `4px solid ${adBrand.color || 'var(--primary-color)'}`,
+                  padding: "12px 16px",
+                  borderRadius: "0 8px 8px 0",
+                  display: "flex",
+                  alignItems: "center"
+                } : {}
+              }>
                 <h2 className="cat-section-title">{cat}</h2>
-                <div className="cat-section-divider" />
-                <span className="cat-section-count">{catProds.length} items</span>
+                <div className="cat-section-divider" style={{ display: adBrand?.sponsoredCategories?.includes(cat) ? "none" : "block" }} />
+                {adBrand?.sponsoredCategories?.includes(cat) ? (
+                  <span style={{ fontSize: "11px", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6, fontWeight: 600, marginLeft: "auto" }}>
+                    PRESENTADO POR
+                    {adBrand.logoUrl ? <img src={adBrand.logoUrl} style={{ height: 20, objectFit: "contain" }} alt={adBrand.name} /> : adBrand.name}
+                  </span>
+                ) : (
+                  <span className="cat-section-count">{catProds.length} items</span>
+                )}
               </div>
               <CategoryCarousel
                 cat={cat}
@@ -443,9 +461,17 @@ function LazySection({
               const vid = getVideoAtIndex(adBrand, index);
               return vid ? <BrandVideoCard brand={adBrand} asset={vid} layout="wide" /> : null;
             }
+            if (slotType === "native-story" && adBrand.story) {
+              return <NativeStoryCard brand={adBrand} />;
+            }
             // "inline-cards" are handled inside the carousel, not between sections
             return null;
           })()}
+
+          {/* FlashDealCard — aparece cuando la marca tiene oferta activa en <24hs */}
+          {index > 0 && adBrand?.flashDeal && (
+            <FlashDealCard brand={adBrand} />
+          )}
 
           {/* Removed static CategoryBanner */}
           {children}

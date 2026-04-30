@@ -1,30 +1,29 @@
 // filepath: src/components/ads/SponsoredBanner.tsx
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
-import Image from "next/image";
+import React, { useEffect, useState } from "react";
 import type { BrandConfig, BrandAsset } from "@/types/brands";
-import { TIER_COLORS } from "@/types/brands";
 import { useAdImpression } from "@/hooks/useAdImpression";
 import { AD_TOKENS } from "./adStyles";
 
 interface SponsoredBannerProps {
   brand: BrandConfig;
   asset: BrandAsset;
-  /** "full" = full-width between sections, "compact" = smaller inline */
   variant?: "full" | "compact";
 }
 
-/**
- * Horizontal banner between categories.
- * Full-bleed image, NOT clickable. Maintains aspect ratio with object-fit cover
- * but at a more restrained height so it doesn't dominate.
- */
 export default function SponsoredBanner({ brand, asset, variant = "full" }: SponsoredBannerProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
-  // Usamos el hook de tracking que usa IntersectionObserver
   const ref = useAdImpression<HTMLDivElement>(brand.id, asset.id);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -40,72 +39,87 @@ export default function SponsoredBanner({ brand, asset, variant = "full" }: Spon
     return () => observer.disconnect();
   }, [ref]);
 
-  const tierStyle = TIER_COLORS[brand.tier];
-  const isCompact = variant === "compact";
-
   return (
-      <div
+    <div
       ref={ref}
-      className="sponsored-banner-v2"
-      style={{
-        borderRadius: isCompact ? "8px" : AD_TOKENS.borderRadius.banner,
-        overflow: "hidden",
-        position: "relative",
-        width: "100%",
-        cursor: "default",
-        margin: isCompact ? "6px 0" : "12px 0",
-        background: "#0a0a0a",
-      }}
       aria-label={`Publicidad: ${brand.name}`}
+      onMouseEnter={(e) => {
+        if (!isMobile) {
+          e.currentTarget.style.transform = AD_TOKENS.hover.banner;
+          e.currentTarget.style.boxShadow = `0 16px 40px ${brand.color}44`;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isMobile) {
+          e.currentTarget.style.transform = "none";
+          e.currentTarget.style.boxShadow = "none";
+        }
+      }}
+      style={{
+        width: "100%",
+        height: isMobile ? "auto" : AD_TOKENS.size.banner.desktop.height,
+        minHeight: isMobile ? "140px" : undefined,
+        borderRadius: isMobile ? AD_TOKENS.size.banner.mobile.borderRadius : AD_TOKENS.size.banner.desktop.borderRadius,
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        alignItems: isMobile ? "flex-start" : "center",
+        padding: isMobile ? "20px" : "0 40px",
+        gap: isMobile ? "12px" : "24px",
+        position: "relative",
+        background: brand.color || "#1a1a1a",
+        cursor: "pointer",
+        margin: isMobile ? "20px 0" : "32px 0",
+        ...AD_TOKENS.fadeIn(isVisible)
+      }}
     >
-      {/* Image — constrained aspect ratio */}
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          aspectRatio: isCompact ? "4/1" : "3/1",
-          maxHeight: isCompact ? "120px" : "220px",
-          minHeight: isCompact ? "60px" : "100px",
-        }}
-      >
-        {isVisible && (
-          <Image
-            src={asset.src}
-            alt={asset.alt}
-            fill
-            sizes="(max-width: 600px) 100vw, (max-width: 1200px) 90vw, 1200px"
-            style={{ 
-              objectFit: "cover",
-              ...AD_TOKENS.fadeIn(isVisible)
-            }}
-            loading="lazy"
-          />
-        )}
+      {/* Textura sutil de fondo */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%)" }} />
 
-        {/* Gradient overlay */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: AD_TOKENS.overlay.banner,
-            pointerEvents: "none",
-          }}
+      {/* Logo de la marca */}
+      {brand.logoUrl ? (
+        <img 
+          src={brand.logoUrl} 
+          alt={brand.name} 
+          style={{ height: 64, width: 64, objectFit: "contain", borderRadius: 12, flexShrink: 0, position: "relative" }} 
         />
+      ) : (
+        <div style={{ width: 64, height: 64, borderRadius: 12, background: "rgba(255,255,255,0.15)", flexShrink: 0, position: "relative" }} />
+      )}
 
-        {/* Brand pill */}
-        <div
-          style={{
-            position: "absolute",
-            top: isCompact ? "6px" : "10px",
-            right: isCompact ? "6px" : "10px",
-            zIndex: 2,
-          }}
-        >
-          <span style={AD_TOKENS.brandPill(tierStyle.border)}>
-            ⟐ {brand.name} · Publicidad
-          </span>
-        </div>
+      {/* Texto */}
+      <div style={{ flex: 1, position: "relative" }}>
+        <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "10px", letterSpacing: "1.5px", textTransform: "uppercase", margin: "0 0 4px", fontWeight: 600 }}>
+          PUBLICIDAD
+        </p>
+        <h3 style={{ color: "#fff", fontSize: "20px", fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.2px" }}>
+          {brand.headline || brand.name}
+        </h3>
+        {brand.tagline && (
+          <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "13px", margin: 0 }}>
+            {brand.tagline}
+          </p>
+        )}
       </div>
+
+      {/* CTA */}
+      <button style={{
+        flexShrink: 0, 
+        position: "relative",
+        width: isMobile ? "100%" : "auto",
+        textAlign: "center",
+        background: "rgba(255,255,255,0.15)", 
+        backdropFilter: "blur(8px)",
+        border: "1px solid rgba(255,255,255,0.35)",
+        color: "#fff", 
+        fontSize: "12px", 
+        fontWeight: 600,
+        padding: "10px 22px", 
+        borderRadius: "24px", 
+        cursor: "pointer",
+      }}>
+        Ver catálogo →
+      </button>
     </div>
   );
 }

@@ -46,6 +46,32 @@ export interface BrandConfig {
   expiresAt?: string;
   /** Número máximo de impresiones para esta campaña. null = sin límite. */
   impressionCap?: number | null;
+  
+  // --- V4 Nuevos Campos ---
+  
+  /** Titular del ad (ej: "Whisky Black Label") */
+  headline?: string;
+  /** Subtítulo (ej: "Para los que saben lo que quieren") */
+  tagline?: string;
+  /** URL logo cuadrado, para banners y badges */
+  logoUrl?: string;
+  /** ID de producto destacado para SponsoredProduct format */
+  featuredProductId?: string;
+  /** ["BEBIDAS", "LICORES"] - Categorías que esta marca patrocina */
+  sponsoredCategories?: string[];
+  /** Historia de marca para NativeStoryCard */
+  story?: {
+    title: string;
+    body: string;
+    imageUrl: string;
+  };
+  /** Oferta flash de la marca */
+  flashDeal?: {
+    productId: string;
+    discount: number;
+    expiresAt: string;
+    description: string;
+  };
 }
 
 /** Peso de frecuencia por tier */

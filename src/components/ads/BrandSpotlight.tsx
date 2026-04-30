@@ -1,10 +1,9 @@
 // filepath: src/components/ads/BrandSpotlight.tsx
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import type { BrandConfig, BrandAsset } from "@/types/brands";
-import { TIER_COLORS } from "@/types/brands";
 import BrandMediaModal from "./BrandMediaModal";
 import { AD_TOKENS } from "./adStyles";
 import { useAdImpression } from "@/hooks/useAdImpression";
@@ -12,16 +11,24 @@ import { useAdImpression } from "@/hooks/useAdImpression";
 interface BrandSpotlightProps {
   brand: BrandConfig;
   asset: BrandAsset;
-  layout?: "card" | "tall";
+  layout?: "hero" | "card" | "wide"; // visual hint — actualmente no cambia el layout, reservado para V5
 }
 
-export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandSpotlightProps) {
+export default function BrandSpotlight({ brand, asset, layout: _layout }: BrandSpotlightProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  
+  const [isMobile, setIsMobile] = useState(false);
+
   // Usamos el hook the tracking que también usa IntersectionObserver
   const ref = useAdImpression<HTMLDivElement>(brand.id, asset.id);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -39,11 +46,7 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
 
   if (imgError) return null;
 
-  const tierStyle = TIER_COLORS[brand.tier];
-  const isTall = layout === "tall";
-
-  // Altura auto-contenida — no depende del padre
-  const containerHeight = isTall ? "320px" : "180px";
+  const tierConfig = AD_TOKENS.tier[brand.tier];
 
   return (
     <>
@@ -51,15 +54,26 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
         ref={ref}
         aria-label={`Publicidad: ${brand.name}`}
         onClick={() => setModalOpen(true)}
+        onMouseEnter={(e) => {
+          if (!isMobile) {
+            e.currentTarget.style.transform = AD_TOKENS.hover.spotlight;
+            e.currentTarget.style.boxShadow = `0 24px 60px ${tierConfig.glow}`;
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isMobile) {
+            e.currentTarget.style.transform = "none";
+            e.currentTarget.style.boxShadow = "none";
+          }
+        }}
         style={{
-          borderRadius: AD_TOKENS.borderRadius.card,
-          overflow: "hidden",
           position: "relative",
-          cursor: "pointer",
           width: "100%",
-          height: containerHeight,       // ← altura fija, no depende del padre
-          background: `${brand.color}18`,
-          flexShrink: 0,
+          height: isMobile ? AD_TOKENS.size.spotlight.mobile.height : AD_TOKENS.size.spotlight.desktop.height,
+          borderRadius: isMobile ? AD_TOKENS.size.spotlight.mobile.borderRadius : AD_TOKENS.size.spotlight.desktop.borderRadius,
+          overflow: "hidden",
+          cursor: "pointer",
+          margin: isMobile ? "20px 0" : "32px 0",
           ...AD_TOKENS.fadeIn(isVisible)
         }}
       >
@@ -68,46 +82,70 @@ export default function BrandSpotlight({ brand, asset, layout = "card" }: BrandS
             src={asset.src}
             alt={asset.alt}
             fill
-            sizes={isTall ? "20vw" : "16vw"}
-            style={{ objectFit: "contain", padding: "4px" }}
+            sizes="100vw"
+            style={{ objectFit: "cover" }}
             loading="lazy"
             onError={() => setImgError(true)}
           />
         )}
 
-        {/* Gradiente bottom */}
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          background: isTall ? AD_TOKENS.overlay.tall : AD_TOKENS.overlay.card,
-          pointerEvents: "none",
-        }} />
+        {/* Overlay en 3 capas */}
+        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.25)" }} />
+        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${brand.color}55 0%, transparent 60%)` }} />
+        <div style={{ position: "absolute", inset: 0, background: isMobile ? "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 100%)" : "linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 50%)" }} />
 
-        {/* Brand pill — bottom left */}
-        <div style={{
-          position: "absolute",
-          bottom: "8px",
-          left: "8px",
-          zIndex: 2,
-          display: "flex",
-          alignItems: "center",
-          gap: "4px",
+        {/* Badge de tier */}
+        <div style={{ 
+          position: "absolute", 
+          top: 20, right: 20, 
+          background: tierConfig.bg,
+          padding: "4px 10px", 
+          borderRadius: "6px", 
+          border: `1px solid ${tierConfig.border}`, 
+          fontSize: "10px", 
+          fontWeight: 700, 
+          letterSpacing: "1.2px", 
+          color: "#fff",
+          zIndex: 2
         }}>
-          <span style={AD_TOKENS.brandPill(tierStyle.border)}>
-            ⟐ {brand.name}
-          </span>
+          {tierConfig.label}
         </div>
 
-        {/* Publicidad label — top right */}
-        <span style={{
-          position: "absolute",
-          top: "6px",
-          right: "6px",
-          zIndex: 2,
-          ...AD_TOKENS.publicidadLabel
-        }}>
-          Publicidad
-        </span>
+        {/* Label publicidad */}
+        <div style={{ position: "absolute", top: 20, left: 20, zIndex: 2, ...AD_TOKENS.adLabel }}>
+          PUBLICIDAD
+        </div>
+
+        {/* Contenido */}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: isMobile ? "20px" : "32px 40px", textAlign: isMobile ? "center" : "left", zIndex: 2 }}>
+          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "12px", letterSpacing: "2px", textTransform: "uppercase", margin: "0 0 8px" }}>
+            {brand.name}
+          </p>
+          <h2 style={{ color: "#fff", fontSize: isMobile ? "24px" : "36px", fontWeight: 800, margin: "0 0 8px", letterSpacing: "-0.5px" }}>
+            {brand.headline || brand.name}
+          </h2>
+          {brand.tagline && (
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "16px", margin: "0 0 20px" }}>
+              {brand.tagline}
+            </p>
+          )}
+          <button style={{ 
+            width: isMobile ? "100%" : "auto",
+            background: "rgba(255,255,255,0.15)", 
+            backdropFilter: "blur(8px)", 
+            border: "1px solid rgba(255,255,255,0.35)", 
+            color: "#fff", 
+            fontSize: "13px", 
+            fontWeight: 600, 
+            padding: "10px 24px", 
+            borderRadius: "24px", 
+            cursor: "pointer", 
+            letterSpacing: "0.3px",
+            marginTop: "12px"
+          }}>
+            Ver en catálogo →
+          </button>
+        </div>
       </div>
       
       {modalOpen && (

@@ -1,5 +1,6 @@
 import React, { useRef, useCallback } from "react";
 import type { Producto } from "@/types";
+import type { BrandConfig } from "@/types/brands";
 import { EMOJI_POR_CATEGORIA } from "@/types";
 import Image from "next/image";
 
@@ -9,6 +10,7 @@ interface ProductoCardProps {
   searchTerm?: string;
   onAdd: (producto: Producto) => void;
   onQtyChange: (codigo: string, qty: number) => void;
+  sponsorBrand?: BrandConfig | null;
 }
 
 function formatPrice(n: number): string {
@@ -83,6 +85,7 @@ export default function ProductoCard({
   searchTerm,
   onAdd,
   onQtyChange,
+  sponsorBrand,
 }: ProductoCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const isInCart = qty > 0;
@@ -212,6 +215,25 @@ export default function ProductoCard({
             </button>
           )}
         </div>
+        {/* BrandAmbassadorBadge — micro-logo en esquina inferior izquierda de la imagen */}
+        {sponsorBrand?.logoUrl && (
+          <div style={{
+            position: "absolute", bottom: 6, left: 6, zIndex: 3,
+            background: "rgba(255,255,255,0.92)",
+            borderRadius: "5px",
+            padding: "2px 5px",
+            display: "flex",
+            alignItems: "center",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+            backdropFilter: "blur(4px)",
+          }}>
+            <img
+              src={sponsorBrand.logoUrl}
+              alt={sponsorBrand.name}
+              style={{ height: 12, maxWidth: 40, objectFit: "contain", opacity: 0.85 }}
+            />
+          </div>
+        )}
       </div>
 
       <div className="card-body" style={{ padding: "0 4px 48px 4px", flex: 1, display: "flex", flexDirection: "column" }}>
