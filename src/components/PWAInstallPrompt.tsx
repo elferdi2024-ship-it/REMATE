@@ -10,6 +10,13 @@ export function PWAInstallPrompt() {
   const { info } = useToast();
 
   useEffect(() => {
+    // 0. Register Service Worker (requerido para PWA en Android)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(err => {
+        console.error('Service Worker registration failed:', err);
+      });
+    }
+
     // 1. Detectar si ya está instalada (Standalone mode)
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches 
                          || (window.navigator as any).standalone 
