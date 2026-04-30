@@ -64,7 +64,7 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
       ref={containerRef}
       className={`brand-video-v2 ${isTall ? "brand-video-tall" : ""} ${isInline ? "brand-video-inline" : ""}`}
       style={{
-        background: "var(--white)",
+        background: "transparent",
         borderRadius: isWide ? "20px" : "16px",
         overflow: "hidden",
         position: "relative",
@@ -82,7 +82,7 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
           width: "100%",
           height: "100%",
           ...(isWide && { aspectRatio: "16/9", maxHeight: "360px" }),
-          background: "var(--white)",
+          background: "transparent",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -95,12 +95,13 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
             muted
             loop
             playsInline
-            preload="none"
+            autoPlay
+            preload="metadata"
             onError={handleError}
             style={{
               width: "100%",
               height: "100%",
-              objectFit: "cover",
+              objectFit: "contain",
               position: "absolute",
               top: 0,
               left: 0,
