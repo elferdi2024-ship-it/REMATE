@@ -1,7 +1,8 @@
-﻿// filepath: src/components/ads/SponsoredBanner.tsx
+// filepath: src/components/ads/SponsoredBanner.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { BrandConfig, BrandAsset } from "@/types/brands";
 import { useAdImpression } from "@/hooks/useAdImpression";
@@ -20,6 +21,7 @@ export default function SponsoredBanner({
   variant = "full",
   slot = "results",
 }: SponsoredBannerProps) {
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [abVariant, setAbVariant] = useState<"A" | "B">("A");
@@ -66,6 +68,16 @@ export default function SponsoredBanner({
   const isCompact = variant === "compact";
   const ctaText = abVariant === "A" ? "ABRIR OFERTAS" : "VER PROMOCIONES";
   const ctaBg = abVariant === "A" ? "rgba(255,255,255,0.2)" : "rgba(232,48,42,0.35)";
+
+  const handleCtaClick = useCallback(() => {
+    // Navigate to catalog filtered by brand name
+    const searchTerm = brand.name || brand.headline || "";
+    if (searchTerm) {
+      router.push(`/catalogo?search=${encodeURIComponent(searchTerm)}`);
+    } else {
+      router.push("/catalogo");
+    }
+  }, [brand.name, brand.headline, router]);
   const brandInitial = brand.name?.slice(0, 1).toUpperCase() || "M";
 
   return (
@@ -241,6 +253,7 @@ export default function SponsoredBanner({
       </div>
 
       <button
+        onClick={handleCtaClick}
         style={{
           flexShrink: 0,
           position: "relative",

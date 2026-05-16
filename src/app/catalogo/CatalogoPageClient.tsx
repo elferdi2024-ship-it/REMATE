@@ -184,12 +184,17 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [categoria, setCategoria] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // Sync category from URL if present
+  // Sync category and search from URL if present
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const cat = params.get("categoria");
+    const q = params.get("search");
     if (cat) {
       setCategoria(cat);
+    }
+    if (q) {
+      setSearch(q);
+      setDebouncedSearch(q);
     }
   }, []);
 
