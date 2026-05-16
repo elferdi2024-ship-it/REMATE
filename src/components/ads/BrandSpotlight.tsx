@@ -14,7 +14,7 @@ interface BrandSpotlightProps {
   layout?: "hero" | "card" | "wide"; // visual hint — actualmente no cambia el layout, reservado para V5
 }
 
-export default function BrandSpotlight({ brand, asset, layout: _layout }: BrandSpotlightProps) {
+export default function BrandSpotlight({ brand, asset, layout = "wide" }: BrandSpotlightProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -47,6 +47,24 @@ export default function BrandSpotlight({ brand, asset, layout: _layout }: BrandS
   if (imgError) return null;
 
   const tierConfig = AD_TOKENS.tier[brand.tier];
+  const layoutStyles =
+    layout === "card"
+      ? {
+          height: isMobile ? "220px" : "280px",
+          radius: isMobile ? "12px" : "14px",
+          margin: "0",
+        }
+      : layout === "hero"
+        ? {
+            height: isMobile ? "300px" : "520px",
+            radius: isMobile ? "16px" : "22px",
+            margin: isMobile ? "20px 0" : "34px 0",
+          }
+        : {
+            height: isMobile ? AD_TOKENS.size.spotlight.mobile.height : AD_TOKENS.size.spotlight.desktop.height,
+            radius: isMobile ? AD_TOKENS.size.spotlight.mobile.borderRadius : AD_TOKENS.size.spotlight.desktop.borderRadius,
+            margin: isMobile ? "20px 0" : "32px 0",
+          };
 
   return (
     <>
@@ -69,11 +87,11 @@ export default function BrandSpotlight({ brand, asset, layout: _layout }: BrandS
         style={{
           position: "relative",
           width: "100%",
-          height: isMobile ? AD_TOKENS.size.spotlight.mobile.height : AD_TOKENS.size.spotlight.desktop.height,
-          borderRadius: isMobile ? AD_TOKENS.size.spotlight.mobile.borderRadius : AD_TOKENS.size.spotlight.desktop.borderRadius,
+          height: layoutStyles.height,
+          borderRadius: layoutStyles.radius,
           overflow: "hidden",
           cursor: "pointer",
-          margin: isMobile ? "20px 0" : "32px 0",
+          margin: layoutStyles.margin,
           ...AD_TOKENS.fadeIn(isVisible)
         }}
       >
@@ -93,23 +111,6 @@ export default function BrandSpotlight({ brand, asset, layout: _layout }: BrandS
         <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.25)" }} />
         <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${brand.color}55 0%, transparent 60%)` }} />
         <div style={{ position: "absolute", inset: 0, background: isMobile ? "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 100%)" : "linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 50%)" }} />
-
-        {/* Badge de tier */}
-        <div style={{ 
-          position: "absolute", 
-          top: 20, right: 20, 
-          background: tierConfig.bg,
-          padding: "4px 10px", 
-          borderRadius: "6px", 
-          border: `1px solid ${tierConfig.border}`, 
-          fontSize: "10px", 
-          fontWeight: 700, 
-          letterSpacing: "1.2px", 
-          color: "#fff",
-          zIndex: 2
-        }}>
-          {tierConfig.label}
-        </div>
 
         {/* Label publicidad */}
         <div style={{ position: "absolute", top: 20, left: 20, zIndex: 2, ...AD_TOKENS.adLabel }}>

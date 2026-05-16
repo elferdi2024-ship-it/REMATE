@@ -6,6 +6,7 @@ import type { MetodoEntrega } from '@/lib/sucursales';
 import CartItemRow from './CartItem';
 import CartFooter from './CartFooter';
 import AdPopup from './AdPopup';
+import { AdSlotPlacement } from '@/components/ads';
 
 interface CartPanelProps {
   isOpen: boolean;
@@ -117,6 +118,8 @@ export default function CartPanel({
 
           {/* Footer — only show when cart has items */}
           {items.length > 0 && (
+            <>
+              <AdSlotPlacement slot="cart-upsell" />
             <CartFooter
               total={total}
               alias={alias}
@@ -139,6 +142,7 @@ export default function CartPanel({
               sucursalId={sucursalId}
               onSucursalChange={onSucursalChange}
             />
+            </>
           )}
         </div>
       </div>

@@ -1,5 +1,4 @@
-// filepath: src/components/catalogo/Hero.tsx
-"use client";
+﻿"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -32,9 +31,10 @@ export default function Hero({
   searchQuery = "",
   onSearchChange,
 }: HeroProps) {
+  const trustItems = ["Precios mayoristas reales", "Pedido en minutos", "Atencion por WhatsApp"];
+
   return (
     <section className="hero hero-compact">
-      {/* ── Fondo imagen ── */}
       <div style={{ position: "absolute", inset: 0, zIndex: 0, background: "var(--oscuro, #111111)" }}>
         <Image
           src="/catalogo-hero.jpg"
@@ -54,7 +54,6 @@ export default function Hero({
         />
       </div>
 
-      {/* Glow rojo */}
       <div
         style={{
           position: "absolute",
@@ -65,30 +64,20 @@ export default function Hero({
         }}
       />
 
-      {/* ── Contenido ── */}
       <div className="hero-inner hero-inner-v2" style={{ position: "relative", zIndex: 2 }}>
-
-        {/* ════ IZQUIERDA: Marca ════ */}
         <div className="hero-brand">
-          <Link
-            href="/"
-            className="hero-back-link"
-          >
-            ← Inicio
+          <Link href="/" className="hero-back-link">
+            Inicio
           </Link>
 
-          {/* Eyebrow */}
           <div style={{ marginBottom: "10px" }}>
-            <span className="hero-eyebrow-badge">
-              MAYORISTA · DISTRIBUIDORA · CANELONES
-            </span>
+            <span className="hero-eyebrow-badge">MAYORISTA · DISTRIBUIDORA · CANELONES</span>
           </div>
 
-
-
-          {/* Descriptor */}
           <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "16px" }}>
-            <div style={{ width: "3px", minHeight: "36px", background: "var(--rojo)", borderRadius: "2px", flexShrink: 0, marginTop: "2px" }} />
+            <div
+              style={{ width: "3px", minHeight: "36px", background: "var(--rojo)", borderRadius: "2px", flexShrink: 0, marginTop: "2px" }}
+            />
             <p
               style={{
                 fontFamily: "var(--font-display, 'Arial Black', sans-serif)",
@@ -102,13 +91,12 @@ export default function Hero({
                 margin: 0,
               }}
             >
-              Pedí tu Surtido
+              Pedi tu surtido
               <br />
-              <span style={{ color: "var(--rojo, #D62828)" }}>y Olvidate del Resto</span>
+              <span style={{ color: "var(--rojo, #D62828)" }}>y olvidate del resto</span>
             </p>
           </div>
 
-          {/* Stats strip */}
           <div
             style={{
               background: "rgba(26,20,16,0.55)",
@@ -122,7 +110,7 @@ export default function Hero({
           >
             {[
               { val: "1900+", lbl: "Productos" },
-              { val: "21", lbl: "Categorías" },
+              { val: "21", lbl: "Categorias" },
               { val: "WA", lbl: "Express" },
             ].map((stat, i) => (
               <div
@@ -160,18 +148,30 @@ export default function Hero({
               </div>
             ))}
           </div>
+
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "10px" }}>
+            {trustItems.map((item) => (
+              <span
+                key={item}
+                style={{
+                  fontSize: "0.66rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.9px",
+                  textTransform: "uppercase",
+                  color: "var(--on-dark-mid, #C8C3BC)",
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  borderRadius: "999px",
+                  padding: "5px 10px",
+                  background: "rgba(255,255,255,0.06)",
+                }}
+              >
+                {item}
+              </span>
+            ))}
+          </div>
         </div>
 
-        {/* ════ MEDIO: Logo ════ */}
-        <div 
-          className="hero-logo-center" 
-          style={{ 
-            display: "flex", 
-            justifyContent: "center", 
-            alignItems: "center",
-            padding: "20px 0"
-          }}
-        >
+        <div className="hero-logo-center" style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "20px 0" }}>
           <Link href="/">
             <Image
               src="/logo.png"
@@ -179,51 +179,43 @@ export default function Hero({
               width={280}
               height={150}
               priority
-              style={{ 
+              style={{
                 width: "100%",
                 maxWidth: "280px",
                 height: "auto",
-                objectFit: "contain", 
+                objectFit: "contain",
                 filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.6)) drop-shadow(0 0 15px rgba(214,40,40,0.25))",
-                cursor: "pointer"
+                cursor: "pointer",
               }}
             />
           </Link>
         </div>
 
-        {/* ════ DERECHA: Controles ════ */}
         <div className="hero-controls-v2">
-
-          {/* ── BOTÓN USUARIO — prominente ── */}
           {onOpenUser && (
             <button
               className={`btn-hero-user-v2${isLoggedIn ? " logged-in" : ""}`}
               onClick={onOpenUser}
-              aria-label={isLoggedIn ? "Mi cuenta" : "Iniciar sesión"}
+              aria-label={isLoggedIn ? "Mi cuenta" : "Iniciar sesion"}
             >
-              <div className="btn-hero-user-icon">
-                {isLoggedIn ? "✓" : "👤"}
-              </div>
+              <div className="btn-hero-user-icon">{isLoggedIn ? "OK" : "ID"}</div>
               <div className="btn-hero-user-text">
-                <span className="btn-hero-user-label">
-                  {isLoggedIn ? "MI CUENTA" : "INICIAR SESIÓN"}
-                </span>
+                <span className="btn-hero-user-label">{isLoggedIn ? "MI CUENTA" : "INICIAR SESION"}</span>
                 <span className="btn-hero-user-sub">
-                  {isLoggedIn
-                    ? (userDisplayName || "Mi perfil y pedidos")
-                    : "Ver historial y repetir pedidos"}
+                  {isLoggedIn ? userDisplayName || "Mi perfil y pedidos" : "Ver historial y repetir pedidos"}
                 </span>
               </div>
               <span className="btn-hero-user-arrow">›</span>
             </button>
           )}
 
-          {/* ── Buscador ── */}
           <div className="hero-search-wrap">
-            <span className="hero-search-icon" style={{ color: "rgba(255,255,255,0.4)" }}>🔍</span>
+            <span className="hero-search-icon" style={{ color: "rgba(255,255,255,0.4)" }}>
+              Q
+            </span>
             <input
               type="text"
-              placeholder="¿Qué estás buscando?"
+              placeholder="Que estas buscando?"
               value={searchQuery}
               onChange={(e) => onSearchChange?.(e.target.value)}
               aria-label="Buscar producto"
@@ -239,25 +231,27 @@ export default function Hero({
               <button
                 onClick={() => onSearchChange?.("")}
                 style={{
-                  position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)",
-                  background: "none", border: "none", color: "rgba(255,255,255,0.5)",
-                  cursor: "pointer", fontSize: "0.9rem", lineHeight: 1,
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  color: "rgba(255,255,255,0.5)",
+                  cursor: "pointer",
+                  fontSize: "0.9rem",
+                  lineHeight: 1,
                 }}
-                aria-label="Limpiar búsqueda"
+                aria-label="Limpiar busqueda"
               >
-                ✕
+                x
               </button>
             )}
           </div>
 
-          {/* ── Carrito + compartir ── */}
           <div className="hero-actions">
-            <button
-              className="btn-hero-cart"
-              onClick={onOpenCart}
-              aria-label="Abrir carrito"
-            >
-              <span>🛒</span>
+            <button className="btn-hero-cart" onClick={onOpenCart} aria-label="Abrir carrito">
+              <span style={{ fontWeight: 900 }}>C</span>
               <span>VER PEDIDO</span>
               <span
                 style={{
@@ -272,18 +266,12 @@ export default function Hero({
               >
                 {formatPrice(cartTotal)}
               </span>
-              {cartQty > 0 && (
-                <span className="cart-badge">{cartQty}</span>
-              )}
+              {cartQty > 0 && <span className="cart-badge">{cartQty}</span>}
             </button>
 
             {onShareCart && cartQty > 0 && (
-              <button
-                className="btn-hero-share"
-                onClick={onShareCart}
-                aria-label="Compartir carrito"
-              >
-                ✉
+              <button className="btn-hero-share" onClick={onShareCart} aria-label="Compartir carrito">
+                C
                 <span className="share-tooltip">Compartir carrito</span>
               </button>
             )}

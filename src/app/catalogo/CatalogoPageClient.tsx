@@ -15,11 +15,14 @@ import {
   ResultsBar,
   ProductoGrid,
   FloatCartBtn,
+  MarketingRail,
+  ConversionStrip,
 } from "@/components/catalogo";
 import CartPanel from "@/components/carrito/CartPanel";
 import UserPanel from "@/components/usuario/UserPanel";
 import FacturaModal from "@/components/catalogo/FacturaModal";
 import OnlineBanner from "@/components/ui/OnlineBanner";
+import { AdSlotPlacement } from "@/components/ads";
 import {
   armarMensajeWA,
   enviarWhatsApp,
@@ -628,8 +631,20 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onSearchChange={setSearchDebounced}
       />
 
+      <div className="page-wrapper">
+        <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} />
+      </div>
+
       {/* Ticker */}
       <Ticker />
+
+      <div className="page-wrapper">
+        <ConversionStrip />
+      </div>
+
+      <div className="page-wrapper">
+        <MarketingRail cartQty={totalQty} isLoggedIn={!!user} />
+      </div>
 
       {/* Contenido del catálogo — max-width desktop */}
       <div className="page-wrapper">
@@ -650,6 +665,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           onToggleVista={handleToggleVista}
           searchQuery={search}
           onSearchChange={setSearchDebounced}
+          marketAd={<AdSlotPlacement slot="results" category={activeCat === "Todos" ? undefined : activeCat} />}
         />
 
         {/* Product grid/list */}
@@ -658,6 +674,14 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             {[...Array(12)].map((_, i) => (
               <ProductoSkeleton key={i} />
             ))}
+          </div>
+        ) : filtrados.length === 0 ? (
+          <div style={{ padding: "16px 0 8px" }}>
+            <div className="no-results">
+              <span className="no-results-icon">&#128269;</span>
+              <p>No encontramos productos con ese criterio.</p>
+            </div>
+            <AdSlotPlacement slot="empty-search" category={activeCat === "Todos" ? undefined : activeCat} />
           </div>
         ) : (
           <ProductoGrid
@@ -731,3 +755,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     </>
   );
 }
+
+
+
+

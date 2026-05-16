@@ -65,6 +65,24 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
   };
 
   const handleError = useCallback(() => setHasError(true), []);
+  const layoutStyles =
+    layout === "inline"
+      ? {
+          aspectRatio: "4/5",
+          margin: "0",
+          borderRadius: isMobile ? "10px" : "12px",
+        }
+      : layout === "tall"
+        ? {
+            aspectRatio: isMobile ? "3/4" : "4/5",
+            margin: isMobile ? "20px 0" : "24px 0",
+            borderRadius: isMobile ? "12px" : "16px",
+          }
+        : {
+            aspectRatio: isMobile ? "16/9" : "21/9",
+            margin: isMobile ? "20px 0" : "32px 0",
+            borderRadius: isMobile ? "12px" : "18px",
+          };
 
   if (hasError) return null;
 
@@ -81,12 +99,12 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
       style={{
         position: "relative",
         width: "100%",
-        aspectRatio: isMobile ? "16/9" : "21/9",
-        borderRadius: isMobile ? "12px" : "18px",
+        aspectRatio: layoutStyles.aspectRatio,
+        borderRadius: layoutStyles.borderRadius,
         overflow: "hidden",
         background: "#000",
         cursor: "pointer",
-        margin: isMobile ? "20px 0" : "32px 0",
+        margin: layoutStyles.margin,
         ...AD_TOKENS.fadeIn(isVisible)
       }}
       aria-label={`Video publicitario: ${brand.name}`}

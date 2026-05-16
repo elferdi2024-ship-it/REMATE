@@ -2,6 +2,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import type { BrandConfig } from "@/types/brands";
 import type { Producto } from "@/types";
 import { AD_TOKENS } from "./adStyles";
@@ -47,11 +48,15 @@ export default function BrandProductCard({ brand, product, onAdd, onQtyChange, q
 
       {/* Logo de marca pequeño — esquina superior derecha */}
       {brand.logoUrl && (
-        <img
-          src={brand.logoUrl}
-          alt={brand.name}
-          style={{ position: "absolute", top: 8, right: 8, width: 28, height: 28, objectFit: "contain", zIndex: 4, opacity: 0.9 }}
-        />
+        <div style={{ position: "absolute", top: 8, right: 8, width: 28, height: 28, zIndex: 4, opacity: 0.9 }}>
+          <Image
+            src={brand.logoUrl}
+            alt={brand.name}
+            fill
+            sizes="28px"
+            style={{ objectFit: "contain" }}
+          />
+        </div>
       )}
 
       <ProductoCard

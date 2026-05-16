@@ -239,6 +239,19 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
             <div className={`h-2 w-2 rounded-full ${status === 'no_leido' ? 'bg-red-500' : 'bg-gray-600'}`} />
             <span className="text-[10px] font-black uppercase tracking-widest">NO LEÍDO</span>
           </button>
+
+          <button
+            disabled={isUpdating}
+            onClick={() => handleStatusChange("pendiente")}
+            className={`flex flex-1 items-center justify-center gap-3 rounded-2xl border py-4 transition-all ${
+              status === "pendiente"
+                ? "border-yellow-500/50 bg-yellow-500/10 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.1)]"
+                : "border-white/5 bg-white/5 text-gray-500 hover:border-white/20"
+            }`}
+          >
+            <div className={`h-2 w-2 rounded-full ${status === 'pendiente' ? 'bg-yellow-500' : 'bg-gray-600'}`} />
+            <span className="text-[10px] font-black uppercase tracking-widest">PENDIENTE</span>
+          </button>
           
           <button
             disabled={isUpdating}

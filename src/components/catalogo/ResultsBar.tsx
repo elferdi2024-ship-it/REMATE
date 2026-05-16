@@ -11,6 +11,7 @@ interface ResultsBarProps {
   onToggleVista: (v: Vista) => void;
   searchQuery?: string;
   onSearchChange?: (v: string) => void;
+  marketAd?: React.ReactNode;
 }
 
 export default function ResultsBar({
@@ -20,9 +21,16 @@ export default function ResultsBar({
   onToggleVista,
   searchQuery = "",
   onSearchChange,
+  marketAd,
 }: ResultsBarProps) {
   return (
+    <div className="results-bar-wrap">
     <div className="results-bar">
+      <div className="results-market-chip">
+        <span className="results-market-dot" />
+        OFERTAS Y PUBLICIDAD ACTIVA
+      </div>
+
       {/* Buscador inline */}
       {onSearchChange && (
         <div className="results-search-wrap">
@@ -69,6 +77,8 @@ export default function ResultsBar({
           </button>
         </div>
       </div>
+    </div>
+    {marketAd}
     </div>
   );
 }

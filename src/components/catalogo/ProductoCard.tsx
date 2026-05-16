@@ -114,17 +114,22 @@ export default function ProductoCard({
       className={`card${isInCart ? " in-cart" : ""} group`}
       style={{
         background: "var(--white)",
-        border: "1px solid var(--border)",
+        border: "1px solid rgba(17,11,8,0.12)",
         borderRadius: "16px",
         padding: "10px",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         display: "flex",
         flexDirection: "column",
         position: "relative",
+        boxShadow: "0 10px 24px rgba(17,11,8,0.08)",
       } as React.CSSProperties}
     >
+      {producto.precio > 0 && (
+        <span className="card-offer-ribbon">Oportunidad</span>
+      )}
+
       <div className="card-thumb" style={{ 
-        background: "var(--bg2)", 
+        background: "linear-gradient(180deg, #ffffff 0%, #f7f4ef 100%)", 
         borderRadius: "12px",
         aspectRatio: "1 / 1",
         height: "auto",
@@ -226,11 +231,15 @@ export default function ProductoCard({
             alignItems: "center",
             boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
             backdropFilter: "blur(4px)",
+            width: 50,
+            height: 16,
           }}>
-            <img
+            <Image
               src={sponsorBrand.logoUrl}
               alt={sponsorBrand.name}
-              style={{ height: 12, maxWidth: 40, objectFit: "contain", opacity: 0.85 }}
+              fill
+              sizes="50px"
+              style={{ objectFit: "contain", opacity: 0.85, padding: "2px 5px" }}
             />
           </div>
         )}

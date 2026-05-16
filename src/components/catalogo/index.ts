@@ -8,3 +8,5 @@ export { default as MasPedidos } from "./MasPedidos";
 export { default as Buscador } from "./Buscador";
 export { default as ProductoGrid } from "./ProductoGrid";
 export { default as FloatCartBtn } from "./FloatCartBtn";
+export { default as MarketingRail } from "./MarketingRail";
+export { default as ConversionStrip } from "./ConversionStrip";

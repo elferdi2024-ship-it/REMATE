@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import Image from "next/image";
 import type { Producto, Vista } from "@/types";
 import ProductoCard from "./ProductoCard";
 import ProductoRow from "./ProductoRow";
@@ -10,6 +11,7 @@ import { useBrands } from "@/hooks/useBrands";
 import { getActiveBrands, getBrandForCategory, getImageAtIndex, getVideoAtIndex, buildAdSequence, buildAdSequenceWithCooldown } from "@/lib/brands";
 import { canShowAd } from "@/lib/adFrequency";
 import type { BrandConfig } from "@/types/brands";
+import { normalizeCategoryName, normalizeProductCategory } from "@/lib/category-normalizer";
 
 interface ProductoGridProps {
   productos: Producto[];
@@ -48,24 +50,6 @@ const AD_PATTERN: AdSlotType[] = [
 
 /** How often to insert ad cards in carousels (every N products) — only for inline-cards slots */
 const INLINE_AD_EVERY = 8;
-
-const CATEGORY_CORRECTIONS: Record<string, string> = {
-  "ALFAJOR": "Golosinas y Dulces",
-  "PILAS": "Otros",
-  "LAMPARA": "Otros",
-  "SHAMPOO": "Higiene Personal",
-  "ACONDICIONADOR": "Higiene Personal",
-  "JABON TOCADOR": "Higiene Personal",
-  "DENTAL": "Higiene Personal",
-  "AFEITADORA": "Higiene Personal",
-  "ACEITUNAS": "Conservas y Enlatados",
-  "CHOCLO": "Conservas y Enlatados",
-  "ARVEJAS": "Conservas y Enlatados",
-  "POROTOS": "Conservas y Enlatados",
-  "LENTEJAS": "Conservas y Enlatados",
-  "PAN DULCE": "Panadería",
-  "BUDIN": "Panadería",
-};
 
 // Deleted CategoryBanner
 
@@ -320,10 +304,7 @@ export default function ProductoGrid({
 
   const grouped = useMemo(() => {
     return productos.reduce((acc, p) => {
-      const correction = Object.entries(CATEGORY_CORRECTIONS).find(([keyword]) =>
-        p.nombre.toUpperCase().includes(keyword)
-      );
-      const cat = correction ? correction[1] : p.categoria;
+      const cat = normalizeProductCategory(p);
       if (!acc[cat]) acc[cat] = [];
       acc[cat].push(p);
       return acc;
@@ -361,6 +342,9 @@ export default function ProductoGrid({
         const matchingBrand = getBrandForCategory(brands, cat);
         const fallbackBrand = adSequence[catIdx % adSequence.length] || null;
         const adBrand = matchingBrand || fallbackBrand;
+        const isSponsoredCategory = Boolean(
+          adBrand?.categories?.some((c) => normalizeCategoryName(c) === cat)
+        );
 
         return (
           <LazySection
@@ -372,7 +356,7 @@ export default function ProductoGrid({
           >
             <section className="cat-section">
               <div className="cat-section-header" style={
-                adBrand?.sponsoredCategories?.includes(cat) ? {
+                isSponsoredCategory ? {
                   background: `linear-gradient(90deg, ${adBrand.color || 'var(--primary-color)'}18 0%, transparent 60%)`,
                   borderLeft: `4px solid ${adBrand.color || 'var(--primary-color)'}`,
                   padding: "12px 16px",
@@ -382,11 +366,21 @@ export default function ProductoGrid({
                 } : {}
               }>
                 <h2 className="cat-section-title">{cat}</h2>
-                <div className="cat-section-divider" style={{ display: adBrand?.sponsoredCategories?.includes(cat) ? "none" : "block" }} />
-                {adBrand?.sponsoredCategories?.includes(cat) ? (
+                <div className="cat-section-divider" style={{ display: isSponsoredCategory ? "none" : "block" }} />
+                {isSponsoredCategory ? (
                   <span style={{ fontSize: "11px", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6, fontWeight: 600, marginLeft: "auto" }}>
                     PRESENTADO POR
-                    {adBrand.logoUrl ? <img src={adBrand.logoUrl} style={{ height: 20, objectFit: "contain" }} alt={adBrand.name} /> : adBrand.name}
+                    {adBrand.logoUrl ? (
+                      <span style={{ position: "relative", width: 64, height: 20, display: "inline-block" }}>
+                        <Image
+                          src={adBrand.logoUrl}
+                          alt={adBrand.name}
+                          fill
+                          sizes="64px"
+                          style={{ objectFit: "contain" }}
+                        />
+                      </span>
+                    ) : adBrand.name}
                   </span>
                 ) : (
                   <span className="cat-section-count">{catProds.length} items</span>
@@ -482,3 +476,6 @@ function LazySection({
     </div>
   );
 }
+
+
+

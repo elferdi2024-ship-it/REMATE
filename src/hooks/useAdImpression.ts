@@ -9,12 +9,18 @@ import { trackAdFrequency } from "@/lib/adFrequency";
  * Al ir a nuestro dominio en vez de firestore.googleapis.com,
  * los ad blockers no pueden interceptarlo.
  */
-async function postAdEvent(brandId: string, assetId?: string, type = "impression") {
+async function postAdEvent(
+  brandId: string,
+  assetId?: string,
+  type = "impression",
+  slot?: string,
+  abVariant?: string
+) {
   try {
     await fetch("/api/ad-event", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ brandId, assetId, type }),
+      body: JSON.stringify({ brandId, assetId, type, slot, abVariant }),
       // keepalive permite que el request sobreviva si el usuario navega
       keepalive: true,
     });
@@ -38,7 +44,12 @@ export async function trackModalCta(brandId: string): Promise<void> {
  * en pantalla. Utiliza IntersectionObserver y marca un flag para no
  * repetir el log en la misma sesión/montaje.
  */
-export function useAdImpression<T extends HTMLElement>(brandId: string, assetId?: string) {
+export function useAdImpression<T extends HTMLElement>(
+  brandId: string,
+  assetId?: string,
+  slot?: string,
+  abVariant?: string
+) {
   const ref = useRef<T>(null);
   const recorded = useRef(false);
 
@@ -52,7 +63,7 @@ export function useAdImpression<T extends HTMLElement>(brandId: string, assetId?
           observer.disconnect();
 
           // Registrar via API Route (evita ad blockers)
-          postAdEvent(brandId, assetId, "impression");
+          postAdEvent(brandId, assetId, "impression", slot, abVariant);
 
           // Incrementar sessionStorage cap
           trackAdFrequency(brandId);
@@ -63,7 +74,7 @@ export function useAdImpression<T extends HTMLElement>(brandId: string, assetId?
 
     observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [brandId, assetId]);
+  }, [brandId, assetId, slot, abVariant]);
 
   return ref;
 }

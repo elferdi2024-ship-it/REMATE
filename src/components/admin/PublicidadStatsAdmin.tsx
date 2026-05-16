@@ -128,6 +128,25 @@ export default function PublicidadStatsAdmin() {
                     <p className="text-lg font-bold text-white">{s.total.toLocaleString()}</p>
                   </div>
                 </div>
+
+                <div className="border-t border-white/5 pt-4">
+                  <p className="text-[10px] font-bold uppercase text-gray-500 mb-2">Slots Top</p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(s.bySlot).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([slot,val]) => (
+                      <span key={slot} className="rounded-full border border-white/15 px-2 py-1 text-[10px] text-white/90">
+                        {slot}: {val}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-white/5 pt-4">
+                  <p className="text-[10px] font-bold uppercase text-gray-500 mb-2">A/B CTA</p>
+                  <div className="flex gap-3 text-xs">
+                    <span className="text-white">A: {(s.byAb["A"] || 0).toLocaleString()}</span>
+                    <span className="text-white">B: {(s.byAb["B"] || 0).toLocaleString()}</span>
+                  </div>
+                </div>
               </div>
 
               <div className="mt-6 pt-4 border-t border-white/5 text-[11px] text-gray-500 flex justify-between">

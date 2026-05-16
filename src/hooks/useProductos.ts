@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import type { Producto } from "@/types";
+import { normalizeProductCategory } from "@/lib/category-normalizer";
 
 interface UseProductosReturn {
   productos: Producto[];
@@ -31,8 +32,12 @@ export function useProductos(): UseProductosReturn {
         const res = await fetch("/productos.json");
         if (!res.ok) throw new Error(`HTTP ${res.status}: failed to load productos`);
         const data = (await res.json()) as Producto[];
+        const normalized = data.map((p) => ({
+          ...p,
+          categoria: normalizeProductCategory(p),
+        }));
         if (!cancelled) {
-          setProductos(data);
+          setProductos(normalized);
           setLoading(false);
         }
       } catch (err: any) {

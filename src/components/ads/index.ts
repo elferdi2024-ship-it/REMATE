@@ -8,3 +8,4 @@ export { default as SponsoredProduct } from "./SponsoredProduct";
 export { default as NativeStoryCard } from "./NativeStoryCard";
 export { default as BrandProductCard } from "./BrandProductCard";
 export { default as FlashDealCard } from "./FlashDealCard";
+export { default as AdSlotPlacement } from "./AdSlotPlacement";

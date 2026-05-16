@@ -1,7 +1,7 @@
 "use client";
 
 import PedidoAdminCard, { type PedidoAdmin } from "@/components/admin/PedidoAdminCard";
-import { subscribePedidosHoy } from "@/lib/pedidos";
+import { actualizarEstadoPedido, subscribePedidosHoy } from "@/lib/pedidos";
 import { useCallback, useEffect, useState } from "react";
 
 const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -19,6 +19,8 @@ export default function PedidosPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
+  const [onlyFresh, setOnlyFresh] = useState(false);
+  const [bulkUpdating, setBulkUpdating] = useState(false);
 
   const playNotification = useCallback(() => {
     try {
@@ -76,8 +78,26 @@ export default function PedidosPage() {
       p.clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.clienteTelefono?.includes(searchTerm);
     const matchesStatus = statusFilter === "todos" || p.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const ts = p.fecha instanceof Date ? p.fecha.getTime() : p.fecha.seconds * 1000;
+    const isFresh = Date.now() - ts < 5 * 60 * 1000;
+    const matchesFresh = !onlyFresh || isFresh;
+    return matchesSearch && matchesStatus && matchesFresh;
   });
+
+  const handleBulkStatus = useCallback(
+    async (nextStatus: "no_leido" | "pendiente" | "cargado") => {
+      if (filteredPedidos.length === 0) return;
+      try {
+        setBulkUpdating(true);
+        await Promise.all(filteredPedidos.map((p) => actualizarEstadoPedido(p.id, nextStatus)));
+      } catch (err) {
+        console.error("Error in bulk status update:", err);
+      } finally {
+        setBulkUpdating(false);
+      }
+    },
+    [filteredPedidos]
+  );
 
   const totalGeneral = filteredPedidos.reduce((sum, p) => sum + (p.total || 0), 0);
   const totalItems = filteredPedidos.reduce((sum, p) => sum + p.items.reduce((acc, i) => acc + i.cantidad, 0), 0);
@@ -164,7 +184,42 @@ export default function PedidosPage() {
               </span>
             </button>
           ))}
+          <button
+            onClick={() => setOnlyFresh((prev) => !prev)}
+            className={`flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all ${
+              onlyFresh
+                ? "border-[#00E5FF] bg-[#00E5FF] text-black shadow-[0_0_15px_rgba(0,229,255,0.3)]"
+                : "border-white/10 bg-white/5 text-gray-500 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            Solo nuevos (5m)
+          </button>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-widest text-gray-500">Acciones masivas:</span>
+        <button
+          onClick={() => handleBulkStatus("pendiente")}
+          disabled={bulkUpdating || filteredPedidos.length === 0}
+          className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-yellow-400 transition hover:bg-yellow-500/20 disabled:opacity-40"
+        >
+          Marcar filtrados pendiente
+        </button>
+        <button
+          onClick={() => handleBulkStatus("cargado")}
+          disabled={bulkUpdating || filteredPedidos.length === 0}
+          className="rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-green-400 transition hover:bg-green-500/20 disabled:opacity-40"
+        >
+          Marcar filtrados cargado
+        </button>
+        <button
+          onClick={() => handleBulkStatus("no_leido")}
+          disabled={bulkUpdating || filteredPedidos.length === 0}
+          className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-red-400 transition hover:bg-red-500/20 disabled:opacity-40"
+        >
+          Marcar filtrados no leido
+        </button>
       </div>
 
       {error && (
