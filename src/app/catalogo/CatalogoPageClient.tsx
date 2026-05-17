@@ -266,6 +266,15 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     return () => clearTimeout(timer);
   }, []);
 
+  // Direct brand filter from ad banners (bypasses debounce)
+  const handleBrandFilter = useCallback((brandName: string) => {
+    setSearch(brandName);
+    setDebouncedSearch(brandName);
+    setCategoria(""); // Clear category to show all matches
+    // Update URL without full navigation
+    window.history.replaceState(null, "", `/catalogo?search=${encodeURIComponent(brandName)}`);
+  }, []);
+
   // Cloud orders (when logged in)
   const { pedidos: cloudPedidos } = usePedidosCloud();
   // Local orders (guest)
@@ -637,7 +646,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       />
 
       <div className="page-wrapper">
-        <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} />
+        <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
       </div>
 
       {/* Ticker */}
@@ -670,7 +679,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           onToggleVista={handleToggleVista}
           searchQuery={search}
           onSearchChange={setSearchDebounced}
-          marketAd={<AdSlotPlacement slot="results" category={activeCat === "Todos" ? undefined : activeCat} />}
+          marketAd={<AdSlotPlacement slot="results" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />}
         />
 
         {/* Product grid/list */}
@@ -686,7 +695,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
               <span className="no-results-icon">&#128269;</span>
               <p>No encontramos productos con ese criterio.</p>
             </div>
-            <AdSlotPlacement slot="empty-search" category={activeCat === "Todos" ? undefined : activeCat} />
+            <AdSlotPlacement slot="empty-search" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
           </div>
         ) : (
           <ProductoGrid

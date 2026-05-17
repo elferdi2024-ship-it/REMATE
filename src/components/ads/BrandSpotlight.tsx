@@ -11,10 +11,11 @@ import { useAdImpression } from "@/hooks/useAdImpression";
 interface BrandSpotlightProps {
   brand: BrandConfig;
   asset: BrandAsset;
-  layout?: "hero" | "card" | "wide"; // visual hint — actualmente no cambia el layout, reservado para V5
+  layout?: "hero" | "card" | "wide";
+  onBrandFilter?: (brandName: string) => void;
 }
 
-export default function BrandSpotlight({ brand, asset, layout = "wide" }: BrandSpotlightProps) {
+export default function BrandSpotlight({ brand, asset, layout = "wide", onBrandFilter }: BrandSpotlightProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -71,7 +72,13 @@ export default function BrandSpotlight({ brand, asset, layout = "wide" }: BrandS
       <div
         ref={ref}
         aria-label={`Publicidad: ${brand.name}`}
-        onClick={() => setModalOpen(true)}
+        onClick={() => {
+          if (onBrandFilter) {
+            onBrandFilter(brand.name);
+          } else {
+            setModalOpen(true);
+          }
+        }}
         onMouseEnter={(e) => {
           if (!isMobile) {
             e.currentTarget.style.transform = AD_TOKENS.hover.spotlight;

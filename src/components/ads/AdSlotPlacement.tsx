@@ -16,6 +16,7 @@ type AdSlot =
 interface AdSlotPlacementProps {
   slot: AdSlot;
   category?: string;
+  onBrandFilter?: (brandName: string) => void;
 }
 
 const TIER_SLOT_RULES: Record<string, AdSlot[]> = {
@@ -24,7 +25,7 @@ const TIER_SLOT_RULES: Record<string, AdSlot[]> = {
   bronce: ["results", "empty-search"],
 };
 
-export default function AdSlotPlacement({ slot, category }: AdSlotPlacementProps) {
+export default function AdSlotPlacement({ slot, category, onBrandFilter }: AdSlotPlacementProps) {
   const { brands } = useBrands();
 
   const brand = useMemo(() => {
@@ -64,7 +65,7 @@ export default function AdSlotPlacement({ slot, category }: AdSlotPlacementProps
   if (slot === "empty-search") {
     return (
       <div style={{ marginTop: "10px" }}>
-        <BrandSpotlight brand={brand} asset={imageAsset} layout="card" />
+      <BrandSpotlight brand={brand} asset={imageAsset} layout="card" onBrandFilter={onBrandFilter} />
       </div>
     );
   }
@@ -72,10 +73,10 @@ export default function AdSlotPlacement({ slot, category }: AdSlotPlacementProps
   if (slot === "results") {
     return (
       <div style={{ marginTop: "10px" }}>
-        <SponsoredBanner brand={brand} asset={imageAsset} variant="compact" slot={slot} />
+        <SponsoredBanner brand={brand} asset={imageAsset} variant="compact" slot={slot} onBrandFilter={onBrandFilter} />
       </div>
     );
   }
 
-  return <SponsoredBanner brand={brand} asset={imageAsset} variant="full" slot={slot} />;
+  return <SponsoredBanner brand={brand} asset={imageAsset} variant="full" slot={slot} onBrandFilter={onBrandFilter} />;
 }

@@ -13,6 +13,7 @@ interface SponsoredBannerProps {
   asset: BrandAsset;
   variant?: "full" | "compact";
   slot?: string;
+  onBrandFilter?: (brandName: string) => void;
 }
 
 export default function SponsoredBanner({
@@ -20,6 +21,7 @@ export default function SponsoredBanner({
   asset,
   variant = "full",
   slot = "results",
+  onBrandFilter,
 }: SponsoredBannerProps) {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
@@ -76,14 +78,15 @@ export default function SponsoredBanner({
   const badgeText = brand.badgeText || "Promo activa hoy";
 
   const handleCtaClick = useCallback(() => {
-    // Navigate to catalog filtered by brand name
     const searchTerm = brand.name || brand.headline || "";
-    if (searchTerm) {
+    if (onBrandFilter && searchTerm) {
+      onBrandFilter(searchTerm);
+    } else if (searchTerm) {
       router.push(`/catalogo?search=${encodeURIComponent(searchTerm)}`);
     } else {
       router.push("/catalogo");
     }
-  }, [brand.name, brand.headline, router]);
+  }, [brand.name, brand.headline, router, onBrandFilter]);
   const brandInitial = brand.name?.slice(0, 1).toUpperCase() || "M";
 
   return (
