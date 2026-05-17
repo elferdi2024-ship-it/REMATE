@@ -43,7 +43,9 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
       background: "rgba(255, 255, 255, 0.85)",
       backdropFilter: "blur(16px)",
       borderBottom: "1px solid rgba(0,0,0,0.08)",
-      position: "relative"
+      position: "sticky",
+      top: 0,
+      zIndex: 90
     }}>
       {/* Botones de navegación (solo PC) */}
       <button 

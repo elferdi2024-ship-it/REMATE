@@ -22,6 +22,7 @@ import CartPanel from "@/components/carrito/CartPanel";
 import UserPanel from "@/components/usuario/UserPanel";
 import FacturaModal from "@/components/catalogo/FacturaModal";
 import OnlineBanner from "@/components/ui/OnlineBanner";
+import QuickViewModal from "@/components/catalogo/QuickViewModal";
 import { AdSlotPlacement } from "@/components/ads";
 import {
   armarMensajeWA,
@@ -40,10 +41,12 @@ import { SUCURSALES, type MetodoEntrega } from "@/lib/sucursales";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import type { Vista, CartItem, Producto } from "@/types";
-import { CATEGORIAS } from "@/types";
+import { CATEGORIAS, EMOJI_POR_CATEGORIA } from "@/types";
 import categoriaMapping from "@/lib/categoria_mapping.json";
 
 const catMap = (categoriaMapping as any).mapping || categoriaMapping;
+
+import { flyToCart } from "@/lib/flyToCart";
 
 interface CatalogoPageClientProps {
   // In the future we can pass pre-loaded products from server
@@ -159,6 +162,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [userPanelOpen, setUserPanelOpen] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Producto | null>(null);
   const [vista, setVista] = useState<Vista>("grilla");
   const [alias, setAlias] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -266,6 +270,18 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     return () => clearTimeout(timer);
   }, []);
 
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  useEffect(() => {
+    setRecentSearches(ls.getBusquedas());
+  }, []);
+
+  const handleSelectSuggestion = useCallback((term: string) => {
+    setSearch(term);
+    setDebouncedSearch(term);
+    ls.addBusqueda(term);
+    setRecentSearches(ls.getBusquedas());
+  }, []);
+
   // Direct brand filter from ad banners (bypasses debounce)
   const handleBrandFilter = useCallback((brandName: string) => {
     setSearch(brandName);
@@ -322,8 +338,11 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   // Handlers
   const handleAddProduct = useCallback(
-    (producto: Producto) => {
+    (producto: Producto, e?: React.MouseEvent) => {
       addItem(producto);
+      if (e) {
+        flyToCart(e, producto.imagen, EMOJI_POR_CATEGORIA[producto.categoria]);
+      }
     },
     [addItem]
   );
@@ -632,7 +651,6 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onIgnore={handleIgnoreSharedCart}
       />
 
-      {/* Hero */}
       <Hero
         onOpenCart={() => setCartOpen(true)}
         cartQty={totalQty}
@@ -643,6 +661,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         userDisplayName={user?.displayName || alias || undefined}
         searchQuery={search}
         onSearchChange={setSearchDebounced}
+        suggestedProducts={search ? filtrados.slice(0, 5) : []}
+        recentSearches={recentSearches}
+        onSelectSuggestion={handleSelectSuggestion}
       />
 
       <div className="page-wrapper">
@@ -690,10 +711,17 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             ))}
           </div>
         ) : filtrados.length === 0 ? (
-          <div style={{ padding: "16px 0 8px" }}>
-            <div className="no-results">
-              <span className="no-results-icon">&#128269;</span>
-              <p>No encontramos productos con ese criterio.</p>
+          <div style={{ padding: "32px 16px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div className="no-results" style={{ background: "var(--bg2)", padding: "48px 24px", borderRadius: "var(--r-xl)", maxWidth: "500px", margin: "0 auto 24px", boxShadow: "var(--shadow-sm)" }}>
+              <span className="no-results-icon" style={{ fontSize: "4rem", marginBottom: "16px", display: "block" }}>&#128269;</span>
+              <h3 style={{ fontSize: "1.4rem", fontWeight: 800, marginBottom: "8px", color: "var(--oscuro)", fontFamily: "var(--font-display), sans-serif" }}>No encontramos resultados</h3>
+              <p style={{ color: "var(--muted)", marginBottom: "24px" }}>No hay productos que coincidan con <strong>"{search}"</strong>. Intentá con otro término o limpiá los filtros.</p>
+              <button 
+                onClick={() => { setSearchDebounced(""); setCategoria(""); }} 
+                style={{ background: "var(--rojo)", color: "white", fontWeight: 700, padding: "12px 24px", borderRadius: "var(--r-md)", border: "none", cursor: "pointer", boxShadow: "0 4px 12px var(--rojo-glow)" }}
+              >
+                Limpiar Búsqueda
+              </button>
             </div>
             <AdSlotPlacement slot="empty-search" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
           </div>
@@ -705,6 +733,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             searchTerm={search}
             onAdd={handleAddProduct}
             onQtyChange={handleQtyChange}
+            onQuickView={(p) => setQuickViewProduct(p)}
           />
         )}
       </div>
@@ -760,6 +789,18 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onReorderItems={handleReorderItems}
         onLogout={handleLogout}
         onClearData={handleClearData}
+      />
+
+      {/* Quick View Modal */}
+      <QuickViewModal
+        producto={quickViewProduct}
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+        onAdd={handleAddProduct}
+        qty={quickViewProduct ? (qtyMap[quickViewProduct.codigo] || 0) : 0}
+        onQtyChange={handleQtyChange}
+        relatedProducts={quickViewProduct ? productos.filter(p => p.categoria === quickViewProduct.categoria && p.codigo !== quickViewProduct.codigo).slice(0, 8) : []}
+        getQty={(codigo) => qtyMap[codigo] || 0}
       />
 
       {/* User Panel */}

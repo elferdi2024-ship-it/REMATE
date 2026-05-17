@@ -7,8 +7,9 @@ import { EMOJI_POR_CATEGORIA } from "@/types";
 interface ProductoRowProps {
   producto: Producto;
   qty: number;
-  onAdd: (producto: Producto) => void;
+  onAdd: (producto: Producto, e?: React.MouseEvent) => void;
   onQtyChange: (codigo: string, qty: number) => void;
+  onQuickView?: (producto: Producto) => void;
 }
 
 function formatPrice(n: number): string {
@@ -40,12 +41,12 @@ function getCatColorVar(cat: string): string {
   return map[cat] || "var(--border, #DDD8D0)";
 }
 
-export default function ProductoRow({ producto, qty, onAdd, onQtyChange }: ProductoRowProps) {
+export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuickView }: ProductoRowProps) {
   const isInCart = qty > 0;
   const emoji = EMOJI_POR_CATEGORIA[producto.categoria] || "📦";
   const catColor = getCatColorVar(producto.categoria);
 
-  const handleAdd = useCallback(() => { onAdd(producto); }, [onAdd, producto]);
+  const handleAdd = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onAdd(producto, e); }, [onAdd, producto]);
   const handleDec = useCallback(() => { onQtyChange(producto.codigo, Math.max(0, qty - 1)); }, [onQtyChange, producto.codigo, qty]);
   const handleInc = useCallback(() => { onQtyChange(producto.codigo, qty + 1); }, [onQtyChange, producto.codigo, qty]);
 
@@ -59,8 +60,9 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange }: Produ
 
   return (
     <div
+      onClick={() => onQuickView?.(producto)}
       className={`product-row${isInCart ? " in-cart" : ""}`}
-      style={{ borderLeft: `3px solid ${catColor}` }}
+      style={{ borderLeft: `3px solid ${catColor}`, cursor: onQuickView ? 'pointer' : 'default' }}
     >
       {/* Thumb */}
       <div className="row-thumb">

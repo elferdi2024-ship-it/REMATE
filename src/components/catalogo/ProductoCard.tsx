@@ -8,9 +8,10 @@ interface ProductoCardProps {
   producto: Producto;
   qty: number;
   searchTerm?: string;
-  onAdd: (producto: Producto) => void;
+  onAdd: (producto: Producto, e?: React.MouseEvent) => void;
   onQtyChange: (codigo: string, qty: number) => void;
   sponsorBrand?: BrandConfig | null;
+  onQuickView?: (producto: Producto) => void;
 }
 
 function formatPrice(n: number): string {
@@ -86,21 +87,25 @@ export default function ProductoCard({
   onAdd,
   onQtyChange,
   sponsorBrand,
+  onQuickView,
 }: ProductoCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardRef = React.useRef<HTMLDivElement>(null);
+  const [isAdding, setIsAdding] = React.useState(false);
   const isInCart = qty > 0;
 
-  const handleAdd = useCallback((e: React.MouseEvent) => {
+  const handleAdd = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    onAdd(producto);
+    onAdd(producto, e);
+    setIsAdding(true);
+    setTimeout(() => setIsAdding(false), 300);
   }, [onAdd, producto]);
 
-  const handleDec = useCallback((e: React.MouseEvent) => {
+  const handleDec = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     onQtyChange(producto.codigo, Math.max(0, qty - 1));
   }, [onQtyChange, producto.codigo, qty]);
 
-  const handleInc = useCallback((e: React.MouseEvent) => {
+  const handleInc = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     onQtyChange(producto.codigo, qty + 1);
   }, [onQtyChange, producto.codigo, qty]);
@@ -111,7 +116,8 @@ export default function ProductoCard({
   return (
     <div
       ref={cardRef}
-      className={`card${isInCart ? " in-cart" : ""} group`}
+      onClick={() => onQuickView?.(producto)}
+      className={`card${isInCart ? " in-cart" : ""} group ${isAdding ? "adding-anim" : ""}`}
       style={{
         background: "var(--white)",
         border: "1px solid rgba(17,11,8,0.12)",

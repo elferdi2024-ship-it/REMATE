@@ -62,3 +62,11 @@ export function setBusquedas(arr: string[]): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(LS_BUSQUEDAS, JSON.stringify(arr.slice(0, 10)));
 }
+
+export function addBusqueda(q: string): void {
+  if (!q.trim()) return;
+  const current = getBusquedas();
+  const filtered = current.filter(item => item.toLowerCase() !== q.toLowerCase());
+  filtered.unshift(q);
+  setBusquedas(filtered.slice(0, 10));
+}

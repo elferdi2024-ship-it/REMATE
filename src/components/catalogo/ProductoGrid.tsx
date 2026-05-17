@@ -18,8 +18,9 @@ interface ProductoGridProps {
   vista: Vista;
   qtyMap: Record<string, number>;
   searchTerm?: string;
-  onAdd: (producto: Producto) => void;
+  onAdd: (producto: Producto, e?: React.MouseEvent) => void;
   onQtyChange: (codigo: string, qty: number) => void;
+  onQuickView?: (producto: Producto) => void;
 }
 
 /**
@@ -64,6 +65,7 @@ function CategoryCarousel({
   vista,
   onAdd,
   onQtyChange,
+  onQuickView,
   adBrand,
   showInlineAds,
 }: {
@@ -74,8 +76,9 @@ function CategoryCarousel({
   qtyMap: Record<string, number>;
   searchTerm?: string;
   vista: Vista;
-  onAdd: (p: Producto) => void;
+  onAdd: (p: Producto, e?: React.MouseEvent) => void;
   onQtyChange: (codigo: string, qty: number) => void;
+  onQuickView?: (producto: Producto) => void;
   adBrand?: BrandConfig | null;
   showInlineAds?: boolean;
 }) {
@@ -129,6 +132,7 @@ function CategoryCarousel({
             qty={qtyMap[p.codigo] || 0}
             onAdd={onAdd}
             onQtyChange={onQtyChange}
+            onQuickView={onQuickView}
           />
         ))}
       </div>
@@ -151,6 +155,7 @@ function CategoryCarousel({
                 searchTerm={searchTerm}
                 onAdd={onAdd}
                 onQtyChange={onQtyChange}
+                onQuickView={onQuickView}
                 sponsorBrand={adBrand}
               />,
             ];
@@ -200,6 +205,7 @@ function CategoryCarousel({
                   searchTerm={searchTerm}
                   onAdd={onAdd}
                   onQtyChange={onQtyChange}
+                  onQuickView={onQuickView}
                   sponsorBrand={adBrand}
                 />
               </div>,
@@ -284,6 +290,7 @@ export default function ProductoGrid({
   searchTerm,
   onAdd,
   onQtyChange,
+  onQuickView,
 }: ProductoGridProps) {
   const [columns, setColumns] = useState(2);
   const { brands } = useBrands();
@@ -396,6 +403,7 @@ export default function ProductoGrid({
                 vista={vista}
                 onAdd={onAdd}
                 onQtyChange={onQtyChange}
+                onQuickView={onQuickView}
                 adBrand={adBrand}
                 showInlineAds={showInlineAds}
               />
@@ -471,7 +479,22 @@ function LazySection({
           {children}
         </>
       ) : (
-        <div className="section-placeholder animate-pulse bg-gray-100 rounded-xl h-[300px] mb-8" />
+        <div className="cat-section-skeleton mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-8 w-48 bg-gray-200 rounded-md animate-pulse" />
+            <div className="h-px flex-1 bg-gray-100" />
+          </div>
+          <div className="flex gap-3 overflow-hidden">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex-shrink-0 animate-pulse bg-white border border-gray-100 rounded-2xl p-2.5 flex flex-col" style={{ width: "calc((100vw - 48px) / 2)", minWidth: "140px", maxWidth: "220px", height: "240px" }}>
+                <div className="w-full bg-gray-100 rounded-xl mb-2" style={{ aspectRatio: "1/1" }} />
+                <div className="h-4 w-12 bg-gray-200 rounded mb-2" />
+                <div className="h-8 w-full bg-gray-200 rounded mb-auto" />
+                <div className="h-6 w-20 bg-gray-200 rounded mt-2" />
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

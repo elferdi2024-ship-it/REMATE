@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+
+import type { Producto } from "@/types";
 
 interface HeroProps {
   onOpenCart: () => void;
@@ -14,6 +16,9 @@ interface HeroProps {
   userDisplayName?: string;
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
+  suggestedProducts?: Producto[];
+  recentSearches?: string[];
+  onSelectSuggestion?: (query: string) => void;
 }
 
 function formatPrice(n: number): string {
@@ -30,12 +35,28 @@ export default function Hero({
   userDisplayName,
   searchQuery = "",
   onSearchChange,
+  suggestedProducts = [],
+  recentSearches = [],
+  onSelectSuggestion,
 }: HeroProps) {
   const trustItems = ["Precios mayoristas reales", "Pedido en minutos", "Atencion por WhatsApp"];
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <section className="hero hero-compact">
-      <div style={{ position: "absolute", inset: 0, zIndex: 0, background: "var(--oscuro, #111111)" }}>
+      <div style={{ position: "absolute", inset: 0, zIndex: 0, background: "var(--oscuro, #111111)", overflow: "hidden" }}>
         <Image
           src="/catalogo-hero.jpg"
           alt=""
@@ -216,7 +237,7 @@ export default function Hero({
             </button>
           )}
 
-          <div className="hero-search-wrap">
+          <div className="hero-search-wrap" ref={searchContainerRef} style={{ position: "relative" }}>
             <span className="hero-search-icon" style={{ color: "rgba(255,255,255,0.4)" }}>
               Q
             </span>
@@ -225,6 +246,7 @@ export default function Hero({
               placeholder="Que estas buscando?"
               value={searchQuery}
               onChange={(e) => onSearchChange?.(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
               aria-label="Buscar producto"
               style={{
                 background: "rgba(255,255,255,0.1)",
@@ -232,6 +254,7 @@ export default function Hero({
                 border: "1px solid rgba(255,255,255,0.22)",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
                 color: "#fff",
+                width: "100%",
               }}
             />
             {searchQuery && (
@@ -248,11 +271,136 @@ export default function Hero({
                   cursor: "pointer",
                   fontSize: "0.9rem",
                   lineHeight: 1,
+                  zIndex: 2,
                 }}
                 aria-label="Limpiar busqueda"
               >
                 x
               </button>
+            )}
+
+            {/* Predictive Search Dropdown */}
+            {isSearchFocused && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 8px)",
+                  left: 0,
+                  right: 0,
+                  background: "var(--bg, #F5F0E8)",
+                  borderRadius: "var(--r-md, 12px)",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.05)",
+                  zIndex: 100,
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  maxHeight: "350px",
+                }}
+              >
+                {!searchQuery.trim() ? (
+                  /* Sin texto: Mostrar historial o top búsquedas */
+                  <div style={{ padding: "12px" }}>
+                    <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px", paddingLeft: "4px" }}>
+                      Búsquedas Recientes
+                    </div>
+                    {recentSearches.length > 0 ? (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                        {recentSearches.map((term, i) => (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              setIsSearchFocused(false);
+                              onSelectSuggestion?.(term);
+                            }}
+                            style={{
+                              background: "rgba(0,0,0,0.05)",
+                              border: "1px solid rgba(0,0,0,0.05)",
+                              borderRadius: "999px",
+                              padding: "6px 12px",
+                              fontSize: "0.85rem",
+                              color: "var(--texto)",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <span style={{ opacity: 0.5 }}>🕒</span> {term}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ padding: "8px 4px", fontSize: "0.85rem", color: "var(--muted)" }}>No hay búsquedas recientes</div>
+                    )}
+                  </div>
+                ) : (
+                  /* Con texto: Mostrar sugerencias predictivas */
+                  <div style={{ overflowY: "auto", flex: 1 }}>
+                    {suggestedProducts.length > 0 ? (
+                      <div style={{ padding: "8px 0" }}>
+                        {suggestedProducts.map((p) => (
+                          <button
+                            key={p.codigo}
+                            onClick={() => {
+                              setIsSearchFocused(false);
+                              onSelectSuggestion?.(p.nombre);
+                            }}
+                            style={{
+                              width: "100%",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "12px",
+                              padding: "10px 16px",
+                              background: "transparent",
+                              border: "none",
+                              borderBottom: "1px solid rgba(0,0,0,0.04)",
+                              cursor: "pointer",
+                              textAlign: "left",
+                            }}
+                            onMouseOver={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.03)")}
+                            onMouseOut={(e) => (e.currentTarget.style.background = "transparent")}
+                          >
+                            <div
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "6px",
+                                background: "white",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                              }}
+                            >
+                              {p.imagen ? (
+                                <Image src={p.imagen} alt={p.nombre} width={32} height={32} style={{ objectFit: "contain" }} />
+                              ) : (
+                                <span style={{ fontSize: "1.2rem" }}>📦</span>
+                              )}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--texto)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                {p.nombre}
+                              </div>
+                              <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>
+                                {p.categoria}
+                              </div>
+                            </div>
+                            <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "var(--rojo)" }}>
+                              {formatPrice(p.precio)}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--muted)", fontSize: "0.9rem" }}>
+                        No se encontraron sugerencias
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </div>
 

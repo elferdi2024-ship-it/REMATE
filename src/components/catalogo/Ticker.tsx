@@ -16,7 +16,7 @@ function TickerItems({ repeats = 8 }: { repeats?: number }) {
       items.push(
         <span key={`${i}-${j}`} className="ticker-item">
           {text}
-          <span className="sep">·</span>
+          <span className="sep">&nbsp;&mdash;&nbsp;</span>
         </span>
       );
     });
