@@ -305,7 +305,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [telefono, setTelefono] = useState("");
 
   // Hydration fix: Load client-only data after mount
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    setMounted(true);
     setVista(ls.getVista());
     setAlias(ls.getAlias());
     setTelefono(ls.getTelefono());
@@ -824,10 +826,53 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     return sorted.slice(0, 8);
   }, [productos]);
 
-  // Loading state
-  // El estado de carga (loading) ahora se maneja directamente en el JSX principal 
-  // debajo del ResultsBar mediante Skeleton Loaders para evitar el flicker.
-
+  // Render clear loading shell to prevent hydration mismatches
+  if (!mounted) {
+    return (
+      <>
+        <OnlineBanner />
+        <Hero
+          onOpenCart={() => {}}
+          cartQty={0}
+          cartTotal={0}
+          onOpenUser={() => {}}
+          isLoggedIn={false}
+          searchQuery=""
+          onSearchChange={() => {}}
+          suggestedProducts={[]}
+          recentSearches={[]}
+          onSelectSuggestion={() => {}}
+        />
+        <div className="page-wrapper">
+          <AdSlotPlacement slot="hero" onBrandFilter={() => {}} />
+        </div>
+        <Ticker />
+        <div className="page-wrapper">
+          <ConversionStrip />
+        </div>
+        <div className="page-wrapper">
+          <MarketingRail cartQty={0} isLoggedIn={false} />
+        </div>
+        <div className="page-wrapper">
+          <div ref={gridRef}>
+            <ResultsBar
+              showing={0}
+              total={0}
+              vista="grilla"
+              onToggleVista={() => {}}
+              searchQuery=""
+              onSearchChange={() => {}}
+            />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3" style={{ marginTop: "16px" }}>
+            {[...Array(12)].map((_, i) => (
+              <ProductoSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  }
 
   // Show error state if failed to load
   if (loadingError) {
