@@ -377,7 +377,7 @@ export default function LandingPage() {
             {[
               { val: "1900+", lbl: "Productos" },
               { val: "6", lbl: "Sucursales" },
-              { val: "WA", lbl: "Pedido Express" },
+              { val: "wa", lbl: "Pedido Express" },
             ].map((stat, i) => (
               <div
                 key={i}
@@ -396,9 +396,16 @@ export default function LandingPage() {
                     letterSpacing: "1px",
                     lineHeight: 1,
                     textShadow: "0 0 12px rgba(214,40,40,0.3)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  {stat.val}
+                  {stat.val === "wa" ? (
+                    <Image src="/whatsapp-icon.png" alt="WhatsApp" width={32} height={32} style={{ objectFit: "contain" }} />
+                  ) : (
+                    stat.val
+                  )}
                 </div>
                 <div
                   style={{

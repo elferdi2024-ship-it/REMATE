@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -111,7 +111,7 @@ export default function Hero({
             {[
               { val: "1900+", lbl: "Productos" },
               { val: "21", lbl: "Categorias" },
-              { val: "WA", lbl: "Express" },
+              { val: "wa", lbl: "Express" },
             ].map((stat, i) => (
               <div
                 key={i}
@@ -129,9 +129,16 @@ export default function Hero({
                     letterSpacing: "-0.5px",
                     lineHeight: 1,
                     fontWeight: 800,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  {stat.val}
+                  {stat.val === "wa" ? (
+                    <Image src="/whatsapp-icon.png" alt="WhatsApp" width={24} height={24} style={{ objectFit: "contain" }} />
+                  ) : (
+                    stat.val
+                  )}
                 </div>
                 <div
                   style={{
