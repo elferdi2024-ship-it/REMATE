@@ -72,6 +72,17 @@ export interface BrandConfig {
     expiresAt: string;
     description: string;
   };
+
+  // --- V5 Banner Personalizable ---
+
+  /** Chips/tags que aparecen en el SponsoredBanner (ej: "Precio mayorista", "Stock activo") */
+  chips?: string[];
+  /** Texto del badge superior del banner (ej: "PROMO ACTIVA HOY") */
+  badgeText?: string;
+  /** Texto CTA variante A del A/B test */
+  ctaTextA?: string;
+  /** Texto CTA variante B del A/B test */
+  ctaTextB?: string;
 }
 
 /** Peso de frecuencia por tier */

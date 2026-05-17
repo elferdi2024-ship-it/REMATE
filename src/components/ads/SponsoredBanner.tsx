@@ -66,8 +66,14 @@ export default function SponsoredBanner({
   }, [ref]);
 
   const isCompact = variant === "compact";
-  const ctaText = abVariant === "A" ? "ABRIR OFERTAS" : "VER PROMOCIONES";
+  const ctaText = abVariant === "A"
+    ? (brand.ctaTextA || "ABRIR OFERTAS")
+    : (brand.ctaTextB || "VER PROMOCIONES");
   const ctaBg = abVariant === "A" ? "rgba(255,255,255,0.2)" : "rgba(232,48,42,0.35)";
+  const chips = brand.chips && brand.chips.length > 0
+    ? brand.chips
+    : ["Precio mayorista", "Stock activo", "Entrega rapida"];
+  const badgeText = brand.badgeText || "Promo activa hoy";
 
   const handleCtaClick = useCallback(() => {
     // Navigate to catalog filtered by brand name
@@ -83,7 +89,11 @@ export default function SponsoredBanner({
   return (
     <div
       ref={ref}
+      role="button"
+      tabIndex={0}
       aria-label={`Publicidad: ${brand.name}`}
+      onClick={handleCtaClick}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCtaClick(); }}
       onMouseEnter={(e) => {
         if (!isMobile) {
           e.currentTarget.style.transform = AD_TOKENS.hover.banner;
@@ -161,7 +171,7 @@ export default function SponsoredBanner({
           textTransform: "uppercase",
         }}
       >
-        Promo activa hoy
+        {badgeText}
       </div>
 
       {brand.logoUrl ? (
@@ -232,7 +242,7 @@ export default function SponsoredBanner({
           </p>
         )}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-          {["Precio mayorista", "Stock activo", "Entrega rapida"].map((chip) => (
+          {chips.map((chip) => (
             <span
               key={chip}
               style={{

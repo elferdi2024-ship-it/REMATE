@@ -536,6 +536,15 @@ export default function PublicidadAdmin() {
                 ))}
               </div>
             </div>
+
+            {/* Banner Config */}
+            <BannerConfigSection
+              brand={brand}
+              onUpdate={(updates) => {
+                const updated = brands.map((b) => (b.id === brand.id ? { ...b, ...updates } : b));
+                handleSave(updated);
+              }}
+            />
           </div>
         );
       })}
@@ -643,6 +652,250 @@ function NewBrandForm({
           Cancelar
         </button>
       </div>
+    </div>
+  );
+}
+
+// ─── Banner Config Section ──────────────────────────────────────────────────
+
+function BannerConfigSection({
+  brand,
+  onUpdate,
+}: {
+  brand: BrandConfig;
+  onUpdate: (updates: Partial<BrandConfig>) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [headline, setHeadline] = useState(brand.headline || "");
+  const [tagline, setTagline] = useState(brand.tagline || "");
+  const [badgeText, setBadgeText] = useState(brand.badgeText || "Promo activa hoy");
+  const [ctaTextA, setCtaTextA] = useState(brand.ctaTextA || "ABRIR OFERTAS");
+  const [ctaTextB, setCtaTextB] = useState(brand.ctaTextB || "VER PROMOCIONES");
+  const [chips, setChips] = useState<string[]>(brand.chips || ["Precio mayorista", "Stock activo", "Entrega rapida"]);
+  const [newChip, setNewChip] = useState("");
+
+  const addChip = () => {
+    const trimmed = newChip.trim();
+    if (!trimmed || chips.includes(trimmed)) return;
+    setChips([...chips, trimmed]);
+    setNewChip("");
+  };
+
+  const removeChip = (chip: string) => {
+    setChips(chips.filter((c) => c !== chip));
+  };
+
+  const handleSave = () => {
+    onUpdate({
+      headline: headline || undefined,
+      tagline: tagline || undefined,
+      badgeText: badgeText || undefined,
+      ctaTextA: ctaTextA || undefined,
+      ctaTextB: ctaTextB || undefined,
+      chips: chips.length > 0 ? chips : undefined,
+    });
+  };
+
+  return (
+    <div className="border-t border-white/5">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🎨</span>
+          <div>
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+              Personalización del Banner
+            </p>
+            <p className="text-xs text-gray-600 mt-0.5">
+              Headline, tagline, chips, badge y textos CTA
+            </p>
+          </div>
+        </div>
+        <span className="text-gray-600 text-xs">{isOpen ? "▾" : "▸"}</span>
+      </button>
+
+      {isOpen && (
+        <div className="border-t border-white/5 p-5 space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
+          {/* Headline & Tagline */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-1">
+                Headline <span className="text-gray-600 font-normal">(título principal del banner)</span>
+              </label>
+              <input
+                type="text"
+                value={headline}
+                onChange={(e) => setHeadline(e.target.value)}
+                placeholder={brand.name}
+                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-1">
+                Tagline <span className="text-gray-600 font-normal">(subtítulo)</span>
+              </label>
+              <input
+                type="text"
+                value={tagline}
+                onChange={(e) => setTagline(e.target.value)}
+                placeholder="Para los que saben lo que quieren"
+                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+              />
+            </div>
+          </div>
+
+          {/* Badge & CTA */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-1">
+                Badge <span className="text-gray-600 font-normal">(esquina superior)</span>
+              </label>
+              <input
+                type="text"
+                value={badgeText}
+                onChange={(e) => setBadgeText(e.target.value)}
+                placeholder="Promo activa hoy"
+                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-1">
+                CTA - Variante A
+              </label>
+              <input
+                type="text"
+                value={ctaTextA}
+                onChange={(e) => setCtaTextA(e.target.value)}
+                placeholder="ABRIR OFERTAS"
+                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 mb-1">
+                CTA - Variante B
+              </label>
+              <input
+                type="text"
+                value={ctaTextB}
+                onChange={(e) => setCtaTextB(e.target.value)}
+                placeholder="VER PROMOCIONES"
+                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+              />
+            </div>
+          </div>
+
+          {/* Chips / Tags */}
+          <div>
+            <label className="block text-xs font-bold text-gray-400 mb-2">
+              Chips / Tags <span className="text-gray-600 font-normal">(badges del banner)</span>
+            </label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {chips.map((chip) => (
+                <span
+                  key={chip}
+                  className="group flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-300"
+                >
+                  {chip}
+                  <button
+                    onClick={() => removeChip(chip)}
+                    className="flex h-4 w-4 items-center justify-center rounded-full bg-red-500/20 text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ✕
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newChip}
+                onChange={(e) => setNewChip(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addChip())}
+                placeholder="Nuevo chip... (Enter para agregar)"
+                className="flex-1 rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+              />
+              <button
+                onClick={addChip}
+                disabled={!newChip.trim()}
+                className="rounded-xl bg-white/5 px-4 py-2 text-sm font-bold text-white hover:bg-white/10 disabled:opacity-30 border border-white/5"
+              >
+                + Agregar
+              </button>
+            </div>
+          </div>
+
+          {/* Banner Preview */}
+          <div className="rounded-xl border border-white/5 bg-black/20 p-4">
+            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">
+              Vista previa del banner
+            </p>
+            <div
+              className="relative overflow-hidden rounded-xl p-4 flex items-center gap-4"
+              style={{ background: brand.color || "#1a1a1a", minHeight: "80px" }}
+            >
+              {/* Overlay */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: "linear-gradient(90deg, rgba(8,9,12,0.88) 0%, rgba(8,9,12,0.45) 75%, rgba(8,9,12,0.35) 100%)",
+                }}
+              />
+              {/* Badge */}
+              <div
+                className="absolute top-2 right-3 z-10 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white"
+                style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.35)" }}
+              >
+                {badgeText}
+              </div>
+              {/* Logo */}
+              <div
+                className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white text-sm font-bold"
+                style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.15))" }}
+              >
+                {brand.name[0]}
+              </div>
+              {/* Content */}
+              <div className="relative z-10 flex-1 min-w-0">
+                <p className="text-[8px] text-white/60 uppercase tracking-wider font-bold">Publicidad</p>
+                <h4 className="text-sm font-bold text-white truncate">
+                  {headline || brand.name}
+                </h4>
+                {tagline && (
+                  <p className="text-[10px] text-white/70 truncate">{tagline}</p>
+                )}
+                <div className="flex gap-1 flex-wrap mt-1.5">
+                  {chips.map((chip) => (
+                    <span
+                      key={chip}
+                      className="rounded-full border border-white/30 bg-white/10 px-1.5 py-0.5 text-[7px] uppercase tracking-wider text-white/90"
+                    >
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              {/* CTA */}
+              <div className="relative z-10 shrink-0">
+                <span className="rounded-full border border-white/35 bg-white/20 px-3 py-1.5 text-[9px] font-bold text-white">
+                  {ctaTextA}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Save */}
+          <div className="flex justify-end">
+            <button
+              onClick={handleSave}
+              className="rounded-xl bg-[#00E5FF] px-6 py-2.5 text-sm font-bold text-[#050914] transition-all hover:bg-white"
+            >
+              💾 Guardar Banner
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
