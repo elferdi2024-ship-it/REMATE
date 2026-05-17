@@ -715,7 +715,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             <div className="no-results" style={{ background: "var(--bg2)", padding: "48px 24px", borderRadius: "var(--r-xl)", maxWidth: "500px", margin: "0 auto 24px", boxShadow: "var(--shadow-sm)" }}>
               <span className="no-results-icon" style={{ fontSize: "4rem", marginBottom: "16px", display: "block" }}>&#128269;</span>
               <h3 style={{ fontSize: "1.4rem", fontWeight: 800, marginBottom: "8px", color: "var(--oscuro)", fontFamily: "var(--font-display), sans-serif" }}>No encontramos resultados</h3>
-              <p style={{ color: "var(--muted)", marginBottom: "24px" }}>No hay productos que coincidan con <strong>"{search}"</strong>. Intentá con otro término o limpiá los filtros.</p>
+              <p style={{ color: "var(--muted)", marginBottom: "24px" }}>No hay productos que coincidan con <strong>&quot;{search}&quot;</strong>. Intentá con otro término o limpiá los filtros.</p>
               <button 
                 onClick={() => { setSearchDebounced(""); setCategoria(""); }} 
                 style={{ background: "var(--rojo)", color: "white", fontWeight: 700, padding: "12px 24px", borderRadius: "var(--r-md)", border: "none", cursor: "pointer", boxShadow: "0 4px 12px var(--rojo-glow)" }}
