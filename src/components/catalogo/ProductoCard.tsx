@@ -203,7 +203,32 @@ export default function ProductoCard({
               padding: "0 4px"
             }}>
               <button className="float-qty-btn minus" onClick={handleDec} style={{ padding: "0 10px", fontSize: "1.2rem", fontWeight: "bold" }}>&#8722;</button>
-              <span className="float-qty-val" style={{ fontWeight: 800, minWidth: "24px", textAlign: "center" }}>{qty}</span>
+              <input 
+                type="number" 
+                value={qty || ''} 
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    onQtyChange(producto.codigo, val);
+                  } else if (e.target.value === '') {
+                    onQtyChange(producto.codigo, 0);
+                  }
+                }}
+                onFocus={(e) => e.target.select()}
+                className="float-qty-val" 
+                style={{ 
+                  fontWeight: 800, 
+                  width: "40px", 
+                  textAlign: "center",
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  WebkitAppearance: "none",
+                  MozAppearance: "textfield",
+                  margin: 0,
+                  fontSize: "1rem"
+                }} 
+              />
               <button className="float-qty-btn plus" onClick={handleInc} style={{ padding: "0 10px", fontSize: "1.2rem", fontWeight: "bold" }}>+</button>
             </div>
           ) : (

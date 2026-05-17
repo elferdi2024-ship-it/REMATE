@@ -53,7 +53,24 @@ export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRow
         >
           −
         </button>
-        <span className="qty-val">{item.cantidad}</span>
+        <input
+          type="number"
+          className="qty-val field-input"
+          value={item.cantidad || ''}
+          onChange={(e) => {
+            if (e.target.value === '') {
+              onUpdateQty(item.codigo, -item.cantidad);
+              return;
+            }
+            const val = parseInt(e.target.value, 10);
+            if (!isNaN(val) && val >= 0) {
+              if (val === 0) onRemove(item.codigo);
+              else onUpdateQty(item.codigo, val - item.cantidad);
+            }
+          }}
+          onFocus={(e) => e.target.select()}
+          style={{ width: "40px", textAlign: "center", padding: "4px", height: "100%", background: "transparent", border: "none", outline: "none", MozAppearance: "textfield" }}
+        />
         <button
           className="qty-btn"
           onClick={() => onUpdateQty(item.codigo, 1)}

@@ -52,6 +52,10 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
 
   const handleQtyInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.value === '') {
+        onQtyChange(producto.codigo, 0);
+        return;
+      }
       const val = parseInt(e.target.value, 10);
       if (!isNaN(val) && val >= 0) onQtyChange(producto.codigo, val);
     },

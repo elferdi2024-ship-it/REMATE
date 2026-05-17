@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useMemo, Suspense, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useCallback, useMemo, Suspense, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/lib/toast-context";
@@ -150,7 +150,21 @@ function SharedCartWatcher({
 import { ProductoSkeleton } from "@/components/catalogo/ProductoSkeleton";
 
 export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
+  // Refs para Auto-Scroll
+  const gridRef = useRef<HTMLDivElement>(null);
+  
+  const scrollToGrid = () => {
+    if (gridRef.current) {
+      gridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   // Hooks
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlSearch = searchParams?.get("search") || "";
+  const urlCategoria = searchParams?.get("categoria") || "";
+
   const { items: cartItems, addItem, removeItem, updateQty, clearCart, total, totalQty } = useCart();
   const { user, signOut } = useAuth();
   const toast = useToast();
@@ -183,24 +197,17 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [metodoEntrega, setMetodoEntrega] = useState<MetodoEntrega>('envio');
   const [sucursalId, setSucursalId] = useState<string | null>(null);
 
-  // Search & filter state (client-side only)
-  const [search, setSearch] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  // Search state for instant feedback on input, synced with URL
+  const [search, setSearch] = useState(urlSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlSearch);
 
-  // Sync category and search from URL if present
+  // Sync state if URL changes from outside (e.g., back button or banners)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const cat = params.get("categoria");
-    const q = params.get("search");
-    if (cat) {
-      setCategoria(cat);
-    }
-    if (q) {
-      setSearch(q);
-      setDebouncedSearch(q);
-    }
-  }, []);
+    setSearch(urlSearch);
+    setDebouncedSearch(urlSearch);
+  }, [urlSearch]);
+
+  const categoria = urlCategoria; // Categoria is entirely derived from URL
 
   // Fetch productos on mount
   useEffect(() => {
@@ -263,12 +270,19 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     };
   }, []);
 
-  // Debounce search (200ms)
+  // Debounce search (200ms) and update URL
   const setSearchDebounced = useCallback((term: string) => {
     setSearch(term);
-    const timer = setTimeout(() => setDebouncedSearch(term), 200);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(term);
+      const params = new URLSearchParams(window.location.search);
+      if (term) params.set("search", term);
+      else params.delete("search");
+      router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+      if (term) scrollToGrid();
+    }, 200);
     return () => clearTimeout(timer);
-  }, []);
+  }, [router]);
 
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   useEffect(() => {
@@ -280,16 +294,23 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     setDebouncedSearch(term);
     ls.addBusqueda(term);
     setRecentSearches(ls.getBusquedas());
-  }, []);
+    const params = new URLSearchParams(window.location.search);
+    if (term) params.set("search", term);
+    else params.delete("search");
+    router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+    scrollToGrid();
+  }, [router]);
 
   // Direct brand filter from ad banners (bypasses debounce)
   const handleBrandFilter = useCallback((brandName: string) => {
     setSearch(brandName);
     setDebouncedSearch(brandName);
-    setCategoria(""); // Clear category to show all matches
-    // Update URL without full navigation
-    window.history.replaceState(null, "", `/catalogo?search=${encodeURIComponent(brandName)}`);
-  }, []);
+    const params = new URLSearchParams(window.location.search);
+    params.set("search", brandName);
+    params.delete("categoria"); // Clear category to show all matches
+    router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+    scrollToGrid();
+  }, [router]);
 
   // Cloud orders (when logged in)
   const { pedidos: cloudPedidos } = usePedidosCloud();
@@ -591,6 +612,35 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Corregido: Si categoria es "" (Todos), activeCat debe ser "Todos"
   const activeCat = categoria === "" ? "Todos" : categoria;
 
+  // Motor Heurístico de Cross-Selling (Productos Recomendados)
+  const getRelatedProducts = useCallback((product: Producto | null) => {
+    if (!product) return [];
+    
+    // 1. Misma Marca (Alta afinidad)
+    const sameBrand = productos.filter(p => p.marca && p.marca === product.marca && p.codigo !== product.codigo);
+    
+    // 2. Nombre Similar (Ej: si es "Helado de Fresa", buscar otros "Helado")
+    const firstWord = product.nombre.split(' ')[0].toLowerCase();
+    const similarName = productos.filter(p => 
+      p.nombre.toLowerCase().includes(firstWord) && 
+      p.codigo !== product.codigo && 
+      p.marca !== product.marca
+    );
+    
+    // 3. Misma Categoría (Fallback general)
+    const sameCategory = productos.filter(p => 
+      p.categoria === product.categoria && 
+      p.codigo !== product.codigo && 
+      p.marca !== product.marca && 
+      !p.nombre.toLowerCase().includes(firstWord)
+    );
+
+    // Combinar priorizando Marca > Nombre Similar > Categoría
+    const combined = [...sameBrand, ...similarName, ...sameCategory];
+    
+    return combined.slice(0, 8);
+  }, [productos]);
+
   // Loading state
   // El estado de carga (loading) ahora se maneja directamente en el JSX principal 
   // debajo del ResultsBar mediante Skeleton Loaders para evitar el flicker.
@@ -688,20 +738,28 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           <CatsNav
             categorias={["Todos", ...categorias]}
             activeCat={activeCat}
-            onSelect={(cat) => setCategoria(cat === "Todos" ? "" : cat)}
+            onSelect={(cat) => {
+              const params = new URLSearchParams(window.location.search);
+              if (cat === "Todos") params.delete("categoria");
+              else params.set("categoria", cat);
+              router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+              scrollToGrid();
+            }}
           />
         )}
 
         {/* Results bar */}
-        <ResultsBar
-          showing={filtrados.length}
-          total={filtrados.length}
-          vista={vista}
-          onToggleVista={handleToggleVista}
-          searchQuery={search}
-          onSearchChange={setSearchDebounced}
-          marketAd={<AdSlotPlacement slot="results" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />}
-        />
+        <div ref={gridRef}>
+          <ResultsBar
+            showing={filtrados.length}
+            total={filtrados.length}
+            vista={vista}
+            onToggleVista={handleToggleVista}
+            searchQuery={search}
+            onSearchChange={setSearchDebounced}
+            marketAd={<AdSlotPlacement slot="results" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />}
+          />
+        </div>
 
         {/* Product grid/list */}
         {loading ? (
@@ -717,7 +775,13 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
               <h3 style={{ fontSize: "1.4rem", fontWeight: 800, marginBottom: "8px", color: "var(--oscuro)", fontFamily: "var(--font-display), sans-serif" }}>No encontramos resultados</h3>
               <p style={{ color: "var(--muted)", marginBottom: "24px" }}>No hay productos que coincidan con <strong>&quot;{search}&quot;</strong>. Intentá con otro término o limpiá los filtros.</p>
               <button 
-                onClick={() => { setSearchDebounced(""); setCategoria(""); }} 
+                onClick={() => {
+                  setSearchDebounced("");
+                  const params = new URLSearchParams(window.location.search);
+                  params.delete("categoria");
+                  params.delete("search");
+                  router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+                }} 
                 style={{ background: "var(--rojo)", color: "white", fontWeight: 700, padding: "12px 24px", borderRadius: "var(--r-md)", border: "none", cursor: "pointer", boxShadow: "0 4px 12px var(--rojo-glow)" }}
               >
                 Limpiar Búsqueda
@@ -799,7 +863,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onAdd={handleAddProduct}
         qty={quickViewProduct ? (qtyMap[quickViewProduct.codigo] || 0) : 0}
         onQtyChange={handleQtyChange}
-        relatedProducts={quickViewProduct ? productos.filter(p => p.categoria === quickViewProduct.categoria && p.codigo !== quickViewProduct.codigo).slice(0, 8) : []}
+        relatedProducts={getRelatedProducts(quickViewProduct)}
         getQty={(codigo) => qtyMap[codigo] || 0}
       />
 
