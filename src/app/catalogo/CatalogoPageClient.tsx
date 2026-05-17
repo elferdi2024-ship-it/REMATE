@@ -149,6 +149,129 @@ function SharedCartWatcher({
 /* ── Client Component with pre-loaded productos ── */
 import { ProductoSkeleton } from "@/components/catalogo/ProductoSkeleton";
 
+type SemanticDomain =
+  | "sweet_dessert"
+  | "savory_meat"
+  | "savory_complement"
+  | "beverages"
+  | "cleaning_hygiene"
+  | "mate_culture"
+  | "sweet_snacks"
+  | "general_food";
+
+function getSemanticDomain(product: Producto): SemanticDomain {
+  const name = product.nombre.toLowerCase();
+  const category = (product.categoria || "").toLowerCase();
+
+  // 1. Cleaning & Hygiene (Strict separation)
+  if (
+    category.includes("limpieza") || 
+    category.includes("higiene") || 
+    category.includes("perfumeria") ||
+    name.includes("jabon") || 
+    name.includes("detergente") || 
+    name.includes("desinfectante") || 
+    name.includes("lavavajilla") || 
+    name.includes("limpiador") || 
+    name.includes("shampoo") || 
+    name.includes("suavizante") || 
+    name.includes("papel higienico") || 
+    name.includes("rollo") || 
+    name.includes("servilleta")
+  ) {
+    return "cleaning_hygiene";
+  }
+
+  // 2. Mate culture
+  if (
+    name.includes("yerba") || 
+    name.includes("mate") || 
+    name.includes("termo") || 
+    name.includes("bombilla")
+  ) {
+    return "mate_culture";
+  }
+
+  // 3. Savory Meat
+  if (
+    name.includes("hamburguesa") || 
+    name.includes("carne") || 
+    name.includes("churrasco") || 
+    name.includes("milanesa") || 
+    name.includes("pancho") || 
+    name.includes("salchicha") || 
+    name.includes("nugget") || 
+    name.includes("lomo")
+  ) {
+    return "savory_meat";
+  }
+
+  // 4. Savory complements (High affinity with meat!)
+  if (
+    name.includes("pan de") || 
+    name.includes("queso") || 
+    name.includes("jamon") || 
+    name.includes("fiambre") || 
+    name.includes("papas fritas") || 
+    name.includes("ketchup") || 
+    name.includes("mostaza") || 
+    name.includes("mayonesa") || 
+    name.includes("salsa") || 
+    name.includes("aderezo") || 
+    name.includes("cheddar")
+  ) {
+    return "savory_complement";
+  }
+
+  // 5. Sweet desserts (Ice creams, etc.)
+  if (
+    category.includes("helado") || 
+    name.includes("helado") || 
+    name.includes("crema helada") || 
+    name.includes("postre")
+  ) {
+    return "sweet_dessert";
+  }
+
+  // 6. Sweet snacks (Alfajor, chocolate, biscuits)
+  if (
+    name.includes("alfajor") || 
+    name.includes("chocolate") || 
+    name.includes("dulce de leche") || 
+    name.includes("galleta") || 
+    name.includes("bombon") || 
+    name.includes("caramelo") || 
+    name.includes("chicle")
+  ) {
+    return "sweet_snacks";
+  }
+
+  // 7. Beverages (soft drinks, alcohol, water)
+  if (
+    category.includes("bebida") || 
+    category.includes("refresco") || 
+    category.includes("cerveza") || 
+    name.includes("coca") || 
+    name.includes("pepsi") || 
+    name.includes("fanta") || 
+    name.includes("refresco") || 
+    name.includes("cerveza") || 
+    name.includes("agua ") || 
+    name.includes("jugo") || 
+    name.includes("whisky") || 
+    name.includes("vino") || 
+    name.includes("gin") || 
+    name.includes("tónica") || 
+    name.includes("energy") || 
+    name.includes("monster")
+  ) {
+    return "beverages";
+  }
+
+  return "general_food";
+}
+
+
 export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Refs para Auto-Scroll
   const gridRef = useRef<HTMLDivElement>(null);
@@ -612,33 +735,93 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Corregido: Si categoria es "" (Todos), activeCat debe ser "Todos"
   const activeCat = categoria === "" ? "Todos" : categoria;
 
-  // Motor Heurístico de Cross-Selling (Productos Recomendados)
+  // Motor Heurístico de Cross-Selling con Dominios Semánticos (Afinidad Premium)
   const getRelatedProducts = useCallback((product: Producto | null) => {
     if (!product) return [];
-    
-    // 1. Misma Marca (Alta afinidad)
-    const sameBrand = productos.filter(p => p.marca && p.marca === product.marca && p.codigo !== product.codigo);
-    
-    // 2. Nombre Similar (Ej: si es "Helado de Fresa", buscar otros "Helado")
-    const firstWord = product.nombre.split(' ')[0].toLowerCase();
-    const similarName = productos.filter(p => 
-      p.nombre.toLowerCase().includes(firstWord) && 
-      p.codigo !== product.codigo && 
-      p.marca !== product.marca
-    );
-    
-    // 3. Misma Categoría (Fallback general)
-    const sameCategory = productos.filter(p => 
-      p.categoria === product.categoria && 
-      p.codigo !== product.codigo && 
-      p.marca !== product.marca && 
-      !p.nombre.toLowerCase().includes(firstWord)
-    );
 
-    // Combinar priorizando Marca > Nombre Similar > Categoría
-    const combined = [...sameBrand, ...similarName, ...sameCategory];
-    
-    return combined.slice(0, 8);
+    const sourceDomain = getSemanticDomain(product);
+
+    // Filtrar productos excluyendo el actual y marcas/nombres vacíos si aplica
+    let candidates = productos.filter(p => p.codigo !== product.codigo);
+
+    // REGLA DE AISLAMIENTO: Los productos de limpieza no se mezclan con comida, y viceversa
+    if (sourceDomain === "cleaning_hygiene") {
+      candidates = candidates.filter(p => getSemanticDomain(p) === "cleaning_hygiene");
+    } else {
+      candidates = candidates.filter(p => getSemanticDomain(p) !== "cleaning_hygiene");
+    }
+
+    // Calcular puntaje de afinidad para cada candidato
+    const scoredCandidates = candidates.map(p => {
+      const targetDomain = getSemanticDomain(p);
+      let score = 0;
+
+      // 1. Compatibilidad de Dominio Semántico (Afinidades lógicas)
+      if (sourceDomain === "sweet_dessert") {
+        if (targetDomain === "sweet_dessert") score += 50;
+        else if (targetDomain === "sweet_snacks") score += 30;
+        else if (targetDomain === "beverages") score += 10;
+        else score -= 40; // Penalizar fuertemente carnes u otros
+      }
+      else if (sourceDomain === "savory_meat") {
+        if (targetDomain === "savory_complement") score += 50; // ¡Pan, queso, aderezos!
+        else if (targetDomain === "beverages") score += 30; // ¡Bebidas con la comida!
+        else if (targetDomain === "savory_meat") score += 20; // Otras carnes/hamburguesas
+        else score -= 40; // Penalizar postres u otros
+      }
+      else if (sourceDomain === "savory_complement") {
+        if (targetDomain === "savory_meat") score += 50; // ¡Hamburguesas con pan/queso/salsas!
+        else if (targetDomain === "savory_complement") score += 30; // Otros complementos
+        else if (targetDomain === "beverages") score += 20;
+        else score -= 40;
+      }
+      else if (sourceDomain === "mate_culture") {
+        if (targetDomain === "mate_culture") score += 50;
+        else if (targetDomain === "sweet_snacks") score += 40; // ¡Galletitas con el mate!
+        else score -= 20;
+      }
+      else if (sourceDomain === "sweet_snacks") {
+        if (targetDomain === "sweet_snacks") score += 50;
+        else if (targetDomain === "mate_culture") score += 40; // ¡Yerba/termo con alfajores!
+        else if (targetDomain === "sweet_dessert") score += 20;
+        else score -= 30;
+      }
+      else if (sourceDomain === "beverages") {
+        if (targetDomain === "beverages") score += 40;
+        else if (targetDomain === "savory_complement") score += 30; // Snacks/papas fritas
+        else if (targetDomain === "savory_meat") score += 20;
+        else if (targetDomain === "sweet_snacks") score += 10;
+      }
+      else if (sourceDomain === "cleaning_hygiene") {
+        if (targetDomain === "cleaning_hygiene") score += 50;
+      }
+
+      // 2. Afinidad por Marca
+      if (p.marca && product.marca && p.marca === product.marca) {
+        score += 25;
+      }
+
+      // 3. Afinidad por Categoría oficial
+      if (p.categoria && product.categoria && p.categoria === product.categoria) {
+        score += 15;
+      }
+
+      // 4. Nombre similar (coincidencia de palabra clave)
+      const firstWord = product.nombre.split(' ')[0].toLowerCase();
+      if (firstWord.length > 2 && p.nombre.toLowerCase().includes(firstWord)) {
+        score += 20;
+      }
+
+      return { product: p, score };
+    });
+
+    // Ordenar de mayor a menor puntaje
+    const sorted = scoredCandidates
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.product);
+
+    return sorted.slice(0, 8);
   }, [productos]);
 
   // Loading state
@@ -865,6 +1048,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onQtyChange={handleQtyChange}
         relatedProducts={getRelatedProducts(quickViewProduct)}
         getQty={(codigo) => qtyMap[codigo] || 0}
+        onQuickView={(p) => setQuickViewProduct(p)}
       />
 
       {/* User Panel */}

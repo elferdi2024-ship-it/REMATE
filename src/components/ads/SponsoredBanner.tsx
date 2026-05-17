@@ -226,7 +226,7 @@ export default function SponsoredBanner({
             fontWeight: 700,
           }}
         >
-          Publicidad
+          Destacado
         </p>
         <h3
           style={{

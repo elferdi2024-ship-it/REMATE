@@ -146,7 +146,7 @@ export default function BrandVideoCard({ brand, asset, layout = "wide" }: BrandV
 
       {/* Info de marca — inferior izquierdo */}
       <div style={{ position: "absolute", bottom: isMobile ? 16 : 24, left: isMobile ? 16 : 32, pointerEvents: "none" }}>
-        <div style={AD_TOKENS.adLabel}>PUBLICIDAD</div>
+        <div style={AD_TOKENS.adLabel}>EXCLUSIVO</div>
         <p style={{ color: "#fff", fontSize: "22px", fontWeight: 700, margin: "6px 0 2px" }}>{brand.name}</p>
         {brand.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", margin: 0 }}>{brand.tagline}</p>}
       </div>

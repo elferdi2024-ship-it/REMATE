@@ -28,7 +28,7 @@ export default function ResultsBar({
     <div className="results-bar">
       <div className="results-market-chip">
         <span className="results-market-dot" />
-        OFERTAS Y PUBLICIDAD ACTIVA
+        OFERTAS DESTACADAS
       </div>
 
       {/* Buscador inline */}

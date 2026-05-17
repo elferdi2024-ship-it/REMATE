@@ -121,7 +121,7 @@ export default function BrandSpotlight({ brand, asset, layout = "wide", onBrandF
 
         {/* Label publicidad */}
         <div style={{ position: "absolute", top: 20, left: 20, zIndex: 2, ...AD_TOKENS.adLabel }}>
-          PUBLICIDAD
+          DESTACADO
         </div>
 
         {/* Contenido */}

@@ -63,7 +63,7 @@ export default function AdPopup({
       </button>
 
       {/* Etiqueta discreta */}
-      <span className="ad-popup__label">Publicidad</span>
+      <span className="ad-popup__label">Exclusivo</span>
 
       {/* Imagen */}
       {linkUrl ? (

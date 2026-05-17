@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
@@ -184,7 +184,7 @@ export default function FlashDealCard({ brand }: FlashDealCardProps) {
         </div>
 
         <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
-          <div style={{ ...AD_TOKENS.adLabel }}>PUBLICIDAD</div>
+          <div style={{ ...AD_TOKENS.adLabel }}>OFERTA</div>
         </div>
       </div>
 

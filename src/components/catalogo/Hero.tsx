@@ -237,24 +237,67 @@ export default function Hero({
             </button>
           )}
 
-          <div className="hero-search-wrap" ref={searchContainerRef} style={{ position: "relative" }}>
-            <span className="hero-search-icon" style={{ color: "rgba(255,255,255,0.4)" }}>
-              Q
+          <div 
+            className="hero-search-wrap" 
+            ref={searchContainerRef} 
+            style={{ 
+              position: "relative",
+              width: "100%",
+              maxWidth: "650px",
+              margin: "0 auto",
+            }}
+          >
+            <span 
+              className="hero-search-icon" 
+              style={{ 
+                position: "absolute",
+                left: "20px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: isSearchFocused ? "var(--rojo, #E8302A)" : "#8E8880",
+                zIndex: 2,
+                transition: "color 0.2s ease-in-out",
+              }}
+            >
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
             </span>
             <input
               type="text"
-              placeholder="Que estas buscando?"
+              placeholder="¿Qué estás buscando? (ej. mayonesa, refresco, hamburguesa...)"
               value={searchQuery}
               onChange={(e) => onSearchChange?.(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
               aria-label="Buscar producto"
               style={{
-                background: "rgba(255,255,255,0.1)",
-                backdropFilter: "blur(8px)",
-                border: "1px solid rgba(255,255,255,0.22)",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
-                color: "#fff",
+                background: "#ffffff",
+                border: isSearchFocused ? "2px solid var(--rojo, #E8302A)" : "2px solid #E2DCD5",
+                borderRadius: "30px",
+                boxShadow: isSearchFocused 
+                  ? "0 12px 36px rgba(232, 48, 42, 0.18), 0 0 0 4px rgba(232, 48, 42, 0.25)" 
+                  : "0 8px 24px rgba(0, 0, 0, 0.25)",
+                color: "#111111",
                 width: "100%",
+                padding: "16px 48px 16px 54px",
+                fontSize: "1.05rem",
+                fontWeight: 700,
+                outline: "none",
+                transition: "all 0.2s ease-in-out",
+                fontFamily: "var(--font-body), sans-serif",
               }}
             />
             {searchQuery && (
@@ -262,20 +305,35 @@ export default function Hero({
                 onClick={() => onSearchChange?.("")}
                 style={{
                   position: "absolute",
-                  right: "12px",
+                  right: "16px",
                   top: "50%",
                   transform: "translateY(-50%)",
-                  background: "none",
+                  background: "#F4EFEA",
                   border: "none",
-                  color: "rgba(255,255,255,0.5)",
+                  color: "#5C5750",
+                  width: "24px",
+                  height: "24px",
+                  borderRadius: "50%",
                   cursor: "pointer",
-                  fontSize: "0.9rem",
-                  lineHeight: 1,
+                  fontSize: "0.75rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   zIndex: 2,
+                  fontWeight: 900,
+                  transition: "all 0.2s ease",
                 }}
                 aria-label="Limpiar busqueda"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#EADED2";
+                  e.currentTarget.style.color = "#E8302A";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#F4EFEA";
+                  e.currentTarget.style.color = "#5C5750";
+                }}
               >
-                x
+                ✕
               </button>
             )}
 

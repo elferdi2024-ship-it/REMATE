@@ -85,7 +85,7 @@ export default function BrandMediaModal({ brand, isOpen, onClose }: BrandMediaMo
 
         <div style={{ padding: "clamp(12px, 3vw, 20px)", borderBottom: "1px solid #333" }}>
           <h2 style={{ color: "#fff", margin: 0, fontSize: "1.2rem" }}>{brand.name}</h2>
-          <p style={{ color: "#aaa", fontSize: "0.85rem", margin: 0 }}>Publicidad de {brand.name}</p>
+          <p style={{ color: "#aaa", fontSize: "0.85rem", margin: 0 }}>Recomendado por {brand.name}</p>
         </div>
 
         <div style={{ 

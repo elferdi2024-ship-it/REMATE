@@ -15,6 +15,7 @@ interface QuickViewModalProps {
   onQtyChange: (codigo: string, qty: number) => void;
   relatedProducts: Producto[]; // For cross-selling
   getQty: (codigo: string) => number; // Function to get qty for related products
+  onQuickView?: (producto: Producto) => void;
 }
 
 function formatPrice(n: number): string {
@@ -29,7 +30,8 @@ export default function QuickViewModal({
   qty,
   onQtyChange,
   relatedProducts,
-  getQty
+  getQty,
+  onQuickView
 }: QuickViewModalProps) {
   const [isClosing, setIsClosing] = useState(false);
 
@@ -115,7 +117,7 @@ export default function QuickViewModal({
               {producto.nombre}
             </h2>
             
-            <div className="flex items-end justify-between mb-8">
+            <div className="flex items-end justify-between mb-6">
               <div>
                 <p className="text-3xl font-black text-red-600 leading-none" style={{ fontFamily: "var(--font-display)" }}>
                   {formatPrice(producto.precio)}
@@ -127,32 +129,90 @@ export default function QuickViewModal({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               {isInCart ? (
-                <div className="flex items-center justify-between bg-gray-50 border-2 border-gray-200 rounded-xl p-2">
-                  <button 
-                    onClick={() => onQtyChange(producto.codigo, Math.max(0, qty - 1))}
-                    className="w-12 h-12 flex items-center justify-center bg-white rounded-lg shadow-sm text-2xl font-bold text-gray-700 active:scale-95 transition-transform"
-                  >
-                    −
-                  </button>
-                  <span className="text-xl font-bold text-gray-900 px-4">
-                    {qty} en el carrito
-                  </span>
-                  <button 
-                    onClick={() => onQtyChange(producto.codigo, qty + 1)}
-                    className="w-12 h-12 flex items-center justify-center bg-white rounded-lg shadow-sm text-2xl font-bold text-red-600 active:scale-95 transition-transform"
-                  >
-                    +
-                  </button>
-                </div>
+                <>
+                  <div className="flex items-center justify-between bg-gray-50 border-2 border-gray-200 rounded-xl p-2">
+                    <button 
+                      onClick={() => onQtyChange(producto.codigo, Math.max(0, qty - 1))}
+                      className="w-12 h-12 flex items-center justify-center bg-white rounded-lg shadow-sm text-2xl font-bold text-gray-700 active:scale-95 transition-transform"
+                    >
+                      −
+                    </button>
+                    <div className="flex flex-col items-center flex-1 mx-4">
+                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">CANTIDAD</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={qty || ""}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (!isNaN(val) && val >= 0) {
+                            onQtyChange(producto.codigo, val);
+                          } else if (e.target.value === "") {
+                            onQtyChange(producto.codigo, 0);
+                          }
+                        }}
+                        onFocus={(e) => e.target.select()}
+                        className="w-20 text-center font-black text-2xl text-gray-900 bg-transparent border-b-2 border-gray-300 focus:border-red-600 outline-none pb-0.5"
+                      />
+                    </div>
+                    <button 
+                      onClick={() => onQtyChange(producto.codigo, qty + 1)}
+                      className="w-12 h-12 flex items-center justify-center bg-white rounded-lg shadow-sm text-2xl font-bold text-red-600 active:scale-95 transition-transform"
+                    >
+                      +
+                    </button>
+                  </div>
+                  
+                  <div>
+                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center mb-2">
+                      ⚡ SUMAR POR PAQUETE / CAJA
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      {[6, 12, 24, 48].map((preset) => (
+                        <button
+                          key={preset}
+                          onClick={() => onQtyChange(producto.codigo, qty + preset)}
+                          className="flex-1 py-2 bg-gray-50 hover:bg-red-50 hover:text-red-600 hover:border-red-400 border border-gray-200 rounded-xl text-xs font-black text-gray-800 transition-all active:scale-95 flex flex-col items-center"
+                        >
+                          <span className="text-[9px] font-bold text-gray-400 opacity-80">SUMAR</span>
+                          <span>+{preset}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
               ) : (
-                <button 
-                  onClick={() => onAdd(producto)}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-lg py-4 rounded-xl shadow-[0_4px_20px_rgba(232,48,42,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                  <span className="text-xl">🛒</span> Agregar al Pedido
-                </button>
+                <>
+                  <button 
+                    onClick={() => onAdd(producto)}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-lg py-4 rounded-xl shadow-[0_4px_20px_rgba(232,48,42,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  >
+                    <span className="text-xl">🛒</span> Agregar al Pedido
+                  </button>
+                  
+                  <div>
+                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center mb-2">
+                      ⚡ LLEVAR DIRECTO POR CANTIDAD (B2B)
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      {[6, 12, 24, 48].map((preset) => (
+                        <button
+                          key={preset}
+                          onClick={() => {
+                            onAdd(producto);
+                            onQtyChange(producto.codigo, preset);
+                          }}
+                          className="flex-1 py-2 bg-gray-50 hover:bg-red-50 hover:text-red-600 hover:border-red-400 border border-gray-200 rounded-xl text-xs font-black text-gray-800 transition-all active:scale-95 flex flex-col items-center"
+                        >
+                          <span className="text-[9px] font-bold text-gray-400 opacity-80">LLEVAR</span>
+                          <span>{preset} u.</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -171,6 +231,7 @@ export default function QuickViewModal({
                       qty={getQty(rel.codigo)}
                       onAdd={onAdd}
                       onQtyChange={onQtyChange}
+                      onQuickView={onQuickView}
                     />
                   </div>
                 ))}
