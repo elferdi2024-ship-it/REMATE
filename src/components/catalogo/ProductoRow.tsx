@@ -84,7 +84,7 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
       </div>
 
       {/* Actions */}
-      <div className="row-actions">
+      <div className="row-actions" onClick={(e) => e.stopPropagation()}>
         {isInCart ? (
           <div className="qty-ctrl">
             <button className="qty-btn" onClick={handleDec} aria-label="Reducir cantidad">

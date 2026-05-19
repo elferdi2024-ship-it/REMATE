@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import type { Producto } from "@/types";
+import { SUCURSALES } from "@/lib/sucursales";
 
 interface HeroProps {
   onOpenCart: () => void;
@@ -19,6 +20,7 @@ interface HeroProps {
   suggestedProducts?: Producto[];
   recentSearches?: string[];
   onSelectSuggestion?: (query: string) => void;
+  sucursalId?: string | null;
 }
 
 function formatPrice(n: number): string {
@@ -38,8 +40,23 @@ export default function Hero({
   suggestedProducts = [],
   recentSearches = [],
   onSelectSuggestion,
+  sucursalId = null,
 }: HeroProps) {
+  const sucursalObj = SUCURSALES.find((s) => s.id === sucursalId);
   const trustItems = ["Precios mayoristas reales", "Pedido en minutos", "Atencion por WhatsApp"];
+  const [inputValue, setInputValue] = useState(searchQuery || "");
+
+  // Sync with parent query changes (e.g. from banner or popular tags)
+  useEffect(() => {
+    setInputValue(searchQuery || "");
+  }, [searchQuery]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInputValue(val);
+    onSearchChange?.(val);
+  };
+
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
@@ -91,8 +108,44 @@ export default function Hero({
             Inicio
           </Link>
 
-          <div style={{ marginBottom: "10px" }}>
+          <div style={{ marginBottom: "10px", display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
             <span className="hero-eyebrow-badge">MAYORISTA · DISTRIBUIDORA · CANELONES</span>
+            {sucursalObj && (
+              <Link
+                href="/seleccionar-sucursal"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  background: "rgba(232, 48, 42, 0.12)",
+                  border: "1px solid rgba(232, 48, 42, 0.3)",
+                  borderRadius: "20px",
+                  padding: "4px 12px",
+                  fontSize: "0.68rem",
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  color: "#fff",
+                  textDecoration: "none",
+                  boxShadow: "0 2px 10px rgba(232,48,42,0.1)",
+                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px) scale(1.03)';
+                  e.currentTarget.style.borderColor = 'rgba(232, 48, 42, 0.6)';
+                  e.currentTarget.style.background = 'rgba(232, 48, 42, 0.18)';
+                  e.currentTarget.style.boxShadow = '0 4px 14px rgba(232,48,42,0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.borderColor = 'rgba(232, 48, 42, 0.3)';
+                  e.currentTarget.style.background = 'rgba(232, 48, 42, 0.12)';
+                  e.currentTarget.style.boxShadow = '0 2px 10px rgba(232,48,42,0.1)';
+                }}
+              >
+                <span>🏪 {sucursalObj.nombre}</span>
+                <span style={{ color: "#E8302A", fontSize: "0.6rem", fontWeight: 900 }}>· Cambiar</span>
+              </Link>
+            )}
           </div>
 
           <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "16px" }}>
@@ -238,7 +291,7 @@ export default function Hero({
           )}
 
           <div 
-            className="hero-search-wrap" 
+            className="hero-search-wrap animate-pulse-glow" 
             ref={searchContainerRef} 
             style={{ 
               position: "relative",
@@ -279,63 +332,75 @@ export default function Hero({
             <input
               type="text"
               placeholder="¿Qué estás buscando? (ej. mayonesa, refresco, hamburguesa...)"
-              value={searchQuery}
-              onChange={(e) => onSearchChange?.(e.target.value)}
+              value={inputValue}
+              onChange={handleChange}
               onFocus={() => setIsSearchFocused(true)}
               aria-label="Buscar producto"
-              style={{
-                background: "#ffffff",
-                border: isSearchFocused ? "2px solid var(--rojo, #E8302A)" : "2px solid #E2DCD5",
-                borderRadius: "30px",
-                boxShadow: isSearchFocused 
-                  ? "0 12px 36px rgba(232, 48, 42, 0.18), 0 0 0 4px rgba(232, 48, 42, 0.25)" 
-                  : "0 8px 24px rgba(0, 0, 0, 0.25)",
-                color: "#111111",
-                width: "100%",
-                padding: "16px 48px 16px 54px",
-                fontSize: "1.05rem",
-                fontWeight: 700,
-                outline: "none",
-                transition: "all 0.2s ease-in-out",
-                fontFamily: "var(--font-body), sans-serif",
-              }}
+              className="hero-search-input-premium"
             />
-            {searchQuery && (
+            {inputValue && (
               <button
-                onClick={() => onSearchChange?.("")}
-                style={{
-                  position: "absolute",
-                  right: "16px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "#F4EFEA",
-                  border: "none",
-                  color: "#5C5750",
-                  width: "24px",
-                  height: "24px",
-                  borderRadius: "50%",
-                  cursor: "pointer",
-                  fontSize: "0.75rem",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 2,
-                  fontWeight: 900,
-                  transition: "all 0.2s ease",
+                className="hero-search-clear-btn"
+                onClick={() => {
+                  setInputValue("");
+                  onSearchChange?.("");
                 }}
                 aria-label="Limpiar busqueda"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#EADED2";
-                  e.currentTarget.style.color = "#E8302A";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "#F4EFEA";
-                  e.currentTarget.style.color = "#5C5750";
-                }}
               >
                 ✕
               </button>
             )}
+
+            <button
+              onClick={() => {
+                onSearchChange?.(inputValue);
+              }}
+              style={{
+                position: "absolute",
+                right: "6px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "linear-gradient(135deg, var(--rojo, #D62828) 0%, #E8302A 100%)",
+                color: "#fff",
+                border: "none",
+                borderRadius: "24px",
+                padding: "10px 24px",
+                fontSize: "0.85rem",
+                fontWeight: 800,
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(232, 48, 42, 0.3)",
+                transition: "all 0.2s ease-in-out",
+                letterSpacing: "1.5px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                zIndex: 3,
+              }}
+              className="hidden-mobile"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-50%) scale(1.03)";
+                e.currentTarget.style.boxShadow = "0 6px 16px rgba(232, 48, 42, 0.4)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(-50%) scale(1)";
+                e.currentTarget.style.boxShadow = "0 4px 12px rgba(232, 48, 42, 0.3)";
+              }}
+            >
+              <span>BUSCAR</span>
+              <svg 
+                width="14" 
+                height="14" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="3" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
 
             {/* Predictive Search Dropdown */}
             {isSearchFocused && (
@@ -460,6 +525,64 @@ export default function Hero({
                 )}
               </div>
             )}
+          </div>
+
+          <div
+            className="hero-search-tags"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              marginTop: "16px",
+              flexWrap: "wrap",
+              fontSize: "0.82rem",
+              fontWeight: 600,
+              color: "#C8C3BC",
+              width: "100%",
+            }}
+          >
+            <span style={{ opacity: 0.85 }}>Búsquedas sugeridas:</span>
+            {[
+              { label: "Mayonesa", query: "mayonesa" },
+              { label: "Refrescos", query: "refresco" },
+              { label: "Hamburguesas", query: "hamburguesa" },
+              { label: "Helados", query: "helado" },
+              { label: "Cerveza", query: "cerveza" }
+            ].map((tag) => (
+              <button
+                key={tag.query}
+                onClick={() => {
+                  setInputValue(tag.label);
+                  onSearchChange?.(tag.query);
+                }}
+                style={{
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  borderRadius: "16px",
+                  padding: "5px 14px",
+                  color: "#ffffff",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  transition: "all 0.2s ease-in-out",
+                  fontFamily: "var(--font-body), sans-serif",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "var(--rojo, #D62828)";
+                  e.currentTarget.style.borderColor = "var(--rojo, #D62828)";
+                  e.currentTarget.style.transform = "translateY(-1.5px)";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(214, 40, 40, 0.3)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                {tag.label}
+              </button>
+            ))}
           </div>
 
           <div className="hero-actions">

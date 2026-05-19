@@ -4,6 +4,7 @@ const LS_TEL = "elremate_tel";
 const LS_HISTORY = "elremate_history";
 const LS_VISTA = "elremate_vista";
 const LS_BUSQUEDAS = "elremate_busquedas";
+const LS_SUCURSAL = "el_remate_selected_sucursal";
 
 export function getAlias(): string {
   if (typeof window === "undefined") return "";
@@ -69,4 +70,14 @@ export function addBusqueda(q: string): void {
   const filtered = current.filter(item => item.toLowerCase() !== q.toLowerCase());
   filtered.unshift(q);
   setBusquedas(filtered.slice(0, 10));
+}
+
+export function getSelectedSucursal(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(LS_SUCURSAL) || "";
+}
+
+export function setSelectedSucursal(v: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(LS_SUCURSAL, v);
 }

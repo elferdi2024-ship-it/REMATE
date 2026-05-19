@@ -190,7 +190,7 @@ export default function ProductoCard({
           </span>
         )}
         
-        <div className="card-floating-action" style={{ position: "absolute", bottom: "8px", right: "8px", zIndex: 10 }}>
+        <div className="card-floating-action" onClick={(e) => e.stopPropagation()} style={{ position: "absolute", bottom: "8px", right: "8px", zIndex: 10 }}>
           {isInCart ? (
             <div className="float-qty-ctrl" style={{ 
               display: "flex",

@@ -334,8 +334,35 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   const categoria = urlCategoria; // Categoria is entirely derived from URL
 
-  // Fetch productos on mount
+  // Enforce branch selection from URL or local storage
   useEffect(() => {
+    if (!mounted) return;
+
+    const urlSucursal = searchParams?.get("sucursal");
+    const savedSucursal = ls.getSelectedSucursal();
+
+    if (urlSucursal) {
+      const valid = SUCURSALES.some((s) => s.id === urlSucursal);
+      if (valid) {
+        setSucursalId(urlSucursal);
+        if (savedSucursal !== urlSucursal) ls.setSelectedSucursal(urlSucursal);
+      } else {
+        router.replace("/seleccionar-sucursal");
+      }
+    } else if (savedSucursal) {
+      const params = new URLSearchParams(window.location.search);
+      params.set("sucursal", savedSucursal);
+      router.replace(`/catalogo?${params.toString()}`);
+      setSucursalId(savedSucursal);
+    } else {
+      router.replace("/seleccionar-sucursal");
+    }
+  }, [mounted, searchParams, router]);
+
+  // Fetch branch-specific or global productos
+  useEffect(() => {
+    if (!sucursalId) return;
+    const currentId = sucursalId;
     let cancelled = false;
 
     async function fetchProductos() {
@@ -343,20 +370,37 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         setLoading(true);
         setLoadingError(null);
         let data: Producto[] = [];
+        let loadedFromBranch = false;
         
         try {
-          const snap = await getDoc(doc(db, "catalogo_activo", "productos"));
-          if (snap.exists()) {
-            const docData = snap.data();
-            data = Object.values(docData.items || {}) as Producto[];
-            console.log(`📦 Catálogo cargado desde Firestore (${data.length} productos)`);
-          } else {
-            console.warn("⚠️ Documento de Firestore 'catalogo_activo/productos' no existe.");
+          const branchSnap = await getDoc(doc(db, "sucursales_catalogos", currentId));
+          if (branchSnap.exists()) {
+            const branchData = branchSnap.data();
+            const items = branchData.items || {};
+            const itemsList = Object.values(items) as Producto[];
+            const activeItems = itemsList.filter((item) => !item.deshabilitado);
+            if (activeItems.length > 0) {
+              data = activeItems;
+              loadedFromBranch = true;
+              console.log(`🏪 Catálogo personalizado cargado para sucursal: ${currentId} (${data.length} productos)`);
+            }
           }
-        } catch (e: any) {
-          console.error("❌ Falló la carga desde Firestore. Verificá reglas o conexión.", e);
-          if (e.code === 'permission-denied') {
-            console.error("⛔ Error de Permisos: El catálogo no es público en Firestore.");
+        } catch (e) {
+          console.error("❌ Falló la carga desde Firestore para la sucursal.", e);
+        }
+
+        if (!loadedFromBranch) {
+          try {
+            const snap = await getDoc(doc(db, "catalogo_activo", "productos"));
+            if (snap.exists()) {
+              const docData = snap.data();
+              data = Object.values(docData.items || {}) as Producto[];
+              console.log(`📦 Catálogo global cargado desde Firestore (${data.length} productos)`);
+            } else {
+              console.warn("⚠️ Documento de Firestore 'catalogo_activo/productos' no existe.");
+            }
+          } catch (e) {
+            console.error("❌ Falló la carga global desde Firestore.", e);
           }
         }
 
@@ -393,20 +437,26 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sucursalId]);
 
-  // Debounce search (200ms) and update URL
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounce search (400ms) for grid filtering and URL updates to prevent layout thrashing
   const setSearchDebounced = useCallback((term: string) => {
     setSearch(term);
-    const timer = setTimeout(() => {
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
       setDebouncedSearch(term);
       const params = new URLSearchParams(window.location.search);
       if (term) params.set("search", term);
       else params.delete("search");
       router.replace(`/catalogo?${params.toString()}`, { scroll: false });
       if (term) scrollToGrid();
-    }, 200);
-    return () => clearTimeout(timer);
+    }, 400); // 400ms for stable grid and URL updates
   }, [router]);
 
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -472,6 +522,27 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
     return result;
   }, [productos, categoria, debouncedSearch]);
+
+  // Instant suggestions filter for ultra-responsive live search autocomplete
+  const instantSuggestions = useMemo(() => {
+    if (!search.trim()) return [];
+    const normalize = (s: string) =>
+      s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      
+    const searchTerms = normalize(search.trim()).split(/\s+/);
+    let result = productos.filter((p) => (p.precio || 0) > 0);
+    
+    if (categoria) {
+      result = result.filter((p) => p.categoria === categoria);
+    }
+    
+    result = result.filter((p) => {
+      const searchableText = normalize(`${p.nombre} ${p.codigo} ${p.categoria}`);
+      return searchTerms.every((term) => searchableText.includes(term));
+    });
+    
+    return result.slice(0, 5);
+  }, [productos, categoria, search]);
 
   // Qty map for product grid
   const qtyMap = useMemo(() => {
@@ -763,54 +834,56 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         if (targetDomain === "sweet_dessert") score += 50;
         else if (targetDomain === "sweet_snacks") score += 30;
         else if (targetDomain === "beverages") score += 10;
-        else score -= 40; // Penalizar fuertemente carnes u otros
+        else score = -999; // Incompatible
       }
       else if (sourceDomain === "savory_meat") {
-        if (targetDomain === "savory_complement") score += 50; // ¡Pan, queso, aderezos!
-        else if (targetDomain === "beverages") score += 30; // ¡Bebidas con la comida!
-        else if (targetDomain === "savory_meat") score += 20; // Otras carnes/hamburguesas
-        else score -= 40; // Penalizar postres u otros
+        if (targetDomain === "savory_complement") score += 50;
+        else if (targetDomain === "beverages") score += 30;
+        else if (targetDomain === "savory_meat") score += 20;
+        else score = -999; // Incompatible
       }
       else if (sourceDomain === "savory_complement") {
-        if (targetDomain === "savory_meat") score += 50; // ¡Hamburguesas con pan/queso/salsas!
-        else if (targetDomain === "savory_complement") score += 30; // Otros complementos
+        if (targetDomain === "savory_meat") score += 50;
+        else if (targetDomain === "savory_complement") score += 30;
         else if (targetDomain === "beverages") score += 20;
-        else score -= 40;
+        else score = -999; // Incompatible
       }
       else if (sourceDomain === "mate_culture") {
         if (targetDomain === "mate_culture") score += 50;
-        else if (targetDomain === "sweet_snacks") score += 40; // ¡Galletitas con el mate!
-        else score -= 20;
+        else if (targetDomain === "sweet_snacks") score += 40;
+        else score = -999; // Incompatible
       }
       else if (sourceDomain === "sweet_snacks") {
         if (targetDomain === "sweet_snacks") score += 50;
-        else if (targetDomain === "mate_culture") score += 40; // ¡Yerba/termo con alfajores!
+        else if (targetDomain === "mate_culture") score += 40;
         else if (targetDomain === "sweet_dessert") score += 20;
-        else score -= 30;
+        else score = -999; // Incompatible
       }
       else if (sourceDomain === "beverages") {
         if (targetDomain === "beverages") score += 40;
-        else if (targetDomain === "savory_complement") score += 30; // Snacks/papas fritas
+        else if (targetDomain === "savory_complement") score += 30;
         else if (targetDomain === "savory_meat") score += 20;
         else if (targetDomain === "sweet_snacks") score += 10;
+        else score = -999; // Incompatible
       }
       else if (sourceDomain === "cleaning_hygiene") {
         if (targetDomain === "cleaning_hygiene") score += 50;
+        else score = -999; // Incompatible
       }
 
       // 2. Afinidad por Marca
-      if (p.marca && product.marca && p.marca === product.marca) {
+      if (p.marca && product.marca && p.marca === product.marca && score !== -999) {
         score += 25;
       }
 
       // 3. Afinidad por Categoría oficial
-      if (p.categoria && product.categoria && p.categoria === product.categoria) {
+      if (p.categoria && product.categoria && p.categoria === product.categoria && score !== -999) {
         score += 15;
       }
 
       // 4. Nombre similar (coincidencia de palabra clave)
       const firstWord = product.nombre.split(' ')[0].toLowerCase();
-      if (firstWord.length > 2 && p.nombre.toLowerCase().includes(firstWord)) {
+      if (firstWord.length > 2 && p.nombre.toLowerCase().includes(firstWord) && score !== -999) {
         score += 20;
       }
 
@@ -842,6 +915,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           suggestedProducts={[]}
           recentSearches={[]}
           onSelectSuggestion={() => {}}
+          sucursalId={sucursalId}
         />
         <div className="page-wrapper">
           <AdSlotPlacement slot="hero" onBrandFilter={() => {}} />
@@ -939,9 +1013,10 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         userDisplayName={user?.displayName || alias || undefined}
         searchQuery={search}
         onSearchChange={setSearchDebounced}
-        suggestedProducts={search ? filtrados.slice(0, 5) : []}
+        suggestedProducts={instantSuggestions}
         recentSearches={recentSearches}
         onSelectSuggestion={handleSelectSuggestion}
+        sucursalId={sucursalId}
       />
 
       <div className="page-wrapper">

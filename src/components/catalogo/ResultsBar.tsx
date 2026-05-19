@@ -1,7 +1,7 @@
 // filepath: src/components/catalogo/ResultsBar.tsx
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { Vista } from "@/types";
 
 interface ResultsBarProps {
@@ -23,6 +23,18 @@ export default function ResultsBar({
   onSearchChange,
   marketAd,
 }: ResultsBarProps) {
+  const [inputValue, setInputValue] = useState(searchQuery || "");
+
+  useEffect(() => {
+    setInputValue(searchQuery || "");
+  }, [searchQuery]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInputValue(val);
+    onSearchChange?.(val);
+  };
+
   return (
     <div className="results-bar-wrap">
     <div className="results-bar">
@@ -39,14 +51,17 @@ export default function ResultsBar({
             type="search"
             className="results-search-input"
             placeholder="Buscar por nombre, marca o código..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            value={inputValue}
+            onChange={handleChange}
             aria-label="Buscar productos"
           />
-          {searchQuery && (
+          {inputValue && (
             <button
               className="results-search-clear"
-              onClick={() => onSearchChange("")}
+              onClick={() => {
+                setInputValue("");
+                onSearchChange("");
+              }}
               aria-label="Limpiar búsqueda"
             >
               ✕

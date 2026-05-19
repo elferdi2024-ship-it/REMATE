@@ -5,6 +5,7 @@ export interface Producto {
   categoria: string;
   imagen?: string;
   marca?: string;
+  deshabilitado?: boolean;
 }
 
 export interface CartItem {
