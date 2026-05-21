@@ -14,6 +14,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Catálogos por Sucursal: Cualquiera lee, solo admin escribe
+    match /sucursales_catalogos/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Pedidos: Clientes crean, admin gestiona (lee/edita/borra)
     match /pedidos/{pedidoId} {
       allow create: if true;

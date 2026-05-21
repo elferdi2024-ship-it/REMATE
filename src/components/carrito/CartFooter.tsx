@@ -25,6 +25,7 @@ interface CartFooterProps {
   onMetodoEntregaChange: (m: MetodoEntrega) => void;
   sucursalId: string | null;
   onSucursalChange: (id: string) => void;
+  isTiendaCerrada?: boolean;
 }
 
 export default function CartFooter({
@@ -48,6 +49,7 @@ export default function CartFooter({
   onMetodoEntregaChange,
   sucursalId,
   onSucursalChange,
+  isTiendaCerrada = false,
 }: CartFooterProps) {
   return (
     <div className="cart-footer">
@@ -165,16 +167,26 @@ export default function CartFooter({
         <button 
           className="btn-whatsapp" 
           onClick={onSendWA}
-          disabled={isProcessing || (metodoEntrega === 'retiro' && !sucursalId)}
+          disabled={isProcessing || isTiendaCerrada || (metodoEntrega === 'retiro' && !sucursalId)}
           style={{ 
-            opacity: isProcessing || (metodoEntrega === 'retiro' && !sucursalId) ? 0.7 : 1, 
-            cursor: isProcessing || (metodoEntrega === 'retiro' && !sucursalId) ? 'not-allowed' : 'pointer' 
+            opacity: isProcessing || isTiendaCerrada || (metodoEntrega === 'retiro' && !sucursalId) ? 0.7 : 1, 
+            cursor: isProcessing || isTiendaCerrada || (metodoEntrega === 'retiro' && !sucursalId) ? 'not-allowed' : 'pointer',
+            ...(isTiendaCerrada ? {
+              background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              boxShadow: 'none'
+            } : {})
           }}
         >
           {isProcessing ? (
             <div className="btn-whatsapp-text">
               <span className="btn-wa-main">PROCESANDO...</span>
               <span className="btn-wa-sub">Estamos preparando tu pedido</span>
+            </div>
+          ) : isTiendaCerrada ? (
+            <div className="btn-whatsapp-text">
+              <span className="btn-wa-main" style={{ color: '#ef4444' }}>TOMA DE PEDIDOS PAUSADA</span>
+              <span className="btn-wa-sub" style={{ color: '#94a3b8' }}>Disculpe las molestias. Intente más tarde.</span>
             </div>
           ) : (metodoEntrega === 'retiro' && !sucursalId) ? (
             <div className="btn-whatsapp-text">

@@ -8,6 +8,7 @@ export interface PedidoAdmin {
   uid: string | null;
   clienteNombre: string;
   clienteTelefono?: string;
+  clienteDireccion?: string;
   fecha: { seconds: number; nanoseconds: number } | Date;
   items: PedidoItem[];
   total: number;
@@ -36,6 +37,253 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
   const [isFresh, setIsFresh] = useState(isNew(pedido.fecha));
   const [status, setStatus] = useState(pedido.status || "no_leido");
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const cleanPhone = (tel: string) => {
+    let cleaned = tel.replace(/[\s\-\(\)]/g, "");
+    if (cleaned.startsWith("0")) {
+      cleaned = cleaned.substring(1);
+    }
+    if (cleaned.startsWith("598")) {
+      return cleaned;
+    }
+    return `598${cleaned}`;
+  };
+
+  const getWhatsAppMessage = () => {
+    const isRetiro = pedido.clienteDireccion?.includes("RETIRO EN LOCAL");
+    const text = `*Distribuidora El Remate* 🛒\n\n¡Hola *${pedido.clienteNombre}*! Recibimos tu pedido en la web.\n\n📋 *Detalle del Pedido:*\n🔢 ID de Orden: #${pedido.id.slice(-6).toUpperCase()}\n💰 Total Estimado: ${formatCurrency(pedido.total)}\n🚚 Entrega: ${isRetiro ? "Retiro en local" : "Envío a domicilio"}\n\nEl despacho de tu pedido está en proceso. ¡Muchas gracias por tu preferencia!`;
+    return encodeURIComponent(text);
+  };
+
+  const handleImprimir = () => {
+    const printWindow = window.open("", "_blank", "width=800,height=600");
+    if (!printWindow) return;
+
+    const fechaFormateada = new Date(pedido.fecha instanceof Date ? pedido.fecha : pedido.fecha.seconds * 1000).toLocaleString("es-UY");
+
+    const itemsHtml = pedido.items
+      .map(
+        (i) => `
+        <tr class="item-row">
+          <td class="qty">${i.cantidad}</td>
+          <td class="desc">
+            <span class="name">${i.nombre}</span>
+            <span class="code">(${i.codigo})</span>
+          </td>
+          <td class="price">${formatCurrency(i.cantidad * i.precioUnitario)}</td>
+        </tr>
+      `
+      )
+      .join("");
+
+    const isRetiro = pedido.clienteDireccion?.includes("RETIRO EN LOCAL");
+    const metodoLabel = isRetiro ? "🟢 RETIRO EN SUCURSAL" : "🚚 ENVÍO A DOMICILIO";
+    const direccionClean = pedido.clienteDireccion
+      ? pedido.clienteDireccion.replace("RETIRO EN LOCAL: ", "").replace("RETIRO EN SUCURSAL: ", "").replace("🏠 ENVÍO A DOMICILIO: ", "")
+      : "No especificada";
+
+    const content = `
+      <html>
+        <head>
+          <title>Picking - #${pedido.id.slice(-6).toUpperCase()}</title>
+          <style>
+            @page {
+              size: 80mm auto;
+              margin: 0;
+            }
+            body {
+              font-family: 'Courier New', Courier, monospace;
+              width: 74mm;
+              margin: 0 auto;
+              padding: 5mm 0;
+              font-size: 11px;
+              color: #000;
+              line-height: 1.3;
+            }
+            .text-center { text-align: center; }
+            .header {
+              border-bottom: 1px dashed #000;
+              padding-bottom: 3mm;
+              margin-bottom: 3mm;
+            }
+            .title {
+              font-size: 16px;
+              font-weight: bold;
+              margin: 0 0 1mm 0;
+              letter-spacing: 1px;
+            }
+            .subtitle {
+              font-size: 10px;
+              margin: 0 0 2mm 0;
+              text-transform: uppercase;
+            }
+            .info-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 3mm;
+              font-size: 10px;
+            }
+            .info-table td {
+              padding: 0.5mm 0;
+              vertical-align: top;
+            }
+            .info-table td.label {
+              font-weight: bold;
+              width: 18mm;
+            }
+            .divider {
+              border-top: 1px dashed #000;
+              margin: 3mm 0;
+            }
+            .items-table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            .items-table th {
+              border-bottom: 1px solid #000;
+              text-align: left;
+              font-size: 10px;
+              padding-bottom: 1mm;
+            }
+            .items-table td {
+              padding: 1.5mm 0;
+              vertical-align: top;
+            }
+            .items-table .qty {
+              width: 8mm;
+              font-weight: bold;
+              font-size: 12px;
+            }
+            .items-table .desc {
+              font-size: 11px;
+            }
+            .items-table .desc .name {
+              display: block;
+              text-transform: uppercase;
+            }
+            .items-table .desc .code {
+              font-size: 9px;
+              color: #555;
+              display: block;
+              margin-top: 0.5mm;
+            }
+            .items-table .price {
+              text-align: right;
+              width: 18mm;
+              font-weight: bold;
+            }
+            .totals {
+              margin-top: 3mm;
+              text-align: right;
+              font-size: 13px;
+              font-weight: bold;
+            }
+            .notes {
+              margin-top: 4mm;
+              padding: 2mm;
+              border: 1px dashed #000;
+              font-size: 9px;
+              background-color: #f9f9f9;
+            }
+            .notes-title {
+              font-weight: bold;
+              margin-bottom: 1mm;
+              text-transform: uppercase;
+            }
+            .signature {
+              margin-top: 10mm;
+              border-top: 1px solid #000;
+              text-align: center;
+              padding-top: 2mm;
+              font-size: 10px;
+            }
+            @media print {
+              body {
+                width: 74mm;
+                padding: 0;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header text-center">
+            <h1 class="title">EL REMATE</h1>
+            <p class="subtitle">Distribuidora · Canelones</p>
+            <div style="font-size: 12px; font-weight: bold; margin-top: 2mm;">
+              TICKET DE PREPARACIÓN
+            </div>
+            <div style="font-size: 10px;">ID: #${pedido.id.slice(-6).toUpperCase()}</div>
+          </div>
+
+          <table class="info-table">
+            <tr>
+              <td class="label">CLIENTE:</td>
+              <td style="font-weight: bold; text-transform: uppercase;">${pedido.clienteNombre}</td>
+            </tr>
+            ${pedido.clienteTelefono ? `
+            <tr>
+              <td class="label">TEL:</td>
+              <td>${pedido.clienteTelefono}</td>
+            </tr>` : ''}
+            <tr>
+              <td class="label">FECHA:</td>
+              <td>${fechaFormateada}</td>
+            </tr>
+            <tr>
+              <td class="label">ENTREGA:</td>
+              <td style="font-weight: bold;">${metodoLabel}</td>
+            </tr>
+            <tr>
+              <td class="label">DIREC:</td>
+              <td style="font-size: 9px; max-width: 56mm; word-wrap: break-word;">${direccionClean}</td>
+            </tr>
+          </table>
+
+          <div class="divider"></div>
+
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th style="width: 8mm;">CANT</th>
+                <th>DETALLE</th>
+                <th style="text-align: right; width: 18mm;">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+
+          <div class="divider"></div>
+
+          <div class="totals">
+            TOTAL: ${formatCurrency(pedido.total)}
+          </div>
+
+          ${pedido.notas ? `
+          <div class="notes">
+            <div class="notes-title">Observaciones:</div>
+            <div>${pedido.notas}</div>
+          </div>` : ''}
+
+          <div class="signature">
+            Firma Preparador / Reparto
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(content);
+    printWindow.document.close();
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -167,6 +415,25 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
                 {status.replace("_", " ")}
               </span>
             </div>
+            {pedido.clienteDireccion && (
+              <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-white/5 border border-white/5 px-3 py-1.5 w-fit">
+                {pedido.clienteDireccion.includes("RETIRO EN LOCAL") ? (
+                  <>
+                    <span className="text-xs">🏪</span>
+                    <span className="text-[10px] font-black text-amber-400 tracking-wider uppercase">RETIRO EN LOCAL</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-xs">🚚</span>
+                    <span className="text-[10px] font-black text-[#00E5FF] tracking-wider uppercase">ENVÍO A DOMICILIO</span>
+                  </>
+                )}
+                <span className="text-white/10 text-xs">|</span>
+                <span className="text-[10px] font-mono text-gray-400 truncate max-w-[200px] sm:max-w-xs" title={pedido.clienteDireccion}>
+                  {pedido.clienteDireccion.replace("RETIRO EN LOCAL: ", "").replace("🏠 ENVÍO A DOMICILIO: ", "")}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="relative">
@@ -180,13 +447,13 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
         <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-white/5 pt-8">
           {pedido.clienteTelefono && (
             <a 
-              href={`https://wa.me/598${pedido.clienteTelefono.replace(/\s+/g, '')}`}
+              href={`https://wa.me/${cleanPhone(pedido.clienteTelefono)}?text=${getWhatsAppMessage()}`}
               target="_blank"
               rel="noopener noreferrer"
               className="group/btn flex flex-1 items-center justify-center gap-3 rounded-2xl bg-[#25D366] px-6 py-4 text-xs font-black text-black transition-all hover:scale-[1.02] hover:shadow-[0_10px_20px_rgba(37,211,102,0.3)] active:scale-95"
             >
               <span className="text-lg">💬</span>
-              <span>WHATSAPP</span>
+              <span>WHATSAPP PRO</span>
             </a>
           )}
           
@@ -201,6 +468,15 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           >
             <span className="text-xl">🧾</span>
             <span className="text-[10px] font-black uppercase tracking-widest">RECIBO</span>
+          </button>
+
+          <button
+            onClick={handleImprimir}
+            className="flex h-[56px] flex-1 items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white active:scale-95"
+            title="Imprimir Ticket Térmico 80mm"
+          >
+            <span className="text-xl">🖨️</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">IMPRIMIR</span>
           </button>
 
           <button

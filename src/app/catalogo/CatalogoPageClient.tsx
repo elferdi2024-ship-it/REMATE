@@ -39,7 +39,7 @@ import { haptic } from "@/lib/haptic";
 import * as ls from "@/lib/ls";
 import { SUCURSALES, type MetodoEntrega } from "@/lib/sucursales";
 import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import type { Vista, CartItem, Producto } from "@/types";
 import { CATEGORIAS, EMOJI_POR_CATEGORIA } from "@/types";
 import categoriaMapping from "@/lib/categoria_mapping.json";
@@ -325,6 +325,21 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Search state for instant feedback on input, synced with URL
   const [search, setSearch] = useState(urlSearch);
   const [debouncedSearch, setDebouncedSearch] = useState(urlSearch);
+
+  // Tienda Config
+  const [tiendaConfig, setTiendaConfig] = useState<{ pedidosAbiertos: boolean; bannerMensaje: string }>({
+    pedidosAbiertos: true,
+    bannerMensaje: "",
+  });
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "config", "tienda"), (snap) => {
+      if (snap.exists()) {
+        setTiendaConfig(snap.data() as any);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   // Sync state if URL changes from outside (e.g., back button or banners)
   useEffect(() => {
@@ -991,6 +1006,21 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     <>
       <OnlineBanner />
 
+      {/* Banners dinámicos premium controlados desde el panel de administración (Reloj Suizo) */}
+      {tiendaConfig.bannerMensaje && (
+        <div className="w-full bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black font-bold text-center text-xs sm:text-sm py-2.5 px-4 shadow-[0_4px_20px_rgba(245,158,11,0.25)] flex items-center justify-center gap-2 z-40 transition-all duration-300">
+          <span className="text-sm">📢</span>
+          <span>{tiendaConfig.bannerMensaje}</span>
+        </div>
+      )}
+
+      {!tiendaConfig.pedidosAbiertos && (
+        <div className="w-full bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-white font-bold text-center text-xs sm:text-sm py-3 px-4 shadow-[0_4px_25px_rgba(220,38,38,0.3)] flex items-center justify-center gap-2 z-40 transition-all duration-300 border-b border-red-500/20">
+          <span className="text-sm animate-pulse">⚠️</span>
+          <span>TOMA DE PEDIDOS PAUSADA TEMPORALMENTE. Podés armar tu carrito, pero la confirmación está inactiva.</span>
+        </div>
+      )}
+
       {/* Shared cart watcher (reads URL params inside Suspense) */}
       <Suspense fallback={null}>
         <SharedCartWatcher onLoadCart={(cart) => setSharedCart(cart)} />
@@ -1142,6 +1172,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onMetodoEntregaChange={setMetodoEntrega}
         sucursalId={sucursalId}
         onSucursalChange={setSucursalId}
+        isTiendaCerrada={!tiendaConfig.pedidosAbiertos}
       />
 
       {/* User Panel */}

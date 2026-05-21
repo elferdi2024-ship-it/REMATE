@@ -34,6 +34,7 @@ interface CartPanelProps {
   onMetodoEntregaChange: (m: MetodoEntrega) => void;
   sucursalId: string | null;
   onSucursalChange: (id: string) => void;
+  isTiendaCerrada?: boolean;
 }
 
 export default function CartPanel({
@@ -62,6 +63,7 @@ export default function CartPanel({
   onMetodoEntregaChange,
   sucursalId,
   onSucursalChange,
+  isTiendaCerrada = false,
 }: CartPanelProps) {
   return (
     <>
@@ -141,6 +143,7 @@ export default function CartPanel({
               onMetodoEntregaChange={onMetodoEntregaChange}
               sucursalId={sucursalId}
               onSucursalChange={onSucursalChange}
+              isTiendaCerrada={isTiendaCerrada}
             />
             </>
           )}

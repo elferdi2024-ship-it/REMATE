@@ -2,6 +2,7 @@
 
 import PedidoAdminCard, { type PedidoAdmin } from "@/components/admin/PedidoAdminCard";
 import { actualizarEstadoPedido, subscribePedidosHoy } from "@/lib/pedidos";
+import { SUCURSALES } from "@/lib/sucursales";
 import { useCallback, useEffect, useState } from "react";
 
 const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -21,6 +22,8 @@ export default function PedidosPage() {
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [onlyFresh, setOnlyFresh] = useState(false);
   const [bulkUpdating, setBulkUpdating] = useState(false);
+  const [deliveryFilter, setDeliveryFilter] = useState<"todos" | "envio" | "retiro">("todos");
+  const [branchFilter, setBranchFilter] = useState<string>("todas");
 
   const playNotification = useCallback(() => {
     try {
@@ -37,6 +40,7 @@ export default function PedidosPage() {
         uid: d.uid ?? null,
         clienteNombre: d.clienteNombre ?? "Cliente",
         clienteTelefono: d.clienteTelefono ?? "",
+        clienteDireccion: d.clienteDireccion ?? "",
         fecha: d.fecha?.toDate?.() ?? new Date(),
         items: d.items ?? [],
         total: d.total ?? 0,
@@ -81,7 +85,30 @@ export default function PedidosPage() {
     const ts = p.fecha instanceof Date ? p.fecha.getTime() : p.fecha.seconds * 1000;
     const isFresh = Date.now() - ts < 5 * 60 * 1000;
     const matchesFresh = !onlyFresh || isFresh;
-    return matchesSearch && matchesStatus && matchesFresh;
+
+    // Delivery Method Filter
+    let matchesDelivery = true;
+    const isRetiro = p.clienteDireccion?.includes("RETIRO EN LOCAL") || false;
+    const isEnvio = p.clienteDireccion ? (!isRetiro && p.clienteDireccion.trim().length > 0) : false;
+
+    if (deliveryFilter === "retiro") {
+      matchesDelivery = isRetiro;
+    } else if (deliveryFilter === "envio") {
+      matchesDelivery = isEnvio;
+    }
+
+    // Branch Filter
+    let matchesBranch = true;
+    if (branchFilter !== "todas") {
+      const sucursal = SUCURSALES.find((s) => s.id === branchFilter);
+      if (sucursal) {
+        matchesBranch = isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase()) || false;
+      } else {
+        matchesBranch = false;
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesFresh && matchesDelivery && matchesBranch;
   });
 
   const handleBulkStatus = useCallback(
@@ -194,6 +221,57 @@ export default function PedidosPage() {
           >
             Solo nuevos (5m)
           </button>
+        </div>
+      </div>
+
+      {/* Swiss Watch Control Deck: Method & Branch Filters */}
+      <div className="flex flex-col gap-6 rounded-[32px] border border-white/5 bg-[#0A0F1C] p-6 shadow-2xl md:flex-row md:items-center md:justify-between">
+        {/* Delivery Method Filter */}
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-500">MÉTODO DE ENTREGA</label>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { id: "todos", label: "TODOS", icon: "🌐" },
+              { id: "envio", label: "🚚 ENVÍO", icon: "🚚" },
+              { id: "retiro", label: "🏪 RETIRO", icon: "🏪" },
+            ].map((m) => (
+              <button
+                key={m.id}
+                onClick={() => {
+                  setDeliveryFilter(m.id as any);
+                  if (m.id !== "retiro") {
+                    setBranchFilter("todas");
+                  }
+                }}
+                className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
+                  deliveryFilter === m.id
+                    ? "border-[#00E5FF] bg-[#00E5FF]/10 text-[#00E5FF] shadow-[0_0_15px_rgba(0,229,255,0.15)]"
+                    : "border-white/5 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <span>{m.icon}</span>
+                <span>{m.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Branch Filter (Enabled only when retiro is selected or todos is selected) */}
+        <div className="space-y-2 flex-1 md:max-w-xs">
+          <label className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-500">FILTRAR SUCURSAL</label>
+          <select
+            value={branchFilter}
+            onChange={(e) => setBranchFilter(e.target.value)}
+            disabled={deliveryFilter === "envio"}
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-white placeholder:text-gray-500 focus:border-[#00E5FF]/50 focus:outline-none focus:ring-1 focus:ring-[#00E5FF]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
+          >
+            <option value="todas" className="bg-[#0A0F1C] text-white">TODAS LAS SUCURSALES</option>
+            {SUCURSALES.map((s) => (
+              <option key={s.id} value={s.id} className="bg-[#0A0F1C] text-white">
+                {s.nombre} ({s.direccion})
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

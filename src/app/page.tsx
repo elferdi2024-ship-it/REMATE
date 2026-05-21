@@ -3,10 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { BrandStrip, BrandShowcase } from "@/components/ads";
 import { useBrands } from "@/hooks/useBrands";
+import { SUCURSALES } from "@/lib/sucursales";
+import * as ls from "@/lib/ls";
 
 /* ═══════════════════════════════════════════════════════════════════
    LANDING PAGE — Distribuidora El Remate
@@ -26,16 +29,8 @@ import { useBrands } from "@/hooks/useBrands";
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ──────────────────────────────────────────────────────────────
-   📍 DATOS: SUCURSALES (editar nombres, teléfonos, direcciones)
+   📍 DATOS: SUCURSALES (Importadas desde @/lib/sucursales)
    ────────────────────────────────────────────────────────────── */
-const SUCURSALES = [
-  { nombre: "La Paz", telefono: "094 358 830", direccion: "Ramón Álvarez 225" },
-  { nombre: "Las Piedras", telefono: "092 202 019", direccion: "Luis Alberto de Herrera 487" },
-  { nombre: "18 de Mayo", telefono: "094 713 033", direccion: "Maestro Julio Castro 15" },
-  { nombre: "Las Piedras", telefono: "099 013 272", direccion: "Avenida Artigas 750" },
-  { nombre: "Canelones", telefono: "094 611 400", direccion: "General Artigas 118" },
-  { nombre: "El Dorado", telefono: "093 404 158", direccion: "Elías Regules esq. Honduras" },
-];
 
 /* ──────────────────────────────────────────────────────────────
    📍 DATOS: CATEGORÍAS DE PRODUCTOS (editar nombres e íconos)
@@ -99,8 +94,14 @@ const FEATURES = [
    ═══════════════════════════════════════════════════════════════════ */
 
 export default function LandingPage() {
+  const router = useRouter();
   const [configCats, setConfigCats] = useState<Record<string, string>>({});
   const { brands } = useBrands();
+
+  const handleSelectSucursal = (id: string) => {
+    ls.setSelectedSucursal(id);
+    router.push(`/catalogo?sucursal=${id}`);
+  };
 
   useEffect(() => {
     async function load() {
@@ -985,7 +986,7 @@ export default function LandingPage() {
                 color: "var(--tierra, #5C4A35)", // 🎨 COLOR SUBTÍTULO SUCURSALES: cambiar aquí
               }}
             >
-              Encontranos en Canelones
+              Encontranos en Canelones · Tocá una sucursal para ver su catálogo
             </p>
           </div>
 
@@ -997,9 +998,10 @@ export default function LandingPage() {
               gap: "16px",
             }}
           >
-            {SUCURSALES.map((sucursal, i) => (
+            {SUCURSALES.map((sucursal) => (
               <div
-                key={i}
+                key={sucursal.id}
+                onClick={() => handleSelectSucursal(sucursal.id)}
                 style={{
                   background: "var(--white, #FFFFFF)",
                   borderRadius: "var(--r-lg, 16px)",
@@ -1007,73 +1009,119 @@ export default function LandingPage() {
                   padding: "28px",
                   boxShadow: "var(--shadow-md, 0 4px 16px rgba(17,11,8,0.12))",
                   transition: "all 0.2s",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-4px)";
                   e.currentTarget.style.boxShadow = "var(--shadow-lg, 0 12px 40px rgba(17,11,8,0.18))";
+                  e.currentTarget.style.borderColor = "var(--rojo, #D62828)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "translateY(0)";
                   e.currentTarget.style.boxShadow = "var(--shadow-md, 0 4px 16px rgba(17,11,8,0.12))";
+                  e.currentTarget.style.borderColor = "var(--border, #DDD8D0)";
                 }}
               >
-                {/* 👇 NOMBRE SUCURSAL - editar color aquí 👇 */}
-                <h3
-                  style={{
-                    fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif",
-                    fontSize: "1.6rem",
-                    color: "var(--oscuro, #111111)", // 🎨 COLOR NOMBRE: cambiar aquí
-                    letterSpacing: "1px",
-                    marginBottom: "16px",
-                    lineHeight: 1.1,
-                  }}
-                >
-                  📍 {sucursal.nombre}
-                </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                  {/* 👇 DIRECCIÓN SUCURSAL - editar color aquí 👇 */}
-                  <p
+                <div>
+                  {/* 👇 NOMBRE SUCURSAL - editar color aquí 👇 */}
+                  <h3
                     style={{
-                      fontSize: "0.95rem",
-                      color: "var(--texto, #111111)", // 🎨 COLOR DIRECCIÓN: cambiar aquí
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      fontWeight: 600,
-                      lineHeight: 1.5,
+                      fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif",
+                      fontSize: "1.6rem",
+                      color: "var(--oscuro, #111111)", // 🎨 COLOR NOMBRE: cambiar aquí
+                      letterSpacing: "1px",
+                      marginBottom: "16px",
+                      lineHeight: 1.1,
                     }}
                   >
-                    {sucursal.direccion}
-                  </p>
-                  {/* 👇 TELÉFONO SUCURSAL - editar color aquí 👇 */}
-                  <a
-                    href={`https://wa.me/598${sucursal.telefono.replace(/\s/g, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    📍 {sucursal.nombre}
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {/* 👇 DIRECCIÓN SUCURSAL - editar color aquí 👇 */}
+                    <p
+                      style={{
+                        fontSize: "0.95rem",
+                        color: "var(--texto, #111111)", // 🎨 COLOR DIRECCIÓN: cambiar aquí
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        fontWeight: 600,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {sucursal.direccion}
+                    </p>
+                    {/* 👇 TELÉFONO SUCURSAL - editar color aquí 👇 */}
+                    <a
+                      href={`https://wa.me/598${sucursal.telefono.replace(/\s/g, "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        fontSize: "0.95rem",
+                        color: "var(--verde, #1A7A42)", // 🎨 COLOR TELÉFONO: cambiar aquí
+                        textDecoration: "none",
+                        fontWeight: 700,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "6px 10px",
+                        borderRadius: "var(--r-sm, 8px)",
+                        transition: "all 0.15s",
+                        background: "rgba(26,122,66,0.06)",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "rgba(26,122,66,0.12)";
+                        e.currentTarget.style.color = "var(--verde-dark, #145E33)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "rgba(26,122,66,0.06)";
+                        e.currentTarget.style.color = "var(--verde, #1A7A42)";
+                      }}
+                    >
+                      📱 {sucursal.telefono}
+                    </a>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: "18px", borderTop: "1.5px solid var(--border, #DDD8D0)", paddingTop: "14px" }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectSucursal(sucursal.id);
+                    }}
                     style={{
-                      fontSize: "0.95rem",
-                      color: "var(--verde, #1A7A42)", // 🎨 COLOR TELÉFONO: cambiar aquí
-                      textDecoration: "none",
-                      fontWeight: 700,
+                      width: "100%",
+                      background: "var(--rojo, #D62828)",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "var(--r-sm, 8px)",
+                      padding: "10px 14px",
+                      fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif",
+                      fontSize: "1.05rem",
+                      letterSpacing: "1.5px",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                      boxShadow: "0 2px 8px rgba(214,40,40,0.2)",
                       display: "flex",
                       alignItems: "center",
-                      gap: "8px",
-                      padding: "6px 10px",
-                      borderRadius: "var(--r-sm, 8px)",
-                      transition: "all 0.15s",
-                      background: "rgba(26,122,66,0.06)",
+                      justifyContent: "center",
+                      gap: "6px"
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "rgba(26,122,66,0.12)";
-                      e.currentTarget.style.color = "var(--verde-dark, #145E33)";
+                      e.currentTarget.style.background = "var(--rojo-dark, #A31D1D)";
+                      e.currentTarget.style.transform = "translateY(-1px)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(26,122,66,0.06)";
-                      e.currentTarget.style.color = "var(--verde, #1A7A42)";
+                      e.currentTarget.style.background = "var(--rojo, #D62828)";
+                      e.currentTarget.style.transform = "translateY(0)";
                     }}
                   >
-                    📱 {sucursal.telefono}
-                  </a>
+                    🛒 VER CATÁLOGO ➡️
+                  </button>
                 </div>
               </div>
             ))}
