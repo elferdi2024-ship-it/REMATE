@@ -17,7 +17,10 @@ import {
   FloatCartBtn,
   MarketingRail,
   ConversionStrip,
+  BrandRail,
 } from "@/components/catalogo";
+import { useBrands } from "@/hooks/useBrands";
+
 import CartPanel from "@/components/carrito/CartPanel";
 import UserPanel from "@/components/usuario/UserPanel";
 import FacturaModal from "@/components/catalogo/FacturaModal";
@@ -289,6 +292,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const urlCategoria = searchParams?.get("categoria") || "";
 
   const { items: cartItems, addItem, removeItem, updateQty, clearCart, total, totalQty } = useCart();
+  const { brands } = useBrands();
+
   const { user, signOut } = useAuth();
   const toast = useToast();
   const isOnline = useOnline();
@@ -306,18 +311,19 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   // Hydration fix: Load client-only data after mount
   const [mounted, setMounted] = useState(false);
+  const [direccion, setDireccion] = useState("");
   useEffect(() => {
     setMounted(true);
     setVista(ls.getVista());
     setAlias(ls.getAlias());
     setTelefono(ls.getTelefono());
+    setDireccion(ls.getDireccion());
   }, []);
   const [clientNotes, setClientNotes] = useState("");
   const [sharedCart, setSharedCart] = useState<CartItem[] | null>(null);
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [facturaModalOpen, setFacturaModalOpen] = useState(false);
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
-  const [direccion, setDireccion] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [metodoEntrega, setMetodoEntrega] = useState<MetodoEntrega>('envio');
   const [sucursalId, setSucursalId] = useState<string | null>(null);
@@ -611,13 +617,20 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     ls.setTelefono(t);
   }, []);
 
+  const handleSaveDireccion = useCallback((d: string) => {
+    setDireccion(d);
+    ls.setDireccion(d);
+  }, []);
+
   const handleClearData = useCallback(() => {
     ls.setAlias("");
     ls.setTelefono("");
+    ls.setDireccion("");
     ls.setHistory([]);
     ls.setBusquedas([]);
     setAlias("");
     setTelefono("");
+    setDireccion("");
     toast.info("Datos locales limpiados");
   }, [toast]);
 
@@ -765,7 +778,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         console.error("❌ LocalStorage: Error al guardar historial local:", lErr);
       }
 
-      // 4. GENERAR Y ENVIAR POR WHATSAPP (Lo m\u00e1s importante)
+      // 4. GENERAR Y ENVIAR POR WHATSAPP (Lo más importante)
       try {
         await enviarFacturaWhatsApp(
           process.env.NEXT_PUBLIC_WA_NUMBER!,
@@ -775,11 +788,12 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           deliveryNotas || undefined,
           "/logo.png",
           orderId,
-          deliveryDireccion
+          deliveryDireccion,
+          true // skipRedirect = true: descarga el comprobante y no redirige a WhatsApp
         );
       } catch (waErr) {
         console.error("❌ WhatsApp: Error al enviar factura:", waErr);
-        throw new Error("No se pudo abrir WhatsApp para enviar el pedido.");
+        throw new Error("No se pudo descargar el comprobante del pedido.");
       }
 
       // Reset delivery state after success
@@ -913,6 +927,15 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
     return sorted.slice(0, 8);
   }, [productos]);
+
+  // Recomendaciones semánticas del carrito (Cross-Selling con Dominios Semánticos)
+  const cartRecommendations = useMemo(() => {
+    if (cartItems.length === 0 || productos.length === 0) return [];
+    // Tomar el último producto agregado al carrito como ancla
+    const lastItem = cartItems[cartItems.length - 1];
+    const anchorProduct = productos.find(p => p.codigo === lastItem.codigo) || null;
+    return getRelatedProducts(anchorProduct).slice(0, 4);
+  }, [cartItems, productos, getRelatedProducts]);
 
   // Render clear loading shell to prevent hydration mismatches
   if (!mounted) {
@@ -1066,7 +1089,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
       {/* Contenido del catálogo — max-width desktop */}
       <div className="page-wrapper">
+
         {/* Category nav */}
+
         {categorias.length > 0 && (
           <CatsNav
             categorias={["Todos", ...categorias]}
@@ -1131,6 +1156,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             onAdd={handleAddProduct}
             onQtyChange={handleQtyChange}
             onQuickView={(p) => setQuickViewProduct(p)}
+            onSelectBrand={handleBrandFilter}
           />
         )}
       </div>
@@ -1166,13 +1192,15 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         clientNotes={clientNotes}
         onClientNotesChange={setClientNotes}
         direccion={direccion}
-        onDireccionChange={setDireccion}
+        onDireccionChange={handleSaveDireccion}
         isProcessing={isProcessing}
         metodoEntrega={metodoEntrega}
         onMetodoEntregaChange={setMetodoEntrega}
         sucursalId={sucursalId}
         onSucursalChange={setSucursalId}
         isTiendaCerrada={!tiendaConfig.pedidosAbiertos}
+        relatedProducts={cartRecommendations}
+        onAddProduct={handleAddProduct}
       />
 
       {/* User Panel */}

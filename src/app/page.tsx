@@ -150,15 +150,17 @@ export default function LandingPage() {
           />
         </div>
 
-        {/* Textura radial cálida */}
+        {/* Textura radial cálida animada */}
         <div
           style={{
             position: "absolute",
             inset: 0,
             backgroundImage: `
-              radial-gradient(ellipse 60% 80% at -5% 50%, rgba(214,40,40,0.14) 0%, transparent 55%),
-              radial-gradient(ellipse 50% 60% at 105% 20%, rgba(214,40,40,0.08) 0%, transparent 50%)
+              radial-gradient(ellipse 60% 80% at -5% 50%, rgba(214,40,40,0.18) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 60% at 105% 20%, rgba(214,40,40,0.12) 0%, transparent 55%)
             `,
+            backgroundSize: "200% 200%",
+            animation: "animateHeroGradient 10s ease infinite",
             pointerEvents: "none",
             zIndex: 1,
           }}
@@ -535,33 +537,27 @@ export default function LandingPage() {
             {FEATURES.map((feature, i) => (
               <div
                 key={i}
+                className="premium-glass"
                 style={{
-                  background: "var(--white, #FFFFFF)",
                   borderRadius: "var(--r-lg, 16px)",
-                  border: "1.5px solid var(--border, #DDD8D0)",
                   padding: "32px 24px",
                   textAlign: "center",
-                  transition: "all 0.2s",
-                  boxShadow: "var(--shadow-md, 0 4px 16px rgba(17,11,8,0.12))",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = "var(--shadow-lg, 0 12px 40px rgba(17,11,8,0.18))";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "var(--shadow-md, 0 4px 16px rgba(17,11,8,0.12))";
+                  boxShadow: "var(--shadow-premium)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <div style={{ fontSize: "3rem", marginBottom: "16px" }}>
                   {feature.icono}
                 </div>
-                {/* 👇 TÍTULO TARJETA - editar color aquí 👇 */}
+                {/* 👇 TÍTULO TARJETA 👇 */}
                 <h3
                   style={{
                     fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif",
                     fontSize: "1.6rem",
-                    color: "var(--oscuro, #111111)", // 🎨 COLOR TÍTULO: cambiar aquí
+                    color: "var(--oscuro, #111111)",
                     letterSpacing: "1px",
                     marginBottom: "12px",
                     lineHeight: 1.1,
@@ -569,11 +565,11 @@ export default function LandingPage() {
                 >
                   {feature.titulo}
                 </h3>
-                {/* 👇 DESCRIPCIÓN TARJETA - editar color aquí 👇 */}
+                {/* 👇 DESCRIPCIÓN TARJETA 👇 */}
                 <p
                   style={{
                     fontSize: "0.95rem",
-                    color: "var(--muted, #5C5550)", // 🎨 COLOR DESCRIPCIÓN: cambiar aquí
+                    color: "var(--muted, #5C5550)",
                     lineHeight: 1.6,
                     fontWeight: 500,
                   }}

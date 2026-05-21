@@ -101,6 +101,39 @@
 
   /* ── Sombras Premium ── */
   --shadow-premium: 0 10px 25px -5px rgba(0,0,0,0.04), 0 8px 10px -6px rgba(0,0,0,0.04);
+
+  /* ── Glassmorphism Premium (Fase 2) ── */
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-bg-hover: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.45);
+  --glass-blur: blur(14px);
+}
+
+/* Keyframes globales para animaciones ultra-smooth (Fase 2 & 4) */
+@keyframes shimmerPulse {
+  0%, 100% { opacity: 0.45; background-color: var(--bg2); }
+  50% { opacity: 0.90; background-color: var(--border); }
+}
+
+@keyframes animateHeroGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.premium-glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-glass:hover {
+  background: var(--glass-bg-hover);
+  border-color: rgba(232, 48, 42, 0.2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 /* 
@@ -3155,3 +3188,99 @@ html.dark-mode body { background: var(--bg); }
   border: 1px solid rgba(0,0,0,0.06) !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.04) !important;
 }
+
+/* ══════════════════════════════════════════════════════════
+   B2B SPONSOR & ADVERTISING SUITE V5 ANIMATIONS (GPU ACCELERATED)
+   ══════════════════════════════════════════════════════════ */
+
+@keyframes sponsored-conic-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sponsored-metallic-glint {
+  0% {
+    left: -150%;
+  }
+  30%, 100% {
+    left: 150%;
+  }
+}
+
+.sponsored-conic-glow-border {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--white);
+  z-index: 1;
+}
+
+/* El pseudo-elemento que dibuja el gradiente rotativo cónico */
+.sponsored-conic-glow-border::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(232, 48, 42, 0.4) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+  animation: sponsored-conic-spin 4s linear infinite;
+  z-index: -2;
+  will-change: transform;
+}
+
+/* Capa de fondo interna para tapar el centro de la rotación y dejar solo un borde fino */
+.sponsored-conic-glow-border::after {
+  content: "";
+  position: absolute;
+  inset: 1.5px;
+  background: var(--white);
+  border-radius: 15px;
+  z-index: -1;
+}
+
+.sponsored-metallic-glint-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.sponsored-metallic-glint-overlay::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.15) 30%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0.15) 70%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  animation: sponsored-metallic-glint 5.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: left;
+}
+
+.brand-rail-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+

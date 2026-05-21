@@ -10,3 +10,4 @@ export { default as ProductoGrid } from "./ProductoGrid";
 export { default as FloatCartBtn } from "./FloatCartBtn";
 export { default as MarketingRail } from "./MarketingRail";
 export { default as ConversionStrip } from "./ConversionStrip";
+export { default as BrandRail } from "./BrandRail";

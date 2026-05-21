@@ -91,14 +91,17 @@ export default function ProductoCard({
 }: ProductoCardProps) {
   const cardRef = React.useRef<HTMLDivElement>(null);
   const [isAdding, setIsAdding] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
   const isInCart = qty > 0;
 
   const handleAdd = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    onAdd(producto, e);
-    setIsAdding(true);
-    setTimeout(() => setIsAdding(false), 300);
-  }, [onAdd, producto]);
+    if (onQuickView) {
+      onQuickView(producto);
+    } else {
+      onAdd(producto, e);
+    }
+  }, [onQuickView, onAdd, producto]);
 
   const handleDec = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -117,34 +120,61 @@ export default function ProductoCard({
     <div
       ref={cardRef}
       onClick={() => onQuickView?.(producto)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`card${isInCart ? " in-cart" : ""} group ${isAdding ? "adding-anim" : ""}`}
       style={{
         background: "var(--white)",
-        border: "1px solid rgba(17,11,8,0.12)",
-        borderRadius: "16px",
-        padding: "10px",
-        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        border: isHovered 
+          ? "1px solid rgba(232, 48, 42, 0.25)" 
+          : isInCart
+            ? "1.5px solid var(--verde)" 
+            : "1px solid rgba(17,11,8,0.08)",
+        borderRadius: "20px",
+        padding: "12px",
+        transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        boxShadow: "0 10px 24px rgba(17,11,8,0.08)",
+        transform: isHovered ? "translateY(-6px)" : "translateY(0)",
+        boxShadow: isHovered 
+          ? "0 20px 35px rgba(17,11,8,0.12), 0 4px 12px rgba(17,11,8,0.04)"
+          : isInCart
+            ? "0 10px 24px rgba(46,125,50,0.06)"
+            : "0 8px 24px rgba(17,11,8,0.04)",
+        cursor: "pointer"
       } as React.CSSProperties}
     >
       {producto.precio > 0 && (
-        <span className="card-offer-ribbon">Oportunidad</span>
+        <span className="card-offer-ribbon" style={{
+          position: "absolute",
+          top: "12px",
+          left: "12px",
+          zIndex: 3,
+          background: "linear-gradient(135deg, #FF3D00, #E8302A)",
+          color: "white",
+          fontSize: "9px",
+          fontWeight: 800,
+          textTransform: "uppercase",
+          letterSpacing: "1px",
+          padding: "4px 10px",
+          borderRadius: "8px 0 8px 0",
+          boxShadow: "0 4px 10px rgba(232,48,42,0.25)",
+        }}>Oportunidad</span>
       )}
 
       <div className="card-thumb" style={{ 
-        background: "linear-gradient(180deg, #ffffff 0%, #f7f4ef 100%)", 
-        borderRadius: "12px",
+        background: "linear-gradient(180deg, #ffffff 0%, #f9f8f6 100%)", 
+        borderRadius: "14px",
         aspectRatio: "1 / 1",
         height: "auto",
-        marginBottom: "8px",
-        border: "none",
+        marginBottom: "10px",
+        border: "1px solid rgba(17,11,8,0.03)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        position: "relative"
+        position: "relative",
+        overflow: "hidden"
       }}>
         {producto.imagen ? (
           <Image 
@@ -152,16 +182,13 @@ export default function ProductoCard({
             alt={producto.nombre}
             fill
             sizes="(max-width: 768px) 50vw, 33vw"
-            className="group-hover:scale-110"
+            className="group-hover:scale-105"
             style={{ 
               objectFit: "contain", 
-              padding: "4px",
-              transition: "transform 0.5s ease" 
+              padding: "8px",
+              transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)" 
             }} 
             onError={(e) => {
-              // Si falla la imagen, removemos el src para que el estado de react 
-              // o el renderizado condicional muestre el emoji (aunque aquí es más difícil sin estado local)
-              // Por ahora forzamos ocultar la imagen y mostrar el fondo
               const target = e.target as HTMLImageElement;
               target.style.display = "none";
               const parent = target.parentElement;
@@ -176,16 +203,16 @@ export default function ProductoCard({
         {(!producto.imagen) ? (
           <span role="img" aria-hidden="true" style={{ 
             fontSize: "3rem", 
-            transition: "transform 0.5s ease",
-          }} className="group-hover:scale-110">
+            transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+          }} className="group-hover:scale-105">
             {emoji}
           </span>
         ) : (
           <span role="img" aria-hidden="true" style={{ 
             fontSize: "3rem", 
-            transition: "transform 0.5s ease",
+            transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
             display: "none"
-          }} className="group-hover:scale-110 fallback-emoji">
+          }} className="group-hover:scale-105 fallback-emoji">
             {emoji}
           </span>
         )}
@@ -196,10 +223,10 @@ export default function ProductoCard({
               display: "flex",
               alignItems: "center",
               background: "var(--white)",
-              borderRadius: "22px",
-              height: "44px",
-              boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
-              border: "1px solid var(--border-2)",
+              borderRadius: "24px",
+              height: "42px",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+              border: "1.5px solid rgba(46,125,50,0.25)",
               padding: "0 4px"
             }}>
               <button className="float-qty-btn minus" onClick={handleDec} style={{ padding: "0 10px", fontSize: "1.2rem", fontWeight: "bold" }}>&#8722;</button>
@@ -232,26 +259,34 @@ export default function ProductoCard({
               <button className="float-qty-btn plus" onClick={handleInc} style={{ padding: "0 10px", fontSize: "1.2rem", fontWeight: "bold" }}>+</button>
             </div>
           ) : (
-            <button className="btn-float-add" onClick={handleAdd} style={{
-              background: "var(--oscuro)",
-              color: "white",
-              border: "none",
-              borderRadius: "50%",
-              width: "36px",
-              height: "36px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-              cursor: "pointer"
-            }}>
+            <button 
+              className="btn-float-add" 
+              onClick={handleAdd} 
+              style={{
+                background: "linear-gradient(135deg, var(--oscuro), #4b5563)",
+                color: "white",
+                border: "none",
+                borderRadius: "50%",
+                width: "38px",
+                height: "38px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 6px 14px rgba(0,0,0,0.2)",
+                cursor: "pointer",
+                transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+                transform: isHovered ? "scale(1.08)" : "scale(1)",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.15)"}
+              onMouseLeave={(e) => e.currentTarget.style.transform = isHovered ? "scale(1.08)" : "scale(1)"}
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 5v14M5 12h14"/>
               </svg>
             </button>
           )}
         </div>
-        {/* BrandAmbassadorBadge — micro-logo en esquina inferior izquierda de la imagen */}
+        
         {sponsorBrand?.logoUrl && (
           <div style={{
             position: "absolute", bottom: 6, left: 6, zIndex: 3,

@@ -1,86 +1,89 @@
+// filepath: src/components/catalogo/ProductoSkeleton.tsx
 import React from "react";
 
 export function ProductoSkeleton() {
+  const pulseStyle = {
+    animation: "shimmerPulse 1.6s ease-in-out infinite",
+    background: "var(--bg2)",
+  };
+
   return (
     <div
       style={{
         background: "var(--white)",
-        border: "1px solid var(--border)",
+        border: "1.5px solid var(--border)",
         borderRadius: "16px",
-        padding: "10px",
+        padding: "12px",
         display: "flex",
         flexDirection: "column",
         position: "relative",
+        height: "290px", // Altura fija garantizada para eliminar el CLS del catálogo
+        boxShadow: "var(--shadow-sm)",
       }}
     >
       {/* Thumbnail area skeleton */}
       <div
-        className="animate-pulse"
         style={{
-          background: "var(--bg2)",
+          ...pulseStyle,
           borderRadius: "12px",
-          height: "110px",
-          marginBottom: "8px",
+          height: "120px",
+          marginBottom: "10px",
+          width: "100%",
         }}
       />
 
       {/* Categoria chip skeleton */}
       <div
-        className="animate-pulse"
         style={{
-          background: "var(--bg2)",
-          height: "22px",
-          width: "60px",
+          ...pulseStyle,
+          height: "18px",
+          width: "65px",
           borderRadius: "6px",
-          marginBottom: "8px",
+          marginBottom: "10px",
         }}
       />
 
       {/* Name skeleton (2 lines) */}
       <div
-        className="animate-pulse"
         style={{
-          background: "var(--bg2)",
-          height: "1.2rem",
+          ...pulseStyle,
+          height: "14px",
           width: "90%",
           borderRadius: "4px",
           marginBottom: "6px",
         }}
       />
       <div
-        className="animate-pulse"
         style={{
-          background: "var(--bg2)",
-          height: "1.2rem",
+          ...pulseStyle,
+          height: "14px",
           width: "60%",
           borderRadius: "4px",
-          marginBottom: "12px",
+          marginBottom: "14px",
         }}
       />
 
       {/* Price skeleton */}
       <div
-        className="animate-pulse"
         style={{
-          background: "var(--bg2)",
-          height: "24px",
-          width: "80px",
+          ...pulseStyle,
+          height: "22px",
+          width: "75px",
           borderRadius: "6px",
-          marginTop: "4px",
+          marginTop: "auto",
         }}
       />
 
       {/* Button skeleton */}
       <div
-        className="animate-pulse"
         style={{
+          ...pulseStyle,
           position: "absolute",
-          bottom: "10px",
-          right: "10px",
+          bottom: "12px",
+          right: "12px",
           width: "36px",
           height: "36px",
           borderRadius: "50%",
-          background: "var(--bg2)",
         }}
       />
     </div>

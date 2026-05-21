@@ -5,6 +5,7 @@ const LS_HISTORY = "elremate_history";
 const LS_VISTA = "elremate_vista";
 const LS_BUSQUEDAS = "elremate_busquedas";
 const LS_SUCURSAL = "el_remate_selected_sucursal";
+const LS_DIRECCION = "elremate_direccion";
 
 export function getAlias(): string {
   if (typeof window === "undefined") return "";
@@ -24,6 +25,16 @@ export function getTelefono(): string {
 export function setTelefono(v: string): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(LS_TEL, v);
+}
+
+export function getDireccion(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(LS_DIRECCION) || "";
+}
+
+export function setDireccion(v: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(LS_DIRECCION, v);
 }
 
 export function getHistory(): any[] {

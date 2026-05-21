@@ -1,4 +1,5 @@
-﻿"use client";
+// filepath: src/components/ads/NativeStoryCard.tsx
+"use client";
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
@@ -9,9 +10,10 @@ import { markAsSeen, hasSeenEnough } from "@/hooks/useFrequencyCap";
 
 interface NativeStoryCardProps {
   brand: BrandConfig;
+  onBrandFilter?: (brandName: string) => void;
 }
 
-export default function NativeStoryCard({ brand }: NativeStoryCardProps) {
+export default function NativeStoryCard({ brand, onBrandFilter }: NativeStoryCardProps) {
   const { ref, isVisible } = useAdEntrance<HTMLDivElement>();
   const [hidden, setHidden] = useState(false);
 
@@ -28,6 +30,7 @@ export default function NativeStoryCard({ brand }: NativeStoryCardProps) {
   return (
     <div
       ref={ref}
+      onClick={() => onBrandFilter?.(brand.name)}
       style={{
         ...AD_TOKENS.fadeIn(isVisible),
         width: "100%",
@@ -39,6 +42,7 @@ export default function NativeStoryCard({ brand }: NativeStoryCardProps) {
         boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
         margin: "24px 0",
         border: "1px solid rgba(0,0,0,0.05)",
+        cursor: onBrandFilter ? "pointer" : "default",
       }}
     >
       <div style={{ position: "relative", width: "100%", height: "220px", background: "#f0f0f0" }}>
@@ -90,6 +94,11 @@ export default function NativeStoryCard({ brand }: NativeStoryCardProps) {
         </div>
 
         <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onBrandFilter?.(brand.name);
+          }}
           style={{
             background: "transparent",
             color: brand.color || "var(--rojo, #e8302a)",

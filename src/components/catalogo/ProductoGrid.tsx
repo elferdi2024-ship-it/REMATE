@@ -21,6 +21,7 @@ interface ProductoGridProps {
   onAdd: (producto: Producto, e?: React.MouseEvent) => void;
   onQtyChange: (codigo: string, qty: number) => void;
   onQuickView?: (producto: Producto) => void;
+  onSelectBrand?: (brandName: string) => void;
 }
 
 /**
@@ -68,6 +69,7 @@ function CategoryCarousel({
   onQuickView,
   adBrand,
   showInlineAds,
+  onSelectBrand,
 }: {
   cat: string;
   catProds: Producto[];
@@ -81,6 +83,7 @@ function CategoryCarousel({
   onQuickView?: (producto: Producto) => void;
   adBrand?: BrandConfig | null;
   showInlineAds?: boolean;
+  onSelectBrand?: (brandName: string) => void;
 }) {
   const [showAll, setShowAll] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -166,7 +169,7 @@ function CategoryCarousel({
                 const img = getImageAtIndex(adBrand, pIdx);
                 if (img) items.push(
                   <div key={`ad-grid-${pIdx}`} className="brand-grid-slot">
-                    <BrandSpotlight brand={adBrand} asset={img} layout="card" />
+                    <BrandSpotlight brand={adBrand} asset={img} layout="card" onBrandFilter={onSelectBrand} />
                   </div>
                 );
               } else {
@@ -238,6 +241,12 @@ function CategoryCarousel({
                       <SponsoredProduct 
                         brand={adBrand} 
                         asset={adAsset.asset} 
+                        onQuickView={() => {
+                          if (adAsset.asset.productCodigo) {
+                            const prod = allProds.find(p => p.codigo === adAsset.asset.productCodigo);
+                            if (prod) onQuickView?.(prod);
+                          }
+                        }}
                         onAdd={() => {
                           if (adAsset.asset.productCodigo) {
                             const prod = allProds.find(p => p.codigo === adAsset.asset.productCodigo);
@@ -248,7 +257,7 @@ function CategoryCarousel({
                     ) : adAsset.type === "video" ? (
                       <BrandVideoCard brand={adBrand} asset={adAsset.asset} layout="inline" />
                     ) : (
-                      <BrandSpotlight brand={adBrand} asset={adAsset.asset} layout="card" />
+                      <BrandSpotlight brand={adBrand} asset={adAsset.asset} layout="card" onBrandFilter={onSelectBrand} />
                     )}
                   </div>
                 );
@@ -291,6 +300,7 @@ export default function ProductoGrid({
   onAdd,
   onQtyChange,
   onQuickView,
+  onSelectBrand,
 }: ProductoGridProps) {
   const [columns, setColumns] = useState(2);
   const { brands } = useBrands();
@@ -360,6 +370,7 @@ export default function ProductoGrid({
             vista={vista}
             slotType={slotType}
             adBrand={adBrand}
+            onSelectBrand={onSelectBrand}
           >
             <section className="cat-section">
               <div className="cat-section-header" style={
@@ -406,6 +417,7 @@ export default function ProductoGrid({
                 onQuickView={onQuickView}
                 adBrand={adBrand}
                 showInlineAds={showInlineAds}
+                onSelectBrand={onSelectBrand}
               />
             </section>
           </LazySection>
@@ -421,12 +433,14 @@ function LazySection({
   vista,
   slotType,
   adBrand,
+  onSelectBrand,
 }: {
   children: React.ReactNode;
   index: number;
   vista: Vista;
   slotType: AdSlotType;
   adBrand?: BrandConfig | null;
+  onSelectBrand?: (brandName: string) => void;
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -457,14 +471,14 @@ function LazySection({
 
             if (slotType === "banner") {
               const img = getImageAtIndex(adBrand, index);
-              return img ? <SponsoredBanner brand={adBrand} asset={img} variant="full" /> : null;
+              return img ? <SponsoredBanner brand={adBrand} asset={img} variant="full" onBrandFilter={onSelectBrand} /> : null;
             }
             if (slotType === "video-wide") {
               const vid = getVideoAtIndex(adBrand, index);
               return vid ? <BrandVideoCard brand={adBrand} asset={vid} layout="wide" /> : null;
             }
             if (slotType === "native-story" && adBrand.story) {
-              return <NativeStoryCard brand={adBrand} />;
+              return <NativeStoryCard brand={adBrand} onBrandFilter={onSelectBrand} />;
             }
             // "inline-cards" are handled inside the carousel, not between sections
             return null;
@@ -472,7 +486,7 @@ function LazySection({
 
           {/* FlashDealCard — aparece cuando la marca tiene oferta activa en <24hs */}
           {index > 0 && adBrand?.flashDeal && (
-            <FlashDealCard brand={adBrand} />
+            <FlashDealCard brand={adBrand} onBrandFilter={onSelectBrand} />
           )}
 
           {/* Removed static CategoryBanner */}

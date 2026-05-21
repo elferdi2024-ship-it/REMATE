@@ -110,7 +110,8 @@ export async function enviarFacturaWhatsApp(
   notas?: string,
   logoUrl?: string,
   numeroPedido?: string,
-  direccion?: string
+  direccion?: string,
+  skipRedirect: boolean = false
 ): Promise<void> {
   const phone = numero || process.env.NEXT_PUBLIC_WA_NUMBER || "";
   const numFinal = numeroPedido || generarNumeroPedido();
@@ -129,6 +130,23 @@ export async function enviarFacturaWhatsApp(
     });
   } catch (err) {
     console.error("Error generando factura:", err);
+  }
+
+  // Si skipRedirect es true, solo descargamos la imagen y retornamos temprano sin abrir WhatsApp
+  if (skipRedirect) {
+    if (blob) {
+      try {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `pedido-${numFinal}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error("Error descargando factura en modo silencioso:", err);
+      }
+    }
+    return;
   }
 
   // 2. Intentar Web Share API (SOLO EN MÓVILES)

@@ -363,183 +363,181 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
   const statusColors = {
     no_leido: "bg-red-500/20 text-red-400 border-red-500/30",
     pendiente: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    cargado: "bg-green-500/20 text-green-400 border-green-500/30",
   };
 
   return (
     <div
-      className={`group relative overflow-hidden rounded-[32px] border transition-all duration-500 ${
+      className={`group relative overflow-hidden rounded-[20px] border transition-all duration-300 ${
         isFresh
-          ? "border-[#00E5FF]/40 bg-gradient-to-br from-[#0A0F1C] to-[#00E5FF]/5 shadow-[0_20px_50px_rgba(0,229,255,0.15)]"
-          : "border-white/5 bg-[#0A0F1C] hover:border-white/20 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+          ? "border-blue-400/40 bg-blue-50/50 shadow-[0_8px_30px_rgba(59,130,246,0.12)] dark:border-blue-500/30 dark:bg-blue-900/10 dark:shadow-[0_8px_30px_rgba(59,130,246,0.15)]"
+          : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-xl dark:border-white/10 dark:bg-[#111] dark:hover:border-white/20 dark:hover:shadow-2xl"
       }`}
     >
-      {/* Glossy Overlay Effect */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-
+      {/* Fresh Badge */}
       {isFresh && (
-        <div className="absolute right-6 top-0 z-10">
-          <div className="rounded-b-2xl bg-[#00E5FF] px-4 py-1.5 shadow-[0_0_20px_rgba(0,229,255,0.4)]">
-            <span className="text-[10px] font-black uppercase tracking-widest text-black">NUEVO</span>
+        <div className="absolute right-4 top-0 z-10">
+          <div className="rounded-b-lg bg-blue-500 px-3 py-1 shadow-md animate-pulse">
+            <span className="text-[9px] font-bold uppercase tracking-widest text-white">NUEVO PEDIDO</span>
           </div>
         </div>
       )}
 
       {/* Main Content */}
-      <div className="relative z-10 p-8">
+      <div className="relative z-10 p-5 sm:p-6">
         {/* Header Meta */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-4 dark:border-white/5">
           <div className="flex items-center gap-3">
-            <div className={`h-2.5 w-2.5 rounded-full ${status === 'no_leido' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'} animate-pulse`} />
-            <span className="font-mono text-[11px] font-bold tracking-tighter text-gray-500">
-              {formatDate(pedido.fecha)}
-            </span>
+            <div className="flex items-center gap-2 rounded-full bg-gray-100 px-2.5 py-1 dark:bg-white/5">
+              <div className={`h-2 w-2 rounded-full ${status === 'no_leido' ? 'bg-red-500' : 'bg-green-500'} animate-pulse`} />
+              <span className="font-mono text-[10px] font-bold text-gray-600 dark:text-gray-300">
+                {formatDate(pedido.fecha)}
+              </span>
+            </div>
           </div>
-          <div className="rounded-lg bg-white/5 px-3 py-1 border border-white/5">
-            <span className="font-mono text-[10px] font-bold text-gray-400">ID: {pedido.id.slice(-6).toUpperCase()}</span>
+          <div className="rounded-md bg-gray-50 px-2.5 py-1 text-[10px] font-bold text-gray-500 dark:bg-white/5 dark:text-gray-400">
+            ID: <span className="font-mono">{pedido.id.slice(-6).toUpperCase()}</span>
           </div>
         </div>
 
         {/* Info Grid */}
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-2">
-            <h3 className="font-bebas text-5xl tracking-wide text-white leading-none">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1 min-w-0 flex-1">
+            <h3 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-gray-900 truncate dark:text-white" title={pedido.clienteNombre}>
               {pedido.clienteNombre}
             </h3>
-            <div className="flex items-center gap-4">
-               <p className="text-sm font-bold text-gray-500 uppercase tracking-[0.2em]">
+            <div className="flex items-center gap-2.5 flex-wrap mt-1">
+              <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                 {pedido.items.length} {pedido.items.length === 1 ? "Artículo" : "Artículos"}
-              </p>
-              <div className={`h-1 w-1 rounded-full bg-white/20`} />
-              <span className={`text-[10px] font-black uppercase tracking-widest ${status === 'no_leido' ? 'text-red-400' : 'text-green-400'}`}>
+              </span>
+              <div className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+              <span className={`text-[10px] font-bold uppercase tracking-widest ${status === 'no_leido' ? 'text-red-500' : 'text-green-500'}`}>
                 {status.replace("_", " ")}
               </span>
             </div>
+            
             {pedido.clienteDireccion && (
-              <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-white/5 border border-white/5 px-3 py-1.5 w-fit">
+              <div className="mt-3 flex items-center gap-2 rounded-md bg-gray-50 px-3 py-1.5 w-fit max-w-full dark:bg-white/5">
                 {pedido.clienteDireccion.includes("RETIRO EN LOCAL") ? (
                   <>
-                    <span className="text-xs">🏪</span>
-                    <span className="text-[10px] font-black text-amber-400 tracking-wider uppercase">RETIRO EN LOCAL</span>
+                    <span className="text-[10px] font-bold text-orange-600 tracking-wider uppercase shrink-0 dark:text-orange-400">🏬 RETIRO EN LOCAL</span>
                   </>
                 ) : (
                   <>
-                    <span className="text-xs">🚚</span>
-                    <span className="text-[10px] font-black text-[#00E5FF] tracking-wider uppercase">ENVÍO A DOMICILIO</span>
+                    <span className="text-[10px] font-bold text-blue-600 tracking-wider uppercase shrink-0 dark:text-blue-400">🚚 ENVÍO DOMICILIO</span>
                   </>
                 )}
-                <span className="text-white/10 text-xs">|</span>
-                <span className="text-[10px] font-mono text-gray-400 truncate max-w-[200px] sm:max-w-xs" title={pedido.clienteDireccion}>
+                <span className="text-gray-300 dark:text-gray-600 text-xs shrink-0">|</span>
+                <span className="text-[10px] text-gray-600 truncate max-w-[120px] sm:max-w-xs dark:text-gray-300" title={pedido.clienteDireccion}>
                   {pedido.clienteDireccion.replace("RETIRO EN LOCAL: ", "").replace("🏠 ENVÍO A DOMICILIO: ", "")}
                 </span>
               </div>
             )}
           </div>
 
-          <div className="relative">
-            <p className="bg-gradient-to-r from-[#00E5FF] to-blue-400 bg-clip-text font-bebas text-6xl text-transparent leading-none">
+          <div className="shrink-0 self-end sm:self-center text-right">
+            <p className="font-display text-3xl sm:text-4xl font-bold tracking-tighter text-gray-900 dark:text-white">
               {formatCurrency(pedido.total)}
             </p>
           </div>
         </div>
 
         {/* Action Bar */}
-        <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-white/5 pt-8">
-          {pedido.clienteTelefono && (
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          {pedido.clienteTelefono ? (
             <a 
               href={`https://wa.me/${cleanPhone(pedido.clienteTelefono)}?text=${getWhatsAppMessage()}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="group/btn flex flex-1 items-center justify-center gap-3 rounded-2xl bg-[#25D366] px-6 py-4 text-xs font-black text-black transition-all hover:scale-[1.02] hover:shadow-[0_10px_20px_rgba(37,211,102,0.3)] active:scale-95"
+              className="flex-1 min-w-[200px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#25D366] to-[#1DA851] py-3 px-4 text-[11px] font-black tracking-widest text-white shadow-[0_4px_15px_rgba(37,211,102,0.3)] transition-all hover:shadow-[0_6px_20px_rgba(37,211,102,0.4)] active:scale-95"
             >
-              <span className="text-lg">💬</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
               <span>WHATSAPP PRO</span>
             </a>
+          ) : (
+            <div className="flex-1 min-w-[200px] flex items-center justify-center rounded-xl bg-gray-100 text-gray-400 py-3 px-4 text-[11px] font-black tracking-widest dark:bg-white/5 dark:text-gray-500">
+              SIN TELÉFONO
+            </div>
           )}
-          
-          <button
-            onClick={() => setIsViewingReceipt(!isViewingReceipt)}
-            className={`flex h-[56px] flex-1 items-center justify-center gap-3 rounded-2xl border transition-all active:scale-95 ${
-              isViewingReceipt 
-                ? "border-amber-500/50 bg-amber-500/20 text-amber-400" 
-                : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10"
-            }`}
-            title="Ver Recibo de Texto"
-          >
-            <span className="text-xl">🧾</span>
-            <span className="text-[10px] font-black uppercase tracking-widest">RECIBO</span>
-          </button>
 
-          <button
-            onClick={handleImprimir}
-            className="flex h-[56px] flex-1 items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white active:scale-95"
-            title="Imprimir Ticket Térmico 80mm"
-          >
-            <span className="text-xl">🖨️</span>
-            <span className="text-[10px] font-black uppercase tracking-widest">IMPRIMIR</span>
-          </button>
+          <div className="flex flex-1 sm:flex-none gap-2">
+            <button
+              onClick={() => setIsViewingReceipt(!isViewingReceipt)}
+              className={`flex-1 sm:flex-none sm:w-[120px] flex items-center justify-center gap-1.5 rounded-xl border py-3 px-2 text-[11px] font-black tracking-widest transition-all active:scale-95 ${
+                isViewingReceipt 
+                  ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400" 
+                  : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
+              }`}
+            >
+              <span>RECIBO</span>
+            </button>
 
-          <button
-            onClick={handleCopiadoFacturacion}
-            disabled={isUpdating}
-            className="relative flex h-[56px] flex-1 items-center justify-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-[#00E5FF] to-blue-400 font-black text-black shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(0,229,255,0.6)] active:scale-95 disabled:opacity-50"
-            title="Copiar para Facturación"
-          >
-            {/* Pulse ring */}
-            <span className="absolute inset-0 animate-ping rounded-2xl bg-[#00E5FF]/20" />
-            <span className="relative text-lg">📋</span>
-            <span className="relative text-[11px] uppercase tracking-[0.15em]">Copiar para Facturación</span>
-          </button>
+            <button
+              onClick={handleImprimir}
+              className="flex-1 sm:flex-none sm:w-[120px] flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
+            >
+              <span>IMPRIMIR</span>
+            </button>
+          </div>
 
-          <button
-            onClick={handleEliminar}
-            disabled={isUpdating}
-            className="flex h-[56px] w-[56px] items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/5 text-xl text-red-400 transition-all hover:bg-red-500/20 active:scale-90"
-            title="Eliminar Pedido"
-          >
-            🗑️
-          </button>
+          <div className="flex flex-1 gap-2">
+            <button
+              onClick={handleCopiadoFacturacion}
+              disabled={isUpdating}
+              className="flex-[3] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#00B4D8] text-black font-black tracking-widest py-3 px-2 text-[11px] transition-all hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] active:scale-95 disabled:opacity-50"
+            >
+              <span className="truncate">COPIAR FACTURA</span>
+            </button>
+
+            <button
+              onClick={handleEliminar}
+              disabled={isUpdating}
+              className="flex-1 sm:w-14 sm:flex-none flex items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 text-red-600 transition-all hover:bg-red-100 py-3 text-[11px] font-bold active:scale-95 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/30"
+              title="Eliminar Pedido"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+            </button>
+          </div>
         </div>
 
-        {/* Status Switcher - Premium Look */}
-        <div className="mt-4 flex gap-2">
+        {/* Status Switcher */}
+        <div className="mt-4 grid grid-cols-3 gap-2">
           <button
             disabled={isUpdating}
             onClick={() => handleStatusChange("no_leido")}
-            className={`flex flex-1 items-center justify-center gap-3 rounded-2xl border py-4 transition-all ${
+            className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 transition-all text-[10px] font-black uppercase tracking-widest ${
               status === "no_leido"
-                ? "border-red-500/50 bg-red-500/10 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
-                : "border-white/5 bg-white/5 text-gray-500 hover:border-white/20"
+                ? "border-red-500/50 bg-gradient-to-r from-red-500/20 to-red-500/5 text-red-600 shadow-[0_0_15px_rgba(239,68,68,0.2)] dark:text-red-400"
+                : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:border-white/5 dark:bg-white/5 dark:text-gray-400 dark:hover:border-white/20 dark:hover:text-white"
             }`}
           >
-            <div className={`h-2 w-2 rounded-full ${status === 'no_leido' ? 'bg-red-500' : 'bg-gray-600'}`} />
-            <span className="text-[10px] font-black uppercase tracking-widest">NO LEÍDO</span>
+            <div className={`h-2 w-2 rounded-full shrink-0 ${status === 'no_leido' ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}`} />
+            <span className="truncate">NO LEÍDO</span>
           </button>
 
           <button
             disabled={isUpdating}
             onClick={() => handleStatusChange("pendiente")}
-            className={`flex flex-1 items-center justify-center gap-3 rounded-2xl border py-4 transition-all ${
+            className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 transition-all text-[10px] font-black uppercase tracking-widest ${
               status === "pendiente"
-                ? "border-yellow-500/50 bg-yellow-500/10 text-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.1)]"
-                : "border-white/5 bg-white/5 text-gray-500 hover:border-white/20"
+                ? "border-yellow-500/50 bg-gradient-to-r from-yellow-500/20 to-yellow-500/5 text-yellow-700 shadow-[0_0_15px_rgba(234,179,8,0.2)] dark:text-yellow-400"
+                : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:border-white/5 dark:bg-white/5 dark:text-gray-400 dark:hover:border-white/20 dark:hover:text-white"
             }`}
           >
-            <div className={`h-2 w-2 rounded-full ${status === 'pendiente' ? 'bg-yellow-500' : 'bg-gray-600'}`} />
-            <span className="text-[10px] font-black uppercase tracking-widest">PENDIENTE</span>
+            <div className={`h-2 w-2 rounded-full shrink-0 ${status === 'pendiente' ? 'bg-yellow-500 animate-pulse' : 'bg-gray-400'}`} />
+            <span className="truncate">PENDIENTE</span>
           </button>
           
           <button
             disabled={isUpdating}
             onClick={() => handleStatusChange("cargado")}
-            className={`flex flex-1 items-center justify-center gap-3 rounded-2xl border py-4 transition-all ${
+            className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 transition-all text-[10px] font-black uppercase tracking-widest ${
               status === "cargado"
-                ? "border-green-500/50 bg-green-500/10 text-green-400 shadow-[0_0_20px_rgba(34,197,94,0.1)]"
-                : "border-white/5 bg-white/5 text-gray-500 hover:border-white/20"
+                ? "border-green-500/50 bg-gradient-to-r from-green-500/20 to-green-500/5 text-green-700 shadow-[0_0_15px_rgba(34,197,94,0.2)] dark:text-green-400"
+                : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:border-white/5 dark:bg-white/5 dark:text-gray-400 dark:hover:border-white/20 dark:hover:text-white"
             }`}
           >
-            <div className={`h-2 w-2 rounded-full ${status === 'cargado' ? 'bg-green-500' : 'bg-gray-600'}`} />
-            <span className="text-[10px] font-black uppercase tracking-widest">CARGADO</span>
+            <div className={`h-2 w-2 rounded-full shrink-0 ${status === 'cargado' ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-gray-400'}`} />
+            <span className="truncate">CARGADO</span>
           </button>
         </div>
 
@@ -548,59 +546,59 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
             setIsViewingFull(!isViewingFull);
             onViewFull(pedido);
           }}
-          className={`mt-6 w-full rounded-2xl border py-4 text-[11px] font-black uppercase tracking-[0.3em] transition-all ${
+          className={`mt-4 w-full rounded-lg border py-3 text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 ${
             isViewingFull
-              ? "border-[#00E5FF] bg-[#00E5FF] text-black shadow-[0_0_30px_rgba(0,229,255,0.4)]"
-              : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+              ? "border-gray-900 bg-gray-900 text-white dark:border-white dark:bg-white dark:text-black"
+              : "border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
           }`}
         >
           {isViewingFull ? "OCULTAR DETALLES" : "VER DETALLES COMPLETOS"}
         </button>
       </div>
 
-      {/* ── Text Receipt View (Canva tipo texto) ── */}
+      {/* ── Text Receipt View ── */}
       {isViewingReceipt && (
-        <div className="animate-in fade-in zoom-in-95 duration-300 border-t border-white/5 bg-[#0F172A] p-6">
-          <div className="relative mx-auto max-w-md overflow-hidden rounded-xl bg-white p-8 text-black shadow-2xl">
-            {/* Decoración de recibo cortado */}
+        <div className="animate-in fade-in zoom-in-95 duration-200 border-t border-gray-100 bg-gray-50 p-4 sm:p-6 dark:border-white/5 dark:bg-[#0a0a0a]">
+          <div className="relative mx-auto max-w-md overflow-hidden rounded-xl bg-white p-6 sm:p-8 text-black shadow-xl ring-1 ring-gray-200/50">
+            {/* Cut line decoration */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-[linear-gradient(90deg,#fff_0%,#fff_50%,#000_50%,#000_100%)] bg-[length:10px_100%]" />
             
-            <div className="mb-6 text-center">
-              <h4 className="font-mono text-xl font-black uppercase tracking-widest">EL REMATE</h4>
-              <p className="font-mono text-[10px] text-gray-500 uppercase">Distribuidora · Canelones</p>
+            <div className="mb-4 text-center">
+              <h4 className="font-mono text-lg font-black uppercase tracking-wider">EL REMATE</h4>
+              <p className="font-mono text-[10px] text-gray-500 uppercase">Canelones · Picking</p>
             </div>
 
-            <div className="mb-4 space-y-1 font-mono text-[11px] leading-tight">
+            <div className="mb-3 space-y-1 font-mono text-[11px] leading-tight">
               <div className="flex justify-between">
-                <span>PEDIDO:</span>
+                <span>ID ORDEN:</span>
                 <span className="font-bold">#{pedido.id.slice(-6).toUpperCase()}</span>
               </div>
               <div className="flex justify-between">
                 <span>FECHA:</span>
                 <span>{new Date(pedido.fecha instanceof Date ? pedido.fecha : pedido.fecha.seconds * 1000).toLocaleString("es-UY")}</span>
               </div>
-              <div className="border-b border-dashed border-gray-300 my-2" />
-              <div>CLIENTE: <span className="font-bold">{pedido.clienteNombre}</span></div>
+              <div className="border-b border-dashed border-gray-300 my-1.5" />
+              <div>CLIENTE: <span className="font-bold uppercase">{pedido.clienteNombre}</span></div>
               {pedido.clienteTelefono && <div>TEL: {pedido.clienteTelefono}</div>}
             </div>
 
-            <div className="mb-4 border-b border-dashed border-gray-300 pb-2" />
+            <div className="mb-3 border-b border-dashed border-gray-300 pb-1.5" />
 
-            <div className="space-y-3 font-mono text-[11px]">
+            <div className="space-y-2.5 font-mono text-[11px]">
               {pedido.items.map((item, idx) => (
-                <div key={idx} className="flex flex-col group/receipt-item">
+                <div key={idx} className="flex flex-col">
                   <button 
                     onClick={() => copyToClipboard(item.nombre, "Copiado: " + item.nombre)}
-                    className="text-left font-bold hover:text-[#00E5FF] transition-colors uppercase"
+                    className="text-left font-bold hover:text-blue-600 transition-colors uppercase leading-tight"
                   >
                     {item.nombre}
                   </button>
-                  <div className="flex justify-between text-gray-600">
+                  <div className="flex justify-between text-gray-600 mt-1">
                     <span className="flex gap-2">
-                      <button onClick={() => copyToClipboard(item.cantidad.toString(), "Copiado: " + item.cantidad)} className="hover:text-black hover:underline">{item.cantidad}</button>
+                      <button onClick={() => copyToClipboard(item.cantidad.toString(), "Copiado: " + item.cantidad)} className="hover:text-black hover:underline">{item.cantidad} u.</button>
                       <span>x</span>
                       <span>{formatCurrency(item.precioUnitario)}</span>
-                      <button onClick={() => copyToClipboard(item.codigo, "Copiado: " + item.codigo)} className="ml-2 text-[9px] text-gray-400 hover:text-black">({item.codigo})</button>
+                      <button onClick={() => copyToClipboard(item.codigo, "Copiado: " + item.codigo)} className="ml-1 text-[9px] text-gray-400 hover:text-black">({item.codigo})</button>
                     </span>
                     <span className="text-black font-bold">{formatCurrency(item.cantidad * item.precioUnitario)}</span>
                   </div>
@@ -608,35 +606,34 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
               ))}
             </div>
 
-            <div className="my-4 border-b border-dashed border-gray-300" />
+            <div className="my-3 border-b border-dashed border-gray-300" />
 
-            <div className="flex justify-between font-mono text-lg font-black">
+            <div className="flex justify-between font-mono text-base font-black">
               <span>TOTAL:</span>
               <span>{formatCurrency(pedido.total)}</span>
             </div>
 
             {pedido.notas && (
-              <div className="mt-4 rounded bg-gray-100 p-2 font-mono text-[10px] italic">
+              <div className="mt-4 rounded bg-gray-50 border border-gray-100 p-3 font-mono text-[10px] italic text-gray-700 leading-normal">
                 OBS: {pedido.notas}
               </div>
             )}
 
-            <div className="mt-8 text-center font-mono text-[9px] text-gray-400">
-              *** GRACIAS POR SU PREFERENCIA ***
+            <div className="mt-6 text-center font-mono text-[9px] text-gray-400">
+              *** DOCUMENTO INTERNO DE PREPARACIÓN ***
             </div>
 
-            {/* Botón flotante para copiar dentro del canva */}
             <button
               onClick={handleCopiadoRecibo}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-black py-3 text-[10px] font-bold text-white transition-all hover:bg-gray-800 active:scale-95"
+              className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-lg bg-black hover:bg-gray-800 py-3 text-[10px] font-bold text-white transition-all active:scale-95"
             >
-              <span>📋</span> COPIAR TEXTO FORMATEADO
+              📋 COPIAR TEXTO FORMATEADO
             </button>
           </div>
           
           <button 
             onClick={() => setIsViewingReceipt(false)}
-            className="mt-4 w-full text-center text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest"
+            className="mt-4 w-full text-center text-[10px] font-bold text-gray-500 hover:text-gray-800 uppercase tracking-widest dark:text-gray-400 dark:hover:text-white"
           >
             Cerrar Recibo
           </button>
@@ -645,50 +642,47 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
       {/* Expandable Details Area */}
       {isViewingFull && (
-        <div className="animate-in slide-in-from-top-2 border-t border-white/5 bg-[#0F172A] p-4 sm:p-8">
+        <div className="animate-in slide-in-from-top-2 border-t border-gray-100 bg-gray-50 p-4 sm:p-6 dark:border-white/5 dark:bg-[#0a0a0a]">
           {/* White Receipt Container */}
-          <div className="relative mx-auto max-w-2xl overflow-hidden rounded-xl bg-white p-6 sm:p-10 text-black shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+          <div className="relative mx-auto max-w-xl overflow-hidden rounded-xl bg-white p-5 sm:p-8 text-black shadow-xl ring-1 ring-gray-200/50">
             {/* Cut line decoration */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-[linear-gradient(90deg,#fff_0%,#fff_50%,#f1f5f9_50%,#f1f5f9_100%)] bg-[length:20px_100%]" />
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[linear-gradient(90deg,#fff_0%,#fff_50%,#f1f5f9_50%,#f1f5f9_100%)] bg-[length:15px_100%]" />
             
-            <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between border-b-2 border-black pb-4">
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between border-b border-gray-300 pb-4">
               <div>
-                <h4 className="font-mono text-2xl font-black tracking-tighter">ORDEN DE PEDIDO</h4>
+                <h4 className="font-mono text-lg font-black tracking-tight">PICKING / PREPARACIÓN</h4>
                 <p className="font-mono text-[10px] text-gray-500">#{pedido.id.toUpperCase()}</p>
               </div>
-              <div className="mt-2 text-right sm:mt-0">
-                <p className="font-mono text-xs font-bold uppercase">{pedido.clienteNombre}</p>
+              <div className="mt-2 text-left sm:text-right sm:mt-0">
+                <p className="font-mono text-sm font-bold uppercase">{pedido.clienteNombre}</p>
                 <p className="font-mono text-[10px] text-gray-400">{new Date(pedido.fecha instanceof Date ? pedido.fecha : pedido.fecha.seconds * 1000).toLocaleString("es-UY")}</p>
               </div>
             </div>
 
             <div className="space-y-1">
-              <div className="grid grid-cols-[40px_1fr_100px] border-b border-black pb-2 mb-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
+              <div className="grid grid-cols-[40px_1fr_90px] border-b border-gray-300 pb-2 mb-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">
                 <span>Cant</span>
                 <span>Producto / Código</span>
                 <span className="text-right">Subtotal</span>
               </div>
 
               {pedido.items.map((item, i) => (
-                <div key={i} className="group/item grid grid-cols-[40px_1fr_100px] items-start py-2 border-b border-dashed border-gray-200 hover:bg-gray-50 transition-colors">
-                  {/* Cantidad */}
+                <div key={i} className="grid grid-cols-[40px_1fr_90px] items-start py-2 border-b border-dashed border-gray-200 hover:bg-gray-50 transition-colors">
                   <button
                     onClick={() => copyToClipboard(item.cantidad.toString(), "Cantidad: " + item.cantidad)}
-                    className="h-8 w-8 rounded bg-black text-white text-[11px] font-bold hover:bg-[#00E5FF] hover:text-black transition-colors"
+                    className="h-7 w-7 rounded bg-gray-100 text-black text-[11px] font-bold hover:bg-black hover:text-white transition-colors"
                   >
                     {item.cantidad}
                   </button>
 
-                  <div className="px-2">
-                    {/* Nombre */}
+                  <div className="px-3">
                     <button
                       onClick={() => copyToClipboard(item.nombre, "Producto: " + item.nombre)}
-                      className="text-left font-mono text-[12px] font-bold uppercase hover:text-[#00E5FF] transition-colors leading-tight"
+                      className="text-left font-mono text-[12px] font-bold uppercase hover:text-blue-600 transition-colors leading-tight block w-full"
                     >
                       {item.nombre}
                     </button>
-                    {/* Código */}
-                    <div className="mt-0.5">
+                    <div className="mt-1">
                       <button
                         onClick={() => copyToClipboard(item.codigo, "Código: " + item.codigo)}
                         className="font-mono text-[9px] text-gray-400 hover:text-black hover:underline"
@@ -698,38 +692,37 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
                     </div>
                   </div>
 
-                  <div className="text-right font-mono text-xs font-bold pt-1">
+                  <div className="text-right font-mono text-[12px] font-bold pt-1">
                     {formatCurrency(item.cantidad * item.precioUnitario)}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 flex flex-col items-end gap-1 border-t-2 border-black pt-4">
-              <div className="flex w-full justify-between text-[10px] font-bold text-gray-400">
+            <div className="mt-6 flex flex-col items-end gap-1 border-t border-gray-300 pt-4">
+              <div className="flex w-full justify-between text-[11px] font-bold text-gray-500">
                 <span>SUBTOTAL:</span>
                 <span>{formatCurrency(pedido.total)}</span>
               </div>
-              <div className="flex w-full justify-between text-xl font-black">
+              <div className="flex w-full justify-between text-lg font-black border-t border-dashed border-gray-200 pt-2 mt-1">
                 <span>TOTAL:</span>
                 <span>{formatCurrency(pedido.total)}</span>
               </div>
             </div>
 
             {pedido.notas && (
-              <div className="mt-8 rounded-lg border-2 border-black border-dashed p-4">
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Observaciones</p>
-                <p className="font-mono text-xs italic text-gray-700 leading-relaxed">&quot;{pedido.notas}&quot;</p>
+              <div className="mt-6 rounded-lg bg-yellow-50/50 border border-yellow-100 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-yellow-800 mb-1">Observaciones</p>
+                <p className="font-mono text-[11px] italic text-yellow-900 leading-relaxed">&quot;{pedido.notas}&quot;</p>
               </div>
             )}
           </div>
-          
-          <div className="mt-8 flex justify-center">
+          <div className="mt-6 flex justify-center">
              <button 
-              className="group flex items-center gap-2 rounded-full bg-white/5 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-gray-500 transition-all hover:bg-white/10 hover:text-white"
+              className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-600 shadow-sm border border-gray-200 transition-all hover:bg-gray-50 hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
               onClick={() => setIsViewingFull(false)}
              >
-               <span className="text-lg">↑</span> OCULTAR FACTURA
+               <span>↑</span> OCULTAR DETALLES
              </button>
           </div>
         </div>

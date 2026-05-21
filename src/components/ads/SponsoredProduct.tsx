@@ -4,15 +4,16 @@
 import React from "react";
 import Image from "next/image";
 import type { BrandConfig, BrandAsset } from "@/types/brands";
-import { useAdImpression } from "@/hooks/useAdImpression";
+import { useAdImpression, trackModalCta } from "@/hooks/useAdImpression";
 
 interface SponsoredProductProps {
   brand: BrandConfig;
   asset: BrandAsset; // type: "sponsored_product"
   onAdd?: () => void;
+  onQuickView?: () => void;
 }
 
-export default function SponsoredProduct({ brand, asset, onAdd }: SponsoredProductProps) {
+export default function SponsoredProduct({ brand, asset, onAdd, onQuickView }: SponsoredProductProps) {
   const ref = useAdImpression<HTMLDivElement>(brand.id, asset.id);
   
   if (asset.type !== "sponsored_product") return null;
@@ -20,18 +21,21 @@ export default function SponsoredProduct({ brand, asset, onAdd }: SponsoredProdu
   return (
     <div
       ref={ref}
+      className="sponsored-conic-glow-border"
+      onClick={() => onQuickView?.()}
       style={{
-        background: "var(--white)",
-        border: "1.5px solid rgba(232,48,42,0.15)",  // borde sutil que diferencia
-        borderRadius: "16px",
         padding: "10px",
         display: "flex",
         flexDirection: "column",
         position: "relative",
         height: "100%",
-        minHeight: "260px"
+        minHeight: "260px",
+        cursor: onQuickView ? "pointer" : "default"
       }}
     >
+      {/* Efecto de destello de luz metálica */}
+      <div className="sponsored-metallic-glint-overlay" />
+
       {/* Badge "Patrocinado" — discreta pero visible */}
       <div style={{
         position: "absolute",
@@ -135,7 +139,13 @@ export default function SponsoredProduct({ brand, asset, onAdd }: SponsoredProdu
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            onAdd?.();
+            // Disparar track de click CTA
+            trackModalCta(brand.id);
+            if (onQuickView) {
+              onQuickView();
+            } else {
+              onAdd?.();
+            }
           }}
           style={{
             background: "var(--oscuro)",

@@ -1,3 +1,4 @@
+// filepath: src/components/ads/FlashDealCard.tsx
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
@@ -9,6 +10,7 @@ import { markAsSeen, hasSeenEnough } from "@/hooks/useFrequencyCap";
 
 interface FlashDealCardProps {
   brand: BrandConfig;
+  onBrandFilter?: (brandName: string) => void;
 }
 
 function useCountdown(expiresAt: string) {
@@ -39,7 +41,7 @@ function useCountdown(expiresAt: string) {
   };
 }
 
-export default function FlashDealCard({ brand }: FlashDealCardProps) {
+export default function FlashDealCard({ brand, onBrandFilter }: FlashDealCardProps) {
   const { ref, isVisible } = useAdEntrance<HTMLDivElement>();
   const [hidden, setHidden] = useState(false);
 
@@ -72,6 +74,7 @@ export default function FlashDealCard({ brand }: FlashDealCardProps) {
   return (
     <div
       ref={ref}
+      onClick={() => onBrandFilter?.(brand.name)}
       style={{
         ...AD_TOKENS.fadeIn(isVisible),
         width: "100%",
@@ -82,6 +85,7 @@ export default function FlashDealCard({ brand }: FlashDealCardProps) {
         boxShadow: "0 8px 32px rgba(239,68,68,0.15)",
         margin: "24px 0",
         position: "relative",
+        cursor: onBrandFilter ? "pointer" : "default",
       }}
     >
       <div
@@ -189,7 +193,10 @@ export default function FlashDealCard({ brand }: FlashDealCardProps) {
       </div>
 
       <button
-        onClick={handleDismiss}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDismiss();
+        }}
         aria-label="Cerrar oferta"
         style={{
           position: "absolute",
