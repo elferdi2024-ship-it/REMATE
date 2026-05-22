@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { SUCURSALES } from "@/lib/sucursales";
 
 export default function AdminLoginPage() {
   const { signIn, user, loginAsAdminDios } = useAuth();
@@ -325,8 +326,11 @@ export default function AdminLoginPage() {
                   onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
                 >
                   <option value="" disabled className="text-gray-500">Seleccionar sucursal</option>
-                  <option value="Atlántida" className="text-white bg-[#151515]">Atlántida</option>
-                  <option value="Pando" className="text-white bg-[#151515]">Pando</option>
+                  {SUCURSALES.map((s) => (
+                    <option key={s.id} value={`${s.nombre} (${s.direccion})`} className="text-white bg-[#151515]">
+                      {s.nombre} ({s.direccion})
+                    </option>
+                  ))}
                   <option value="Depósito Central" className="text-white bg-[#151515]">Depósito Central</option>
                   <option value="Owner / Dueño" className="text-white bg-[#151515]">Owner / Dueño (Ver todo)</option>
                 </select>

@@ -3117,76 +3117,102 @@ html.dark-mode body { background: var(--bg); }
   }
 }
 
-/* Highly Visible ResultsBar Search Input */
+/* Highly Visible Premium ResultsBar Search Input v2.0 */
+.results-search-wrap {
+  flex: 1 1 100%;
+  position: relative;
+  min-width: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .results-search-input {
   width: 100% !important;
-  padding: 10px 36px 10px 38px !important;
-  border: 2px solid #E2DCD5 !important;
-  border-radius: 20px !important;
+  padding: 14px 44px 14px 50px !important; /* Más padding para una sensación ultra premium */
+  border: 2px solid rgba(232, 48, 42, 0.12) !important; /* Borde sutil de la marca por defecto */
+  border-radius: 32px !important; /* Totalmente redondeado tipo píldora de alta gama */
   background: #ffffff !important;
   font-family: var(--font-body), sans-serif !important;
-  font-size: var(--text-sm) !important;
-  color: #111111 !important;
-  font-weight: 700 !important;
+  font-size: var(--text-md, 0.95rem) !important; /* Texto levemente más grande para mejor lectura */
+  color: var(--texto, #111111) !important;
+  font-weight: 600 !important;
   outline: none !important;
-  transition: all 0.2s ease-in-out !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 10px 30px rgba(17, 11, 8, 0.04), 0 2px 8px rgba(17, 11, 8, 0.01) !important; /* Elevación sutil */
 }
 
 .results-search-input::placeholder {
   color: #8E8880 !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
+  transition: color 0.2s ease;
+}
+
+.results-search-input:hover {
+  border-color: rgba(232, 48, 42, 0.35) !important;
+  box-shadow: 0 12px 35px rgba(232, 48, 42, 0.08), 0 4px 12px rgba(17, 11, 8, 0.03) !important;
 }
 
 .results-search-input:focus {
-  border-color: var(--rojo, #D62828) !important;
+  border-color: var(--rojo, #E8302A) !important;
   background: #ffffff !important;
-  box-shadow: 0 6px 18px rgba(214, 40, 40, 0.12), 0 0 0 3px rgba(214, 40, 40, 0.2) !important;
+  box-shadow: 0 15px 40px rgba(232, 48, 42, 0.14), 0 0 0 4px rgba(232, 48, 42, 0.12) !important; /* Resplandor premium */
+  transform: translateY(-1px) !important;
 }
 
 .results-search-icon {
   position: absolute !important;
-  left: 14px !important;
+  left: 20px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
-  font-size: 0.95rem !important;
   pointer-events: none !important;
-  color: var(--rojo, #D62828) !important;
+  color: #8E8880 !important;
   display: flex !important;
   align-items: center !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  z-index: 5 !important;
+}
+
+.results-search-wrap:focus-within .results-search-icon {
+  color: var(--rojo, #E8302A) !important;
+  transform: translateY(-50%) scale(1.1) !important;
+}
+
+.results-search-wrap:hover .results-search-icon {
+  color: #5C5550;
 }
 
 .results-search-clear {
   position: absolute !important;
-  right: 12px !important;
+  right: 16px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
   background: #F4EFEA !important;
   border: none !important;
-  font-size: 0.7rem !important;
+  font-size: 0.75rem !important;
   color: #5C5750 !important;
-  width: 20px !important;
-  height: 20px !important;
+  width: 24px !important;
+  height: 24px !important;
   border-radius: 50% !important;
   cursor: pointer !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transition: all 0.2s ease !important;
-  font-weight: 900 !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  z-index: 5 !important;
 }
 
 .results-search-clear:hover {
-  background: #EADED2 !important;
-  color: var(--rojo, #D62828) !important;
+  background: var(--rojo-pale, #FEF2F1) !important;
+  color: var(--rojo, #E8302A) !important;
+  transform: translateY(-50%) scale(1.1) rotate(90deg) !important;
 }
 
 .results-bar {
-  background: linear-gradient(180deg, #ffffff 0%, #f7f5f2 100%) !important;
-  padding: 12px 16px !important;
-  border-radius: 24px !important;
-  border: 1px solid rgba(0,0,0,0.06) !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.04) !important;
+  background: linear-gradient(180deg, #ffffff 0%, #FAF8F5 100%) !important;
+  padding: 14px 20px !important; /* Más espaciado premium */
+  border-radius: 28px !important; /* Curvatura más sofisticada */
+  border: 1px solid rgba(17, 11, 8, 0.05) !important;
+  box-shadow: 0 12px 35px rgba(17, 11, 8, 0.05), 0 2px 10px rgba(17, 11, 8, 0.02) !important;
+  transition: all 0.3s ease !important;
 }
 
 /* ══════════════════════════════════════════════════════════

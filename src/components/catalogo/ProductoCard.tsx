@@ -145,23 +145,7 @@ export default function ProductoCard({
         cursor: "pointer"
       } as React.CSSProperties}
     >
-      {producto.precio > 0 && (
-        <span className="card-offer-ribbon" style={{
-          position: "absolute",
-          top: "12px",
-          left: "12px",
-          zIndex: 3,
-          background: "linear-gradient(135deg, #FF3D00, #E8302A)",
-          color: "white",
-          fontSize: "9px",
-          fontWeight: 800,
-          textTransform: "uppercase",
-          letterSpacing: "1px",
-          padding: "4px 10px",
-          borderRadius: "8px 0 8px 0",
-          boxShadow: "0 4px 10px rgba(232,48,42,0.25)",
-        }}>Oportunidad</span>
-      )}
+      {/* Tag 'Oportunidad' removido */}
 
       <div className="card-thumb" style={{ 
         background: "linear-gradient(180deg, #ffffff 0%, #f9f8f6 100%)", 
