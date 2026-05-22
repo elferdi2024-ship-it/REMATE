@@ -39,7 +39,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [sucursalId, setSucursalId] = useState<string | null>(null);
 
   useEffect(() => {
-    const isBypass = typeof window !== "undefined" && sessionStorage.getItem("bypass_admin_dios") === "true";
+    const isBypass = typeof window !== "undefined" && 
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") &&
+      sessionStorage.getItem("bypass_admin_dios") === "true";
     if (isBypass) {
       setRole("admin");
       setSucursalId(null);
