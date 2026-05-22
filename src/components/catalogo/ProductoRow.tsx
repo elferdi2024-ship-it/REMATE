@@ -122,6 +122,8 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
             <img 
               src={producto.imagen} 
               alt={producto.nombre}
+              loading="lazy"
+              decoding="async"
               style={{ objectFit: "contain", width: "100%", height: "100%", padding: "4px" }} 
             />
           </div>

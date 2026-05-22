@@ -108,7 +108,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const loginAsAdminDios = () => {
-    if (typeof window !== "undefined") {
+    if (
+      typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ) {
       sessionStorage.setItem("bypass_admin_dios", "true");
       document.cookie = "session=true; path=/; max-age=86400";
       setRole("admin");

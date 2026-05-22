@@ -24,7 +24,7 @@ export function useAdStats() {
     async function loadStats() {
       try {
         // 1. Cargar la configuración de marcas para mapear Tier y Nombre real
-        let brandsMap: Record<string, { name: string; tier: string }> = {};
+        const brandsMap: Record<string, { name: string; tier: string }> = {};
         try {
           const configSnap = await getDoc(doc(db, "configuracion", "publicidad"));
           if (configSnap.exists()) {
