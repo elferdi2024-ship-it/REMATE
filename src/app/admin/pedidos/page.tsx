@@ -1,7 +1,7 @@
 "use client";
 
 import PedidoAdminCard, { type PedidoAdmin } from "@/components/admin/PedidoAdminCard";
-import { actualizarEstadoPedido, subscribePedidosHoy } from "@/lib/pedidos";
+import { actualizarEstadoPedido, subscribePedidosHoy, guardarPedidoGlobal } from "@/lib/pedidos";
 import { SUCURSALES } from "@/lib/sucursales";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
@@ -26,6 +26,7 @@ export default function PedidosPage() {
   const [bulkUpdating, setBulkUpdating] = useState(false);
   const [deliveryFilter, setDeliveryFilter] = useState<"todos" | "envio" | "retiro">("todos");
   const [branchFilter, setBranchFilter] = useState<string>("todas");
+  const [simulating, setSimulating] = useState(false);
  
   const effectiveBranchFilter = role === "empleado" && sucursalId ? sucursalId : branchFilter;
 
@@ -130,6 +131,30 @@ export default function PedidosPage() {
     [filteredPedidos]
   );
 
+  const handleSimulateOrder = useCallback(async () => {
+    try {
+      setSimulating(true);
+      const mockOrder = {
+        uid: null,
+        clienteNombre: "Renato (Pedido de Entrenamiento)",
+        clienteTelefono: "099 265 952",
+        clienteDireccion: "RETIRO EN LOCAL - Sucursal Atlantida",
+        items: [
+          { codigo: "7730124002903", nombre: "Yerba Mate Premium 1kg", cantidad: 2, precioUnitario: 350 },
+          { codigo: "876543210012", nombre: "Aceite de Oliva Extra Virgen 500ml", cantidad: 1, precioUnitario: 750 }
+        ],
+        total: 1450,
+        notas: "Pedido simulado para entrenamiento. Pruebe los botones interactivos, imprima el ticket o contácteme por WhatsApp.",
+        status: "no_leido" as const
+      };
+      await guardarPedidoGlobal(mockOrder);
+    } catch (err) {
+      console.error("Error al simular pedido:", err);
+    } finally {
+      setSimulating(false);
+    }
+  }, []);
+
   const totalGeneral = filteredPedidos.reduce((sum, p) => sum + (p.total || 0), 0);
   const totalItems = filteredPedidos.reduce((sum, p) => sum + p.items.reduce((acc, i) => acc + i.cantidad, 0), 0);
 
@@ -190,7 +215,19 @@ export default function PedidosPage() {
           <p className="text-gray-400 mt-1 font-medium">{formatHeaderDate()}</p>
         </div>
 
-        <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
+        <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row md:items-center">
+          {/* Botón de Simulación de Pedido (Solo para Administrador, Dueño o en pruebas) */}
+          {(role === "admin" || role === "owner" || !role) && (
+            <button
+              onClick={handleSimulateOrder}
+              disabled={simulating}
+              className="shrink-0 flex items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-[#00E5FF] transition hover:bg-cyan-500/20 disabled:opacity-40 shadow-[0_0_15px_rgba(0,229,255,0.05)] hover:shadow-[0_0_20px_rgba(0,229,255,0.15)]"
+            >
+              <span>🧪</span>
+              <span>{simulating ? "SIMULANDO..." : "SIMULAR PEDIDO"}</span>
+            </button>
+          )}
+
           {/* Search Bar */}
           <div className="relative flex-1 md:w-64">
             <input

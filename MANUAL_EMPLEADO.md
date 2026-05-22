@@ -89,21 +89,17 @@ Cada tarjeta de pedido cuenta con herramientas diseñadas para agilizar las tare
 
 ## 🎮 5. TUTORIAL INTERACTIVO EN VIVO (APRENDIZAJE EN 2 MINUTOS)
 
-Para que puedas familiarizarte y dominar el sistema antes de trabajar con clientes reales, hemos desarrollado un **simulador interactivo en tiempo real**. Esto te permite experimentar el flujo de trabajo de extremo a extremo en tu propio navegador.
+Para que puedas familiarizarte y dominar el sistema antes de trabajar con clientes reales, hemos desarrollado un **simulador interactivo en tiempo real** accesible directamente desde el navegador (sin necesidad de abrir consolas o terminales).
 
-### 🕹️ Cómo iniciar el entrenamiento:
-1. Asegúrate de tener la consola/terminal abierta en la carpeta del proyecto.
-2. Ejecuta el siguiente comando en tu terminal:
-   ```bash
-   npm run simular
-   ```
-3. El sistema creará un **pedido de prueba real** en la base de datos Firestore a nombre de `"Renato (Simulador Interactivo)"`.
-4. De inmediato, tu panel web (`http://localhost:3000/admin/pedidos`) emitirá la **alerta sonora real** de nuevo pedido, y verás aparecer la tarjeta en **Rojo (No Leído)**.
-5. El simulador en tu consola se detendrá y te guiará paso a paso para que:
-   - Presiones **"EMPEZAR PREPARACIÓN"** en la web real y observes cómo el simulador detecta que pasó a **Pendiente (Amarillo)**.
-   - Pruebes la **impresión del ticket térmico** de 80mm y la función de copiar al portapapeles.
-   - Presiones **"COMPLETAR CARGA"** en la web real y verifiques cómo se procesa la carga final del camión.
-6. Al finalizar, el simulador te ofrecerá limpiar automáticamente los datos de prueba de la base de datos. ¡Ideal para entrenar a nuevos empleados en 2 minutos!
+### 🕹️ Cómo iniciar el entrenamiento en vivo a través de internet:
+1. El **Dueño o Administrador** de la distribuidora ingresará al panel y presionará el botón **`🧪 SIMULAR PEDIDO`** ubicado en la esquina superior derecha (junto a la barra de búsqueda).
+2. El sistema creará de inmediato un **pedido de prueba real** en la base de datos Firestore llamado **`"Renato (Pedido de Entrenamiento)"`**.
+3. Al instante, tu panel administrativo (ya sea en computadora o en tu teléfono celular) emitirá la **alerta sonora real** de nuevo pedido, y verás aparecer la tarjeta en **Rojo (No Leído)**.
+4. Podrás experimentar el flujo completo interactuando con la interfaz real:
+   - Haz clic en **`📦 EMPEZAR PREPARACIÓN`** para ver cómo el pedido cambia a **Pendiente (Amarillo)** y el stepper avanza.
+   - Prueba las herramientas de **impresión del ticket térmico** de 80mm y la función de **copiar al portapapeles** para facturar.
+   - Presiona **`🚚 COMPLETAR CARGA`** para marcar la entrega final (la tarjeta pasará a verde y se archivará de la pantalla).
+5. Una vez que hayas terminado tu entrenamiento, el pedido se puede eliminar fácilmente presionando el icono de la papelera 🗑️ en la tarjeta para mantener el historial del día limpio y ordenado. ¡Fácil, rápido y 100% interactivo a través de internet!
 
 ---
 

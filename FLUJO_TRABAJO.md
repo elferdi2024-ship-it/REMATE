@@ -110,19 +110,19 @@ El flujo de trabajo digital ha sido pulido para requerir la menor cantidad de pa
 
 ## 🎮 4. ENTRENAMIENTO E INSTRUMENTACIÓN EN VIVO (MUESTRA REAL)
 
-Para comprender el flujo digital no a través de teoría, sino de una **experiencia de interacción real**, el sistema incluye un simulador interactivo en tiempo real integrado directamente con la base de datos de producción local.
+Para comprender el flujo digital no a través de teoría, sino de una **experiencia de interacción real**, la plataforma incluye un módulo de simulación reactiva integrado directamente en la interfaz de usuario web. 
 
-Este módulo permite al dueño o gerentes presenciar exactamente el viaje de un pedido desde que un cliente presiona "Confirmar Compra" en la web externa hasta que el paquete está arriba del camión de reparto.
+Este mecanismo permite a los directivos y gerentes presenciar exactamente el comportamiento del sistema y capacitar al nuevo personal desde cualquier dispositivo (celular o computadora) conectado a internet, sin necesidad de herramientas técnicas ni de instalar código local.
 
-### 🕹️ Cómo ejecutar una simulación en vivo en su ordenador:
-1. Abra la terminal y ejecute el comando de demostración:
-   ```bash
-   npm run simular
-   ```
-2. **Generación Real**: El script inyectará un pedido de prueba real directamente a su base de datos Firestore a nombre de `"Renato (Simulador Interactivo)"`.
-3. **Sincronización Reactiva**: Si tiene abierto su panel de administración web (`http://localhost:3000/admin/pedidos`), escuchará la **alerta sonora real** al instante y verá aparecer la tarjeta del pedido en **Rojo (No Leído)** sin necesidad de recargar la pantalla.
-4. **Validación Manual**: La consola interactiva lo guiará para que interactúe físicamente con su navegador web. Al hacer clic en **"EMPEZAR PREPARACIÓN"** y posteriormente en **"COMPLETAR CARGA"** en la interfaz real de su pantalla, la consola leerá el cambio de estado directamente de Firestore y le indicará los siguientes pasos operativos (impresión térmica, WhatsApp, etc.).
-5. **Limpieza Automatizada**: Al terminar, el script le ofrecerá borrar el pedido simulado para mantener sus estadísticas diarias perfectamente limpias.
+### 🕹️ Cómo ejecutar una simulación en vivo a través de internet:
+1. Ingrese a la web de administración y ubique el botón **`🧪 SIMULAR PEDIDO`** en la barra superior derecha.
+2. **Creación Instantánea**: Al presionarlo, la plataforma inyectará un pedido de prueba real directamente en la base de datos Firestore a nombre de `"Renato (Pedido de Entrenamiento)"`.
+3. **Sincronización Logística**: Al instante y de forma reactiva, todas las pantallas de los empleados autorizados emitirán la **alerta sonora de nuevo pedido** y verán aparecer la orden en **Rojo (No Leído)** sin necesidad de refrescar el navegador.
+4. **Interacción Paso a Paso**: Podrá probar el flujo completo:
+   - Presionar **`📦 EMPEZAR PREPARACIÓN`** para ver el cambio a **Pendiente (Amarillo)**.
+   - Probar la visualización del **ticket de impresión de 80mm** (apto para ticketeadoras térmicas).
+   - Simular la carga del camión presionando **`🚚 COMPLETAR CARGA`** para archivar el pedido finalizado.
+5. **Limpieza Absoluta**: Para mantener el historial de ventas diario del negocio limpio y con métricas reales de los clientes, cualquier administrador puede borrar el pedido de entrenamiento haciendo clic en el icono de la papelera 🗑️ en la tarjeta. ¡Fácil, rápido y auto-explicativo en vivo!
 
 ---
 
