@@ -367,7 +367,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
   return (
     <div
-      className={`group relative overflow-hidden rounded-[20px] border transition-all duration-300 ${
+      className={`group relative w-full overflow-hidden rounded-[24px] border transition-all duration-300 ${
         isFresh
           ? "border-blue-400/40 bg-blue-50/50 shadow-[0_8px_30px_rgba(59,130,246,0.12)] dark:border-blue-500/30 dark:bg-blue-900/10 dark:shadow-[0_8px_30px_rgba(59,130,246,0.15)]"
           : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-xl dark:border-white/10 dark:bg-[#111] dark:hover:border-white/20 dark:hover:shadow-2xl"
@@ -384,17 +384,66 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
       {/* Main Content */}
       <div className="relative z-10 p-5 sm:p-6">
-        {/* Header Meta */}
-        <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-4 dark:border-white/5">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full bg-gray-100 px-2.5 py-1 dark:bg-white/5">
-              <div className={`h-2 w-2 rounded-full ${status === 'no_leido' ? 'bg-red-500' : 'bg-green-500'} animate-pulse`} />
-              <span className="font-mono text-[10px] font-bold text-gray-600 dark:text-gray-300">
+        {/* Pipeline Stepper / Header Meta */}
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-4 dark:border-white/5">
+          <div className="flex flex-wrap items-center gap-2 justify-between sm:justify-start w-full sm:w-auto">
+            {/* Stepper horizontal interactivo de estados */}
+            <div className="flex items-center gap-1.5 flex-none">
+              {/* Recibido */}
+              <button
+                disabled={isUpdating}
+                onClick={() => handleStatusChange("no_leido")}
+                className={`relative flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${
+                  status === "no_leido"
+                    ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
+                    : "bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                }`}
+                title="Recibido / No Leído"
+              >
+                <span className="text-[11px]">📥</span>
+              </button>
+              <div className={`h-[2px] w-4 sm:w-6 rounded transition-colors duration-300 ${status === "pendiente" || status === "cargado" ? "bg-amber-500" : "bg-gray-200 dark:bg-white/5"}`} />
+              
+              {/* Preparando */}
+              <button
+                disabled={isUpdating}
+                onClick={() => handleStatusChange("pendiente")}
+                className={`relative flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${
+                  status === "pendiente"
+                    ? "bg-amber-500 text-white shadow-[0_0_12px_rgba(245,158,11,0.4)]"
+                    : status === "cargado"
+                    ? "bg-amber-500/20 text-amber-500 dark:bg-amber-500/10"
+                    : "bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                }`}
+                title="Preparando / Pendiente"
+              >
+                <span className="text-[11px]">📦</span>
+              </button>
+              <div className={`h-[2px] w-4 sm:w-6 rounded transition-colors duration-300 ${status === "cargado" ? "bg-green-500" : "bg-gray-200 dark:bg-white/5"}`} />
+
+              {/* Cargado */}
+              <button
+                disabled={isUpdating}
+                onClick={() => handleStatusChange("cargado")}
+                className={`relative flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${
+                  status === "cargado"
+                    ? "bg-green-500 text-white shadow-[0_0_12px_rgba(34,197,94,0.4)]"
+                    : "bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                }`}
+                title="Cargado / Completado"
+              >
+                <span className="text-[11px]">🚚</span>
+              </button>
+            </div>
+            
+            <div className="rounded-full bg-gray-100 px-2.5 py-1 dark:bg-white/5 shrink-0">
+              <span className="font-mono text-[9px] font-bold text-gray-600 dark:text-gray-300">
                 {formatDate(pedido.fecha)}
               </span>
             </div>
           </div>
-          <div className="rounded-md bg-gray-50 px-2.5 py-1 text-[10px] font-bold text-gray-500 dark:bg-white/5 dark:text-gray-400">
+
+          <div className="self-end sm:self-center rounded-md bg-gray-50 px-2.5 py-1 text-[10px] font-bold text-gray-500 dark:bg-white/5 dark:text-gray-400 shrink-0">
             ID: <span className="font-mono">{pedido.id.slice(-6).toUpperCase()}</span>
           </div>
         </div>
@@ -410,25 +459,23 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
                 {pedido.items.length} {pedido.items.length === 1 ? "Artículo" : "Artículos"}
               </span>
               <div className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-600" />
-              <span className={`text-[10px] font-bold uppercase tracking-widest ${status === 'no_leido' ? 'text-red-500' : 'text-green-500'}`}>
-                {status.replace("_", " ")}
+              <span className={`text-[10px] font-bold uppercase tracking-widest ${
+                status === 'no_leido' ? 'text-red-500' : status === 'pendiente' ? 'text-amber-500' : 'text-green-500'
+              }`}>
+                {status === 'no_leido' ? 'NO LEÍDO' : status === 'pendiente' ? 'PENDIENTE' : 'CARGADO'}
               </span>
             </div>
             
             {pedido.clienteDireccion && (
-              <div className="mt-3 flex items-center gap-2 rounded-md bg-gray-50 px-3 py-1.5 w-fit max-w-full dark:bg-white/5">
+              <div className="mt-3 flex flex-col gap-1 rounded-xl bg-gray-50 p-3 w-full dark:bg-white/5 sm:flex-row sm:items-center sm:gap-2 sm:w-fit sm:py-1.5">
                 {pedido.clienteDireccion.includes("RETIRO EN LOCAL") ? (
-                  <>
-                    <span className="text-[10px] font-bold text-orange-600 tracking-wider uppercase shrink-0 dark:text-orange-400">🏬 RETIRO EN LOCAL</span>
-                  </>
+                  <span className="text-[10px] font-black text-orange-600 tracking-wider uppercase shrink-0 dark:text-orange-400">🏬 RETIRO EN LOCAL</span>
                 ) : (
-                  <>
-                    <span className="text-[10px] font-bold text-blue-600 tracking-wider uppercase shrink-0 dark:text-blue-400">🚚 ENVÍO DOMICILIO</span>
-                  </>
+                  <span className="text-[10px] font-black text-blue-600 tracking-wider uppercase shrink-0 dark:text-blue-400">🚚 ENVÍO A DOMICILIO</span>
                 )}
-                <span className="text-gray-300 dark:text-gray-600 text-xs shrink-0">|</span>
-                <span className="text-[10px] text-gray-600 truncate max-w-[120px] sm:max-w-xs dark:text-gray-300" title={pedido.clienteDireccion}>
-                  {pedido.clienteDireccion.replace("RETIRO EN LOCAL: ", "").replace("🏠 ENVÍO A DOMICILIO: ", "")}
+                <span className="hidden sm:inline text-gray-300 dark:text-gray-600 text-xs shrink-0">|</span>
+                <span className="text-[10px] text-gray-600 font-medium dark:text-gray-300 line-clamp-2 sm:line-clamp-1" title={pedido.clienteDireccion}>
+                  {pedido.clienteDireccion.replace("RETIRO EN LOCAL: ", "").replace("🏠 ENVÍO A DOMICILIO: ", "").replace("RETIRO EN SUCURSAL: ", "")}
                 </span>
               </div>
             )}
@@ -441,28 +488,29 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           </div>
         </div>
 
-        {/* Action Bar */}
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        {/* Action Bar (100% Responsivo en Móvil) */}
+        <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
           {pedido.clienteTelefono ? (
             <a 
               href={`https://wa.me/${cleanPhone(pedido.clienteTelefono)}?text=${getWhatsAppMessage()}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 min-w-[200px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#25D366] to-[#1DA851] py-3 px-4 text-[11px] font-black tracking-widest text-white shadow-[0_4px_15px_rgba(37,211,102,0.3)] transition-all hover:shadow-[0_6px_20px_rgba(37,211,102,0.4)] active:scale-95"
+              className="w-full sm:flex-1 min-w-[180px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#25D366] to-[#1DA851] py-3 px-4 text-[11px] font-black tracking-widest text-white shadow-[0_4px_15px_rgba(37,211,102,0.3)] transition-all hover:shadow-[0_6px_20px_rgba(37,211,102,0.4)] active:scale-95"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
               <span>WHATSAPP PRO</span>
             </a>
           ) : (
-            <div className="flex-1 min-w-[200px] flex items-center justify-center rounded-xl bg-gray-100 text-gray-400 py-3 px-4 text-[11px] font-black tracking-widest dark:bg-white/5 dark:text-gray-500">
+            <div className="w-full sm:flex-1 min-w-[180px] flex items-center justify-center rounded-xl bg-gray-100 text-gray-400 py-3 px-4 text-[11px] font-black tracking-widest dark:bg-white/5 dark:text-gray-500">
               SIN TELÉFONO
             </div>
           )}
 
-          <div className="flex flex-1 sm:flex-none gap-2">
+          {/* Grid de dos columnas en móvil, inline flex en PC */}
+          <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:flex-none">
             <button
               onClick={() => setIsViewingReceipt(!isViewingReceipt)}
-              className={`flex-1 sm:flex-none sm:w-[120px] flex items-center justify-center gap-1.5 rounded-xl border py-3 px-2 text-[11px] font-black tracking-widest transition-all active:scale-95 ${
+              className={`flex items-center justify-center gap-1.5 rounded-xl border py-3 px-3 text-[11px] font-black tracking-widest transition-all active:scale-95 ${
                 isViewingReceipt 
                   ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400" 
                   : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
@@ -473,17 +521,18 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
             <button
               onClick={handleImprimir}
-              className="flex-1 sm:flex-none sm:w-[120px] flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
             >
               <span>IMPRIMIR</span>
             </button>
           </div>
 
-          <div className="flex flex-1 gap-2">
+          {/* Copiar factura y borrar en flex horizontal responsivo */}
+          <div className="flex gap-2 w-full sm:w-auto sm:flex-1">
             <button
               onClick={handleCopiadoFacturacion}
               disabled={isUpdating}
-              className="flex-[3] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#00B4D8] text-black font-black tracking-widest py-3 px-2 text-[11px] transition-all hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] active:scale-95 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#00B4D8] text-black font-black tracking-widest py-3 px-2 text-[11px] transition-all hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] active:scale-95 disabled:opacity-50"
             >
               <span className="truncate">COPIAR FACTURA</span>
             </button>
@@ -491,7 +540,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
             <button
               onClick={handleEliminar}
               disabled={isUpdating}
-              className="flex-1 sm:w-14 sm:flex-none flex items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 text-red-600 transition-all hover:bg-red-100 py-3 text-[11px] font-bold active:scale-95 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/30"
+              className="w-12 h-11 shrink-0 flex items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition-all hover:bg-red-100 py-3 text-[11px] font-bold active:scale-95 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/30"
               title="Eliminar Pedido"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
@@ -499,46 +548,43 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           </div>
         </div>
 
-        {/* Status Switcher */}
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <button
-            disabled={isUpdating}
-            onClick={() => handleStatusChange("no_leido")}
-            className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 transition-all text-[10px] font-black uppercase tracking-widest ${
-              status === "no_leido"
-                ? "border-red-500/50 bg-gradient-to-r from-red-500/20 to-red-500/5 text-red-600 shadow-[0_0_15px_rgba(239,68,68,0.2)] dark:text-red-400"
-                : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:border-white/5 dark:bg-white/5 dark:text-gray-400 dark:hover:border-white/20 dark:hover:text-white"
-            }`}
-          >
-            <div className={`h-2 w-2 rounded-full shrink-0 ${status === 'no_leido' ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}`} />
-            <span className="truncate">NO LEÍDO</span>
-          </button>
+        {/* Smart Workflow Action Button (Flujo de Trabajo Inteligente) */}
+        <div className="mt-4">
+          {status === "no_leido" && (
+            <button
+              disabled={isUpdating}
+              onClick={() => handleStatusChange("pendiente")}
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black tracking-widest py-3 px-4 text-[10px] shadow-[0_4px_15px_rgba(245,158,11,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(245,158,11,0.35)] hover:scale-[1.01] active:scale-95 disabled:opacity-50"
+            >
+              <span>📦 EMPEZAR PREPARACIÓN (PENDIENTE)</span>
+            </button>
+          )}
 
-          <button
-            disabled={isUpdating}
-            onClick={() => handleStatusChange("pendiente")}
-            className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 transition-all text-[10px] font-black uppercase tracking-widest ${
-              status === "pendiente"
-                ? "border-yellow-500/50 bg-gradient-to-r from-yellow-500/20 to-yellow-500/5 text-yellow-700 shadow-[0_0_15px_rgba(234,179,8,0.2)] dark:text-yellow-400"
-                : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:border-white/5 dark:bg-white/5 dark:text-gray-400 dark:hover:border-white/20 dark:hover:text-white"
-            }`}
-          >
-            <div className={`h-2 w-2 rounded-full shrink-0 ${status === 'pendiente' ? 'bg-yellow-500 animate-pulse' : 'bg-gray-400'}`} />
-            <span className="truncate">PENDIENTE</span>
-          </button>
-          
-          <button
-            disabled={isUpdating}
-            onClick={() => handleStatusChange("cargado")}
-            className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 transition-all text-[10px] font-black uppercase tracking-widest ${
-              status === "cargado"
-                ? "border-green-500/50 bg-gradient-to-r from-green-500/20 to-green-500/5 text-green-700 shadow-[0_0_15px_rgba(34,197,94,0.2)] dark:text-green-400"
-                : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:border-white/5 dark:bg-white/5 dark:text-gray-400 dark:hover:border-white/20 dark:hover:text-white"
-            }`}
-          >
-            <div className={`h-2 w-2 rounded-full shrink-0 ${status === 'cargado' ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-gray-400'}`} />
-            <span className="truncate">CARGADO</span>
-          </button>
+          {status === "pendiente" && (
+            <button
+              disabled={isUpdating}
+              onClick={() => handleStatusChange("cargado")}
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-green-500/30 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black tracking-widest py-3 px-4 text-[10px] shadow-[0_4px_15px_rgba(34,197,94,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(34,197,94,0.35)] hover:scale-[1.01] active:scale-95 disabled:opacity-50"
+            >
+              <span>🚚 COMPLETAR CARGA (CARGADO)</span>
+            </button>
+          )}
+
+          {status === "cargado" && (
+            <div className="flex gap-2">
+              <div className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-green-500/20 bg-green-500/5 text-green-500 dark:text-green-400 py-3 px-4 text-[10px] font-black tracking-widest uppercase">
+                <span>✅ PEDIDO PREPARADO Y CARGADO</span>
+              </div>
+              <button
+                disabled={isUpdating}
+                onClick={() => handleStatusChange("pendiente")}
+                className="w-12 h-11 shrink-0 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10 transition-all active:scale-95 disabled:opacity-50"
+                title="Revertir a Pendiente"
+              >
+                <span>↩️</span>
+              </button>
+            </div>
+          )}
         </div>
 
         <button
@@ -562,6 +608,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           <div className="relative mx-auto max-w-md overflow-hidden rounded-xl bg-white p-6 sm:p-8 text-black shadow-xl ring-1 ring-gray-200/50">
             {/* Cut line decoration */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-[linear-gradient(90deg,#fff_0%,#fff_50%,#000_50%,#000_100%)] bg-[length:10px_100%]" />
+            
             
             <div className="mb-4 text-center">
               <h4 className="font-mono text-lg font-black uppercase tracking-wider">EL REMATE</h4>

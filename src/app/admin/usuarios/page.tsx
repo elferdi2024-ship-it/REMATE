@@ -6,11 +6,13 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { doc, setDoc, collection, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, firebaseConfig } from "@/lib/firebase";
+import { SUCURSALES } from "@/lib/sucursales";
 
 interface UserData {
   id: string;
   email: string;
-  role: "admin" | "empleado";
+  role: "admin" | "empleado" | "owner";
+  sucursalId?: string | null;
 }
 
 export default function UsuariosPage() {
@@ -18,7 +20,8 @@ export default function UsuariosPage() {
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"empleado" | "admin">("empleado");
+  const [role, setRole] = useState<"empleado" | "admin" | "owner">("empleado");
+  const [sucursalId, setSucursalId] = useState<string>("la-paz");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
@@ -76,7 +79,8 @@ export default function UsuariosPage() {
 
       await setDoc(doc(db, "usuarios", newUserId), {
         email: email,
-        role: role
+        role: role,
+        sucursalId: role === "empleado" ? sucursalId : null
       });
 
       await signOut(secondaryAuth);
@@ -85,6 +89,7 @@ export default function UsuariosPage() {
       setEmail("");
       setPassword("");
       setRole("empleado");
+      setSucursalId("la-paz");
       fetchUsers(); // Refresh list
 
     } catch (error: any) {
@@ -101,13 +106,37 @@ export default function UsuariosPage() {
     }
   };
 
-  const handleRoleChange = async (userId: string, newRole: "admin" | "empleado") => {
+  const handleRoleChange = async (userId: string, newRole: "admin" | "empleado" | "owner") => {
     try {
-      await updateDoc(doc(db, "usuarios", userId), { role: newRole });
-      setUsersList((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
+      const updateData: any = { role: newRole };
+      if (newRole !== "empleado") {
+        updateData.sucursalId = null;
+      } else {
+        updateData.sucursalId = "la-paz";
+      }
+      await updateDoc(doc(db, "usuarios", userId), updateData);
+      setUsersList((prev) =>
+        prev.map((u) =>
+          u.id === userId
+            ? { ...u, role: newRole, sucursalId: newRole === "empleado" ? "la-paz" : null }
+            : u
+        )
+      );
       alert("Rol actualizado exitosamente");
     } catch (error) {
       alert("Error al actualizar el rol");
+    }
+  };
+ 
+  const handleBranchChange = async (userId: string, newBranchId: string) => {
+    try {
+      await updateDoc(doc(db, "usuarios", userId), { sucursalId: newBranchId });
+      setUsersList((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, sucursalId: newBranchId } : u))
+      );
+      alert("Sucursal reasignada exitosamente");
+    } catch (error) {
+      alert("Error al reasignar la sucursal");
     }
   };
 
@@ -189,13 +218,31 @@ export default function UsuariosPage() {
                 <label className="mb-1 block text-sm font-medium text-gray-300">Nivel de Acceso (Rol)</label>
                 <select
                   value={role}
-                  onChange={(e) => setRole(e.target.value as "empleado" | "admin")}
+                  onChange={(e) => setRole(e.target.value as "empleado" | "admin" | "owner")}
                   className="w-full rounded-lg border border-white/10 bg-black/50 px-4 py-2.5 text-white focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF]"
                 >
-                  <option value="empleado">Empleado (Solo ve Pedidos)</option>
+                  <option value="empleado">Empleado (Solo ve Pedidos del Local)</option>
+                  <option value="owner">Dueño (Ve Pedidos y Estadísticas)</option>
                   <option value="admin">Administrador (Acceso Total)</option>
                 </select>
               </div>
+
+              {role === "empleado" && (
+                <div className="animate-in slide-in-from-top-2 duration-300">
+                  <label className="mb-1 block text-sm font-medium text-[#00E5FF]">Asignar Local / Sucursal</label>
+                  <select
+                    value={sucursalId}
+                    onChange={(e) => setSucursalId(e.target.value)}
+                    className="w-full rounded-lg border border-[#00E5FF]/30 bg-black/50 px-4 py-2.5 text-white focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF]"
+                  >
+                    {SUCURSALES.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.nombre} ({s.direccion})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -224,6 +271,7 @@ export default function UsuariosPage() {
                     <tr>
                       <th className="px-4 py-3">Correo</th>
                       <th className="px-4 py-3">Rol</th>
+                      <th className="px-4 py-3">Local Asignado</th>
                       <th className="px-4 py-3 text-right">Acciones</th>
                     </tr>
                   </thead>
@@ -234,13 +282,31 @@ export default function UsuariosPage() {
                         <td className="px-4 py-4">
                           <select
                             value={u.role}
-                            onChange={(e) => handleRoleChange(u.id, e.target.value as "admin" | "empleado")}
+                            onChange={(e) => handleRoleChange(u.id, e.target.value as "admin" | "empleado" | "owner")}
                             disabled={u.email === "rnt.atlantida@gmail.com"}
-                            className="rounded-lg border border-white/10 bg-black/50 px-2 py-1 text-white focus:border-[#00E5FF] focus:outline-none disabled:opacity-50"
+                            className="rounded-lg border border-white/10 bg-black/50 px-2 py-1 text-xs text-white focus:border-[#00E5FF] focus:outline-none disabled:opacity-50"
                           >
                             <option value="empleado">Empleado</option>
+                            <option value="owner">Dueño</option>
                             <option value="admin">Administrador</option>
                           </select>
+                        </td>
+                        <td className="px-4 py-4">
+                          {u.role === "empleado" ? (
+                            <select
+                              value={u.sucursalId || "la-paz"}
+                              onChange={(e) => handleBranchChange(u.id, e.target.value)}
+                              className="rounded-lg border border-[#00E5FF]/20 bg-black/50 px-2 py-1 text-xs text-white focus:border-[#00E5FF] focus:outline-none"
+                            >
+                              {SUCURSALES.map((s) => (
+                                <option key={s.id} value={s.id}>
+                                  {s.nombre}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span className="text-xs text-gray-500">—</span>
+                          )}
                         </td>
                         <td className="px-4 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">

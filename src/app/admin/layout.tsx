@@ -23,7 +23,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [checking, setChecking] = useState(true);
@@ -65,7 +65,7 @@ export default function AdminLayout({
         
         if (snap.exists()) {
           const userRole = snap.data().role;
-          if (userRole === "admin" || userRole === "empleado") {
+          if (userRole === "admin" || userRole === "empleado" || userRole === "owner") {
             setRole(userRole);
           } else {
             router.replace("/admin/login");
@@ -84,9 +84,11 @@ export default function AdminLayout({
     checkRole();
   }, [user, loading, router]);
 
-  // Enforce access control for empleados
+  // Enforce access control for empleados and owners
   useEffect(() => {
     if (role === "empleado" && pathname !== "/admin/pedidos" && !pathname.startsWith("/admin/login")) {
+      router.replace("/admin/pedidos");
+    } else if (role === "owner" && pathname !== "/admin/pedidos" && pathname !== "/admin/stats" && !pathname.startsWith("/admin/login")) {
       router.replace("/admin/pedidos");
     }
   }, [role, pathname, router]);
@@ -120,12 +122,7 @@ export default function AdminLayout({
         <div className="flex flex-col gap-4 w-full max-w-xs">
           <button
             onClick={() => {
-              import("firebase/auth").then(({ getAuth, signOut }) => {
-                const auth = getAuth();
-                signOut(auth).then(() => {
-                  router.push("/admin/login");
-                });
-              });
+              signOut();
             }}
             className="w-full rounded-xl bg-red-500 py-3 font-bold text-white transition-all hover:bg-red-600 shadow-[0_4px_20px_rgba(239,35,60,0.3)]"
           >
@@ -150,6 +147,9 @@ export default function AdminLayout({
   const linksToShow = availableLinks.filter((link) => {
     if (role === "empleado") {
       return link.href === "/admin/pedidos";
+    }
+    if (role === "owner") {
+      return link.href === "/admin/pedidos" || link.href === "/admin/stats";
     }
     return true;
   });
@@ -198,12 +198,7 @@ export default function AdminLayout({
             </div>
             <button
               onClick={() => {
-                import("firebase/auth").then(({ getAuth, signOut }) => {
-                  const auth = getAuth();
-                  signOut(auth).then(() => {
-                    router.push("/admin/login");
-                  });
-                });
+                signOut();
               }}
               className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-red-500/10 py-2 text-xs font-semibold text-red-500 transition-colors hover:bg-red-500/20"
             >
@@ -289,12 +284,7 @@ export default function AdminLayout({
             </div>
             <button
               onClick={() => {
-                import("firebase/auth").then(({ getAuth, signOut }) => {
-                  const auth = getAuth();
-                  signOut(auth).then(() => {
-                    router.push("/admin/login");
-                  });
-                });
+                signOut();
               }}
               className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-red-500/10 py-2 text-xs font-semibold text-red-500 transition-colors hover:bg-red-500/20"
             >

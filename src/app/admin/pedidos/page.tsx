@@ -4,6 +4,7 @@ import PedidoAdminCard, { type PedidoAdmin } from "@/components/admin/PedidoAdmi
 import { actualizarEstadoPedido, subscribePedidosHoy } from "@/lib/pedidos";
 import { SUCURSALES } from "@/lib/sucursales";
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth-context";
 
 const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
@@ -16,6 +17,7 @@ function formatHeaderDate(): string {
 }
 
 export default function PedidosPage() {
+  const { role, sucursalId } = useAuth();
   const [pedidos, setPedidos] = useState<PedidoAdmin[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,6 +26,8 @@ export default function PedidosPage() {
   const [bulkUpdating, setBulkUpdating] = useState(false);
   const [deliveryFilter, setDeliveryFilter] = useState<"todos" | "envio" | "retiro">("todos");
   const [branchFilter, setBranchFilter] = useState<string>("todas");
+ 
+  const effectiveBranchFilter = role === "empleado" && sucursalId ? sucursalId : branchFilter;
 
   const playNotification = useCallback(() => {
     try {
@@ -97,10 +101,10 @@ export default function PedidosPage() {
       matchesDelivery = isEnvio;
     }
 
-    // Branch Filter
+    // Branch Filter (Enforced scoping for employees)
     let matchesBranch = true;
-    if (branchFilter !== "todas") {
-      const sucursal = SUCURSALES.find((s) => s.id === branchFilter);
+    if (effectiveBranchFilter !== "todas") {
+      const sucursal = SUCURSALES.find((s) => s.id === effectiveBranchFilter);
       if (sucursal) {
         matchesBranch = isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase()) || false;
       } else {
@@ -137,11 +141,43 @@ export default function PedidosPage() {
     });
   }
 
+  // Scoped count statistics for employee or full dashboard counts for admin/owner
   const counts = {
-    todos: pedidos.length,
-    no_leido: pedidos.filter((p) => p.status === "no_leido").length,
-    pendiente: pedidos.filter((p) => p.status === "pendiente").length,
-    cargado: pedidos.filter((p) => p.status === "cargado").length,
+    todos: pedidos.filter(p => {
+      if (role === "empleado" && sucursalId) {
+        const sucursal = SUCURSALES.find(s => s.id === sucursalId);
+        const isRetiro = p.clienteDireccion?.includes("RETIRO EN LOCAL") || false;
+        return sucursal && isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase());
+      }
+      return true;
+    }).length,
+    no_leido: pedidos.filter((p) => {
+      const matchesStatus = p.status === "no_leido";
+      if (role === "empleado" && sucursalId) {
+        const sucursal = SUCURSALES.find(s => s.id === sucursalId);
+        const isRetiro = p.clienteDireccion?.includes("RETIRO EN LOCAL") || false;
+        return matchesStatus && sucursal && isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase());
+      }
+      return matchesStatus;
+    }).length,
+    pendiente: pedidos.filter((p) => {
+      const matchesStatus = p.status === "pendiente";
+      if (role === "empleado" && sucursalId) {
+        const sucursal = SUCURSALES.find(s => s.id === sucursalId);
+        const isRetiro = p.clienteDireccion?.includes("RETIRO EN LOCAL") || false;
+        return matchesStatus && sucursal && isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase());
+      }
+      return matchesStatus;
+    }).length,
+    cargado: pedidos.filter((p) => {
+      const matchesStatus = p.status === "cargado";
+      if (role === "empleado" && sucursalId) {
+        const sucursal = SUCURSALES.find(s => s.id === sucursalId);
+        const isRetiro = p.clienteDireccion?.includes("RETIRO EN LOCAL") || false;
+        return matchesStatus && sucursal && isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase());
+      }
+      return matchesStatus;
+    }).length,
   };
 
   return (
@@ -225,55 +261,72 @@ export default function PedidosPage() {
       </div>
 
       {/* Swiss Watch Control Deck: Method & Branch Filters */}
-      <div className="flex flex-col gap-6 rounded-[32px] border border-white/5 bg-[#0A0F1C] p-6 shadow-2xl md:flex-row md:items-center md:justify-between">
-        {/* Delivery Method Filter */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-500">MÉTODO DE ENTREGA</label>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { id: "todos", label: "TODOS", icon: "🌐" },
-              { id: "envio", label: "🚚 ENVÍO", icon: "🚚" },
-              { id: "retiro", label: "🏪 RETIRO", icon: "🏪" },
-            ].map((m) => (
-              <button
-                key={m.id}
-                onClick={() => {
-                  setDeliveryFilter(m.id as any);
-                  if (m.id !== "retiro") {
-                    setBranchFilter("todas");
-                  }
-                }}
-                className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
-                  deliveryFilter === m.id
-                    ? "border-[#00E5FF] bg-[#00E5FF]/10 text-[#00E5FF] shadow-[0_0_15px_rgba(0,229,255,0.15)]"
-                    : "border-white/5 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <span>{m.icon}</span>
-                <span>{m.label}</span>
-              </button>
-            ))}
+      {role === "empleado" && sucursalId ? (
+        <div className="flex items-center gap-4 rounded-[32px] border border-[#00E5FF]/20 bg-gradient-to-r from-[#00E5FF]/5 to-transparent p-6 shadow-xl">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#00E5FF]/10 text-white text-2xl shadow-inner">
+            🏪
+          </div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#00E5FF]">LOCAL ASIGNADO</p>
+            <h3 className="font-bebas text-2xl text-white tracking-wide mt-0.5">
+              SUCURSAL {SUCURSALES.find(s => s.id === sucursalId)?.nombre.toUpperCase() || "ASIGNADA"}
+            </h3>
+            <p className="text-xs text-gray-400">
+              Visualizando únicamente los pedidos y retiros correspondientes a este punto de venta.
+            </p>
           </div>
         </div>
-
-        {/* Branch Filter (Enabled only when retiro is selected or todos is selected) */}
-        <div className="space-y-2 flex-1 md:max-w-xs">
-          <label className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-500">FILTRAR SUCURSAL</label>
-          <select
-            value={branchFilter}
-            onChange={(e) => setBranchFilter(e.target.value)}
-            disabled={deliveryFilter === "envio"}
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-white placeholder:text-gray-500 focus:border-[#00E5FF]/50 focus:outline-none focus:ring-1 focus:ring-[#00E5FF]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
-          >
-            <option value="todas" className="bg-[#0A0F1C] text-white">TODAS LAS SUCURSALES</option>
-            {SUCURSALES.map((s) => (
-              <option key={s.id} value={s.id} className="bg-[#0A0F1C] text-white">
-                {s.nombre} ({s.direccion})
-              </option>
-            ))}
-          </select>
+      ) : (
+        <div className="flex flex-col gap-6 rounded-[32px] border border-white/5 bg-[#0A0F1C] p-6 shadow-2xl md:flex-row md:items-center md:justify-between">
+          {/* Delivery Method Filter */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-500">MÉTODO DE ENTREGA</label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: "todos", label: "TODOS", icon: "🌐" },
+                { id: "envio", label: "🚚 ENVÍO", icon: "🚚" },
+                { id: "retiro", label: "🏪 RETIRO", icon: "🏪" },
+              ].map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => {
+                    setDeliveryFilter(m.id as any);
+                    if (m.id !== "retiro") {
+                      setBranchFilter("todas");
+                    }
+                  }}
+                  className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${
+                    deliveryFilter === m.id
+                      ? "border-[#00E5FF] bg-[#00E5FF]/10 text-[#00E5FF] shadow-[0_0_15px_rgba(0,229,255,0.15)]"
+                      : "border-white/5 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <span>{m.icon}</span>
+                  <span>{m.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+ 
+          {/* Branch Filter (Enabled only when retiro is selected or todos is selected) */}
+          <div className="space-y-2 flex-1 md:max-w-xs">
+            <label className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-500">FILTRAR SUCURSAL</label>
+            <select
+              value={branchFilter}
+              onChange={(e) => setBranchFilter(e.target.value)}
+              disabled={deliveryFilter === "envio"}
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-white placeholder:text-gray-500 focus:border-[#00E5FF]/50 focus:outline-none focus:ring-1 focus:ring-[#00E5FF]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
+            >
+              <option value="todas" className="bg-[#0A0F1C] text-white">TODAS LAS SUCURSALES</option>
+              {SUCURSALES.map((s) => (
+                <option key={s.id} value={s.id} className="bg-[#0A0F1C] text-white">
+                  {s.nombre} ({s.direccion})
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[11px] font-bold uppercase tracking-widest text-gray-500">Acciones masivas:</span>
@@ -313,6 +366,31 @@ export default function PedidosPage() {
           <p className="mt-2 text-sm text-gray-500">Prueba ajustando los filtros o la búsqueda.</p>
         </div>
       )}
+
+      {/* Support Card / Tarjeta de Soporte */}
+      <div className="relative overflow-hidden rounded-[32px] border border-cyan-500/20 bg-gradient-to-r from-cyan-500/10 via-[#0A0F1C]/80 to-transparent p-6 shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-cyan-500/40 hover:shadow-[0_0_30px_rgba(0,229,255,0.15)] flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400 text-2xl shadow-inner animate-pulse">
+            🛠️
+          </div>
+          <div>
+            <h3 className="font-bebas text-2xl text-white tracking-wide">
+              ¿Necesitas ayuda o falla algo? <span className="text-[#00E5FF]">SOPORTE</span>
+            </h3>
+            <p className="text-xs text-gray-400">
+              Estamos en línea para resolver cualquier inconveniente técnico o duda del sistema.
+            </p>
+          </div>
+        </div>
+        <a
+          href="https://wa.me/59892265952?text=Hola%20Facundo,%20necesito%20soporte%20con%20el%20sistema%20de%20pedidos."
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#00E5FF] to-blue-500 px-6 py-3 text-[11px] font-black uppercase tracking-widest text-black shadow-[0_0_20px_rgba(0,229,255,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(0,229,255,0.5)]"
+        >
+          <span>💬</span> Facundo Fernandez
+        </a>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
         {filteredPedidos.map((pedido) => (
