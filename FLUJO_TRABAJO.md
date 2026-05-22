@@ -108,7 +108,25 @@ El flujo de trabajo digital ha sido pulido para requerir la menor cantidad de pa
 
 ---
 
-## 💎 4. BENEFICIOS ESTRATÉGICOS PARA EL DUEÑO DE LA EMPRESA
+## 🎮 4. ENTRENAMIENTO E INSTRUMENTACIÓN EN VIVO (MUESTRA REAL)
+
+Para comprender el flujo digital no a través de teoría, sino de una **experiencia de interacción real**, el sistema incluye un simulador interactivo en tiempo real integrado directamente con la base de datos de producción local.
+
+Este módulo permite al dueño o gerentes presenciar exactamente el viaje de un pedido desde que un cliente presiona "Confirmar Compra" en la web externa hasta que el paquete está arriba del camión de reparto.
+
+### 🕹️ Cómo ejecutar una simulación en vivo en su ordenador:
+1. Abra la terminal y ejecute el comando de demostración:
+   ```bash
+   npm run simular
+   ```
+2. **Generación Real**: El script inyectará un pedido de prueba real directamente a su base de datos Firestore a nombre de `"Renato (Simulador Interactivo)"`.
+3. **Sincronización Reactiva**: Si tiene abierto su panel de administración web (`http://localhost:3000/admin/pedidos`), escuchará la **alerta sonora real** al instante y verá aparecer la tarjeta del pedido en **Rojo (No Leído)** sin necesidad de recargar la pantalla.
+4. **Validación Manual**: La consola interactiva lo guiará para que interactúe físicamente con su navegador web. Al hacer clic en **"EMPEZAR PREPARACIÓN"** y posteriormente en **"COMPLETAR CARGA"** en la interfaz real de su pantalla, la consola leerá el cambio de estado directamente de Firestore y le indicará los siguientes pasos operativos (impresión térmica, WhatsApp, etc.).
+5. **Limpieza Automatizada**: Al terminar, el script le ofrecerá borrar el pedido simulado para mantener sus estadísticas diarias perfectamente limpias.
+
+---
+
+## 💎 5. BENEFICIOS ESTRATÉGICOS PARA EL DUEÑO DE LA EMPRESA
 
 La implementación de este flujo operativo aporta un valor empresarial incalculable para la toma de decisiones:
 

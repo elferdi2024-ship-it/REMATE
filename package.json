@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "simular": "node scripts/simular_pedido.js"
   },
   "dependencies": {
     "@google-cloud/firestore": "^8.5.0",

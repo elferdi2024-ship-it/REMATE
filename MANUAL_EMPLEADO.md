@@ -87,7 +87,27 @@ Cada tarjeta de pedido cuenta con herramientas diseñadas para agilizar las tare
 
 ---
 
-## 🛠️ 5. SOPORTE TÉCNICO E INCIDENCIAS
+## 🎮 5. TUTORIAL INTERACTIVO EN VIVO (APRENDIZAJE EN 2 MINUTOS)
+
+Para que puedas familiarizarte y dominar el sistema antes de trabajar con clientes reales, hemos desarrollado un **simulador interactivo en tiempo real**. Esto te permite experimentar el flujo de trabajo de extremo a extremo en tu propio navegador.
+
+### 🕹️ Cómo iniciar el entrenamiento:
+1. Asegúrate de tener la consola/terminal abierta en la carpeta del proyecto.
+2. Ejecuta el siguiente comando en tu terminal:
+   ```bash
+   npm run simular
+   ```
+3. El sistema creará un **pedido de prueba real** en la base de datos Firestore a nombre de `"Renato (Simulador Interactivo)"`.
+4. De inmediato, tu panel web (`http://localhost:3000/admin/pedidos`) emitirá la **alerta sonora real** de nuevo pedido, y verás aparecer la tarjeta en **Rojo (No Leído)**.
+5. El simulador en tu consola se detendrá y te guiará paso a paso para que:
+   - Presiones **"EMPEZAR PREPARACIÓN"** en la web real y observes cómo el simulador detecta que pasó a **Pendiente (Amarillo)**.
+   - Pruebes la **impresión del ticket térmico** de 80mm y la función de copiar al portapapeles.
+   - Presiones **"COMPLETAR CARGA"** en la web real y verifiques cómo se procesa la carga final del camión.
+6. Al finalizar, el simulador te ofrecerá limpiar automáticamente los datos de prueba de la base de datos. ¡Ideal para entrenar a nuevos empleados en 2 minutos!
+
+---
+
+## 🛠️ 6. SOPORTE TÉCNICO E INCIDENCIAS
 
 Si experimenta una caída de conexión, lentitud, fallas en la impresión o tiene alguna sugerencia de mejora, el panel cuenta con una **tarjeta de soporte técnico integrada** al final de la página.
 
