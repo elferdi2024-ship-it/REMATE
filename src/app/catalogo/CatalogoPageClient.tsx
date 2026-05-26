@@ -368,7 +368,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         setSucursalId(urlSucursal);
         if (savedSucursal !== urlSucursal) ls.setSelectedSucursal(urlSucursal);
       } else {
-        router.replace("/seleccionar-sucursal");
+        const searchStr = typeof window !== "undefined" ? window.location.search : "";
+        router.replace(`/seleccionar-sucursal${searchStr}`);
       }
     } else if (savedSucursal) {
       const params = new URLSearchParams(window.location.search);
@@ -376,7 +377,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       router.replace(`/catalogo?${params.toString()}`);
       setSucursalId(savedSucursal);
     } else {
-      router.replace("/seleccionar-sucursal");
+      const searchStr = typeof window !== "undefined" ? window.location.search : "";
+      router.replace(`/seleccionar-sucursal${searchStr}`);
     }
   }, [mounted, searchParams, router]);
 

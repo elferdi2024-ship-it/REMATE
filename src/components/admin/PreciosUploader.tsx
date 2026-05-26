@@ -61,17 +61,69 @@ export default function PreciosUploader() {
     return "OTROS";
   }
 
+  function cleanString(str: string): string {
+    return str.replace(/^[\s\u00A0]+|[\s\u00A0]+$/g, "").trim();
+  }
+
+  function cleanCode(str: string): string {
+    return str.replace(/[\s\u00A0]+/g, "");
+  }
+
   function parseWorkbook(workbook: WorkBook): ProductRow[] {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
     const products: ProductRow[] = [];
-    for (let i = 1; i < rows.length; i++) {
+
+    // Determinar formato del Excel analizando las primeras filas con datos
+    let isCompactFormat = false;
+    let startRow = 1;
+
+    // Buscamos una fila representativa (no vacía) para analizar la estructura
+    for (let i = 0; i < Math.min(10, rows.length); i++) {
       const row = rows[i];
-      if (!row || row.length < 6) continue;
-      const codigo = String(row[0] ?? "").trim();
-      const nombre = String(row[2] ?? "").trim().toUpperCase();
-      const precio = parseFloat(String(row[5] ?? ""));
-      if (!nombre || isNaN(precio)) continue;
+      if (row && row.length >= 3) {
+        const valCol0 = String(row[0] ?? "");
+        const valCol1 = String(row[1] ?? "");
+        const valCol2 = String(row[2] ?? "");
+        
+        const price2 = parseFloat(valCol2.replace(/[\s\u00A0]+/g, "").replace(",", "."));
+        // Si la columna 2 es un número válido y la columna 0 y 1 tienen texto, es formato compacto
+        if (cleanCode(valCol0) && cleanString(valCol1) && !isNaN(price2)) {
+          isCompactFormat = true;
+          // Si la fila 0 ya tiene un producto válido, empezamos desde la fila 0
+          if (i === 0) {
+            startRow = 0;
+          }
+          break;
+        }
+      }
+    }
+
+    console.log(`[Excel Parser] Detectado formato: ${isCompactFormat ? "Compacto (3 columnas)" : "Clásico (7 columnas)"}. Fila de inicio: ${startRow}`);
+
+    for (let i = startRow; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row || row.length < 3) continue;
+
+      let codigo = "";
+      let nombre = "";
+      let precio = NaN;
+
+      if (isCompactFormat) {
+        codigo = cleanCode(String(row[0] ?? ""));
+        nombre = cleanString(String(row[1] ?? "")).toUpperCase();
+        const rawPrecio = String(row[2] ?? "").replace(/[\s\u00A0]+/g, "").replace(",", ".");
+        precio = parseFloat(rawPrecio);
+      } else {
+        if (row.length < 6) continue;
+        codigo = cleanCode(String(row[0] ?? ""));
+        nombre = cleanString(String(row[2] ?? "")).toUpperCase();
+        const rawPrecio = String(row[5] ?? "").replace(/[\s\u00A0]+/g, "").replace(",", ".");
+        precio = parseFloat(rawPrecio);
+      }
+
+      if (!nombre || isNaN(precio) || !codigo) continue;
+
       products.push({
         codigo,
         nombre,

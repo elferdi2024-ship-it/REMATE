@@ -21,7 +21,9 @@ export default function SeleccionarSucursalPage() {
 
   const handleSelect = (id: string) => {
     ls.setSelectedSucursal(id);
-    router.push(`/catalogo?sucursal=${id}`);
+    const params = new URLSearchParams(window.location.search);
+    params.set("sucursal", id);
+    router.push(`/catalogo?${params.toString()}`);
   };
 
   const filteredSucursales = SUCURSALES.filter(

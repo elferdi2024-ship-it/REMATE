@@ -96,14 +96,18 @@ const FEATURES = [
 export default function LandingPage() {
   const router = useRouter();
   const [configCats, setConfigCats] = useState<Record<string, string>>({});
+  const [selectedSucursal, setSelectedSucursal] = useState<string>("");
   const { brands } = useBrands();
 
   const handleSelectSucursal = (id: string) => {
     ls.setSelectedSucursal(id);
+    setSelectedSucursal(id);
     router.push(`/catalogo?sucursal=${id}`);
   };
 
   useEffect(() => {
+    setSelectedSucursal(ls.getSelectedSucursal());
+
     async function load() {
       try {
         const snap = await getDoc(doc(db, "configuracion", "categorias"));
@@ -309,7 +313,7 @@ export default function LandingPage() {
             }}
           >
             <Link
-              href="/catalogo"
+              href={selectedSucursal ? `/catalogo?sucursal=${selectedSucursal}` : "/seleccionar-sucursal"}
               style={{
                 background: "var(--rojo, #D62828)",
                 color: "#fff",
@@ -645,7 +649,11 @@ export default function LandingPage() {
             {CATEGORIAS.map((cat, i) => (
               <Link
                 key={i}
-                href={`/catalogo?categoria=${encodeURIComponent(cat.nombre)}`}
+                href={
+                  selectedSucursal
+                    ? `/catalogo?categoria=${encodeURIComponent(cat.nombre)}&sucursal=${selectedSucursal}`
+                    : `/seleccionar-sucursal?categoria=${encodeURIComponent(cat.nombre)}`
+                }
                 style={{
                   background: "var(--white, #FFFFFF)",
                   borderRadius: "var(--r-md, 12px)",
@@ -700,7 +708,7 @@ export default function LandingPage() {
 
           <div style={{ textAlign: "center", marginTop: "40px" }}>
             <Link
-              href="/catalogo"
+              href={selectedSucursal ? `/catalogo?sucursal=${selectedSucursal}` : "/seleccionar-sucursal"}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -891,7 +899,7 @@ export default function LandingPage() {
             }}
           >
             <Link
-              href="/catalogo"
+              href={selectedSucursal ? `/catalogo?sucursal=${selectedSucursal}` : "/seleccionar-sucursal"}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
