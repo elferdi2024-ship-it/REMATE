@@ -52,12 +52,21 @@ export default function AdSlotPlacement({ slot, category, onBrandFilter }: AdSlo
 
   if (!brand) return null;
 
-  if (slot === "cart-upsell" && sponsoredAsset) {
-    return (
-      <div style={{ margin: "8px 16px 14px" }}>
-        <SponsoredProduct brand={brand} asset={sponsoredAsset} />
-      </div>
-    );
+  if (slot === "cart-upsell") {
+    if (sponsoredAsset) {
+      return (
+        <div style={{ margin: "8px 16px 14px" }}>
+          <SponsoredProduct brand={brand} asset={sponsoredAsset} />
+        </div>
+      );
+    }
+    if (imageAsset) {
+      return (
+        <div style={{ margin: "8px 16px 14px" }}>
+          <SponsoredBanner brand={brand} asset={imageAsset} variant="compact" slot={slot} onBrandFilter={onBrandFilter} />
+        </div>
+      );
+    }
   }
 
   if (!imageAsset) return null;

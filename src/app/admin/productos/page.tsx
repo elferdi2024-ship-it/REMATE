@@ -8,6 +8,7 @@ import { useToast } from "@/lib/toast-context";
 import imageCompression from 'browser-image-compression';
 import Image from "next/image";
 import categoriaMapping from "@/lib/categoria_mapping.json";
+import { CATEGORIAS } from "@/types";
 
 const catMap = (categoriaMapping as any).mapping || categoriaMapping;
 
@@ -23,6 +24,8 @@ export default function AdminProductos() {
   const [productos, setProductos] = useState<ProductoRow[]>([]);
   const [filtrados, setFiltrados] = useState<ProductoRow[]>([]);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [statusFilter, setStatusFilter] = useState("todos");
   const [loading, setLoading] = useState(true);
   const toast = useToast();
 
@@ -56,10 +59,20 @@ export default function AdminProductos() {
 
   useEffect(() => {
     const s = search.toLowerCase();
-    setFiltrados(
-      productos.filter((p) => p.nombre.toLowerCase().includes(s) || p.codigo.toLowerCase().includes(s))
-    );
-  }, [search, productos]);
+    let res = productos.filter((p) => p.nombre.toLowerCase().includes(s) || p.codigo.toLowerCase().includes(s));
+    
+    if (selectedCategory) {
+      res = res.filter((p) => p.categoria === selectedCategory);
+    }
+    
+    if (statusFilter === "activos") {
+      res = res.filter((p) => p.precio > 0);
+    } else if (statusFilter === "ocultos") {
+      res = res.filter((p) => p.precio <= 0);
+    }
+    
+    setFiltrados(res);
+  }, [search, productos, selectedCategory, statusFilter]);
 
   const slugify = (text: string) => {
     return text
@@ -196,6 +209,20 @@ export default function AdminProductos() {
     }
   };
 
+  const handleUpdateCategory = async (codigo: string, nuevaCategoria: string) => {
+    try {
+      await updateDoc(doc(db, "catalogo_activo", "productos"), {
+        [`items.${codigo}.categoria`]: nuevaCategoria
+      });
+      
+      setProductos(prev => prev.map(p => p.codigo === codigo ? { ...p, categoria: nuevaCategoria } : p));
+      toast.success("Categoría actualizada");
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Error al actualizar la categoría");
+    }
+  };
+
   if (loading) {
     return <div className="p-8 text-white">Cargando catálogo...</div>;
   }
@@ -213,15 +240,42 @@ export default function AdminProductos() {
         </button>
       </div>
 
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Buscar por código o nombre..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-[#0A0F1C] px-4 py-3 pl-10 text-white placeholder-gray-500 focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF]"
-        />
-        <span className="absolute left-3 top-3 text-gray-400">🔍</span>
+      <div className="flex flex-col gap-3 md:flex-row">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Buscar por código o nombre..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-[#0A0F1C] px-4 py-3 pl-10 text-white placeholder-gray-500 focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF] transition-all"
+          />
+          <span className="absolute left-3 top-3.5 text-gray-400">🔍</span>
+        </div>
+        
+        <div className="flex gap-3 flex-wrap">
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="rounded-xl border border-white/10 bg-[#0A0F1C] px-4 py-3 text-sm text-gray-300 focus:border-[#00E5FF] focus:outline-none transition-colors cursor-pointer"
+          >
+            <option value="">Todas las Categorías</option>
+            {CATEGORIAS.map((cat) => (
+              <option key={cat} value={cat} className="bg-[#0A0F1C] text-white">
+                {cat}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-xl border border-white/10 bg-[#0A0F1C] px-4 py-3 text-sm text-gray-300 focus:border-[#00E5FF] focus:outline-none transition-colors cursor-pointer"
+          >
+            <option value="todos">Todos los Estados</option>
+            <option value="activos">Solo Activos (En Web)</option>
+            <option value="ocultos">Solo Ocultos (Fuera de Web)</option>
+          </select>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -256,9 +310,19 @@ export default function AdminProductos() {
             </div>
             
             <div className="flex flex-1 flex-col p-4">
-              <div className="mb-1 flex items-center justify-between">
+              <div className="mb-1 flex items-center justify-between gap-2">
                 <span className="text-xs font-mono text-[#00E5FF]">{prod.codigo}</span>
-                <span className="text-[10px] font-bold text-gray-500 uppercase">{prod.categoria}</span>
+                <select
+                  value={prod.categoria}
+                  onChange={(e) => handleUpdateCategory(prod.codigo, e.target.value)}
+                  className="rounded border border-white/10 bg-black/40 px-2 py-0.5 text-[10px] font-bold uppercase text-gray-300 focus:border-[#00E5FF] focus:outline-none transition-colors"
+                >
+                  {CATEGORIAS.map((cat) => (
+                    <option key={cat} value={cat} className="bg-[#0A0F1C] text-white">
+                      {cat}
+                    </option>
+                  ))}
+                </select>
               </div>
               <h3 className="mb-3 flex-1 text-sm font-semibold text-white line-clamp-2">{prod.nombre}</h3>
               

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { BrandStrip, BrandShowcase } from "@/components/ads";
+import { BrandStrip, BrandShowcase, NativeStoryCard } from "@/components/ads";
 import { useBrands } from "@/hooks/useBrands";
 import { SUCURSALES } from "@/lib/sucursales";
 import * as ls from "@/lib/ls";
@@ -588,6 +588,27 @@ export default function LandingPage() {
 
       {/* ══════ BRAND SHOWCASE (MARCAS DESTACADAS) ══════ */}
       <BrandShowcase brands={brands} />
+
+      {/* ══════ HISTORIAS DE MARCA (NATIVE STORIES) ══════ */}
+      {brands && brands.filter(b => b.active && b.story).length > 0 && (
+        <section style={{ padding: "60px 20px", background: "var(--crema, #F5F0E8)" }}>
+          <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: "32px" }}>
+              <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "4px", textTransform: "uppercase", color: "var(--muted, #9C8570)", display: "block", marginBottom: "8px" }}>
+                Retail Media · Novedades
+              </span>
+              <h2 style={{ fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif", fontSize: "clamp(1.8rem, 5vw, 2.8rem)", color: "var(--oscuro, #1A1410)", letterSpacing: "3px", margin: 0 }}>
+                HISTORIAS DE <span style={{ color: "var(--rojo, #D62828)" }}>NUESTRAS MARCAS</span>
+              </h2>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              {brands.filter(b => b.active && b.story).slice(0, 3).map((brand) => (
+                <NativeStoryCard key={brand.id} brand={brand} onBrandFilter={(brandName) => router.push(`/catalogo?search=${encodeURIComponent(brandName)}`)} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ══════ CATEGORÍAS (TARJETAS DE CATEGORÍAS) ══════
           📌 Aquí se editan los textos de las tarjetas de categorías:

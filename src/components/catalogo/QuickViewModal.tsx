@@ -5,6 +5,7 @@ import Image from "next/image";
 import type { Producto } from "@/types";
 import { EMOJI_POR_CATEGORIA } from "@/types";
 import ProductoCard from "./ProductoCard";
+import AdSlotPlacement from "@/components/ads/AdSlotPlacement";
 
 interface QuickViewModalProps {
   producto: Producto | null;
@@ -232,6 +233,11 @@ export default function QuickViewModal({
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Contextual Ads - Retail Media */}
+          <div className="px-6 md:px-8 pb-4 bg-white">
+            <AdSlotPlacement slot="results" category={producto.categoria} />
           </div>
 
           {/* Cross-Selling (Comprados Juntos) */}

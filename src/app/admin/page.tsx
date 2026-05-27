@@ -6,6 +6,7 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { subscribePedidosHoy } from "@/lib/pedidos";
 import Link from "next/link";
+import { CATEGORIAS } from "@/types";
 
 interface ProductRow {
   codigo: string;
@@ -47,21 +48,7 @@ export default function AdminDashboardPage() {
   });
 
   // Categorías de la app para el selector
-  const CATEGORIAS_DISPONIBLES = [
-    "ACEITES Y GRASAS",
-    "BEBIDAS ALCOHÓLICAS",
-    "BEBIDAS SIN ALCOHOL",
-    "CARNES Y EMBUTIDOS",
-    "CONSERVAS Y ENLATADOS",
-    "GOLOSINAS Y SNACKS",
-    "HARINAS, PASTAS Y CEREALES",
-    "HIGIENE PERSONAL",
-    "LÁCTEOS Y HUEVOS",
-    "LIMPIEZA DEL HOGAR",
-    "PANADERÍA Y REPOSTERÍA",
-    "YERBA, TÉ Y CAFÉ",
-    "OTROS"
-  ];
+  const CATEGORIAS_DISPONIBLES = CATEGORIAS;
 
   // 1. Cargar Configuración de Tienda en tiempo real
   useEffect(() => {

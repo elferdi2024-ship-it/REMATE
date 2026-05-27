@@ -34,6 +34,20 @@ export const metadata: Metadata = {
   title: "El Remate Canelones — Distribuidora Mayorista",
   description:
     "Catálogo mayorista de El Remate Canelones. Más de 1900 productos, precios al público, pedidos por WhatsApp.",
+  keywords: [
+    "distribuidora el remate",
+    "mayorista canelones",
+    "almacen mayorista uruguay",
+    "distribuidora de alimentos",
+    "compras por mayor canelones",
+    "ofertas mayoristas",
+    "catalogo whatsapp el remate"
+  ],
+  authors: [{ name: "Distribuidora El Remate" }],
+  metadataBase: new URL("https://distribuidoraelremate.uy"),
+  alternates: {
+    canonical: "/",
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -43,6 +57,28 @@ export const metadata: Metadata = {
   icons: {
     icon: "/icon-512x512.png",
     apple: "/icon-512x512.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "es_UY",
+    url: "https://distribuidoraelremate.uy",
+    title: "El Remate Canelones — Distribuidora Mayorista",
+    description: "Catálogo mayorista en línea. Más de 1900 productos activos con precios insuperables y pedido express directo por WhatsApp.",
+    siteName: "Distribuidora El Remate",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Distribuidora El Remate Canelones",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "El Remate Canelones — Distribuidora Mayorista",
+    description: "Catálogo mayorista en línea. Más de 1900 productos con entrega a domicilio y pedido por WhatsApp.",
+    images: ["/logo.png"],
   },
 };
 

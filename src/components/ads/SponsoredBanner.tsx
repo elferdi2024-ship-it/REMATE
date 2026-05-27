@@ -89,6 +89,10 @@ export default function SponsoredBanner({
   }, [brand.name, brand.headline, router, onBrandFilter]);
   const brandInitial = brand.name?.slice(0, 1).toUpperCase() || "M";
 
+  const bannerHeight = isMobile
+    ? (isCompact ? "120px" : "140px")
+    : (isCompact ? "136px" : "170px");
+
   return (
     <div
       ref={ref}
@@ -97,196 +101,266 @@ export default function SponsoredBanner({
       aria-label={`Publicidad: ${brand.name}`}
       onClick={handleCtaClick}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCtaClick(); }}
+      style={{
+        width: "100%",
+        height: bannerHeight,
+        borderRadius: "20px",
+        overflow: "hidden",
+        position: "relative",
+        background: "#070B19",
+        border: "1px solid rgba(255,255,255,0.06)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,0.08)",
+        cursor: "pointer",
+        margin: isMobile ? "16px 0" : "28px 0",
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "stretch",
+        ...AD_TOKENS.fadeIn(isVisible),
+        transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease, transform 0.5s ease",
+      }}
       onMouseEnter={(e) => {
         if (!isMobile) {
-          e.currentTarget.style.transform = AD_TOKENS.hover.banner;
-          e.currentTarget.style.boxShadow = `0 16px 40px ${brand.color}44`;
+          e.currentTarget.style.transform = "translateY(-2px)";
+          e.currentTarget.style.borderColor = brand.color ? `${brand.color}40` : "rgba(0, 229, 255, 0.35)";
+          e.currentTarget.style.boxShadow = `0 15px 35px ${brand.color ? `${brand.color}20` : "rgba(0, 229, 255, 0.12)"}, inset 0 1px 2px rgba(255,255,255,0.15)`;
         }
       }}
       onMouseLeave={(e) => {
         if (!isMobile) {
           e.currentTarget.style.transform = "none";
-          e.currentTarget.style.boxShadow = "none";
+          e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
+          e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,0.08)";
         }
       }}
-      style={{
-        width: "100%",
-        height: isMobile ? "auto" : isCompact ? "128px" : AD_TOKENS.size.banner.desktop.height,
-        minHeight: isMobile ? (isCompact ? "120px" : "170px") : undefined,
-        borderRadius: isMobile
-          ? AD_TOKENS.size.banner.mobile.borderRadius
-          : AD_TOKENS.size.banner.desktop.borderRadius,
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: isMobile ? "column" : "row",
-        alignItems: isMobile ? "flex-start" : "center",
-        justifyContent: "space-between",
-        padding: isMobile ? (isCompact ? "12px" : "16px") : isCompact ? "0 14px 0 20px" : "0 20px 0 30px",
-        gap: isMobile ? "12px" : "24px",
-        position: "relative",
-        background: brand.color || "#1a1a1a",
-        cursor: "pointer",
-        margin: isMobile ? "20px 0" : "32px 0",
-        ...AD_TOKENS.fadeIn(isVisible),
-      }}
     >
-      {asset?.src ? (
-        <Image
-          src={asset.src}
-          alt={asset.alt || brand.name}
-          fill
-          sizes="100vw"
-          style={{ objectFit: "cover", opacity: 0.42 }}
-        />
-      ) : null}
-
+      {/* ── BACKGROUND BRAND COMMERCIAL IMAGE (Layer 1) ── */}
       <div
         style={{
           position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(90deg, rgba(8,9,12,0.88) 0%, rgba(8,9,12,0.72) 45%, rgba(8,9,12,0.45) 75%, rgba(8,9,12,0.35) 100%)",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: isMobile ? "68%" : "58%",
+          zIndex: 1,
         }}
-      />
+      >
+        {asset?.src ? (
+          <Image
+            src={asset.src}
+            alt={asset.alt || brand.name}
+            fill
+            sizes={isMobile ? "60vw" : "50vw"}
+            style={{ objectFit: "cover", objectPosition: "center" }}
+          />
+        ) : null}
+      </div>
+
+      {/* ── CINEMATIC SMOOTH GRADIENT OVERLAY (Layer 2) ── */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage:
-            "radial-gradient(circle at 20% 30%, rgba(255,255,255,0.16) 0, transparent 24%), radial-gradient(circle at 85% 70%, rgba(255,255,255,0.12) 0, transparent 30%)",
+          background: isMobile
+            ? "linear-gradient(90deg, #070B19 0%, #070B19 32%, rgba(7,11,25,0.92) 52%, rgba(7,11,25,0.2) 80%, rgba(7,11,25,0) 100%)"
+            : "linear-gradient(90deg, #070B19 0%, #070B19 38%, rgba(7,11,25,0.9) 58%, rgba(7,11,25,0.15) 85%, rgba(7,11,25,0) 100%)",
+          zIndex: 2,
           pointerEvents: "none",
         }}
       />
+
+      {/* ── DYNAMIC BRAND COLOR GLOW (Layer 2.5) ── */}
       <div
         style={{
           position: "absolute",
-          top: 10,
-          right: 12,
+          top: "-50%",
+          left: "-20%",
+          width: "70%",
+          height: "200%",
+          background: `radial-gradient(circle, ${brand.color || "#00E5FF"}12 0%, transparent 65%)`,
+          pointerEvents: "none",
+          zIndex: 2,
+        }}
+      />
+
+      {/* ── LEFT PANEL CONTENT: TEXT & CTA (Layer 3) ── */}
+      <div
+        style={{
+          width: isMobile ? "55%" : "52%",
+          height: "100%",
+          padding: isMobile ? "12px 14px" : "18px 24px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          position: "relative",
           zIndex: 3,
-          fontSize: 10,
+        }}
+      >
+        {/* Brand Header */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {brand.logoUrl ? (
+            <div
+              style={{
+                height: isMobile ? 26 : 34,
+                width: isMobile ? 26 : 34,
+                borderRadius: "50%",
+                border: `2px solid ${brand.color || "#00E5FF"}`,
+                boxShadow: `0 0 10px ${brand.color || "#00E5FF"}40`,
+                background: "#fff",
+                padding: "3px",
+                position: "relative",
+                overflow: "hidden",
+                flexShrink: 0,
+              }}
+            >
+              <Image src={brand.logoUrl} alt={brand.name} fill sizes="34px" style={{ objectFit: "contain", padding: "2px" }} />
+            </div>
+          ) : (
+            <div
+              style={{
+                width: isMobile ? 26 : 34,
+                height: isMobile ? 26 : 34,
+                borderRadius: "50%",
+                background: `linear-gradient(135deg, ${brand.color || "#00E5FF"} 0%, #070B19 100%)`,
+                border: `2px solid ${brand.color || "#00E5FF"}`,
+                boxShadow: `0 0 10px ${brand.color || "#00E5FF"}40`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+                fontSize: isMobile ? "11px" : "13px",
+                fontWeight: 900,
+                flexShrink: 0,
+              }}
+            >
+              {brandInitial}
+            </div>
+          )}
+          
+          <div>
+            <span style={{ fontSize: isMobile ? "11px" : "12.5px", fontWeight: 800, color: "rgba(255,255,255,0.95)", letterSpacing: "-0.2px" }}>
+              {brand.name}
+            </span>
+          </div>
+        </div>
+
+        {/* Headline */}
+        <div style={{ margin: isMobile ? "4px 0" : "8px 0" }}>
+          <h3
+            style={{
+              color: "#fff",
+              fontSize: isMobile ? "15px" : isCompact ? "17px" : "20px",
+              fontWeight: 800,
+              margin: 0,
+              letterSpacing: "-0.3px",
+              lineHeight: 1.1,
+              fontFamily: "var(--font-display, 'Plus Jakarta Sans'), sans-serif",
+              textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+            }}
+          >
+            {brand.headline || brand.name}
+          </h3>
+          {!isMobile && brand.tagline && (
+            <p
+              style={{
+                color: "rgba(255,255,255,0.65)",
+                fontSize: "11px",
+                lineHeight: 1.3,
+                margin: "4px 0 0 0",
+                fontWeight: 500,
+                display: "-webkit-box",
+                WebkitLineClamp: 1,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {brand.tagline}
+            </p>
+          )}
+        </div>
+
+        {/* Footer: CTA Button & Pills */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "2px" }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCtaClick();
+            }}
+            style={{
+              background: "#ffffff",
+              color: "#070B19",
+              border: "none",
+              fontSize: isMobile ? "9.5px" : "11px",
+              fontWeight: 900,
+              letterSpacing: "0.8px",
+              textTransform: "uppercase",
+              padding: isMobile ? "6px 14px" : "8px 18px",
+              borderRadius: "999px",
+              cursor: "pointer",
+              boxShadow: "0 4px 10px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.2)",
+              transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.03)";
+              e.currentTarget.style.boxShadow = "0 6px 15px rgba(255,255,255,0.3), 0 3px 6px rgba(0,0,0,0.3)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "0 4px 10px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.2)";
+            }}
+          >
+            {ctaText}
+          </button>
+
+          {!isMobile && (
+            <div style={{ display: "flex", gap: "4px" }}>
+              {chips.slice(0, 2).map((chip) => (
+                <span
+                  key={chip}
+                  style={{
+                    fontSize: "8.5px",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    color: brand.color || "#00E5FF",
+                    border: `1px solid ${brand.color ? `${brand.color}35` : "rgba(0, 229, 255, 0.2)"}`,
+                    borderRadius: "999px",
+                    padding: "3px 8px",
+                    background: brand.color ? `${brand.color}08` : "rgba(0, 229, 255, 0.05)",
+                  }}
+                >
+                  {chip}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── RIGHT PANEL BADGE (Layer 4 - Placed absolute on top right of the whole card) ── */}
+      <div
+        style={{
+          position: "absolute",
+          top: isMobile ? "8px" : "10px",
+          right: isMobile ? "8px" : "12px",
+          zIndex: 4,
+          fontSize: isMobile ? "7.5px" : "8.5px",
           fontWeight: 900,
-          letterSpacing: 1.3,
-          color: "#fff",
-          background: "rgba(0,0,0,0.35)",
-          border: "1px solid rgba(255,255,255,0.35)",
-          borderRadius: 999,
-          padding: "5px 10px",
+          letterSpacing: "0.8px",
+          color: "#FFF5CC",
+          background: "rgba(255, 179, 0, 0.12)",
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          border: "1px solid rgba(255, 179, 0, 0.35)",
+          borderRadius: "999px",
+          padding: isMobile ? "2px 7px" : "3.5px 10px",
           textTransform: "uppercase",
+          boxShadow: "0 4px 12px rgba(255, 179, 0, 0.08)",
+          textShadow: "0 0 4px rgba(255, 179, 0, 0.2)",
         }}
       >
         {badgeText}
       </div>
-
-      {brand.logoUrl ? (
-        <div
-          style={{
-            height: isCompact ? 46 : 60,
-            width: isCompact ? 46 : 60,
-            borderRadius: 12,
-            flexShrink: 0,
-            position: "relative",
-            background: "rgba(255,255,255,0.9)",
-            padding: 8,
-            zIndex: 2,
-            overflow: "hidden",
-          }}
-        >
-          <Image src={brand.logoUrl} alt={brand.name} fill sizes="60px" style={{ objectFit: "contain", padding: 8 }} />
-        </div>
-      ) : (
-        <div
-          style={{
-            width: isCompact ? 46 : 60,
-            height: isCompact ? 46 : 60,
-            borderRadius: 12,
-            background: "linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.15))",
-            flexShrink: 0,
-            position: "relative",
-            zIndex: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#fff",
-            fontSize: "20px",
-            fontWeight: 900,
-          }}
-        >
-          {brandInitial}
-        </div>
-      )}
-
-      <div style={{ flex: 1, position: "relative", zIndex: 2 }}>
-        <p
-          style={{
-            color: "rgba(255,255,255,0.65)",
-            fontSize: "10px",
-            letterSpacing: "1.5px",
-            textTransform: "uppercase",
-            margin: "0 0 4px",
-            fontWeight: 700,
-          }}
-        >
-          Destacado
-        </p>
-        <h3
-          style={{
-            color: "#fff",
-            fontSize: isCompact ? "16px" : "20px",
-            fontWeight: 800,
-            margin: "0 0 4px",
-            letterSpacing: "-0.2px",
-          }}
-        >
-          {brand.headline || brand.name}
-        </h3>
-        {brand.tagline && (
-          <p style={{ color: "rgba(255,255,255,0.75)", fontSize: isCompact ? "11px" : "13px", margin: 0 }}>
-            {brand.tagline}
-          </p>
-        )}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-          {chips.map((chip) => (
-            <span
-              key={chip}
-              style={{
-                fontSize: "10px",
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-                color: "rgba(255,255,255,0.9)",
-                border: "1px solid rgba(255,255,255,0.3)",
-                borderRadius: 999,
-                padding: "3px 8px",
-                background: "rgba(255,255,255,0.08)",
-              }}
-            >
-              {chip}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <button
-        onClick={handleCtaClick}
-        style={{
-          flexShrink: 0,
-          position: "relative",
-          zIndex: 2,
-          width: isMobile ? "100%" : "auto",
-          textAlign: "center",
-          background: ctaBg,
-          backdropFilter: "blur(8px)",
-          border: "1px solid rgba(255,255,255,0.35)",
-          color: "#fff",
-          fontSize: isCompact ? "11px" : "12px",
-          fontWeight: 900,
-          letterSpacing: 0.6,
-          padding: isCompact ? "7px 14px" : "10px 22px",
-          borderRadius: "24px",
-          cursor: "pointer",
-        }}
-      >
-        {ctaText}
-      </button>
     </div>
   );
 }

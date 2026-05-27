@@ -176,9 +176,18 @@ export default function PreciosUploader() {
       const catalogoActivo: Record<string, ProductRow & { imagen?: string }> = {};
       for (let i = 0; i < parsed.length; i++) {
         const codigo = parsed[i].codigo;
+        const currentProd = currentData[codigo];
+        
+        let precioFinal = parsed[i].precio;
+        if (currentProd && currentProd.precio <= 0) {
+          // Si ya estaba desactivado (precio <= 0), no activarlo (mantener su precio actual)
+          precioFinal = currentProd.precio;
+        }
+
         catalogoActivo[codigo] = {
           ...parsed[i],
-          ...(currentData[codigo]?.imagen ? { imagen: currentData[codigo].imagen } : {})
+          precio: precioFinal,
+          ...(currentProd?.imagen ? { imagen: currentProd.imagen } : {})
         };
         if ((i + 1) % batchSize === 0) {
           setUploadProgress(Math.round(((i + 1) / parsed.length) * 100));
