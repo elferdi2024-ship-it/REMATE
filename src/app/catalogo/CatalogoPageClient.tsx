@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, Suspense, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/lib/toast-context";
@@ -20,6 +21,7 @@ import {
   BrandRail,
 } from "@/components/catalogo";
 import { useBrands } from "@/hooks/useBrands";
+import type { OfertaConfig } from "@/types/ofertas";
 
 import CartPanel from "@/components/carrito/CartPanel";
 import UserPanel from "@/components/usuario/UserPanel";
@@ -337,6 +339,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     pedidosAbiertos: true,
     bannerMensaje: "",
   });
+  const [ofertasConfig, setOfertasConfig] = useState<OfertaConfig | null>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "config", "tienda"), (snap) => {
@@ -344,7 +347,15 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         setTiendaConfig(snap.data() as any);
       }
     });
-    return () => unsub();
+    const unsubOfertas = onSnapshot(doc(db, "configuracion", "ofertas"), (snap) => {
+      if (snap.exists()) {
+        setOfertasConfig(snap.data() as OfertaConfig);
+      }
+    });
+    return () => {
+      unsub();
+      unsubOfertas();
+    };
   }, []);
 
   // Sync state if URL changes from outside (e.g., back button or banners)
@@ -1078,6 +1089,66 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
       </div>
 
+      {/* ── BANNER PREMIUM DE OFERTAS DE LA SEMANA ── */}
+      {ofertasConfig?.activa && ofertasConfig.productos && ofertasConfig.productos.length > 0 && (
+        <div className="page-wrapper" style={{ marginTop: "8px", marginBottom: "16px" }}>
+          <Link
+            href="/ofertas"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: "linear-gradient(135deg, #E8302A 0%, #B91C1C 100%)",
+              color: "#fff",
+              borderRadius: "16px",
+              padding: "16px 20px",
+              textDecoration: "none",
+              boxShadow: "0 10px 25px rgba(232, 48, 42, 0.25)",
+              position: "relative",
+              overflow: "hidden",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-1px) scale(1.005)";
+              e.currentTarget.style.boxShadow = "0 12px 30px rgba(232, 48, 42, 0.35)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "0 10px 25px rgba(232, 48, 42, 0.25)";
+            }}
+          >
+            {/* Ambient background glow */}
+            <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 80% 50%, rgba(255,255,255,0.15) 0%, transparent 60%)", pointerEvents: "none" }} />
+            
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", zIndex: 2 }}>
+              <span style={{ fontSize: "24px" }}>🔥</span>
+              <div style={{ textAlign: "left" }}>
+                <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 900, letterSpacing: "0.5px", textTransform: "uppercase" }}>
+                  {ofertasConfig.titulo || "Ofertas de la Semana"}
+                </h4>
+                <p style={{ margin: "2px 0 0 0", fontSize: "12px", color: "rgba(255,255,255,0.85)", fontWeight: 500 }}>
+                  {ofertasConfig.subtitulo || `Aprovechá precios únicos en ${ofertasConfig.productos.length} productos seleccionados.`}
+                </p>
+              </div>
+            </div>
+            
+            <span style={{
+              background: "rgba(255,255,255,0.2)",
+              padding: "6px 14px",
+              borderRadius: "999px",
+              fontSize: "11px",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.8px",
+              zIndex: 2,
+              flexShrink: 0,
+            }}>
+              Ver Todo →
+            </span>
+          </Link>
+        </div>
+      )}
+
       {/* Ticker */}
       <Ticker />
 
@@ -1118,6 +1189,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             searchQuery={search}
             onSearchChange={setSearchDebounced}
             marketAd={<AdSlotPlacement slot="results" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />}
+            ofertasCount={ofertasConfig?.activa && ofertasConfig.productos ? ofertasConfig.productos.length : 0}
           />
         </div>
 

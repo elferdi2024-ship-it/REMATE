@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import type { Vista } from "@/types";
 
 interface ResultsBarProps {
@@ -12,6 +13,7 @@ interface ResultsBarProps {
   searchQuery?: string;
   onSearchChange?: (v: string) => void;
   marketAd?: React.ReactNode;
+  ofertasCount?: number;
 }
 
 export default function ResultsBar({
@@ -22,6 +24,7 @@ export default function ResultsBar({
   searchQuery = "",
   onSearchChange,
   marketAd,
+  ofertasCount,
 }: ResultsBarProps) {
   const [inputValue, setInputValue] = useState(searchQuery || "");
 
@@ -38,10 +41,55 @@ export default function ResultsBar({
   return (
     <div className="results-bar-wrap">
     <div className="results-bar">
-      <div className="results-market-chip">
-        <span className="results-market-dot" />
-        OFERTAS DESTACADAS
-      </div>
+      {ofertasCount && ofertasCount > 0 ? (
+        <Link
+          href="/ofertas"
+          className="results-market-chip active"
+          style={{
+            textDecoration: "none",
+            cursor: "pointer",
+            background: "rgba(232, 48, 42, 0.12)",
+            border: "1px solid rgba(232, 48, 42, 0.25)",
+            color: "#E8302A",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "6px 14px",
+            borderRadius: "999px",
+            fontSize: "11px",
+            fontWeight: 800,
+            letterSpacing: "1px",
+            transition: "all 0.2s ease-in-out",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(232, 48, 42, 0.18)";
+            e.currentTarget.style.transform = "translateY(-1px)";
+            e.currentTarget.style.boxShadow = "0 4px 12px rgba(232, 48, 42, 0.15)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(232, 48, 42, 0.12)";
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+        >
+          <span
+            className="results-market-dot animate-pulse"
+            style={{
+              width: "6px",
+              height: "6px",
+              background: "#E8302A",
+              borderRadius: "50%",
+              boxShadow: "0 0 8px #E8302A",
+            }}
+          />
+          OFERTAS DESTACADAS ({ofertasCount})
+        </Link>
+      ) : (
+        <div className="results-market-chip">
+          <span className="results-market-dot" />
+          OFERTAS DESTACADAS
+        </div>
+      )}
 
       {/* Buscador inline premium */}
       {onSearchChange && (
