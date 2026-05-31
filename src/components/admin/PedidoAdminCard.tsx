@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { actualizarEstadoPedido, eliminarPedido, type PedidoItem } from "@/lib/pedidos";
+import { SUCURSALES } from "@/lib/sucursales";
 
 export interface PedidoAdmin {
   id: string;
@@ -14,6 +15,7 @@ export interface PedidoAdmin {
   total: number;
   notas?: string;
   status?: "no_leido" | "pendiente" | "cargado";
+  sucursalId?: string | null;
 }
 
 interface PedidoAdminCardProps {
@@ -464,6 +466,14 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
               }`}>
                 {status === 'no_leido' ? 'NO LEÍDO' : status === 'pendiente' ? 'PENDIENTE' : 'CARGADO'}
               </span>
+              {pedido.sucursalId && (
+                <>
+                  <div className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                  <span className="text-[10px] font-extrabold text-[#00E5FF] tracking-wider uppercase bg-[#00E5FF]/10 dark:bg-[#00E5FF]/20 px-2 py-0.5 rounded">
+                    🏪 {SUCURSALES.find(s => s.id === pedido.sucursalId)?.nombre || pedido.sucursalId}
+                  </span>
+                </>
+              )}
             </div>
             
             {pedido.clienteDireccion && (

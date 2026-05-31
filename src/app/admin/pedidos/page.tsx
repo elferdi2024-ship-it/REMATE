@@ -51,6 +51,7 @@ export default function PedidosPage() {
         total: d.total ?? 0,
         notas: d.notas ?? "",
         status: d.status ?? "no_leido",
+        sucursalId: d.sucursalId ?? null,
       }));
 
       // Sort descending by date
@@ -105,11 +106,15 @@ export default function PedidosPage() {
     // Branch Filter (Enforced scoping for employees)
     let matchesBranch = true;
     if (effectiveBranchFilter !== "todas") {
-      const sucursal = SUCURSALES.find((s) => s.id === effectiveBranchFilter);
-      if (sucursal) {
-        matchesBranch = isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase()) || false;
+      if (p.sucursalId) {
+        matchesBranch = p.sucursalId === effectiveBranchFilter;
       } else {
-        matchesBranch = false;
+        const sucursal = SUCURSALES.find((s) => s.id === effectiveBranchFilter);
+        if (sucursal) {
+          matchesBranch = (isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase())) || false;
+        } else {
+          matchesBranch = false;
+        }
       }
     }
 
@@ -166,43 +171,24 @@ export default function PedidosPage() {
     });
   }
 
+  const checkEmployeeBranchMatch = (p: PedidoAdmin) => {
+    if (role === "empleado" && sucursalId) {
+      if (p.sucursalId) {
+        return p.sucursalId === sucursalId;
+      }
+      const sucursal = SUCURSALES.find(s => s.id === sucursalId);
+      const isRetiro = p.clienteDireccion?.includes("RETIRO EN LOCAL") || false;
+      return (sucursal && isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase())) || false;
+    }
+    return true;
+  };
+
   // Scoped count statistics for employee or full dashboard counts for admin/owner
   const counts = {
-    todos: pedidos.filter(p => {
-      if (role === "empleado" && sucursalId) {
-        const sucursal = SUCURSALES.find(s => s.id === sucursalId);
-        const isRetiro = p.clienteDireccion?.includes("RETIRO EN LOCAL") || false;
-        return sucursal && isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase());
-      }
-      return true;
-    }).length,
-    no_leido: pedidos.filter((p) => {
-      const matchesStatus = p.status === "no_leido";
-      if (role === "empleado" && sucursalId) {
-        const sucursal = SUCURSALES.find(s => s.id === sucursalId);
-        const isRetiro = p.clienteDireccion?.includes("RETIRO EN LOCAL") || false;
-        return matchesStatus && sucursal && isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase());
-      }
-      return matchesStatus;
-    }).length,
-    pendiente: pedidos.filter((p) => {
-      const matchesStatus = p.status === "pendiente";
-      if (role === "empleado" && sucursalId) {
-        const sucursal = SUCURSALES.find(s => s.id === sucursalId);
-        const isRetiro = p.clienteDireccion?.includes("RETIRO EN LOCAL") || false;
-        return matchesStatus && sucursal && isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase());
-      }
-      return matchesStatus;
-    }).length,
-    cargado: pedidos.filter((p) => {
-      const matchesStatus = p.status === "cargado";
-      if (role === "empleado" && sucursalId) {
-        const sucursal = SUCURSALES.find(s => s.id === sucursalId);
-        const isRetiro = p.clienteDireccion?.includes("RETIRO EN LOCAL") || false;
-        return matchesStatus && sucursal && isRetiro && p.clienteDireccion?.toLowerCase().includes(sucursal.nombre.toLowerCase());
-      }
-      return matchesStatus;
-    }).length,
+    todos: pedidos.filter(p => checkEmployeeBranchMatch(p)).length,
+    no_leido: pedidos.filter((p) => p.status === "no_leido" && checkEmployeeBranchMatch(p)).length,
+    pendiente: pedidos.filter((p) => p.status === "pendiente" && checkEmployeeBranchMatch(p)).length,
+    cargado: pedidos.filter((p) => p.status === "cargado" && checkEmployeeBranchMatch(p)).length,
   };
 
   return (
@@ -345,14 +331,13 @@ export default function PedidosPage() {
             </div>
           </div>
  
-          {/* Branch Filter (Enabled only when retiro is selected or todos is selected) */}
+          {/* Branch Filter */}
           <div className="space-y-2 flex-1 md:max-w-xs">
             <label className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-500">FILTRAR SUCURSAL</label>
             <select
               value={branchFilter}
               onChange={(e) => setBranchFilter(e.target.value)}
-              disabled={deliveryFilter === "envio"}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-white placeholder:text-gray-500 focus:border-[#00E5FF]/50 focus:outline-none focus:ring-1 focus:ring-[#00E5FF]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-white placeholder:text-gray-500 focus:border-[#00E5FF]/50 focus:outline-none focus:ring-1 focus:ring-[#00E5FF]/50 transition-all duration-300"
             >
               <option value="todas" className="bg-[#0A0F1C] text-white">TODAS LAS SUCURSALES</option>
               {SUCURSALES.map((s) => (

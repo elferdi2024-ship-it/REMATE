@@ -759,6 +759,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           total,
           notas: deliveryNotas || undefined,
           status: "no_leido",
+          sucursalId: sucursalId || null,
         });
         orderId = generatedId;
         setActiveOrderId(orderId);

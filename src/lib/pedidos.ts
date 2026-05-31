@@ -35,6 +35,7 @@ export interface PedidoGlobal {
   total: number;
   notas?: string;
   status: "no_leido" | "pendiente" | "cargado";
+  sucursalId?: string | null;
 }
 
 export interface PedidoUsuario {
@@ -74,6 +75,7 @@ export async function guardarPedidoGlobal(
     total: pedido.total,
     notas: pedido.notas ?? "",
     status: pedido.status || "no_leido",
+    sucursalId: pedido.sucursalId ?? null,
     fecha: Timestamp.now(),
   });
   return docRef.id;
