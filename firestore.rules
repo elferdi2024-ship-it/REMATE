@@ -2,52 +2,56 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Función básica para verificar si el usuario es admin principal
+    // Función para verificar si el usuario es admin
     function isAdmin() {
       return request.auth != null && 
              get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Función extendida para validar accesos por rol específico en el backend
-    function hasAnyRole(roles) {
+    // Función para verificar si el usuario es administrador, dueño o empleado
+    function isStaff() {
       return request.auth != null && 
-             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role in roles;
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role in ['admin', 'owner', 'empleado'];
     }
 
-    // Catálogo Activo: Lectura pública, escritura exclusiva de administradores
+    // Función para verificar si el usuario es administrador o dueño (owner)
+    function isManager() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role in ['admin', 'owner'];
+    }
+
+    // Catálogo: Cualquiera lee, solo admin escribe
     match /catalogo_activo/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Catálogos por Sucursal: Lectura pública, escritura exclusiva de administradores
+    // Catálogos por Sucursal: Cualquiera lee, solo admin escribe
     match /sucursales_catalogos/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Pedidos Globales: Solo clientes crean, personal administrativo gestiona de forma segura
+    // Pedidos: Clientes crean, personal administrativo gestiona (lee/edita/borra)
     match /pedidos/{pedidoId} {
       allow create: if true;
-      // Lectura y actualización permitida a Admin, Owner y Empleado de Sucursal
-      allow read, update: if isAdmin() || hasAnyRole(['owner', 'empleado']);
-      // Eliminación restrictiva: Solo administradores y el Dueño (owner) pueden depurar registros
-      allow delete: if isAdmin() || hasAnyRole(['owner']);
+      allow read, update: if isStaff();
+      allow delete: if isManager();
     }
     
-    // Pedidos Globales Auxiliares: Solo personal administrativo con rol jerárquico y empleados de sucursal
+    // Pedidos Globales: Permitido leer/actualizar a Admin, Owner y Empleado. Borrado solo Admin/Owner.
     match /pedidos_globales/{document=**} {
-      allow read, update: if isAdmin() || hasAnyRole(['owner', 'empleado']);
-      allow delete: if isAdmin() || hasAnyRole(['owner']);
+      allow read, update: if isStaff();
+      allow delete: if isManager();
     }
 
-    // Usuarios: Aislamiento estricto. Cada usuario lee su propio perfil. Solo Admin gestiona todo.
+    // Usuarios: Cada uno lee lo suyo, admin y owner leen todo
     match /usuarios/{userId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin() || hasAnyRole(['owner']));
+      allow read: if request.auth != null && (request.auth.uid == userId || isManager());
       allow write: if isAdmin();
     }
 
-    // Configuración General del Sistema: Lectura pública, escritura exclusiva de administradores
+    // Configuración (Categorías, etc): Cualquiera lee, solo admin escribe
     match /configuracion/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
