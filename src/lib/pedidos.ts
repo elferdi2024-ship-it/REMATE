@@ -153,7 +153,8 @@ export async function getPedidosHoy(): Promise<any[]> {
  * Returns an unsubscribe function.
  */
 export function subscribePedidosHoy(
-  callback: (pedidos: any[]) => void
+  callback: (pedidos: any[]) => void,
+  onError?: (error: any) => void
 ): () => void {
   const hoyInicio = new Date();
   hoyInicio.setHours(0, 0, 0, 0);
@@ -164,9 +165,16 @@ export function subscribePedidosHoy(
     orderBy("fecha", "desc")
   );
 
-  return onSnapshot(q, (snap) => {
-    callback(pedidosFromSnapshots(snap));
-  });
+  return onSnapshot(
+    q,
+    (snap) => {
+      callback(pedidosFromSnapshots(snap));
+    },
+    (err) => {
+      console.error("Firestore subscription error:", err);
+      onError?.(err);
+    }
+  );
 }
 
 // ── Stats ──────────────────────────────────────────────────────────────

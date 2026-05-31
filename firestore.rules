@@ -35,9 +35,10 @@ service cloud.firestore {
       allow delete: if isAdmin() || hasAnyRole(['owner']);
     }
     
-    // Pedidos Globales Auxiliares: Solo personal administrativo con rol jerárquico
+    // Pedidos Globales Auxiliares: Solo personal administrativo con rol jerárquico y empleados de sucursal
     match /pedidos_globales/{document=**} {
-      allow read, write: if isAdmin() || hasAnyRole(['owner']);
+      allow read, update: if isAdmin() || hasAnyRole(['owner', 'empleado']);
+      allow delete: if isAdmin() || hasAnyRole(['owner']);
     }
 
     // Usuarios: Aislamiento estricto. Cada usuario lee su propio perfil. Solo Admin gestiona todo.

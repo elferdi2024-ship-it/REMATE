@@ -74,7 +74,16 @@ export default function PedidosPage() {
   useEffect(() => {
     let unsub: (() => void) | undefined;
     try {
-      unsub = subscribePedidosHoy(handleUpdate);
+      unsub = subscribePedidosHoy(
+        handleUpdate,
+        (err: any) => {
+          if (err?.code === "permission-denied") {
+            setError("🔒 Acceso Denegado: Tu usuario de empleado no tiene permisos de lectura de pedidos en Firestore. Avisa al Administrador Principal para que actualice las reglas de seguridad.");
+          } else {
+            setError(`Error de base de datos: ${err?.message || "Desconocido"}`);
+          }
+        }
+      );
     } catch {
       setError("Error de conexión. Reintentando...");
     }
