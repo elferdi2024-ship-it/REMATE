@@ -81,13 +81,11 @@ export async function guardarPedidoGlobal(
   return docRef.id;
 }
 
-/**
- * Update the status of an order.
- */
 export async function actualizarEstadoPedido(
   id: string,
   status: "no_leido" | "pendiente" | "cargado"
 ): Promise<void> {
+  if (id.startsWith("mock-")) return;
   const ref = doc(db, "pedidos_globales", id);
   await updateDoc(ref, { status });
 }
@@ -96,6 +94,7 @@ export async function actualizarEstadoPedido(
  * Delete an order from /pedidos_globales.
  */
 export async function eliminarPedido(id: string): Promise<void> {
+  if (id.startsWith("mock-")) return;
   const ref = doc(db, "pedidos_globales", id);
   await deleteDoc(ref);
 }

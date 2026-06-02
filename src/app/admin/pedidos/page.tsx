@@ -161,13 +161,32 @@ export default function PedidosPage() {
         notas: "Pedido simulado para entrenamiento. Pruebe los botones interactivos, imprima el ticket o contácteme por WhatsApp.",
         status: "no_leido" as const
       };
-      await guardarPedidoGlobal(mockOrder);
+      
+      const orderWithId = {
+        ...mockOrder,
+        id: `mock-${Date.now().toString().slice(-6)}`,
+        fecha: new Date(),
+        sucursalId: null
+      };
+
+      setPedidos((prev) => {
+        if (prev.some((p) => p.clienteNombre === mockOrder.clienteNombre)) return prev;
+        return [orderWithId, ...prev];
+      });
+      setError(null);
+
+      try {
+        await guardarPedidoGlobal(mockOrder);
+      } catch (err) {
+        console.warn("Silent failure saving mock order to Firestore:", err);
+      }
     } catch (err) {
       console.error("Error al simular pedido:", err);
     } finally {
       setSimulating(false);
     }
   }, []);
+
 
   const totalGeneral = filteredPedidos.reduce((sum, p) => sum + (p.total || 0), 0);
   const totalItems = filteredPedidos.reduce((sum, p) => sum + p.items.reduce((acc, i) => acc + i.cantidad, 0), 0);

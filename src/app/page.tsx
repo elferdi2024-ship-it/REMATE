@@ -337,7 +337,7 @@ export default function LandingPage() {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                boxShadow: "0 4px 18px rgba(232,48,42,0.35)",
+                boxShadow: "0 4px 18 rgba(232,48,42,0.35)",
                 transition: "all 0.15s",
               }}
             >
@@ -377,6 +377,36 @@ export default function LandingPage() {
             >
               📱 WhatsApp
             </a>
+            <Link
+              href="/tutorial"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                color: "#fff",
+                border: "2px dashed rgba(255,255,255,0.2)",
+                borderRadius: "var(--r-md, 12px)",
+                padding: "14px 28px",
+                fontFamily: "var(--font-body, 'DM Sans'), sans-serif",
+                fontSize: "1rem",
+                fontWeight: 800,
+                textDecoration: "none",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+                transition: "all 0.2s",
+                letterSpacing: "0.5px",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.15)";
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              🎤 Guía con &quot;Marti&quot; 🔨
+            </Link>
           </div>
 
           {/* Stats */}

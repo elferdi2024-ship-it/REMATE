@@ -1070,6 +1070,34 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onIgnore={handleIgnoreSharedCart}
       />
 
+      <div className="page-wrapper" style={{ marginTop: "12px", marginBottom: "4px" }}>
+        <Link
+          href="/tutorial"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            background: "rgba(232, 48, 42, 0.06)",
+            border: "1.5px dashed rgba(232, 48, 42, 0.3)",
+            borderRadius: "16px",
+            padding: "10px 18px",
+            textDecoration: "none",
+            color: "inherit",
+            transition: "all 0.2s ease",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "18px" }}>🔨</span>
+            <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--rojo, #D62828)" }}>
+              ¿Primera vez comprando? Mirá la guía interactiva explicada con VOZ por &quot;Marti&quot;.
+            </span>
+          </div>
+          <span style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--rojo, #D62828)", textTransform: "uppercase" }}>
+            Ver Guía ➡️
+          </span>
+        </Link>
+      </div>
+
       <Hero
         onOpenCart={() => setCartOpen(true)}
         cartQty={totalQty}
