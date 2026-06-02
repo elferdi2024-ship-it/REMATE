@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -376,7 +377,13 @@ export default function AdminLoginPage() {
           </div>
         )}
 
-        <div className="mt-5 text-center">
+        <div className="mt-5 text-center flex flex-col gap-2.5">
+          <Link
+            href="/tutorial-empleado"
+            className="text-xs font-bold text-red-400 hover:text-red-300 transition-colors flex items-center justify-center gap-1"
+          >
+            🎤 ¿Nuevo empleado? Mirá la Guía con &quot;Marti&quot; 🔨
+          </Link>
           <button
             onClick={() => router.push("/catalogo")}
             className="text-xs font-semibold text-gray-500 transition-colors hover:text-gray-300"

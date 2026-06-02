@@ -1,3 +1,4 @@
+// filepath: src/app/admin/pedidos/page.tsx
 "use client";
 
 import PedidoAdminCard, { type PedidoAdmin } from "@/components/admin/PedidoAdminCard";
@@ -5,6 +6,7 @@ import { actualizarEstadoPedido, subscribePedidosHoy, guardarPedidoGlobal } from
 import { SUCURSALES } from "@/lib/sucursales";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import Link from "next/link";
 
 const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
@@ -226,7 +228,16 @@ export default function PedidosPage() {
           <h1 className="font-bebas text-4xl tracking-wide text-white md:text-5xl">
             PEDIDOS DE <span className="text-[#00E5FF]">HOY</span>
           </h1>
-          <p className="text-gray-400 mt-1 font-medium">{formatHeaderDate()}</p>
+          <div className="flex items-center gap-3 mt-1 flex-wrap">
+            <span className="text-gray-400 font-medium text-sm">{formatHeaderDate()}</span>
+            <span className="text-gray-600 hidden sm:inline">•</span>
+            <Link
+              href="/tutorial-empleado"
+              className="text-xs font-bold text-red-400 hover:text-red-300 transition-colors flex items-center gap-1 bg-red-950/20 border border-red-500/20 rounded-lg px-2 py-0.5"
+            >
+              🎤 Guía de Preparación con Marti 🔨
+            </Link>
+          </div>
         </div>
 
         <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row md:items-center">
