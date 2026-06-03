@@ -150,44 +150,34 @@ export default function PedidosPage() {
   const handleSimulateOrder = useCallback(async () => {
     try {
       setSimulating(true);
+      
+      const targetSucursalId = role === "empleado" && sucursalId ? sucursalId : (branchFilter !== "todas" ? branchFilter : "las-piedras-herrera");
+      const sucursalObj = SUCURSALES.find(s => s.id === targetSucursalId) || SUCURSALES[0];
+
       const mockOrder = {
         uid: null,
         clienteNombre: "Renato (Pedido de Entrenamiento)",
         clienteTelefono: "099 265 952",
-        clienteDireccion: "RETIRO EN LOCAL - Sucursal Atlantida",
+        clienteDireccion: `RETIRO EN LOCAL - Sucursal ${sucursalObj.nombre} (${sucursalObj.direccion})`,
         items: [
           { codigo: "7730124002903", nombre: "Yerba Mate Premium 1kg", cantidad: 2, precioUnitario: 350 },
           { codigo: "876543210012", nombre: "Aceite de Oliva Extra Virgen 500ml", cantidad: 1, precioUnitario: 750 }
         ],
         total: 1450,
         notas: "Pedido simulado para entrenamiento. Pruebe los botones interactivos, imprima el ticket o contácteme por WhatsApp.",
-        status: "no_leido" as const
+        status: "no_leido" as const,
+        sucursalId: targetSucursalId
       };
       
-      const orderWithId = {
-        ...mockOrder,
-        id: `mock-${Date.now().toString().slice(-6)}`,
-        fecha: new Date(),
-        sucursalId: null
-      };
-
-      setPedidos((prev) => {
-        if (prev.some((p) => p.clienteNombre === mockOrder.clienteNombre)) return prev;
-        return [orderWithId, ...prev];
-      });
       setError(null);
-
-      try {
-        await guardarPedidoGlobal(mockOrder);
-      } catch (err) {
-        console.warn("Silent failure saving mock order to Firestore:", err);
-      }
+      await guardarPedidoGlobal(mockOrder);
     } catch (err) {
       console.error("Error al simular pedido:", err);
+      setError("No se pudo guardar el pedido simulado en la base de datos.");
     } finally {
       setSimulating(false);
     }
-  }, []);
+  }, [role, sucursalId, branchFilter]);
 
 
   const totalGeneral = filteredPedidos.reduce((sum, p) => sum + (p.total || 0), 0);

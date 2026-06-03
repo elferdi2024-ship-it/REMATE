@@ -39,8 +39,9 @@ service cloud.firestore {
       allow delete: if isManager();
     }
     
-    // Pedidos Globales: Permitido leer/actualizar a Admin, Owner y Empleado. Borrado solo Admin/Owner.
+    // Pedidos Globales: Permitido crear a cualquiera. Leer/actualizar a Admin, Owner y Empleado. Borrado solo Admin/Owner.
     match /pedidos_globales/{document=**} {
+      allow create: if true;
       allow read, update: if isStaff();
       allow delete: if isManager();
     }
@@ -49,6 +50,11 @@ service cloud.firestore {
     match /usuarios/{userId} {
       allow read: if request.auth != null && (request.auth.uid == userId || isManager());
       allow write: if isAdmin();
+    }
+
+    // Historial de Pedidos del Usuario: Permitido al propio usuario
+    match /usuarios/{userId}/pedidos/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
     // Configuración (Categorías, etc): Cualquiera lee, solo admin escribe
