@@ -370,7 +370,9 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
   return (
     <div
       className={`group relative w-full overflow-hidden rounded-[24px] border transition-all duration-300 ${
-        isFresh
+        status === "no_leido"
+          ? "border-red-500/50 bg-red-50/30 shadow-[0_8px_30px_rgba(239,68,68,0.15)] animate-[pulse_2.5s_infinite] dark:border-red-500/40 dark:bg-red-950/10"
+          : isFresh
           ? "border-blue-400/40 bg-blue-50/50 shadow-[0_8px_30px_rgba(59,130,246,0.12)] dark:border-blue-500/30 dark:bg-blue-900/10 dark:shadow-[0_8px_30px_rgba(59,130,246,0.15)]"
           : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-xl dark:border-white/10 dark:bg-[#111] dark:hover:border-white/20 dark:hover:shadow-2xl"
       }`}
@@ -453,8 +455,14 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
         {/* Info Grid */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1 min-w-0 flex-1">
-            <h3 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-gray-900 truncate dark:text-white" title={pedido.clienteNombre}>
-              {pedido.clienteNombre}
+            <h3 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-gray-900 truncate dark:text-white flex items-center gap-2" title={pedido.clienteNombre}>
+              {status === "no_leido" && (
+                <span className="relative flex h-3.5 w-3.5 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-500"></span>
+                </span>
+              )}
+              <span>{pedido.clienteNombre}</span>
             </h3>
             <div className="flex items-center gap-2.5 flex-wrap mt-1">
               <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">

@@ -211,6 +211,18 @@ export default function PedidosPage() {
     cargado: pedidos.filter((p) => p.status === "cargado" && checkEmployeeBranchMatch(p)).length,
   };
 
+  // Alerta sonora periódica para pedidos no leídos en la sucursal actual
+  useEffect(() => {
+    if (counts.no_leido === 0) return;
+
+    // Reproducir alerta cada 30 segundos mientras haya pedidos no leídos
+    const interval = setInterval(() => {
+      playNotification();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [counts.no_leido, playNotification]);
+
   return (
     <div className="w-full max-w-full overflow-hidden space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 px-1 md:px-0">
       <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
