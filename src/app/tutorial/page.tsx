@@ -370,202 +370,247 @@ export default function TutorialPage() {
             className="relative w-full overflow-hidden flex justify-center bg-neutral-900/10 rounded-[42px] p-2"
             style={{ height: `${600 * scale}px` }}
           >
-            {/* Phone Frame Mockup scaled with transform scale */}
+            {/* Phone Frame Mockup (Matches El Remate client visual experience) */}
             <div 
-              className="absolute left-0 top-0 w-[300px] h-[600px] origin-top-left bg-[#050914] border-4 border-neutral-800 rounded-[40px] overflow-hidden flex flex-col select-none ring-1 ring-white/10"
+              className="absolute left-0 top-0 w-[300px] h-[600px] origin-top-left bg-[#F5F2EE] border-4 border-neutral-800 rounded-[40px] overflow-hidden flex flex-col select-none ring-1 ring-black/10"
               style={{ transform: `scale(${scale})` }}
             >
-              {/* Notch */}
+              {/* Phone Notch */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-4 bg-neutral-800 rounded-b-xl z-30 flex items-center justify-center">
                 <div className="w-10 h-0.5 bg-neutral-700 rounded-full" />
               </div>
 
               {/* Status bar mock */}
-              <div className="h-6 w-full px-5 pt-1.5 flex justify-between items-center text-[7.5px] font-mono text-neutral-400 z-20 bg-neutral-950/80">
-                <span>00:18</span>
+              <div className="h-6 w-full px-5 pt-1.5 flex justify-between items-center text-[7.5px] font-mono text-neutral-500 z-20 bg-[#F5F2EE]">
+                <span className="font-bold">00:18</span>
                 <div className="flex gap-1 items-center">
                   <span>📶</span>
                   <span>🔋 98%</span>
                 </div>
               </div>
 
-              {/* Phone Content Screen */}
-              <div className="flex-1 relative overflow-hidden flex flex-col bg-[#050914] text-[11px]">
+              {/* Phone Content Screen (Light Theme, system variables matched) */}
+              <div className="flex-1 relative overflow-hidden flex flex-col bg-white text-[11px] text-[#111111] font-sans">
                 
-                {/* 1. SELECCIONAR SUCURSAL SCREEN */}
+                {/* 1. SELECCIONAR SUCURSAL SCREEN (Beige layout) */}
                 {sim.screen === "sucursal" && (
-                  <div className="flex-1 flex flex-col p-4 pt-6 justify-between animate-in fade-in duration-300">
+                  <div className="flex-1 flex flex-col p-4 pt-6 justify-between bg-[#F5F2EE] animate-in fade-in duration-300">
                     <div className="space-y-4 mt-2">
-                      <div className="w-9 h-9 bg-red-600 rounded-xl flex items-center justify-center text-lg font-bold mx-auto">🔨</div>
-                      <div className="text-center space-y-1">
-                        <h4 className="font-display font-black text-sm text-white uppercase tracking-wider">EL REMATE</h4>
-                        <p className="text-[9px] text-neutral-400">Elegí tu sucursal más cercana para ver stock y ofertas de tu zona.</p>
+                      <div className="w-11 h-11 bg-[#E8302A] rounded-2xl flex items-center justify-center text-xl shadow-md mx-auto">🔨</div>
+                      <div className="text-center space-y-1.5">
+                        <h4 className="font-display font-bold text-2xl text-[#111111] uppercase tracking-tight">EL REMATE</h4>
+                        <p className="text-[10px] text-[#5C5550] font-medium leading-normal px-4">Elegí tu sucursal más cercana para ver stock y ofertas de tu zona.</p>
                       </div>
 
-                      <div className="space-y-2.5 pt-2">
+                      <div className="space-y-2.5 pt-3">
                         {/* Canelones Card (Highlighted) */}
                         <div 
                           onClick={() => handleStepSelect(1)}
-                          className="bg-red-600/10 border border-red-500/30 rounded-xl p-3 flex justify-between items-center cursor-pointer shadow-[0_0_12px_rgba(239,68,68,0.1)] transition-all hover:bg-red-600/20"
+                          className="bg-white border-2 border-[#E8302A] rounded-xl p-3.5 flex justify-between items-center cursor-pointer shadow-[0_4px_16px_rgba(232,48,42,0.12)] transition-all hover:translate-y-[-1px]"
                         >
                           <div>
-                            <p className="font-bold text-white text-[11.5px]">Sucursal Canelones 🏪</p>
-                            <p className="text-[8.5px] text-neutral-400 mt-0.5">Ruta 5 km 45, Canelones</p>
+                            <p className="font-bold text-[#111111] text-[12px]">Sucursal Canelones 🏪</p>
+                            <p className="text-[9px] text-[#5C5550] mt-0.5">Ruta 5 km 45, Canelones</p>
                           </div>
-                          <span className="text-red-400 text-xs font-bold">➡️</span>
+                          <span className="text-[#E8302A] text-xs font-black">➡️</span>
                         </div>
 
                         {/* Atlántida Card */}
-                        <div className="bg-white/5 border border-white/5 rounded-xl p-3 flex justify-between items-center opacity-70">
+                        <div className="bg-white/60 border border-[#DDD8D0] rounded-xl p-3.5 flex justify-between items-center opacity-70">
                           <div>
-                            <p className="font-bold text-neutral-300 text-[11.5px]">Sucursal Atlántida</p>
-                            <p className="text-[8.5px] text-neutral-500 mt-0.5">Ruta Interbalnearia km 46</p>
+                            <p className="font-bold text-[#3A3330] text-[12px]">Sucursal Atlántida</p>
+                            <p className="text-[9px] text-[#888078] mt-0.5">Ruta Interbalnearia km 46</p>
                           </div>
-                          <span className="text-neutral-500 text-xs">➡️</span>
+                          <span className="text-[#888078] text-xs">➡️</span>
                         </div>
 
                         {/* Las Piedras Card */}
-                        <div className="bg-white/5 border border-white/5 rounded-xl p-3 flex justify-between items-center opacity-70">
+                        <div className="bg-white/60 border border-[#DDD8D0] rounded-xl p-3.5 flex justify-between items-center opacity-70">
                           <div>
-                            <p className="font-bold text-neutral-300 text-[11.5px]">Sucursal Las Piedras</p>
-                            <p className="text-[8.5px] text-neutral-500 mt-0.5">Dr. Pouey 632</p>
+                            <p className="font-bold text-[#3A3330] text-[12px]">Sucursal Las Piedras</p>
+                            <p className="text-[9px] text-[#888078] mt-0.5">Dr. Pouey 632</p>
                           </div>
-                          <span className="text-neutral-500 text-xs">➡️</span>
+                          <span className="text-[#888078] text-xs">➡️</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-center text-[7.5px] text-neutral-600 font-mono tracking-widest uppercase">
-                      Distribuidora Mayorista
+                    <div className="text-center text-[8px] text-[#888078] font-bold tracking-widest uppercase mb-1">
+                      Distribuidora Mayorista Canelones
                     </div>
                   </div>
                 )}
 
                 {/* 2. CATALOGO SCREEN */}
                 {(sim.screen === "catalogo" || sim.screen === "drawer") && (
-                  <div className="flex-1 flex flex-col animate-in fade-in duration-300">
-                    {/* Catalog Header */}
-                    <div className="bg-neutral-950/80 border-b border-white/5 px-3 py-2 flex items-center justify-between">
+                  <div className="flex-1 flex flex-col bg-white animate-in fade-in duration-300">
+                    {/* Catalog Header (White header, red sucursal badge) */}
+                    <div className="bg-white border-b border-gray-100 px-3 py-2 flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
-                        <span className="w-5 h-5 bg-red-600 rounded-md flex items-center justify-center text-xs font-bold">🔨</span>
-                        <span className="font-display font-bold text-[10px] tracking-tight text-white">EL REMATE</span>
+                        <span className="w-5.5 h-5.5 bg-[#E8302A] rounded-md flex items-center justify-center text-xs font-bold text-white shadow-sm">🔨</span>
+                        <span className="font-display font-extrabold text-[12px] tracking-tight text-[#111111]">EL REMATE</span>
                       </div>
-                      <span className="text-[7.5px] font-bold text-red-400 bg-red-950/40 px-1.5 py-0.5 rounded-full border border-red-500/20">🏪 CANELONES</span>
+                      <span className="text-[8px] font-extrabold text-[#E8302A] bg-[#FEF2F1] px-2 py-0.5 rounded-full border border-[#FEF2F1] shadow-sm uppercase">🏪 CANELONES</span>
                     </div>
 
-                    {/* Catalog Search & Category pills */}
-                    <div className="p-3 border-b border-white/5 space-y-2 bg-neutral-950/40">
-                      <div className="bg-white/5 border border-white/5 rounded-lg py-1.5 px-2.5 text-[8.5px] text-neutral-500 flex items-center gap-2">
-                        <span>🔍</span>
-                        <span>Buscar productos mayoristas...</span>
+                    {/* Search & Category circular buttons (CatsNav replica) */}
+                    <div className="border-b border-gray-100 bg-[#F8FAFC]">
+                      {/* Search Bar mockup */}
+                      <div className="px-3 pt-2">
+                        <div className="bg-white border border-[#DDD8D0] rounded-xl py-1.5 px-2.5 text-[9px] text-[#888078] flex items-center gap-2 shadow-sm">
+                          <span>🔍</span>
+                          <span className="font-medium">Buscar productos mayoristas...</span>
+                        </div>
                       </div>
                       
-                      {/* Horizontal pills */}
-                      <div className="flex gap-1.5 overflow-hidden">
-                        <span className="bg-red-600/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full text-[8px] font-bold">TODOS</span>
-                        <span className="bg-white/5 text-neutral-400 px-2 py-0.5 rounded-full text-[8px]">BEBIDAS</span>
-                        <span className="bg-white/5 text-neutral-400 px-2 py-0.5 rounded-full text-[8px]">ALMACÉN</span>
+                      {/* CatsNav Circular Pills */}
+                      <div className="w-full overflow-x-auto scrollbar-none py-2 px-3">
+                        <div className="flex gap-4 w-max">
+                          {/* Todos */}
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-sm shadow-sm transition-all">📦</div>
+                            <span className="text-[8px] font-bold text-[#5C5550] uppercase tracking-wider">Todos</span>
+                          </div>
+                          {/* Bebidas */}
+                          <div className="flex flex-col items-center gap-1">
+                            <div className={`w-10 h-10 rounded-full border flex items-center justify-center text-sm shadow-sm transition-all ${
+                              sim.screen === "catalogo" ? "border-gray-200 bg-white" : "border-[#E8302A] bg-[#FEF2F1]"
+                            }`}>🍾</div>
+                            <span className={`text-[8px] font-bold uppercase tracking-wider ${
+                              sim.screen === "catalogo" ? "text-[#5C5550]" : "text-[#E8302A]"
+                            }`}>Bebidas</span>
+                          </div>
+                          {/* Almacén */}
+                          <div className="flex flex-col items-center gap-1">
+                            <div className={`w-10 h-10 rounded-full border flex items-center justify-center text-sm shadow-sm transition-all ${
+                              sim.screen === "catalogo" ? "border-[#E8302A] bg-[#FEF2F1]" : "border-gray-200 bg-white"
+                            }`}>🧉</div>
+                            <span className={`text-[8px] font-bold uppercase tracking-wider ${
+                              sim.screen === "catalogo" ? "text-[#E8302A]" : "text-[#5C5550]"
+                            }`}>Almacén</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
                     {/* Catalog Grid Area */}
-                    <div className="flex-1 p-3 grid grid-cols-2 gap-2.5 overflow-y-auto">
+                    <div className="flex-1 p-3 grid grid-cols-2 gap-2.5 overflow-y-auto bg-[#F8FAFC]">
                       {/* Product 1: Yerba Mate */}
                       <div 
                         onClick={() => handleStepSelect(2)}
-                        className="bg-neutral-900/60 border border-white/5 rounded-xl p-2.5 flex flex-col justify-between cursor-pointer hover:bg-neutral-900 transition-colors"
+                        className="bg-white border border-[#DDD8D0] rounded-xl p-2.5 flex flex-col justify-between cursor-pointer hover:border-gray-300 shadow-sm"
                       >
-                        <div className="aspect-square bg-neutral-800 rounded-lg flex items-center justify-center text-2xl mb-1.5 relative overflow-hidden">
+                        <div className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center text-3xl mb-1.5 relative overflow-hidden border border-gray-100">
                           🧉
-                          <span className="absolute bottom-1 right-1 bg-red-600 text-white font-black text-[6.5px] px-1 rounded-sm uppercase">Bulto Cerrado</span>
+                          <span className="absolute bottom-1 right-1 bg-[#E8302A] text-white font-black text-[6.5px] px-1 rounded-sm uppercase tracking-wider">Bulto Cerrado</span>
                         </div>
                         <div>
-                          <p className="font-bold text-[9.5px] text-neutral-200 line-clamp-2 leading-tight">Yerba Mate Premium 1kg</p>
-                          <p className="text-[7.5px] text-neutral-500 font-mono mt-0.5">Cód: 77301240</p>
+                          <p className="font-bold text-[9.5px] text-[#3A3330] line-clamp-2 leading-tight">Yerba Mate Premium 1kg</p>
+                          <p className="text-[7.5px] text-[#888078] font-mono mt-0.5">Cód: 77301240</p>
                         </div>
-                        <div className="flex items-end justify-between mt-2 pt-1.5 border-t border-white/5">
+                        <div className="flex items-end justify-between mt-2 pt-1.5 border-t border-gray-100">
                           <div>
-                            <p className="text-[12px] font-mono font-bold text-white">{formatCurrency(350)}</p>
-                            <p className="text-[6.5px] text-neutral-500 font-medium">unidad</p>
+                            <p className="text-[14px] font-bebas font-bold text-[#E8302A] leading-none">{formatCurrency(350)}</p>
+                            <p className="text-[6.5px] text-[#5C5550] font-bold uppercase tracking-widest mt-0.5">unidad</p>
                           </div>
-                          <span className="w-5 h-5 bg-red-600 hover:bg-red-500 rounded-md flex items-center justify-center text-[10px] text-white">🛒</span>
+                          <span className="w-5.5 h-5.5 bg-[#E8302A] rounded-md flex items-center justify-center text-white text-[10px] shadow-sm">+</span>
                         </div>
                       </div>
 
                       {/* Product 2: Aceite */}
-                      <div className="bg-neutral-900/60 border border-white/5 rounded-xl p-2.5 flex flex-col justify-between opacity-80">
-                        <div className="aspect-square bg-neutral-800 rounded-lg flex items-center justify-center text-2xl mb-1.5">
+                      <div className="bg-white border border-[#DDD8D0] rounded-xl p-2.5 flex flex-col justify-between opacity-80 shadow-sm">
+                        <div className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center text-3xl mb-1.5 border border-gray-100">
                           🍾
                         </div>
                         <div>
-                          <p className="font-bold text-[9.5px] text-neutral-200 line-clamp-2 leading-tight">Aceite de Oliva Extra V. 500ml</p>
-                          <p className="text-[7.5px] text-neutral-500 font-mono mt-0.5">Cód: 87654321</p>
+                          <p className="font-bold text-[9.5px] text-[#3A3330] line-clamp-2 leading-tight">Aceite de Oliva Extra V. 500ml</p>
+                          <p className="text-[7.5px] text-[#888078] font-mono mt-0.5">Cód: 87654321</p>
                         </div>
-                        <div className="flex items-end justify-between mt-2 pt-1.5 border-t border-white/5">
+                        <div className="flex items-end justify-between mt-2 pt-1.5 border-t border-gray-100">
                           <div>
-                            <p className="text-[12px] font-mono font-bold text-white">{formatCurrency(750)}</p>
-                            <p className="text-[6.5px] text-neutral-500 font-medium">unidad</p>
+                            <p className="text-[14px] font-bebas font-bold text-[#E8302A] leading-none">{formatCurrency(750)}</p>
+                            <p className="text-[6.5px] text-[#5C5550] font-bold uppercase tracking-widest mt-0.5">unidad</p>
                           </div>
-                          <span className="w-5 h-5 bg-neutral-800 text-neutral-600 rounded-md flex items-center justify-center text-[10px]">🛒</span>
+                          <span className="w-5.5 h-5.5 bg-gray-200 text-gray-500 rounded-md flex items-center justify-center text-[10px] shadow-sm">+</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Bottom Cart banner Float */}
+                    {/* Bottom FloatCartBtn (Replicates FloatCartBtn.tsx styles) */}
                     {sim.hasItems && (
                       <div 
                         onClick={() => handleStepSelect(3)}
-                        className="m-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white p-2.5 rounded-xl flex items-center justify-between cursor-pointer shadow-lg shadow-green-500/20 hover:scale-[1.02] active:scale-95 transition-all animate-in slide-in-from-bottom-2 duration-300"
+                        className="absolute bottom-5 left-1/2 -translate-x-1/2 bg-[#111111] text-white border-1.5 border-[#E8302A]/35 rounded-[30px] py-2 px-4 flex items-center justify-between gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.30)] cursor-pointer hover:scale-[1.02] active:scale-95 transition-all duration-300 w-[240px] z-10 font-bebas tracking-widest text-[11px]"
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="bg-black/20 text-[9px] font-bold px-1.5 py-0.5 rounded-md">{sim.cartCount} u.</span>
-                          <span className="font-bold text-[9.5px] uppercase tracking-wider">Ver mi Pedido</span>
+                        <div className="flex items-center gap-1.5">
+                          <span>🛒 Pedido</span>
+                          <span className="bg-[#E8302A] text-white text-[7.5px] font-body rounded-full w-4.5 h-4.5 flex items-center justify-center font-bold">{sim.cartCount}</span>
                         </div>
-                        <span className="font-bold text-[11px]">{formatCurrency(sim.cartTotal)} ➡️</span>
+                        <span className="bg-[#E8302A]/15 border border-[#E8302A]/30 text-[#E8302A] text-[9.5px] font-body font-bold rounded-lg px-2 py-0.5">{formatCurrency(sim.cartTotal)}</span>
                       </div>
                     )}
 
-                    {/* 3. SIMULATED BUY DRAWER SHEET */}
+                    {/* 3. SIMULATED BUY DRAWER SHEET (QuickViewModal replica) */}
                     {sim.screen === "drawer" && (
-                      <div className="absolute inset-0 bg-black/75 z-20 flex flex-col justify-end animate-in fade-in duration-200">
-                        <div className="bg-neutral-900 border-t border-white/10 rounded-t-3xl p-4 space-y-4 max-h-[75%] animate-in slide-in-from-bottom-10 duration-300">
+                      <div className="absolute inset-0 bg-[#090D1A]/40 z-20 flex flex-col justify-end animate-in fade-in duration-200">
+                        <div className="bg-white border-t border-gray-100 rounded-t-[32px] p-5 space-y-4 max-h-[75%] animate-in slide-in-from-bottom-10 duration-300 shadow-2xl relative text-left">
                           
-                          {/* Pull Bar */}
-                          <div className="w-10 h-1 bg-neutral-700 rounded-full mx-auto" />
+                          {/* Mobile handle pull bar */}
+                          <div className="w-12 h-1.5 bg-black/10 rounded-full mx-auto" />
+
+                          {/* Category pill */}
+                          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-gray-100 border border-gray-200/50 text-gray-500 text-[8.5px] font-bold uppercase tracking-wider rounded-md">
+                            🧉 Almacén
+                          </div>
 
                           {/* Product Info inside Drawer */}
-                          <div className="flex items-start gap-3">
-                            <div className="w-12 h-12 bg-neutral-800 rounded-xl flex items-center justify-center text-xl">mate</div>
+                          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                             <div>
-                              <h4 className="font-bold text-[11px] text-white">Yerba Mate Premium 1kg</h4>
-                              <p className="text-[8px] text-neutral-400 mt-0.5">Precio unitario: {formatCurrency(350)}</p>
-                              <p className="text-[7.5px] text-red-400 font-extrabold uppercase mt-1">🏷️ Descuento por bulto aplicado</p>
+                              <h4 className="font-bold text-sm text-gray-900 leading-tight">Yerba Mate Premium 1kg</h4>
+                              <p className="text-[8px] text-gray-400 font-bold tracking-wider mt-1">CÓDIGO: 77301240</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bebas text-2xl text-[#E8302A] leading-none">{formatCurrency(350)}</p>
+                              <p className="text-[7.5px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Unidad IVA Incl.</p>
                             </div>
                           </div>
 
-                          {/* Packs Selector */}
-                          <div className="space-y-2">
-                            <p className="text-[8px] text-neutral-500 font-black uppercase tracking-wider">Elegí la cantidad del Bulto:</p>
-                            <div className="grid grid-cols-2 gap-2">
+                          {/* Packs Selector (Compra rápida bultos) */}
+                          <div className="space-y-2 pt-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm">⚡</span>
+                              <span className="text-[8.5px] text-gray-500 font-bold uppercase tracking-wider">Compra rápida (Bulto cerrado)</span>
+                            </div>
+                            <div className="grid grid-cols-4 gap-2">
                               {/* 6 u */}
-                              <div className="bg-white/5 border border-white/5 p-2 rounded-xl text-center opacity-70">
-                                <p className="font-bold text-white text-[10px]">Bulto de 6 u.</p>
-                                <p className="text-[9px] font-mono font-bold text-neutral-400 mt-0.5">{formatCurrency(2100)}</p>
+                              <div className="py-2.5 bg-gray-50 border border-gray-200 rounded-[14px] text-center opacity-70">
+                                <span className="text-[7.5px] font-bold text-gray-400 block">LLEVAR</span>
+                                <span className="text-xs font-black text-gray-800">6 u.</span>
                               </div>
                               {/* 12 u (Highlighted) */}
                               <div 
                                 onClick={() => handleStepSelect(3)}
-                                className="bg-red-600/20 border border-red-500/50 p-2 rounded-xl text-center shadow-[0_0_12px_rgba(239,68,68,0.15)] cursor-pointer hover:bg-red-600/30"
+                                className="py-2.5 bg-[#FEF2F1] border-2 border-[#E8302A] rounded-[14px] text-center cursor-pointer hover:bg-red-50"
                               >
-                                <p className="font-bold text-red-400 text-[10px]">Bulto de 12 u. 🔥</p>
-                                <p className="text-[9.5px] font-mono font-bold text-white mt-0.5">{formatCurrency(4200)}</p>
+                                <span className="text-[7.5px] font-bold text-[#E8302A] block animate-pulse">LLEVAR</span>
+                                <span className="text-xs font-black text-[#E8302A]">12 u. 🔥</span>
+                              </div>
+                              {/* 24 u */}
+                              <div className="py-2.5 bg-gray-50 border border-gray-200 rounded-[14px] text-center opacity-70">
+                                <span className="text-[7.5px] font-bold text-gray-400 block">LLEVAR</span>
+                                <span className="text-xs font-black text-gray-800">24 u.</span>
+                              </div>
+                              {/* 48 u */}
+                              <div className="py-2.5 bg-gray-50 border border-gray-200 rounded-[14px] text-center opacity-70">
+                                <span className="text-[7.5px] font-bold text-gray-400 block">LLEVAR</span>
+                                <span className="text-xs font-black text-gray-800">48 u.</span>
                               </div>
                             </div>
                           </div>
 
                           <button 
                             onClick={() => handleStepSelect(3)}
-                            className="w-full bg-red-600 hover:bg-red-500 text-white text-[9.5px] font-bold py-2 rounded-xl transition-colors text-center"
+                            className="w-full bg-[#111111] hover:bg-black text-white font-bold text-xs py-3 rounded-[20px] transition-all text-center uppercase tracking-wider"
                           >
                             Agregar al Pedido 🛒
                           </button>
@@ -577,45 +622,45 @@ export default function TutorialPage() {
 
                 {/* 4. SHOPPING CART REVIEW SCREEN */}
                 {sim.screen === "carrito" && (
-                  <div className="flex-1 flex flex-col justify-between p-3 animate-in fade-in duration-300">
+                  <div className="flex-1 flex flex-col justify-between p-3.5 bg-white text-left animate-in fade-in duration-300">
                     <div className="space-y-3">
                       {/* Header */}
-                      <div className="border-b border-white/5 pb-2 flex items-center justify-between">
-                        <h4 className="font-display font-bold text-white">Mi Carrito</h4>
-                        <span onClick={() => handleStepSelect(1)} className="text-[9px] text-neutral-500 cursor-pointer">Volver</span>
+                      <div className="border-b border-gray-100 pb-2.5 flex items-center justify-between">
+                        <h4 className="font-display font-extrabold text-sm text-gray-900 uppercase">Mi Pedido</h4>
+                        <span onClick={() => handleStepSelect(1)} className="text-[9px] text-[#5C5550] hover:text-[#E8302A] font-bold uppercase cursor-pointer">Volver</span>
                       </div>
 
                       {/* Cart Items list */}
                       <div className="space-y-2">
-                        <div className="bg-neutral-900 border border-white/5 rounded-xl p-3 flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">mate</span>
+                        <div className="bg-gray-50 border border-gray-200/50 rounded-xl p-3 flex justify-between items-center shadow-sm">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-2xl">🧉</span>
                             <div>
-                              <p className="font-bold text-white">Yerba Mate Premium</p>
-                              <p className="text-[8px] text-neutral-400 mt-0.5">Bulto de 12 unidades</p>
+                              <p className="font-bold text-[#111111] text-[10px]">Yerba Mate Premium</p>
+                              <p className="text-[8px] text-[#5C5550] mt-0.5">Bulto cerrado · 12 unidades</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-mono font-bold text-white">{formatCurrency(4200)}</p>
-                            <p className="text-[8px] text-neutral-500">{formatCurrency(350)} u.</p>
+                            <p className="font-mono font-bold text-[#E8302A]">{formatCurrency(4200)}</p>
+                            <p className="text-[7.5px] text-[#888078] font-bold font-mono">({formatCurrency(350)} u.)</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Totals & Continue button */}
-                    <div className="space-y-3 pt-3 border-t border-white/5">
-                      <div className="space-y-1 text-[9px] text-neutral-400 font-mono">
+                    <div className="space-y-3 pt-3 border-t border-gray-100">
+                      <div className="space-y-1.5 text-[8.5px] text-[#5C5550] font-mono">
                         <div className="flex justify-between"><span>SUBTOTAL:</span><span>{formatCurrency(4200)}</span></div>
-                        <div className="flex justify-between text-emerald-400 font-bold"><span>ENVÍO:</span><span>GRATIS</span></div>
-                        <div className="flex justify-between text-white font-bold text-[11px] pt-1.5 border-t border-white/5">
-                          <span>TOTAL:</span><span>{formatCurrency(4200)}</span>
+                        <div className="flex justify-between text-[#1A7A42] font-black bg-[#EBF7F0] px-2 py-0.5 rounded"><span>ENVÍO A LOCAL:</span><span>GRATIS 🚚</span></div>
+                        <div className="flex justify-between text-[#111111] font-extrabold text-[11.5px] pt-2 border-t border-dashed border-gray-200">
+                          <span>TOTAL A PAGAR:</span><span>{formatCurrency(4200)}</span>
                         </div>
                       </div>
 
                       <button 
                         onClick={() => handleStepSelect(4)}
-                        className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white text-[9.5px] font-black tracking-wider py-2.5 rounded-xl transition-all shadow-md shadow-red-600/10 text-center"
+                        className="w-full bg-[#E8302A] hover:bg-[#C4231E] text-white text-[10px] font-black tracking-wider py-3 rounded-xl transition-all shadow-md shadow-[#E8302A]/10 text-center uppercase"
                       >
                         CONTINUAR COMPRA ➡️
                       </button>
@@ -625,45 +670,45 @@ export default function TutorialPage() {
 
                 {/* 5. CHECKOUT DETAILS SCREEN */}
                 {sim.screen === "checkout" && (
-                  <div className="flex-1 flex flex-col justify-between p-3 animate-in fade-in duration-300">
+                  <div className="flex-1 flex flex-col justify-between p-3.5 bg-white text-left animate-in fade-in duration-300">
                     <div className="space-y-3">
                       {/* Header */}
-                      <div className="border-b border-white/5 pb-2 flex items-center justify-between">
-                        <h4 className="font-display font-bold text-white">Datos del Comercio</h4>
-                        <span onClick={() => handleStepSelect(3)} className="text-[9px] text-neutral-500 cursor-pointer">Volver</span>
+                      <div className="border-b border-gray-100 pb-2.5 flex items-center justify-between">
+                        <h4 className="font-display font-extrabold text-sm text-gray-900 uppercase">Datos del Local</h4>
+                        <span onClick={() => handleStepSelect(3)} className="text-[9px] text-[#5C5550] font-bold uppercase cursor-pointer">Volver</span>
                       </div>
 
                       {/* Checkout fields */}
-                      <div className="space-y-2.5 pt-1 text-left">
-                        <div className="bg-emerald-600/15 border border-emerald-500/20 text-emerald-400 p-2 rounded-lg text-[8.5px] font-bold text-center">
+                      <div className="space-y-2.5 pt-1">
+                        <div className="bg-[#EBF7F0] border border-emerald-500/20 text-[#1A7A42] p-2.5 rounded-lg text-[9px] font-black text-center uppercase tracking-wide">
                           🚚 ¡ENVÍO GRATIS APLICADO! SUPERASTE LOS $3.000
                         </div>
 
                         <div>
-                          <label className="text-[8px] uppercase tracking-wider text-neutral-500 block mb-0.5">Nombre del Local / Negocio</label>
+                          <label className="text-[7.5px] uppercase tracking-widest text-[#888078] font-bold block mb-0.5">Nombre del Local / Comercio</label>
                           <input 
                             type="text" 
                             disabled 
                             value="Mini Market El Sol" 
-                            className="w-full bg-neutral-900 border border-white/5 rounded-lg px-2.5 py-1.5 text-[9.5px] text-neutral-300 outline-none"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[9.5px] text-[#111111] font-semibold outline-none"
                           />
                         </div>
                         <div>
-                          <label className="text-[8px] uppercase tracking-wider text-neutral-500 block mb-0.5">Teléfono Celular (WhatsApp)</label>
+                          <label className="text-[7.5px] uppercase tracking-widest text-[#888078] font-bold block mb-0.5">Teléfono Celular (WhatsApp)</label>
                           <input 
                             type="text" 
                             disabled 
                             value="099 123 456" 
-                            className="w-full bg-neutral-900 border border-white/5 rounded-lg px-2.5 py-1.5 text-[9.5px] text-neutral-300 outline-none"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[9.5px] text-[#111111] font-semibold outline-none"
                           />
                         </div>
                         <div>
-                          <label className="text-[8px] uppercase tracking-wider text-neutral-500 block mb-0.5">Dirección de Entrega</label>
+                          <label className="text-[7.5px] uppercase tracking-widest text-[#888078] font-bold block mb-0.5">Dirección de Entrega</label>
                           <input 
                             type="text" 
                             disabled 
                             value="Av. Giannattasio km 22, Solymar" 
-                            className="w-full bg-neutral-900 border border-white/5 rounded-lg px-2.5 py-1.5 text-[9.5px] text-neutral-300 outline-none"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[9.5px] text-[#111111] font-semibold outline-none"
                           />
                         </div>
                       </div>
@@ -671,43 +716,58 @@ export default function TutorialPage() {
 
                     <button 
                       onClick={() => handleStepSelect(5)}
-                      className="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white text-[9.5px] font-black tracking-widest py-2.5 rounded-xl transition-all shadow-md shadow-emerald-600/10 text-center"
+                      className="w-full bg-[#1A7A42] hover:bg-[#145E33] text-white text-[10px] font-black tracking-widest py-3 rounded-xl transition-all shadow-md shadow-[#1A7A42]/10 text-center uppercase flex items-center justify-center gap-1.5"
                     >
                       💬 ENVIAR PEDIDO POR WHATSAPP
                     </button>
                   </div>
                 )}
 
-                {/* 6. WHATSAPP SUCCESS SCREEN */}
+                {/* 6. WHATSAPP SUCCESS SCREEN (WhatsApp Chat Mockup style) */}
                 {sim.screen === "success" && (
-                  <div className="flex-1 flex flex-col p-4 justify-between bg-neutral-950 text-center animate-in zoom-in-95 duration-300">
-                    <div className="space-y-3 mt-4">
-                      <div className="w-11 h-11 bg-emerald-500 text-white text-lg rounded-full flex items-center justify-center mx-auto mb-1 animate-bounce">
-                        ✓
+                  <div className="flex-1 flex flex-col justify-between bg-[#E5DDD5] animate-in zoom-in-95 duration-300 text-left">
+                    {/* WhatsApp Chat Header */}
+                    <div className="bg-[#075E54] text-white px-3 py-2 flex items-center gap-2 z-10 shadow-md">
+                      <div className="w-6.5 h-6.5 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold font-serif">🔨</div>
+                      <div>
+                        <p className="font-bold text-[9.5px] leading-none">Distribuidora El Remate</p>
+                        <p className="text-[6.5px] text-emerald-100 mt-0.5">En línea</p>
                       </div>
-                      <h4 className="font-bebas text-[14.5px] text-emerald-400">¡Pedido Armado Correctamente!</h4>
-                      <p className="text-[8.5px] text-neutral-400">Se generó el mensaje de WhatsApp mayorista listo para enviar:</p>
                     </div>
 
-                    {/* Mock WhatsApp message display */}
-                    <div className="bg-emerald-950/20 border border-emerald-500/20 rounded-xl p-3.5 text-left font-mono text-[7px] text-neutral-300 space-y-1 max-w-[240px] mx-auto select-all leading-tight">
-                      <p className="text-emerald-400 font-bold">*Distribuidora El Remate* 🛒</p>
-                      <p>Cliente: Mini Market El Sol</p>
-                      <p>ID Pedido: #M826A</p>
-                      <p>-------------------------</p>
-                      <p>12 u. Yerba Mate Premium 1kg - $4.200</p>
-                      <p>-------------------------</p>
-                      <p className="font-bold text-white">TOTAL: $4.200 (Envío Gratis)</p>
+                    {/* Chat Bubble Area */}
+                    <div className="flex-grow p-3 space-y-3 overflow-y-auto flex flex-col justify-end text-[7px] leading-tight">
+                      
+                      {/* User Sent Message bubble (Right) */}
+                      <div className="self-end bg-[#DCF8C6] border border-emerald-200/50 rounded-l-lg rounded-br-lg p-2.5 max-w-[210px] shadow-sm text-neutral-800 space-y-1 relative">
+                        <p className="text-[#128C7E] font-extrabold text-[8px]">*Distribuidora El Remate* 🛒</p>
+                        <p className="font-semibold">Cliente: Mini Market El Sol</p>
+                        <p>ID Pedido: #M826A</p>
+                        <p>-------------------------</p>
+                        <p>12 u. Yerba Mate Premium 1kg - $4.200</p>
+                        <p>-------------------------</p>
+                        <p className="font-extrabold text-[#111111] text-[8px]">TOTAL: $4.200 (Envío Gratis)</p>
+                        <span className="absolute bottom-1 right-2 text-[5.5px] text-gray-500 font-mono">22:15 ✔️✔️</span>
+                      </div>
+
+                      {/* System / Admin response bubble (Left) */}
+                      <div className="self-start bg-white border border-gray-200 rounded-r-lg rounded-bl-lg p-2.5 max-w-[210px] shadow-sm text-neutral-800 space-y-1 relative">
+                        <p className="font-bold text-[#E8302A] text-[7.5px]">Marti — El Remate 🔨</p>
+                        <p className="font-medium text-[7.5px] leading-normal text-neutral-700">
+                          ¡Recibido! Tu pedido está siendo procesado por el local de Canelones. En breve te contactará un empleado para despacharlo. ¡Gracias por elegirnos!
+                        </p>
+                        <span className="absolute bottom-1 right-2 text-[5.5px] text-gray-400 font-mono">22:16</span>
+                      </div>
                     </div>
 
-                    <div className="space-y-2 pb-2">
+                    {/* Reset Controls footer */}
+                    <div className="bg-[#F4F4F4] border-t border-gray-200 p-2 text-center">
                       <button 
                         onClick={() => handleStepSelect(0)}
-                        className="w-full bg-white/5 border border-white/10 hover:bg-white/10 text-[9px] font-bold py-1.5 rounded-lg text-neutral-300 transition-colors"
+                        className="bg-white border border-gray-300 hover:bg-gray-50 text-[8.5px] font-bold py-1.5 px-4 rounded-lg text-neutral-700 transition-colors shadow-sm"
                       >
-                        🔄 Reiniciar Guía
+                        🔄 Reiniciar Guía de Compra
                       </button>
-                      <p className="text-[7.5px] text-neutral-500">¡Comprar de forma mayorista nunca fue tan simple!</p>
                     </div>
                   </div>
                 )}
