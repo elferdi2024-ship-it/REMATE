@@ -52,14 +52,20 @@ export default function AdminDashboardPage() {
 
   // 1. Cargar Configuración de Tienda en tiempo real
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, "config", "tienda"), (snap) => {
-      if (snap.exists()) {
-        setConfig(snap.data() as TiendaConfig);
-      } else {
-        // Inicializar si no existe
-        setConfig({ pedidosAbiertos: true, bannerMensaje: "" });
+    const unsub = onSnapshot(
+      doc(db, "config", "tienda"),
+      (snap) => {
+        if (snap.exists()) {
+          setConfig(snap.data() as TiendaConfig);
+        } else {
+          // Inicializar si no existe
+          setConfig({ pedidosAbiertos: true, bannerMensaje: "" });
+        }
+      },
+      (err) => {
+        console.error("Error al escuchar config/tienda en dashboard:", err);
       }
-    });
+    );
     return () => unsub();
   }, []);
 

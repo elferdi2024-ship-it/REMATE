@@ -342,16 +342,28 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [ofertasConfig, setOfertasConfig] = useState<OfertaConfig | null>(null);
 
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, "config", "tienda"), (snap) => {
-      if (snap.exists()) {
-        setTiendaConfig(snap.data() as any);
+    const unsub = onSnapshot(
+      doc(db, "config", "tienda"),
+      (snap) => {
+        if (snap.exists()) {
+          setTiendaConfig(snap.data() as any);
+        }
+      },
+      (err) => {
+        console.error("Error en listener config/tienda:", err);
       }
-    });
-    const unsubOfertas = onSnapshot(doc(db, "configuracion", "ofertas"), (snap) => {
-      if (snap.exists()) {
-        setOfertasConfig(snap.data() as OfertaConfig);
+    );
+    const unsubOfertas = onSnapshot(
+      doc(db, "configuracion", "ofertas"),
+      (snap) => {
+        if (snap.exists()) {
+          setOfertasConfig(snap.data() as OfertaConfig);
+        }
+      },
+      (err) => {
+        console.error("Error en listener configuracion/ofertas:", err);
       }
-    });
+    );
     return () => {
       unsub();
       unsubOfertas();
