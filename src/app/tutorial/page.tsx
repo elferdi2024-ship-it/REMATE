@@ -64,12 +64,12 @@ const TUTORIAL_STEPS: Step[] = [
   },
   {
     id: 6,
-    title: "6. Enviar por WhatsApp",
-    shortDesc: "Despachar pedido al instante",
-    description: "Presiona 'Enviar Pedido' para generar tu comprobante digital y abrir tu WhatsApp con el mensaje estructurado listo.",
-    speechText: "Por último, haz clic en el botón Enviar Pedido. La aplicación descargará una imagen de tu comprobante y abrirá tu WhatsApp con el mensaje listo para enviar. ¡Eso es todo!",
+    title: "6. Enviar Pedido",
+    shortDesc: "Confirmar orden al instante",
+    description: "Presiona 'Enviar Pedido' para generar tu comprobante digital y registrar tu orden. Nosotros nos comunicaremos contigo.",
+    speechText: "Por último, haz clic en el botón Enviar Pedido. La aplicación descargará una imagen de tu comprobante y enviará la orden a nuestro sistema para que te contactemos a la brevedad. ¡Eso es todo!",
     duration: 10,
-    pointer: { top: "84%", left: "50%", label: "Finalizar en WhatsApp" },
+    pointer: { top: "84%", left: "50%", label: "Finalizar Compra" },
   },
 ];
 
@@ -718,7 +718,7 @@ export default function TutorialPage() {
                       onClick={() => handleStepSelect(5)}
                       className="w-full bg-[#1A7A42] hover:bg-[#145E33] text-white text-[10px] font-black tracking-widest py-3 rounded-xl transition-all shadow-md shadow-[#1A7A42]/10 text-center uppercase flex items-center justify-center gap-1.5"
                     >
-                      💬 ENVIAR PEDIDO POR WHATSAPP
+                      ✔️ CONFIRMAR Y ENVIAR PEDIDO
                     </button>
                   </div>
                 )}

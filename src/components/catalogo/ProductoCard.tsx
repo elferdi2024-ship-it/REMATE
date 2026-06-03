@@ -96,12 +96,8 @@ export default function ProductoCard({
 
   const handleAdd = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onQuickView) {
-      onQuickView(producto);
-    } else {
-      onAdd(producto, e);
-    }
-  }, [onQuickView, onAdd, producto]);
+    onAdd(producto, e);
+  }, [onAdd, producto]);
 
   const handleDec = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();

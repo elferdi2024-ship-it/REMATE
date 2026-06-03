@@ -49,12 +49,8 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
 
   const handleAdd = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onQuickView) {
-      onQuickView(producto);
-    } else {
-      onAdd(producto, e);
-    }
-  }, [onQuickView, onAdd, producto]);
+    onAdd(producto, e);
+  }, [onAdd, producto]);
 
   const handleDec = useCallback(() => {
     onQtyChange(producto.codigo, Math.max(0, qty - 1));
