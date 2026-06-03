@@ -360,8 +360,8 @@ export default function TutorialPage() {
         </div>
       </header>
 
-      {/* Main Layout: Optimized 2-column layout that shifts cleanly on mobile */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+      {/* Main Layout: Responsive flex for mobile, grid for desktop */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-8 flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-8 items-center lg:items-start">
         
         {/* LEFT COLUMN: Phone Frame Simulator container */}
         <section className="w-full lg:col-span-5 flex flex-col items-center">
