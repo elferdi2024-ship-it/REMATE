@@ -803,7 +803,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           "/logo.png",
           orderId,
           deliveryDireccion,
-          false // skipRedirect = false: descarga el comprobante y redirige a WhatsApp
+          true // skipRedirect = true: descarga el comprobante y no redirige a WhatsApp
         );
       } catch (waErr) {
         console.error("❌ WhatsApp: Error al enviar factura:", waErr);
