@@ -1,3 +1,4 @@
+// filepath: src/components/admin/PedidoAdminCard.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -107,6 +108,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
               border-bottom: 1px dashed #000;
               padding-bottom: 3mm;
               margin-bottom: 3mm;
+              font-size: 11px;
             }
             .title {
               font-size: 16px;
@@ -351,9 +353,6 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
     copyToClipboard(textoFinal, "¡Lista de productos copiada! ✅\n(Código, Nombre y Cantidad)");
   };
 
-  const previewItems = pedido.items.slice(0, 3);
-  const remaining = pedido.items.length - 3;
-
   function formatCurrency(value: number): string {
     return value.toLocaleString("es-UY", {
       style: "currency",
@@ -362,19 +361,14 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
     });
   }
 
-  const statusColors = {
-    no_leido: "bg-red-500/20 text-red-400 border-red-500/30",
-    pendiente: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  };
-
   return (
     <div
-      className={`group relative w-full overflow-hidden rounded-[24px] border transition-all duration-300 ${
+      className={`group relative w-full overflow-hidden rounded-[24px] border transition-all duration-300 text-[var(--admin-text-mid)] ${
         status === "no_leido"
-          ? "border-red-500/50 bg-red-50/30 shadow-[0_8px_30px_rgba(239,68,68,0.15)] animate-[pulse_2.5s_infinite] dark:border-red-500/40 dark:bg-red-950/10"
+          ? "border-red-500/50 bg-red-500/5 shadow-[0_8px_30px_rgba(239,68,68,0.15)] animate-[pulse_2.5s_infinite]"
           : isFresh
-          ? "border-blue-400/40 bg-blue-50/50 shadow-[0_8px_30px_rgba(59,130,246,0.12)] dark:border-blue-500/30 dark:bg-blue-900/10 dark:shadow-[0_8px_30px_rgba(59,130,246,0.15)]"
-          : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-xl dark:border-white/10 dark:bg-[#111] dark:hover:border-white/20 dark:hover:shadow-2xl"
+          ? "border-blue-500/30 bg-blue-500/5 shadow-[0_8px_30px_rgba(59,130,246,0.12)]"
+          : "border-[var(--admin-border)] bg-[var(--admin-card-bg)] hover:border-[var(--admin-accent)]/20 hover:shadow-xl"
       }`}
     >
       {/* Fresh Badge */}
@@ -389,7 +383,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
       {/* Main Content */}
       <div className="relative z-10 p-5 sm:p-6">
         {/* Pipeline Stepper / Header Meta */}
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-4 dark:border-white/5">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--admin-border)] pb-4">
           <div className="flex flex-wrap items-center gap-2 justify-between sm:justify-start w-full sm:w-auto">
             {/* Stepper horizontal interactivo de estados */}
             <div className="flex items-center gap-1.5 flex-none">
@@ -400,13 +394,13 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
                 className={`relative flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${
                   status === "no_leido"
                     ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
-                    : "bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    : "bg-[var(--admin-bg)] text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)]"
                 }`}
                 title="Recibido / No Leído"
               >
                 <span className="text-[11px]">📥</span>
               </button>
-              <div className={`h-[2px] w-4 sm:w-6 rounded transition-colors duration-300 ${status === "pendiente" || status === "cargado" ? "bg-amber-500" : "bg-gray-200 dark:bg-white/5"}`} />
+              <div className={`h-[2px] w-4 sm:w-6 rounded transition-colors duration-300 ${status === "pendiente" || status === "cargado" ? "bg-amber-500" : "bg-[var(--admin-border)]"}`} />
               
               {/* Preparando */}
               <button
@@ -416,14 +410,14 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
                   status === "pendiente"
                     ? "bg-amber-500 text-white shadow-[0_0_12px_rgba(245,158,11,0.4)]"
                     : status === "cargado"
-                    ? "bg-amber-500/20 text-amber-500 dark:bg-amber-500/10"
-                    : "bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    ? "bg-amber-500/20 text-amber-500"
+                    : "bg-[var(--admin-bg)] text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)]"
                 }`}
                 title="Preparando / Pendiente"
               >
                 <span className="text-[11px]">📦</span>
               </button>
-              <div className={`h-[2px] w-4 sm:w-6 rounded transition-colors duration-300 ${status === "cargado" ? "bg-green-500" : "bg-gray-200 dark:bg-white/5"}`} />
+              <div className={`h-[2px] w-4 sm:w-6 rounded transition-colors duration-300 ${status === "cargado" ? "bg-green-500" : "bg-[var(--admin-border)]"}`} />
 
               {/* Cargado */}
               <button
@@ -432,7 +426,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
                 className={`relative flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${
                   status === "cargado"
                     ? "bg-green-500 text-white shadow-[0_0_12px_rgba(34,197,94,0.4)]"
-                    : "bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    : "bg-[var(--admin-bg)] text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)]"
                 }`}
                 title="Cargado / Completado"
               >
@@ -440,22 +434,22 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
               </button>
             </div>
             
-            <div className="rounded-full bg-gray-100 px-2.5 py-1 dark:bg-white/5 shrink-0">
-              <span className="font-mono text-[9px] font-bold text-gray-600 dark:text-gray-300">
+            <div className="rounded-full bg-[var(--admin-bg)] px-2.5 py-1 border border-[var(--admin-border)] shrink-0">
+              <span className="font-mono text-[9px] font-bold text-[var(--admin-text-lo)]">
                 {formatDate(pedido.fecha)}
               </span>
             </div>
           </div>
 
-          <div className="self-end sm:self-center rounded-md bg-gray-50 px-2.5 py-1 text-[10px] font-bold text-gray-500 dark:bg-white/5 dark:text-gray-400 shrink-0">
-            ID: <span className="font-mono">{pedido.id.slice(-6).toUpperCase()}</span>
+          <div className="self-end sm:self-center rounded-md bg-[var(--admin-bg)] px-2.5 py-1 text-[10px] font-bold text-[var(--admin-text-lo)] border border-[var(--admin-border)] shrink-0">
+            ID: <span className="font-mono text-[var(--admin-text-hi)]">{pedido.id.slice(-6).toUpperCase()}</span>
           </div>
         </div>
 
         {/* Info Grid */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1 min-w-0 flex-1">
-            <h3 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-gray-900 truncate dark:text-white flex items-center gap-2" title={pedido.clienteNombre}>
+            <h3 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--admin-text-hi)] truncate flex items-center gap-2" title={pedido.clienteNombre}>
               {status === "no_leido" && (
                 <span className="relative flex h-3.5 w-3.5 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -465,10 +459,10 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
               <span>{pedido.clienteNombre}</span>
             </h3>
             <div className="flex items-center gap-2.5 flex-wrap mt-1">
-              <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+              <span className="text-[11px] font-semibold text-[var(--admin-text-lo)] uppercase tracking-wider">
                 {pedido.items.length} {pedido.items.length === 1 ? "Artículo" : "Artículos"}
               </span>
-              <div className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+              <div className="h-1 w-1 rounded-full bg-[var(--admin-border)]" />
               <span className={`text-[10px] font-bold uppercase tracking-widest ${
                 status === 'no_leido' ? 'text-red-500' : status === 'pendiente' ? 'text-amber-500' : 'text-green-500'
               }`}>
@@ -476,8 +470,8 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
               </span>
               {pedido.sucursalId && (
                 <>
-                  <div className="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-600" />
-                  <span className="text-[10px] font-extrabold text-[#00E5FF] tracking-wider uppercase bg-[#00E5FF]/10 dark:bg-[#00E5FF]/20 px-2 py-0.5 rounded">
+                  <div className="h-1 w-1 rounded-full bg-[var(--admin-border)]" />
+                  <span className="text-[10px] font-extrabold text-[var(--admin-accent)] tracking-wider uppercase bg-[var(--admin-accent)]/10 px-2 py-0.5 rounded">
                     🏪 {SUCURSALES.find(s => s.id === pedido.sucursalId)?.nombre || pedido.sucursalId}
                   </span>
                 </>
@@ -485,14 +479,14 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
             </div>
             
             {pedido.clienteDireccion && (
-              <div className="mt-3 flex flex-col gap-1 rounded-xl bg-gray-50 p-3 w-full dark:bg-white/5 sm:flex-row sm:items-center sm:gap-2 sm:w-fit sm:py-1.5">
+              <div className="mt-3 flex flex-col gap-1 rounded-xl bg-[var(--admin-bg)] p-3 border border-[var(--admin-border)] w-full sm:flex-row sm:items-center sm:gap-2 sm:w-fit sm:py-1.5">
                 {pedido.clienteDireccion.includes("RETIRO EN LOCAL") ? (
                   <span className="text-[10px] font-black text-orange-600 tracking-wider uppercase shrink-0 dark:text-orange-400">🏬 RETIRO EN LOCAL</span>
                 ) : (
                   <span className="text-[10px] font-black text-blue-600 tracking-wider uppercase shrink-0 dark:text-blue-400">🚚 ENVÍO A DOMICILIO</span>
                 )}
-                <span className="hidden sm:inline text-gray-300 dark:text-gray-600 text-xs shrink-0">|</span>
-                <span className="text-[10px] text-gray-600 font-medium dark:text-gray-300 line-clamp-2 sm:line-clamp-1" title={pedido.clienteDireccion}>
+                <span className="hidden sm:inline text-[var(--admin-border)] text-xs shrink-0">|</span>
+                <span className="text-[10px] text-[var(--admin-text-mid)] font-medium line-clamp-2 sm:line-clamp-1" title={pedido.clienteDireccion}>
                   {pedido.clienteDireccion.replace("RETIRO EN LOCAL: ", "").replace("🏠 ENVÍO A DOMICILIO: ", "").replace("RETIRO EN SUCURSAL: ", "")}
                 </span>
               </div>
@@ -500,7 +494,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           </div>
 
           <div className="shrink-0 self-end sm:self-center text-right">
-            <p className="font-display text-3xl sm:text-4xl font-bold tracking-tighter text-gray-900 dark:text-white">
+            <p className="font-display text-3xl sm:text-4xl font-bold tracking-tighter text-[var(--admin-text-hi)]">
               {formatCurrency(pedido.total)}
             </p>
           </div>
@@ -519,7 +513,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
               <span>WHATSAPP PRO</span>
             </a>
           ) : (
-            <div className="w-full sm:flex-1 min-w-[180px] flex items-center justify-center rounded-xl bg-gray-100 text-gray-400 py-3 px-4 text-[11px] font-black tracking-widest dark:bg-white/5 dark:text-gray-500">
+            <div className="w-full sm:flex-1 min-w-[180px] flex items-center justify-center rounded-xl bg-[var(--admin-bg)] text-[var(--admin-text-lo)] border border-[var(--admin-border)] py-3 px-4 text-[11px] font-black tracking-widest">
               SIN TELÉFONO
             </div>
           )}
@@ -530,8 +524,8 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
               onClick={() => setIsViewingReceipt(!isViewingReceipt)}
               className={`flex items-center justify-center gap-1.5 rounded-xl border py-3 px-3 text-[11px] font-black tracking-widest transition-all active:scale-95 ${
                 isViewingReceipt 
-                  ? "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400" 
-                  : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
+                  ? "border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400" 
+                  : "border-[var(--admin-border)] bg-[var(--admin-bg)] text-[var(--admin-text-mid)] hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)]"
               }`}
             >
               <span>RECIBO</span>
@@ -539,7 +533,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
             <button
               onClick={handleImprimir}
-              className="flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] text-[var(--admin-text-mid)] hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)] transition-all active:scale-95"
             >
               <span>IMPRIMIR</span>
             </button>
@@ -550,7 +544,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
             <button
               onClick={handleCopiadoFacturacion}
               disabled={isUpdating}
-              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E5FF] to-[#00B4D8] text-black font-black tracking-widest py-3 px-2 text-[11px] transition-all hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] active:scale-95 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--admin-accent)] to-blue-500 text-[var(--admin-sidebar-bg)] font-black tracking-widest py-3 px-2 text-[11px] transition-all hover:shadow-[0_0_20px_var(--admin-accent-glow)] active:scale-95 disabled:opacity-50"
             >
               <span className="truncate">COPIAR FACTURA</span>
             </button>
@@ -558,7 +552,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
             <button
               onClick={handleEliminar}
               disabled={isUpdating}
-              className="w-12 h-11 shrink-0 flex items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition-all hover:bg-red-100 py-3 text-[11px] font-bold active:scale-95 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/30"
+              className="w-12 h-11 shrink-0 flex items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all py-3 text-[11px] font-bold active:scale-95"
               title="Eliminar Pedido"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
@@ -590,13 +584,13 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
           {status === "cargado" && (
             <div className="flex gap-2">
-              <div className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-green-500/20 bg-green-500/5 text-green-500 dark:text-green-400 py-3 px-4 text-[10px] font-black tracking-widest uppercase">
+              <div className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-green-500/20 bg-green-500/5 text-green-600 dark:text-green-400 py-3 px-4 text-[10px] font-black tracking-widest uppercase">
                 <span>✅ PEDIDO PREPARADO Y CARGADO</span>
               </div>
               <button
                 disabled={isUpdating}
                 onClick={() => handleStatusChange("pendiente")}
-                className="w-12 h-11 shrink-0 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10 transition-all active:scale-95 disabled:opacity-50"
+                className="w-12 h-11 shrink-0 flex items-center justify-center rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] text-[var(--admin-text-lo)] hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)] transition-all active:scale-95 disabled:opacity-50"
                 title="Revertir a Pendiente"
               >
                 <span>↩️</span>
@@ -612,8 +606,8 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           }}
           className={`mt-4 w-full rounded-lg border py-3 text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 ${
             isViewingFull
-              ? "border-gray-900 bg-gray-900 text-white dark:border-white dark:bg-white dark:text-black"
-              : "border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+              ? "border-[var(--admin-text-hi)] bg-[var(--admin-text-hi)] text-[var(--admin-sidebar-bg)]"
+              : "border-[var(--admin-border)] bg-[var(--admin-bg)] text-[var(--admin-text-lo)] hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)]"
           }`}
         >
           {isViewingFull ? "OCULTAR DETALLES" : "VER DETALLES COMPLETOS"}
@@ -622,18 +616,17 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
       {/* ── Text Receipt View ── */}
       {isViewingReceipt && (
-        <div className="animate-in fade-in zoom-in-95 duration-200 border-t border-gray-100 bg-gray-50 p-4 sm:p-6 dark:border-white/5 dark:bg-[#0a0a0a]">
+        <div className="animate-in fade-in zoom-in-95 duration-200 border-t border-[var(--admin-border)] bg-[var(--admin-bg)] p-4 sm:p-6">
           <div className="relative mx-auto max-w-md overflow-hidden rounded-xl bg-white p-6 sm:p-8 text-black shadow-xl ring-1 ring-gray-200/50">
             {/* Cut line decoration */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-[linear-gradient(90deg,#fff_0%,#fff_50%,#000_50%,#000_100%)] bg-[length:10px_100%]" />
-            
             
             <div className="mb-4 text-center">
               <h4 className="font-mono text-lg font-black uppercase tracking-wider">EL REMATE</h4>
               <p className="font-mono text-[10px] text-gray-500 uppercase">Canelones · Picking</p>
             </div>
 
-            <div className="mb-3 space-y-1 font-mono text-[11px] leading-tight">
+            <div className="mb-3 space-y-1 font-mono text-[11px] leading-tight text-black">
               <div className="flex justify-between">
                 <span>ID ORDEN:</span>
                 <span className="font-bold">#{pedido.id.slice(-6).toUpperCase()}</span>
@@ -649,7 +642,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
             <div className="mb-3 border-b border-dashed border-gray-300 pb-1.5" />
 
-            <div className="space-y-2.5 font-mono text-[11px]">
+            <div className="space-y-2.5 font-mono text-[11px] text-black">
               {pedido.items.map((item, idx) => (
                 <div key={idx} className="flex flex-col">
                   <button 
@@ -673,7 +666,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
             <div className="my-3 border-b border-dashed border-gray-300" />
 
-            <div className="flex justify-between font-mono text-base font-black">
+            <div className="flex justify-between font-mono text-base font-black text-black">
               <span>TOTAL:</span>
               <span>{formatCurrency(pedido.total)}</span>
             </div>
@@ -698,7 +691,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           
           <button 
             onClick={() => setIsViewingReceipt(false)}
-            className="mt-4 w-full text-center text-[10px] font-bold text-gray-500 hover:text-gray-800 uppercase tracking-widest dark:text-gray-400 dark:hover:text-white"
+            className="mt-4 w-full text-center text-[10px] font-bold text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)] uppercase tracking-widest"
           >
             Cerrar Recibo
           </button>
@@ -707,7 +700,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
       {/* Expandable Details Area */}
       {isViewingFull && (
-        <div className="animate-in slide-in-from-top-2 border-t border-gray-100 bg-gray-50 p-4 sm:p-6 dark:border-white/5 dark:bg-[#0a0a0a]">
+        <div className="animate-in slide-in-from-top-2 border-t border-[var(--admin-border)] bg-[var(--admin-bg)] p-4 sm:p-6">
           {/* White Receipt Container */}
           <div className="relative mx-auto max-w-xl overflow-hidden rounded-xl bg-white p-5 sm:p-8 text-black shadow-xl ring-1 ring-gray-200/50">
             {/* Cut line decoration */}
@@ -732,7 +725,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
               </div>
 
               {pedido.items.map((item, i) => (
-                <div key={i} className="grid grid-cols-[40px_1fr_90px] items-start py-2 border-b border-dashed border-gray-200 hover:bg-gray-50 transition-colors">
+                <div key={i} className="grid grid-cols-[40px_1fr_90px] items-start py-2 border-b border-dashed border-gray-200 hover:bg-gray-50 transition-colors text-black">
                   <button
                     onClick={() => copyToClipboard(item.cantidad.toString(), "Cantidad: " + item.cantidad)}
                     className="h-7 w-7 rounded bg-gray-100 text-black text-[11px] font-bold hover:bg-black hover:text-white transition-colors"
@@ -743,7 +736,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
                   <div className="px-3">
                     <button
                       onClick={() => copyToClipboard(item.nombre, "Producto: " + item.nombre)}
-                      className="text-left font-mono text-[12px] font-bold uppercase hover:text-blue-600 transition-colors leading-tight block w-full"
+                      className="text-left font-mono text-[12px] font-bold uppercase hover:text-blue-600 transition-colors leading-tight block w-full text-black"
                     >
                       {item.nombre}
                     </button>
@@ -757,7 +750,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
                     </div>
                   </div>
 
-                  <div className="text-right font-mono text-[12px] font-bold pt-1">
+                  <div className="text-right font-mono text-[12px] font-bold pt-1 text-black">
                     {formatCurrency(item.cantidad * item.precioUnitario)}
                   </div>
                 </div>
@@ -769,7 +762,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
                 <span>SUBTOTAL:</span>
                 <span>{formatCurrency(pedido.total)}</span>
               </div>
-              <div className="flex w-full justify-between text-lg font-black border-t border-dashed border-gray-200 pt-2 mt-1">
+              <div className="flex w-full justify-between text-lg font-black border-t border-dashed border-gray-200 pt-2 mt-1 text-black">
                 <span>TOTAL:</span>
                 <span>{formatCurrency(pedido.total)}</span>
               </div>
@@ -784,7 +777,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           </div>
           <div className="mt-6 flex justify-center">
              <button 
-              className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-600 shadow-sm border border-gray-200 transition-all hover:bg-gray-50 hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+              className="flex items-center gap-2 rounded-full bg-[var(--admin-card-bg)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-[var(--admin-text-lo)] shadow-sm border border-[var(--admin-border)] transition-all hover:bg-[var(--admin-bg)] hover:text-[var(--admin-text-hi)]"
               onClick={() => setIsViewingFull(false)}
              >
                <span>↑</span> OCULTAR DETALLES

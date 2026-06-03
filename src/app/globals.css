@@ -162,8 +162,40 @@
   --shadow-lg:    0 12px 40px rgba(0,0,0,0.55);
   --shadow-panel: -8px 0 48px rgba(0,0,0,0.65);
 
-  --text:  var(--texto);
-  --text2: var(--tierra);
+}
+
+/* ── variables para el Panel de Administración (Por defecto: Modo Claro) ── */
+.admin-panel {
+  --admin-bg: #f8fafc;                  /* slate-50 */
+  --admin-sidebar-bg: #ffffff;          /* white */
+  --admin-text-hi: #0f172a;             /* slate-900 */
+  --admin-text-mid: #334155;            /* slate-700 */
+  --admin-text-lo: #64748b;             /* slate-500 */
+  --admin-border: rgba(15, 23, 42, 0.08); /* slate-900 a 8% */
+  --admin-card-bg: #ffffff;             /* white */
+  --admin-card-gradient-start: #ffffff;
+  --admin-card-gradient-end: #f1f5f9;   /* slate-100 */
+  --admin-accent: #0284c7;              /* sky-600 */
+  --admin-accent-glow: rgba(2, 132, 199, 0.15);
+  --admin-input-bg: #ffffff;
+  --admin-header-bg: rgba(255, 255, 255, 0.8);
+}
+
+/* ── Modo Oscuro del Administrador ── */
+.admin-panel.admin-dark {
+  --admin-bg: #050914;
+  --admin-sidebar-bg: #0a0f1c;
+  --admin-text-hi: #ffffff;
+  --admin-text-mid: #cbd5e1;            /* slate-300 */
+  --admin-text-lo: #94a3b8;             /* slate-400 */
+  --admin-border: rgba(255, 255, 255, 0.06);
+  --admin-card-bg: rgba(255, 255, 255, 0.02);
+  --admin-card-gradient-start: #0a0f1c;
+  --admin-card-gradient-end: rgba(10, 15, 28, 0.3);
+  --admin-accent: #00e5ff;              /* celeste neón original */
+  --admin-accent-glow: rgba(0, 229, 255, 0.15);
+  --admin-input-bg: rgba(255, 255, 255, 0.05);
+  --admin-header-bg: rgba(10, 15, 28, 0.8);
 }
 
 /* ══════════════════════════════════════════════════════════

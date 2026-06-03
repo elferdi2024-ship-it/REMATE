@@ -29,6 +29,23 @@ export default function AdminLayout({
   const [checking, setChecking] = useState(true);
   const [role, setRole] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  // Leer tema guardado
+  useEffect(() => {
+    const saved = localStorage.getItem("elremate_admin_theme") as "light" | "dark" | null;
+    if (saved === "dark") {
+      setTheme("dark");
+    } else {
+      setTheme("light");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    localStorage.setItem("elremate_admin_theme", next);
+  };
 
   useEffect(() => {
     if (loading) return;
@@ -155,15 +172,15 @@ export default function AdminLayout({
   });
 
   return (
-    <div className="flex min-h-screen bg-[#050914] text-gray-200 selection:bg-[#00E5FF] selection:text-black">
+    <div className={`flex min-h-screen admin-panel ${theme === "dark" ? "admin-dark" : ""} bg-[var(--admin-bg)] text-[var(--admin-text-mid)] selection:bg-[var(--admin-accent)] selection:text-black transition-colors duration-300`}>
       {/* Sidebar (Desktop) */}
-      <aside className="hidden w-72 flex-col border-r border-white/5 bg-[#0A0F1C] md:flex">
-        <div className="flex h-20 items-center justify-center border-b border-white/5 px-6">
-          <h1 className="font-bebas text-3xl tracking-widest text-white">
-            EL REMATE <span className="text-[#00E5FF]">ADMIN</span>
+      <aside className="hidden w-72 flex-col border-r border-[var(--admin-border)] bg-[var(--admin-sidebar-bg)] md:flex transition-colors duration-300">
+        <div className="flex h-20 items-center justify-center border-b border-[var(--admin-border)] px-6">
+          <h1 className="font-bebas text-3xl tracking-widest text-[var(--admin-text-hi)]">
+            EL REMATE <span className="text-[var(--admin-accent)]">ADMIN</span>
           </h1>
         </div>
-        <nav className="flex-1 space-y-2 p-6">
+        <nav className="flex-1 space-y-2 p-6 overflow-y-auto">
           {linksToShow.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -172,28 +189,38 @@ export default function AdminLayout({
                 href={link.href}
                 className={`group flex items-center gap-4 rounded-xl px-4 py-3.5 font-medium transition-all duration-300 ${
                   isActive
-                    ? "bg-[#00E5FF]/10 text-[#00E5FF] shadow-[0_0_20px_rgba(0,229,255,0.1)]"
-                    : "text-gray-400 hover:bg-white/5 hover:text-white"
+                    ? "bg-[var(--admin-accent-glow)] text-[var(--admin-accent)] shadow-[0_0_20px_var(--admin-accent-glow)]"
+                    : "text-[var(--admin-text-lo)] hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)]"
                 }`}
               >
                 <span className="text-xl transition-transform duration-300 group-hover:scale-110">{link.icon}</span>
                 {link.label}
                 {isActive && (
-                  <div className="ml-auto h-2 w-2 rounded-full bg-[#00E5FF] shadow-[0_0_8px_#00E5FF]"></div>
+                  <div className="ml-auto h-2 w-2 rounded-full bg-[var(--admin-accent)] shadow-[0_0_8px_var(--admin-accent)]"></div>
                 )}
               </Link>
             );
           })}
         </nav>
-        <div className="border-t border-white/5 p-6">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
+        <div className="border-t border-[var(--admin-border)] p-6">
+          {/* Theme Selector (Desktop) */}
+          <div className="mb-4 flex items-center justify-between rounded-xl border border-[var(--admin-border)] bg-[var(--admin-input-bg)] p-3 text-xs font-semibold text-[var(--admin-text-mid)]">
+            <span className="text-[10px] font-bold text-[var(--admin-text-lo)] uppercase tracking-wider">Modo Visual</span>
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-1.5 bg-[var(--admin-bg)] px-2.5 py-1 rounded-lg border border-[var(--admin-border)] text-[var(--admin-text-hi)] shadow-sm hover:opacity-90 active:scale-95 transition-all"
+            >
+              {theme === "light" ? "☀️ Claro" : "🌙 Oscuro"}
+            </button>
+          </div>
+          <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 text-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#00E5FF] to-blue-600 text-white shadow-lg">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--admin-accent)] to-blue-600 text-white shadow-lg">
                 <span className="font-bold">{user?.email?.[0].toUpperCase() || "U"}</span>
               </div>
               <div className="overflow-hidden">
-                <p className="truncate font-semibold text-white">{user?.email}</p>
-                <p className="text-xs text-[#00E5FF] capitalize">{role}</p>
+                <p className="truncate font-semibold text-[var(--admin-text-hi)]">{user?.email}</p>
+                <p className="text-xs text-[var(--admin-accent)] capitalize">{role}</p>
               </div>
             </div>
             <button
@@ -207,7 +234,7 @@ export default function AdminLayout({
           </div>
           <Link
             href="/catalogo"
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-transparent px-4 py-3 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--admin-border)] bg-transparent px-4 py-3 text-sm font-semibold text-[var(--admin-text-mid)] transition-colors hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)]"
           >
             <span>🛍️</span> Ver Catálogo
           </Link>
@@ -215,13 +242,13 @@ export default function AdminLayout({
       </aside>
 
       {/* Mobile Header */}
-      <header className="fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b border-white/5 bg-[#0A0F1C]/80 px-4 backdrop-blur-md md:hidden">
-        <h1 className="font-bebas text-2xl tracking-widest text-white">
-          EL REMATE <span className="text-[#00E5FF]">ADMIN</span>
+      <header className="fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-header-bg)] px-4 backdrop-blur-md md:hidden transition-colors duration-300">
+        <h1 className="font-bebas text-2xl tracking-widest text-[var(--admin-text-hi)]">
+          EL REMATE <span className="text-[var(--admin-accent)]">ADMIN</span>
         </h1>
         <button
           onClick={() => setSidebarOpen(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-white transition-colors hover:bg-white/10"
+          className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--admin-input-bg)] text-[var(--admin-text-hi)] border border-[var(--admin-border)] transition-colors hover:opacity-85"
         >
           ☰
         </button>
@@ -237,14 +264,14 @@ export default function AdminLayout({
 
       {/* Mobile Sidebar */}
       <aside
-        className={`fixed inset-y-0 right-0 z-50 flex w-72 flex-col transform border-l border-white/5 bg-[#0A0F1C] transition-transform duration-300 md:hidden ${
+        className={`fixed inset-y-0 right-0 z-50 flex w-72 flex-col transform border-l border-[var(--admin-border)] bg-[var(--admin-sidebar-bg)] transition-transform duration-300 md:hidden ${
           sidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex h-16 shrink-0 items-center justify-end border-b border-white/5 px-4">
+        <div className="flex h-16 shrink-0 items-center justify-end border-b border-[var(--admin-border)] px-4">
           <button
             onClick={() => setSidebarOpen(false)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--admin-text-lo)] hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)]"
           >
             ✕
           </button>
@@ -260,8 +287,8 @@ export default function AdminLayout({
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-4 rounded-xl px-4 py-3.5 font-medium transition-all ${
                     isActive
-                      ? "bg-[#00E5FF]/10 text-[#00E5FF]"
-                      : "text-gray-400 hover:bg-white/5 hover:text-white"
+                      ? "bg-[var(--admin-accent-glow)] text-[var(--admin-accent)]"
+                      : "text-[var(--admin-text-lo)] hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)]"
                   }`}
                 >
                   <span className="text-xl">{link.icon}</span>
@@ -271,15 +298,25 @@ export default function AdminLayout({
             })}
           </nav>
         </div>
-        <div className="shrink-0 border-t border-white/5 p-6 bg-[#0A0F1C]">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
+        <div className="shrink-0 border-t border-[var(--admin-border)] p-6 bg-[var(--admin-sidebar-bg)]">
+          {/* Theme Selector (Mobile) */}
+          <div className="mb-4 flex items-center justify-between rounded-xl border border-[var(--admin-border)] bg-[var(--admin-input-bg)] p-3 text-xs font-semibold text-[var(--admin-text-mid)]">
+            <span className="text-[10px] font-bold text-[var(--admin-text-lo)] uppercase tracking-wider">Modo Visual</span>
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-1.5 bg-[var(--admin-bg)] px-2.5 py-1 rounded-lg border border-[var(--admin-border)] text-[var(--admin-text-hi)] shadow-sm hover:opacity-90 active:scale-95 transition-all"
+            >
+              {theme === "light" ? "☀️ Claro" : "🌙 Oscuro"}
+            </button>
+          </div>
+          <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 text-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#00E5FF] to-blue-600 text-white shadow-lg">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--admin-accent)] to-blue-600 text-white shadow-lg">
                 <span className="font-bold">{user?.email?.[0].toUpperCase() || "U"}</span>
               </div>
               <div className="overflow-hidden">
-                <p className="truncate font-semibold text-white">{user?.email}</p>
-                <p className="text-xs text-[#00E5FF] capitalize">{role}</p>
+                <p className="truncate font-semibold text-[var(--admin-text-hi)]">{user?.email}</p>
+                <p className="text-xs text-[var(--admin-accent)] capitalize">{role}</p>
               </div>
             </div>
             <button
@@ -293,7 +330,7 @@ export default function AdminLayout({
           </div>
           <Link
             href="/catalogo"
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-transparent px-4 py-3 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--admin-border)] bg-transparent px-4 py-3 text-sm font-semibold text-[var(--admin-text-mid)] transition-colors hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)]"
           >
             <span>🛍️</span> Ver Catálogo
           </Link>

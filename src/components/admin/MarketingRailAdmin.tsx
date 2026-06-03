@@ -171,35 +171,35 @@ export default function MarketingRailAdmin() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00E5FF] border-t-transparent" />
+      <div className="flex items-center justify-center p-12 text-[var(--admin-text-hi)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--admin-accent)] border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 text-[var(--admin-text-mid)] animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-bebas text-2xl tracking-widest text-white">
-            TARJETAS <span className="text-[#00E5FF]">MARKETING RAIL</span>
+          <h2 className="font-bebas text-2xl tracking-widest text-[var(--admin-text-hi)]">
+            TARJETAS <span className="text-[var(--admin-accent)]">MARKETING RAIL</span>
           </h2>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-[var(--admin-text-lo)]">
             Editá las fichas de &ldquo;Modo Compra Inteligente&rdquo; que ven los clientes en el catálogo
           </p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={addCard}
-            className="rounded-xl bg-[#00E5FF]/10 px-4 py-2 text-sm font-bold text-[#00E5FF] transition-all hover:bg-[#00E5FF]/20 border border-[#00E5FF]/20"
+            className="rounded-xl bg-[var(--admin-accent)]/10 px-4 py-2 text-sm font-bold text-[var(--admin-accent)] transition-all hover:bg-[var(--admin-accent)]/20 border border-[var(--admin-accent)]/20"
           >
             + Tarjeta
           </button>
           <button
             onClick={() => handleSave(cards)}
             disabled={saving}
-            className="rounded-xl bg-[#00E5FF] px-5 py-2 text-sm font-bold text-[#050914] transition-all hover:bg-white disabled:opacity-50"
+            className="rounded-xl bg-[var(--admin-accent)] px-5 py-2 text-sm font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 disabled:opacity-50"
           >
             {saving ? "Guardando..." : "💾 Guardar Todo"}
           </button>
@@ -207,26 +207,26 @@ export default function MarketingRailAdmin() {
       </div>
 
       {/* Section Title/Kicker Editor */}
-      <div className="rounded-2xl border border-white/10 bg-[#0A0F1C] p-5 space-y-4">
-        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Encabezado de la sección</h3>
+      <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 space-y-4">
+        <h3 className="text-xs font-bold text-[var(--admin-text-lo)] uppercase tracking-widest">Encabezado de la sección</h3>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-xs font-bold text-gray-400 mb-1">Kicker (texto superior)</label>
+            <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Kicker (texto superior)</label>
             <input
               type="text"
               value={sectionKicker}
               onChange={(e) => setSectionKicker(e.target.value)}
-              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+              className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/40"
               placeholder="MODO COMPRA INTELIGENTE"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-400 mb-1">Título</label>
+            <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Título</label>
             <input
               type="text"
               value={sectionTitle}
               onChange={(e) => setSectionTitle(e.target.value)}
-              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+              className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/40"
               placeholder="Recompra rapida, ofertas activas..."
             />
           </div>
@@ -242,13 +242,13 @@ export default function MarketingRailAdmin() {
           return (
             <div
               key={card.id}
-              className={`rounded-2xl border bg-[#0A0F1C] overflow-hidden transition-all ${
-                card.active ? "border-white/10" : "border-white/5 opacity-60"
-              } ${isEditing ? "ring-1 ring-[#00E5FF]/30" : ""}`}
+              className={`rounded-2xl border bg-[var(--admin-card-bg)] overflow-hidden transition-all ${
+                card.active ? "border-[var(--admin-border)]" : "border-[var(--admin-border)]/50 opacity-60"
+              } ${isEditing ? "ring-1 ring-[var(--admin-accent)]/30" : ""}`}
             >
               {/* Card Header - always visible */}
               <div
-                className="flex items-center gap-4 p-4 cursor-pointer hover:bg-white/[0.02] transition-colors"
+                className="flex items-center gap-4 p-4 cursor-pointer hover:bg-[var(--admin-input-bg)]/30 transition-colors"
                 onClick={() => setEditingId(isEditing ? null : card.id)}
               >
                 <span className="text-2xl">{card.icon}</span>
@@ -260,9 +260,9 @@ export default function MarketingRailAdmin() {
                     >
                       {card.pill}
                     </span>
-                    <h4 className="text-sm font-bold text-white truncate">{card.title}</h4>
+                    <h4 className="text-sm font-bold text-[var(--admin-text-hi)] truncate">{card.title}</h4>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5 truncate">
+                  <p className="text-xs text-[var(--admin-text-lo)] mt-0.5 truncate">
                     {card.ctaText} → {card.ctaLink}
                   </p>
                 </div>
@@ -272,7 +272,7 @@ export default function MarketingRailAdmin() {
                   <button
                     onClick={(e) => { e.stopPropagation(); moveCard(card.id, "up"); }}
                     disabled={idx === 0}
-                    className="p-1.5 rounded-lg text-gray-500 hover:bg-white/5 hover:text-white disabled:opacity-20 text-xs"
+                    className="p-1.5 rounded-lg text-[var(--admin-text-lo)] hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)] disabled:opacity-20 text-xs"
                     title="Subir"
                   >
                     ▲
@@ -280,7 +280,7 @@ export default function MarketingRailAdmin() {
                   <button
                     onClick={(e) => { e.stopPropagation(); moveCard(card.id, "down"); }}
                     disabled={idx === cards.length - 1}
-                    className="p-1.5 rounded-lg text-gray-500 hover:bg-white/5 hover:text-white disabled:opacity-20 text-xs"
+                    className="p-1.5 rounded-lg text-[var(--admin-text-lo)] hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)] disabled:opacity-20 text-xs"
                     title="Bajar"
                   >
                     ▼
@@ -291,28 +291,28 @@ export default function MarketingRailAdmin() {
                       updateCard(card.id, { active: !card.active });
                     }}
                     className={`p-1.5 rounded-lg text-xs font-bold ${
-                      card.active ? "text-green-400 hover:bg-green-500/10" : "text-red-400 hover:bg-red-500/10"
+                      card.active ? "text-green-500 hover:bg-green-500/10" : "text-red-500 hover:bg-red-500/10"
                     }`}
                   >
                     {card.active ? "✓" : "✗"}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); deleteCard(card.id); }}
-                    className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10 text-xs"
+                    className="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 text-xs"
                   >
                     🗑
                   </button>
-                  <span className="text-gray-600 text-xs ml-1">{isEditing ? "▾" : "▸"}</span>
+                  <span className="text-[var(--admin-text-lo)]/50 text-xs ml-1">{isEditing ? "▾" : "▸"}</span>
                 </div>
               </div>
 
               {/* Expandable Edit Form */}
               {isEditing && (
-                <div className="border-t border-white/5 p-5 space-y-4">
+                <div className="border-t border-[var(--admin-border)] p-5 space-y-4">
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {/* Icon picker */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-400 mb-2">Icono</label>
+                      <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-2">Icono</label>
                       <div className="flex flex-wrap gap-1.5">
                         {ICON_OPTIONS.map((icon) => (
                           <button
@@ -320,8 +320,8 @@ export default function MarketingRailAdmin() {
                             onClick={() => updateCard(card.id, { icon })}
                             className={`h-9 w-9 rounded-lg text-lg flex items-center justify-center transition-all ${
                               card.icon === icon
-                                ? "bg-[#00E5FF]/20 ring-2 ring-[#00E5FF]/50 scale-110"
-                                : "bg-white/5 hover:bg-white/10"
+                                ? "bg-[var(--admin-accent)]/20 ring-2 ring-[var(--admin-accent)]/50 scale-110"
+                                : "bg-[var(--admin-bg)] border border-[var(--admin-border)] hover:bg-[var(--admin-input-bg)]"
                             }`}
                           >
                             {icon}
@@ -332,19 +332,19 @@ export default function MarketingRailAdmin() {
 
                     {/* Pill text */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-400 mb-1">Pill / Badge</label>
+                      <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Pill / Badge</label>
                       <input
                         type="text"
                         value={card.pill}
                         onChange={(e) => updateCard(card.id, { pill: e.target.value })}
-                        className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00E5FF]/40"
+                        className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] focus:outline-none focus:border-[var(--admin-accent)]/40"
                         placeholder="Recompra"
                       />
                     </div>
 
                     {/* Variant / Color */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-400 mb-1">Estilo de color</label>
+                      <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Estilo de color</label>
                       <div className="flex gap-2">
                         {VARIANT_OPTIONS.map((v) => (
                           <button
@@ -352,7 +352,7 @@ export default function MarketingRailAdmin() {
                             onClick={() => updateCard(card.id, { variant: v.value })}
                             className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all border ${
                               card.variant === v.value
-                                ? "ring-2 ring-offset-1 ring-offset-[#0A0F1C]"
+                                ? "ring-2 ring-offset-1 ring-offset-[var(--admin-card-bg)]"
                                 : "opacity-50 hover:opacity-100"
                             }`}
                             style={{
@@ -372,24 +372,24 @@ export default function MarketingRailAdmin() {
                   <div className="grid gap-4 md:grid-cols-2">
                     {/* Title */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-400 mb-1">Título</label>
+                      <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Título</label>
                       <input
                         type="text"
                         value={card.title}
                         onChange={(e) => updateCard(card.id, { title: e.target.value })}
-                        className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00E5FF]/40"
+                        className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] focus:outline-none focus:border-[var(--admin-accent)]/40"
                         placeholder="Compra de nuevo en 1 toque"
                       />
                     </div>
 
                     {/* Description */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-400 mb-1">Descripción</label>
+                      <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Descripción</label>
                       <input
                         type="text"
                         value={card.description}
                         onChange={(e) => updateCard(card.id, { description: e.target.value })}
-                        className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00E5FF]/40"
+                        className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] focus:outline-none focus:border-[var(--admin-accent)]/40"
                         placeholder="Entra a tu historial..."
                       />
                     </div>
@@ -398,38 +398,38 @@ export default function MarketingRailAdmin() {
                   <div className="grid gap-4 md:grid-cols-2">
                     {/* CTA Text */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-400 mb-1">Texto del botón (CTA)</label>
+                      <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Texto del botón (CTA)</label>
                       <input
                         type="text"
                         value={card.ctaText}
                         onChange={(e) => updateCard(card.id, { ctaText: e.target.value })}
-                        className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00E5FF]/40"
+                        className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] focus:outline-none focus:border-[var(--admin-accent)]/40"
                         placeholder="Activar recompra"
                       />
                     </div>
 
                     {/* CTA Link */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-400 mb-1">
+                      <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">
                         Enlace del botón
-                        <span className="text-gray-600 font-normal ml-1">(ruta o URL completa)</span>
+                        <span className="text-[var(--admin-text-lo)]/60 font-normal ml-1">(ruta o URL completa)</span>
                       </label>
                       <input
                         type="text"
                         value={card.ctaLink}
                         onChange={(e) => updateCard(card.id, { ctaLink: e.target.value })}
-                        className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-[#00E5FF]/40"
+                        className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] font-mono focus:outline-none focus:border-[var(--admin-accent)]/40"
                         placeholder="/historial  o  /catalogo?search=Centenario"
                       />
-                      <p className="text-[10px] text-gray-600 mt-1">
-                        Tip: Usá <code className="text-gray-400">/catalogo?search=NombreMarca</code> para filtrar por marca
+                      <p className="text-[10px] text-[var(--admin-text-lo)]/80 mt-1">
+                        Tip: Usá <code className="text-[var(--admin-text-lo)] font-bold">/catalogo?search=NombreMarca</code> para filtrar por marca
                       </p>
                     </div>
                   </div>
 
                   {/* Preview */}
-                  <div className="rounded-xl border border-white/5 bg-black/20 p-4">
-                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Vista previa</p>
+                  <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] p-4">
+                    <p className="text-[10px] font-bold text-[var(--admin-text-lo)] uppercase tracking-widest mb-3">Vista previa</p>
                     <div className="flex items-start gap-3 max-w-sm">
                       <span className="text-xl">{card.icon}</span>
                       <div className="flex-1">
@@ -439,8 +439,8 @@ export default function MarketingRailAdmin() {
                         >
                           {card.pill}
                         </span>
-                        <h4 className="text-sm font-bold text-white">{card.title}</h4>
-                        <p className="text-xs text-gray-400 mt-1">{card.description}</p>
+                        <h4 className="text-sm font-bold text-[var(--admin-text-hi)]">{card.title}</h4>
+                        <p className="text-xs text-[var(--admin-text-lo)] mt-1">{card.description}</p>
                         <span
                           className="inline-block mt-2 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider border"
                           style={{ borderColor: `${variantInfo?.color}40`, color: variantInfo?.color }}
@@ -458,7 +458,7 @@ export default function MarketingRailAdmin() {
       </div>
 
       {cards.length === 0 && (
-        <div className="text-center py-12 text-gray-600">
+        <div className="text-center py-12 text-[var(--admin-text-lo)]">
           <p className="text-4xl mb-3">📭</p>
           <p className="text-sm">No hay tarjetas configuradas. Agregá una para empezar.</p>
         </div>

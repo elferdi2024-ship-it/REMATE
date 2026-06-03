@@ -181,7 +181,6 @@ export default function AdminSucursales() {
   // BUT we must also show any NEW products added to the master catalog that are missing in the branch.
   const combinedCatalogList = useMemo(() => {
     const list: CustomProducto[] = [];
-    const sourceCatalog = hasCustomCatalog ? branchCatalog : masterCatalog;
 
     // We iterate over all products in the master catalog to guarantee we show everything
     Object.keys(masterCatalog).forEach((codigo) => {
@@ -230,14 +229,14 @@ export default function AdminSucursales() {
   }, [combinedCatalogList, search, selectedCategory]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-[var(--admin-text-mid)]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="font-bebas text-3xl tracking-wider text-white">
+          <h2 className="font-bebas text-3xl tracking-wider text-[var(--admin-text-hi)]">
             Catálogos por Sucursal
           </h2>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--admin-text-lo)]">
             Control independiente de productos habilitados y precios personalizados para cada sucursal.
           </p>
         </div>
@@ -246,18 +245,18 @@ export default function AdminSucursales() {
       {/* Control Top Panel */}
       <div className="grid gap-6 md:grid-cols-3">
         {/* Branch Selector */}
-        <div className="rounded-xl border border-white/5 bg-[#0A0F1C] p-5 space-y-3">
-          <label className="text-xs font-bold uppercase tracking-wider text-gray-400">
+        <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 space-y-3">
+          <label className="text-xs font-bold uppercase tracking-wider text-[var(--admin-text-lo)]">
             1. Seleccionar Sucursal
           </label>
           <select
             value={selectedSucursalId}
             onChange={(e) => setSelectedSucursalId(e.target.value)}
             disabled={saving}
-            className="w-full rounded-lg border border-white/10 bg-[#111625] px-3 py-2.5 text-sm font-bold text-white focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF]"
+            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2.5 text-sm font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-accent)]"
           >
             {SUCURSALES.map((s) => (
-              <option key={s.id} value={s.id}>
+              <option key={s.id} value={s.id} className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
                 {s.nombre} ({s.direccion})
               </option>
             ))}
@@ -265,18 +264,18 @@ export default function AdminSucursales() {
         </div>
 
         {/* Catalog Status Info */}
-        <div className="rounded-xl border border-white/5 bg-[#0A0F1C] p-5 flex flex-col justify-between">
+        <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 flex flex-col justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--admin-text-lo)]">
               2. Estado del Catálogo
             </span>
             <div className="flex items-center gap-2 mt-2">
               <span className={`h-2.5 w-2.5 rounded-full ${hasCustomCatalog ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]'}`}></span>
-              <span className="text-sm font-bold text-white">
+              <span className="text-sm font-bold text-[var(--admin-text-hi)]">
                 {hasCustomCatalog ? "Catálogo Personalizado" : "Catálogo Global (Fallback)"}
               </span>
             </div>
-            <p className="text-xs text-gray-400 mt-2">
+            <p className="text-xs text-[var(--admin-text-lo)] mt-2">
               {hasCustomCatalog
                 ? "Esta sucursal posee inventario y precios independientes."
                 : "Usa de forma directa todos los productos y precios del catálogo general."}
@@ -285,12 +284,12 @@ export default function AdminSucursales() {
         </div>
 
         {/* Actions panel */}
-        <div className="rounded-xl border border-white/5 bg-[#0A0F1C] p-5 flex flex-col justify-center gap-2.5">
+        <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 flex flex-col justify-center gap-2.5">
           {!hasCustomCatalog ? (
             <button
               onClick={handleCloneMaster}
               disabled={saving || loading}
-              className="w-full rounded-lg bg-[#00E5FF] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-all hover:scale-[1.02] hover:bg-[#00E5FF]/80 disabled:opacity-50"
+              className="w-full rounded-lg bg-[var(--admin-accent)] py-2.5 text-xs font-extrabold uppercase tracking-wider text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 disabled:opacity-50"
             >
               Customizar Sucursal 🏪
             </button>
@@ -299,7 +298,7 @@ export default function AdminSucursales() {
               <button
                 onClick={handleSaveChanges}
                 disabled={saving}
-                className="w-full rounded-lg bg-green-500 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white transition-all hover:scale-[1.02] hover:bg-green-600 shadow-[0_4px_12px_rgba(34,197,94,0.2)] disabled:opacity-50"
+                className="w-full rounded-lg bg-green-500 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white transition-all hover:opacity-95 shadow-[0_4px_12px_rgba(34,197,94,0.2)] disabled:opacity-50"
               >
                 {saving ? "Guardando..." : "Guardar Cambios 💾"}
               </button>
@@ -316,7 +315,7 @@ export default function AdminSucursales() {
       </div>
 
       {/* Customization Table/Grid Panel */}
-      <div className="rounded-xl border border-white/5 bg-[#0A0F1C] p-6 space-y-4">
+      <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 space-y-4">
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="relative flex-1 w-full">
@@ -325,20 +324,20 @@ export default function AdminSucursales() {
               placeholder="Buscar producto por código o nombre..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-white/10 bg-[#111625] px-4 py-2 pl-10 text-xs sm:text-sm text-white placeholder-gray-500 focus:border-[#00E5FF] focus:outline-none"
+              className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-2 pl-10 text-xs sm:text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:border-[var(--admin-accent)] focus:outline-none"
             />
-            <span className="absolute left-3 top-2.5 text-gray-500">🔍</span>
+            <span className="absolute left-3 top-2.5 text-[var(--admin-text-lo)]">🔍</span>
           </div>
 
           <div className="w-full md:w-64">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full rounded-lg border border-white/10 bg-[#111625] px-3 py-2 text-xs sm:text-sm font-bold text-white focus:border-[#00E5FF] focus:outline-none"
+              className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2 text-xs sm:text-sm font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none"
             >
-              <option value="Todas">Todas las Categorías</option>
+              <option value="Todas" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">Todas las Categorías</option>
               {CATEGORIAS.map((cat) => (
-                <option key={cat} value={cat}>
+                <option key={cat} value={cat} className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
                   {cat}
                 </option>
               ))}
@@ -348,11 +347,11 @@ export default function AdminSucursales() {
 
         {/* Warning if read-only */}
         {!hasCustomCatalog && (
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-center">
-            <p className="text-xs sm:text-sm text-amber-300 font-semibold">
+          <div className="rounded-lg border border-amber-500/35 bg-amber-500/5 p-4 text-center">
+            <p className="text-xs sm:text-sm text-amber-600 dark:text-amber-300 font-semibold">
               ⚠️ El catálogo actual es de SOLO LECTURA porque la sucursal usa la configuración Global.
             </p>
-            <p className="text-xs text-amber-400/80 mt-1">
+            <p className="text-xs text-amber-700 dark:text-amber-400/80 mt-1">
               Haz clic en &quot;Customizar Sucursal&quot; arriba para habilitar la edición independiente de precios y productos.
             </p>
           </div>
@@ -360,11 +359,11 @@ export default function AdminSucursales() {
 
         {/* Products Customizable Grid */}
         {loading ? (
-          <div className="py-12 text-center text-gray-400">Cargando catálogo de sucursal...</div>
+          <div className="py-12 text-center text-[var(--admin-text-lo)]">Cargando catálogo de sucursal...</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left text-sm text-gray-300">
-              <thead className="bg-[#111625] text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/5">
+            <table className="w-full min-w-[700px] text-left text-sm text-[var(--admin-text-mid)]">
+              <thead className="bg-[var(--admin-bg)] text-xs font-bold uppercase tracking-wider text-[var(--admin-text-lo)] border-b border-[var(--admin-border)]">
                 <tr>
                   <th className="py-3 px-4 w-20">Foto</th>
                   <th className="py-3 px-4">Código / Nombre</th>
@@ -374,7 +373,7 @@ export default function AdminSucursales() {
                   <th className="py-3 px-4 text-center w-32">Estado</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-[var(--admin-border)]">
                 {filteredItems.slice(0, 100).map((prod) => {
                   const masterItem = masterCatalog[prod.codigo] || { precio: 0 };
                   const isOverridden = hasCustomCatalog && prod.precio !== masterItem.precio;
@@ -383,13 +382,13 @@ export default function AdminSucursales() {
                   return (
                     <tr
                       key={prod.codigo}
-                      className={`hover:bg-white/[0.01] transition-colors ${
+                      className={`hover:bg-[var(--admin-input-bg)]/30 transition-colors ${
                         isProductDisabled ? "opacity-45 bg-red-950/5" : ""
                       }`}
                     >
                       {/* Image */}
                       <td className="py-3 px-4">
-                        <div className="relative h-12 w-12 rounded-lg bg-white/5 overflow-hidden flex items-center justify-center">
+                        <div className="relative h-12 w-12 rounded-lg bg-[var(--admin-bg)] overflow-hidden flex items-center justify-center border border-[var(--admin-border)]">
                           {prod.imagen ? (
                             <Image
                               src={prod.imagen}
@@ -405,37 +404,37 @@ export default function AdminSucursales() {
 
                       {/* Name / Barcode */}
                       <td className="py-3 px-4">
-                        <div className="font-semibold text-white line-clamp-1">{prod.nombre}</div>
-                        <div className="text-xs font-mono text-[#00E5FF] mt-0.5">{prod.codigo}</div>
+                        <div className="font-semibold text-[var(--admin-text-hi)] line-clamp-1">{prod.nombre}</div>
+                        <div className="text-xs font-mono text-[var(--admin-accent)] mt-0.5">{prod.codigo}</div>
                       </td>
 
                       {/* Category */}
                       <td className="py-3 px-4">
-                        <span className="inline-block rounded-full bg-white/5 px-2.5 py-0.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        <span className="inline-block rounded-full bg-[var(--admin-bg)] border border-[var(--admin-border)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--admin-text-lo)] uppercase tracking-wider">
                           {prod.categoria}
                         </span>
                       </td>
 
                       {/* Global Reference Price */}
-                      <td className="py-3 px-4 text-center font-bold text-gray-500">
+                      <td className="py-3 px-4 text-center font-bold text-[var(--admin-text-lo)]">
                         ${masterItem.precio}
                       </td>
 
                       {/* Branch Price Override Input */}
                       <td className="py-3 px-4">
                         <div className="relative flex justify-center">
-                          <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">$</span>
+                          <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--admin-text-lo)]">$</span>
                           <input
                             type="number"
                             value={prod.precio}
                             disabled={!hasCustomCatalog || isProductDisabled || saving}
                             onChange={(e) => handlePriceChange(prod.codigo, e.target.value)}
-                            className={`w-28 rounded-lg border px-3 py-1.5 pl-6 text-xs font-bold text-white focus:border-[#00E5FF] focus:outline-none ${
+                            className={`w-28 rounded-lg border px-3 py-1.5 pl-6 text-xs font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none ${
                               !hasCustomCatalog || isProductDisabled
-                                ? "bg-white/5 border-white/5 text-gray-500 cursor-not-allowed"
+                                ? "bg-[var(--admin-input-bg)]/50 border-[var(--admin-border)] text-[var(--admin-text-lo)]/50 cursor-not-allowed"
                                 : isOverridden
-                                ? "bg-[#00E5FF]/5 border-[#00E5FF] text-[#00E5FF]"
-                                : "bg-white/5 border-white/5"
+                                ? "bg-[var(--admin-accent)]/5 border-[var(--admin-accent)] text-[var(--admin-accent)]"
+                                : "bg-[var(--admin-bg)] border-[var(--admin-border)]"
                             }`}
                           />
                         </div>
@@ -449,10 +448,10 @@ export default function AdminSucursales() {
                           onClick={() => handleToggleStatus(prod.codigo)}
                           className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider transition-all ${
                             !hasCustomCatalog
-                              ? "bg-green-500/10 text-green-500 cursor-not-allowed"
+                              ? "bg-green-500/10 text-green-600 dark:text-green-500 cursor-not-allowed"
                               : isProductDisabled
-                              ? "bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20"
-                              : "bg-green-500/10 text-green-500 border border-green-500/30 hover:bg-green-500/20"
+                              ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500/20"
+                              : "bg-green-500/10 text-green-600 dark:text-green-500 border border-green-500/30 hover:bg-green-500/20"
                           }`}
                         >
                           {isProductDisabled ? "Oculto 🚫" : "Activo 👁️"}
@@ -467,7 +466,7 @@ export default function AdminSucursales() {
         )}
 
         {filteredItems.length > 100 && (
-          <p className="text-center text-xs text-gray-500 pt-4 font-semibold">
+          <p className="text-center text-xs text-[var(--admin-text-lo)] pt-4 font-semibold">
             Mostrando los primeros 100 productos de {filteredItems.length} totales. Usa los buscadores e indicadores de arriba para filtrar.
           </p>
         )}

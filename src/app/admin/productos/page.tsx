@@ -1,8 +1,9 @@
+// filepath: src/app/admin/productos/page.tsx
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { db, storage } from "@/lib/firebase";
-import { doc, getDoc, updateDoc, writeBatch } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/lib/toast-context";
 import imageCompression from 'browser-image-compression';
@@ -115,33 +116,33 @@ export default function AdminProductos() {
       const uploadTask = uploadBytesResumable(storageRef, compressedFile);
 
       uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setProgress(p);
-      },
-      (error) => {
-        toast.error("Error al subir la imagen");
-        setUploadingItem(null);
-      },
-      async () => {
-        try {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          // Actualizar Firestore
-          await updateDoc(doc(db, "catalogo_activo", "productos"), {
-            [`items.${codigo}.imagen`]: downloadURL
-          });
-          
-          // Actualizar estado local
-          setProductos(prev => prev.map(p => p.codigo === codigo ? { ...p, imagen: downloadURL } : p));
-          toast.success("Imagen SEO optimizada cargada");
-        } catch (e) {
-          toast.error("Error al guardar URL");
-        } finally {
+        "state_changed",
+        (snapshot) => {
+          const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setProgress(p);
+        },
+        (error) => {
+          toast.error("Error al subir la imagen");
           setUploadingItem(null);
+        },
+        async () => {
+          try {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            // Actualizar Firestore
+            await updateDoc(doc(db, "catalogo_activo", "productos"), {
+              [`items.${codigo}.imagen`]: downloadURL
+            });
+            
+            // Actualizar estado local
+            setProductos(prev => prev.map(p => p.codigo === codigo ? { ...p, imagen: downloadURL } : p));
+            toast.success("Imagen SEO optimizada cargada");
+          } catch (e) {
+            toast.error("Error al guardar URL");
+          } finally {
+            setUploadingItem(null);
+          }
         }
-      }
-    );
+      );
     } catch (error) {
       console.error(error);
       toast.error("Error al comprimir la imagen");
@@ -224,17 +225,17 @@ export default function AdminProductos() {
   };
 
   if (loading) {
-    return <div className="p-8 text-white">Cargando catálogo...</div>;
+    return <div className="p-8 text-[var(--admin-text-hi)]">Cargando catálogo...</div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-[var(--admin-text-mid)]">
       <div className="flex items-center justify-between">
-        <h2 className="font-bebas text-3xl tracking-wider text-white">Gestión de Productos</h2>
+        <h2 className="font-bebas text-3xl tracking-wider text-[var(--admin-text-hi)]">Gestión de Productos</h2>
         <button
           onClick={handleSyncCategories}
           disabled={syncing}
-          className="rounded-lg bg-[#00E5FF] px-4 py-2 text-sm font-bold text-black transition-all hover:scale-105 hover:bg-[#00E5FF]/80 disabled:opacity-50"
+          className="rounded-lg bg-[var(--admin-accent)] px-4 py-2 text-sm font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-95 disabled:opacity-50"
         >
           {syncing ? "Sincronizando..." : "🔄 Sincronizar Categorías (Excel)"}
         </button>
@@ -247,20 +248,20 @@ export default function AdminProductos() {
             placeholder="Buscar por código o nombre..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-[#0A0F1C] px-4 py-3 pl-10 text-white placeholder-gray-500 focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF] transition-all"
+            className="w-full rounded-xl border border-[var(--admin-border)] bg-[var(--admin-input-bg)] px-4 py-3 pl-10 text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:border-[var(--admin-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-accent)] transition-all"
           />
-          <span className="absolute left-3 top-3.5 text-gray-400">🔍</span>
+          <span className="absolute left-3 top-3.5 text-[var(--admin-text-lo)]">🔍</span>
         </div>
         
         <div className="flex gap-3 flex-wrap">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="rounded-xl border border-white/10 bg-[#0A0F1C] px-4 py-3 text-sm text-gray-300 focus:border-[#00E5FF] focus:outline-none transition-colors cursor-pointer"
+            className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-input-bg)] px-4 py-3 text-sm text-[var(--admin-text-mid)] focus:border-[var(--admin-accent)] focus:outline-none transition-colors cursor-pointer"
           >
             <option value="">Todas las Categorías</option>
             {CATEGORIAS.map((cat) => (
-              <option key={cat} value={cat} className="bg-[#0A0F1C] text-white">
+              <option key={cat} value={cat} className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
                 {cat}
               </option>
             ))}
@@ -269,7 +270,7 @@ export default function AdminProductos() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-xl border border-white/10 bg-[#0A0F1C] px-4 py-3 text-sm text-gray-300 focus:border-[#00E5FF] focus:outline-none transition-colors cursor-pointer"
+            className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-input-bg)] px-4 py-3 text-sm text-[var(--admin-text-mid)] focus:border-[var(--admin-accent)] focus:outline-none transition-colors cursor-pointer"
           >
             <option value="todos">Todos los Estados</option>
             <option value="activos">Solo Activos (En Web)</option>
@@ -280,8 +281,8 @@ export default function AdminProductos() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {filtrados.slice(0, 50).map((prod) => (
-          <div key={prod.codigo} className="flex flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0A0F1C] shadow-lg">
-            <div className="relative flex h-40 items-center justify-center bg-white/5 overflow-hidden">
+          <div key={prod.codigo} className="flex flex-col overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] shadow-lg">
+            <div className="relative flex h-40 items-center justify-center bg-[var(--admin-bg)]/20 overflow-hidden">
               {prod.imagen ? (
                 <Image 
                   src={prod.imagen} 
@@ -301,7 +302,7 @@ export default function AdminProductos() {
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60">
                   <div className="text-center">
                     <div className="mb-2 h-2 w-24 overflow-hidden rounded-full bg-white/20">
-                      <div className="h-full bg-[#00E5FF] transition-all" style={{ width: `${progress}%` }} />
+                      <div className="h-full bg-[var(--admin-accent)] transition-all" style={{ width: `${progress}%` }} />
                     </div>
                     <span className="text-xs font-bold text-white">{Math.round(progress)}%</span>
                   </div>
@@ -311,29 +312,29 @@ export default function AdminProductos() {
             
             <div className="flex flex-1 flex-col p-4">
               <div className="mb-1 flex items-center justify-between gap-2">
-                <span className="text-xs font-mono text-[#00E5FF]">{prod.codigo}</span>
+                <span className="text-xs font-mono text-[var(--admin-accent)]">{prod.codigo}</span>
                 <select
                   value={prod.categoria}
                   onChange={(e) => handleUpdateCategory(prod.codigo, e.target.value)}
-                  className="rounded border border-white/10 bg-black/40 px-2 py-0.5 text-[10px] font-bold uppercase text-gray-300 focus:border-[#00E5FF] focus:outline-none transition-colors"
+                  className="rounded border border-[var(--admin-border)] bg-[var(--admin-bg)] px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--admin-text-mid)] focus:border-[var(--admin-accent)] focus:outline-none transition-colors"
                 >
                   {CATEGORIAS.map((cat) => (
-                    <option key={cat} value={cat} className="bg-[#0A0F1C] text-white">
+                    <option key={cat} value={cat} className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
                       {cat}
                     </option>
                   ))}
                 </select>
               </div>
-              <h3 className="mb-3 flex-1 text-sm font-semibold text-white line-clamp-2">{prod.nombre}</h3>
+              <h3 className="mb-3 flex-1 text-sm font-semibold text-[var(--admin-text-hi)] line-clamp-2">{prod.nombre}</h3>
               
               <div className="mb-4 space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Precio Individual</label>
-                  {prod.precio <= 0 && <span className="text-[9px] font-bold text-red-400 italic">Poner {">"} 0 para mostrar</span>}
+                  <label className="text-[10px] font-bold text-[var(--admin-text-lo)] uppercase tracking-wider">Precio Individual</label>
+                  {prod.precio <= 0 && <span className="text-[9px] font-bold text-red-500 italic">Poner {">"} 0 para mostrar</span>}
                 </div>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--admin-text-lo)]">$</span>
                     <input
                       type="number"
                       value={editingPrice?.codigo === prod.codigo ? editingPrice.value : prod.precio}
@@ -343,14 +344,14 @@ export default function AdminProductos() {
                           setEditingPrice({ codigo: prod.codigo, value: prod.precio.toString() });
                         }
                       }}
-                      className="w-full rounded-lg border border-white/5 bg-white/5 py-1.5 pl-6 pr-2 text-sm font-bold text-white focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF]"
+                      className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] py-1.5 pl-6 pr-2 text-sm font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-accent)]"
                     />
                   </div>
                   {editingPrice?.codigo === prod.codigo && (
                     <button
                       onClick={() => handleUpdatePrice(prod.codigo)}
                       disabled={savingPrice === prod.codigo}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#00E5FF] text-black transition-all hover:scale-105 disabled:opacity-50"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--admin-accent)] text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 disabled:opacity-50"
                     >
                       {savingPrice === prod.codigo ? "..." : "✅"}
                     </button>
@@ -363,7 +364,7 @@ export default function AdminProductos() {
                           setTimeout(() => handleUpdatePrice(prod.codigo), 0);
                         }
                       }}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10 text-red-500 transition-all hover:bg-red-500 hover:text-white"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white"
                       title="Ocultar de la web"
                     >
                       🚫
@@ -377,7 +378,7 @@ export default function AdminProductos() {
                           setTimeout(() => handleUpdatePrice(prod.codigo), 0);
                         }
                       }}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10 text-green-500 transition-all hover:bg-green-500 hover:text-white"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white"
                       title="Mostrar en la web"
                     >
                       👁️
@@ -386,8 +387,8 @@ export default function AdminProductos() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end border-t border-white/5 pt-3">
-                <label className="cursor-pointer rounded-lg bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 transition-colors hover:bg-white/10 hover:text-white">
+              <div className="flex items-center justify-end border-t border-[var(--admin-border)] pt-3">
+                <label className="cursor-pointer rounded-lg bg-[var(--admin-bg)] border border-[var(--admin-border)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--admin-text-lo)] transition-colors hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)]">
                   {prod.imagen ? "Cambiar Imagen" : "Subir Imagen"}
                   <input
                     type="file"
@@ -407,7 +408,7 @@ export default function AdminProductos() {
         ))}
       </div>
       {filtrados.length > 50 && (
-        <p className="text-center text-sm text-gray-400">Mostrando los primeros 50 resultados. Usá el buscador para encontrar más.</p>
+        <p className="text-center text-sm text-[var(--admin-text-lo)]">Mostrando los primeros 50 resultados. Usá el buscador para encontrar más.</p>
       )}
     </div>
   );

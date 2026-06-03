@@ -1,3 +1,4 @@
+// filepath: src/components/admin/CategoriasAdmin.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -88,13 +89,13 @@ export default function CategoriasAdmin() {
     }
   };
 
-  if (loading) return <div className="text-white p-8">Cargando categorías...</div>;
+  if (loading) return <div className="text-[var(--admin-text-hi)] p-8">Cargando categorías...</div>;
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 text-[var(--admin-text-mid)]">
       {CATEGORIAS.map((cat) => (
-        <div key={cat} className="overflow-hidden rounded-2xl border border-white/5 bg-[#0A0F1C] shadow-xl">
-          <div className="relative aspect-video bg-white/5 flex items-center justify-center">
+        <div key={cat} className="overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] shadow-xl">
+          <div className="relative aspect-video bg-[var(--admin-bg)] flex items-center justify-center border-b border-[var(--admin-border)]">
             {config[cat] ? (
               <Image src={config[cat]} alt={cat} fill className="object-cover" />
             ) : (
@@ -105,9 +106,9 @@ export default function CategoriasAdmin() {
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
                 <div className="w-2/3">
                   <div className="h-1 w-full bg-white/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#00E5FF] transition-all" style={{ width: `${progress}%` }} />
+                    <div className="h-full bg-[var(--admin-accent)] transition-all" style={{ width: `${progress}%` }} />
                   </div>
-                  <p className="text-[10px] text-[#00E5FF] font-bold mt-2 text-center uppercase tracking-widest">
+                  <p className="text-[10px] text-[var(--admin-accent)] font-bold mt-2 text-center uppercase tracking-widest">
                     Subiendo {Math.round(progress)}%
                   </p>
                 </div>
@@ -116,8 +117,8 @@ export default function CategoriasAdmin() {
           </div>
           
           <div className="p-4">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{cat}</h3>
-            <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-white/5 py-2.5 text-xs font-bold text-white transition-all hover:bg-white/10 active:scale-95 border border-white/5">
+            <h3 className="text-xs font-bold text-[var(--admin-text-lo)] uppercase tracking-widest mb-4">{cat}</h3>
+            <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[var(--admin-bg)] py-2.5 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] active:scale-95 border border-[var(--admin-border)]">
               <span>{config[cat] ? "Cambiar Imagen" : "Subir Imagen"}</span>
               <input 
                 type="file" 

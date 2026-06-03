@@ -151,26 +151,26 @@ export default function OfertasAdmin() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00E5FF] border-t-transparent" />
+      <div className="flex items-center justify-center py-20 text-[var(--admin-text-hi)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--admin-accent)] border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-[var(--admin-text-mid)]">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold text-[var(--admin-text-hi)] flex items-center gap-2">
             🔥 Ofertas Activas
             {config.activa && (
-              <span className="rounded-full bg-green-500/20 px-3 py-0.5 text-xs font-bold text-green-400 border border-green-500/30">
+              <span className="rounded-full bg-green-500/20 px-3 py-0.5 text-xs font-bold text-green-600 dark:text-green-400 border border-green-500/30">
                 EN VIVO
               </span>
             )}
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-[var(--admin-text-lo)] mt-1">
             {config.productos.length} producto{config.productos.length !== 1 ? "s" : ""} en oferta
           </p>
         </div>
@@ -178,7 +178,7 @@ export default function OfertasAdmin() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="rounded-xl bg-[#00E5FF] px-6 py-2.5 text-sm font-bold text-[#050914] transition-all hover:bg-white disabled:opacity-50"
+            className="rounded-xl bg-[var(--admin-accent)] px-6 py-2.5 text-sm font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 disabled:opacity-50"
           >
             {saving ? "Guardando..." : "💾 Guardar Todo"}
           </button>
@@ -186,19 +186,19 @@ export default function OfertasAdmin() {
       </div>
 
       {/* Global Config */}
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 space-y-4">
+      <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
+          <h3 className="text-sm font-bold text-[var(--admin-text-lo)] uppercase tracking-widest">
             Configuración General
           </h3>
           <label className="flex items-center gap-3 cursor-pointer">
-            <span className="text-xs font-bold text-gray-500">
+            <span className="text-xs font-bold text-[var(--admin-text-lo)]">
               {config.activa ? "Ofertas Activas" : "Ofertas Pausadas"}
             </span>
             <div
               onClick={() => setConfig((p) => ({ ...p, activa: !p.activa }))}
               className={`relative h-7 w-12 rounded-full transition-colors cursor-pointer ${
-                config.activa ? "bg-green-500" : "bg-white/10"
+                config.activa ? "bg-green-500" : "bg-[var(--admin-input-bg)] border border-[var(--admin-border)]"
               }`}
             >
               <div
@@ -212,26 +212,26 @@ export default function OfertasAdmin() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div>
-            <label className="block text-xs font-bold text-gray-400 mb-1">Título</label>
+            <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Título</label>
             <input
               type="text"
               value={config.titulo}
               onChange={(e) => setConfig((p) => ({ ...p, titulo: e.target.value }))}
-              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+              className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/50"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-400 mb-1">Subtítulo</label>
+            <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Subtítulo</label>
             <input
               type="text"
               value={config.subtitulo}
               onChange={(e) => setConfig((p) => ({ ...p, subtitulo: e.target.value }))}
-              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+              className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/50"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-400 mb-1">
-              Fecha de Expiración <span className="text-gray-600 font-normal">(countdown)</span>
+            <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">
+              Fecha de Expiración <span className="text-[var(--admin-text-lo)]/60 font-normal">(countdown)</span>
             </label>
             <input
               type="datetime-local"
@@ -242,8 +242,8 @@ export default function OfertasAdmin() {
                   expiresAt: e.target.value ? new Date(e.target.value).toISOString() : undefined,
                 }))
               }
-              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00E5FF]/40"
-              style={{ colorScheme: "dark" }}
+              className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] focus:outline-none focus:border-[var(--admin-accent)]/50"
+              style={{ colorScheme: "light" }}
             />
           </div>
         </div>
@@ -252,20 +252,20 @@ export default function OfertasAdmin() {
       {/* Product Selector Toggle */}
       <button
         onClick={() => setShowSelector(!showSelector)}
-        className="w-full rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.01] p-4 text-center hover:border-[#00E5FF]/30 hover:bg-white/[0.02] transition-all group"
+        className="w-full rounded-2xl border-2 border-dashed border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 text-center hover:border-[var(--admin-accent)]/30 hover:bg-[var(--admin-input-bg)]/40 transition-all group"
       >
         <span className="text-lg group-hover:scale-110 inline-block transition-transform">
           {showSelector ? "✕" : "＋"}
         </span>
-        <p className="text-sm font-bold text-gray-400 mt-1">
+        <p className="text-sm font-bold text-[var(--admin-text-lo)] mt-1">
           {showSelector ? "Cerrar selector" : "Agregar productos a la oferta"}
         </p>
       </button>
 
       {/* Product Selector */}
       {showSelector && (
-        <div className="rounded-2xl border border-[#00E5FF]/20 bg-[#0A0F1C] p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-          <h3 className="text-sm font-bold text-[#00E5FF] uppercase tracking-widest">
+        <div className="rounded-2xl border border-[var(--admin-accent)]/20 bg-[var(--admin-card-bg)] p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <h3 className="text-sm font-bold text-[var(--admin-accent)] uppercase tracking-widest">
             Seleccionar Productos del Catálogo
           </h3>
 
@@ -275,16 +275,16 @@ export default function OfertasAdmin() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por nombre o código..."
-              className="flex-1 min-w-[200px] rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+              className="flex-1 min-w-[200px] rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/50"
             />
             <select
               value={catFilter}
               onChange={(e) => setCatFilter(e.target.value)}
-              className="rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white focus:outline-none"
+              className="rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] focus:outline-none"
             >
-              <option value="" className="bg-[#0A0F1C]">Todas las categorías</option>
+              <option value="" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">Todas las categorías</option>
               {categorias.map((cat) => (
-                <option key={cat} value={cat} className="bg-[#0A0F1C]">
+                <option key={cat} value={cat} className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
                   {cat}
                 </option>
               ))}
@@ -292,7 +292,7 @@ export default function OfertasAdmin() {
           </div>
 
           {filteredCatalogo.length === 0 ? (
-            <p className="text-sm text-gray-600 text-center py-6">
+            <p className="text-sm text-[var(--admin-text-lo)] text-center py-6">
               {searchTerm || catFilter
                 ? "Sin resultados para esa búsqueda"
                 : "Todos los productos ya están en la oferta"}
@@ -303,19 +303,19 @@ export default function OfertasAdmin() {
                 <button
                   key={p.codigo}
                   onClick={() => addProducto(p)}
-                  className="flex items-center justify-between gap-3 rounded-xl bg-white/[0.03] border border-white/5 px-4 py-3 text-left hover:bg-white/[0.06] hover:border-[#00E5FF]/20 transition-all group"
+                  className="flex items-center justify-between gap-3 rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-3 text-left hover:bg-[var(--admin-input-bg)] hover:border-[var(--admin-accent)]/20 transition-all group"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-white truncate">{p.nombre}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm font-semibold text-[var(--admin-text-hi)] truncate">{p.nombre}</p>
+                    <p className="text-xs text-[var(--admin-text-lo)]">
                       {p.codigo} · {p.categoria}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-sm font-bold text-white">
+                    <span className="text-sm font-bold text-[var(--admin-text-hi)]">
                       ${p.precio.toLocaleString("es-UY")}
                     </span>
-                    <span className="rounded-lg bg-[#00E5FF]/10 px-2.5 py-1 text-xs font-bold text-[#00E5FF] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="rounded-lg bg-[var(--admin-accent)]/10 px-2.5 py-1 text-xs font-bold text-[var(--admin-accent)] opacity-0 group-hover:opacity-100 transition-opacity">
                       + Agregar
                     </span>
                   </div>
@@ -328,17 +328,17 @@ export default function OfertasAdmin() {
 
       {/* Selected Products Table */}
       {config.productos.length > 0 && (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
-          <div className="border-b border-white/5 px-6 py-4 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
+        <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] overflow-hidden">
+          <div className="border-b border-[var(--admin-border)] px-6 py-4 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--admin-text-lo)] uppercase tracking-widest">
               Productos en Oferta ({config.productos.length})
             </h3>
-            <div className="flex items-center gap-2 text-xs text-gray-600">
+            <div className="flex items-center gap-2 text-xs text-[var(--admin-text-lo)]">
               <span className="inline-block w-2 h-2 rounded-full bg-amber-400" /> Destacado
             </div>
           </div>
 
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-[var(--admin-border)]">
             {config.productos.map((p) => (
               <div
                 key={p.codigo}
@@ -350,7 +350,7 @@ export default function OfertasAdmin() {
                 <button
                   onClick={() => toggleDestacado(p.codigo)}
                   className={`text-lg transition-all ${
-                    p.destacado ? "text-amber-400 scale-110" : "text-gray-700 hover:text-amber-400"
+                    p.destacado ? "text-amber-400 scale-110" : "text-[var(--admin-text-lo)] hover:text-amber-400"
                   }`}
                   title="Marcar como destacado"
                 >
@@ -359,28 +359,28 @@ export default function OfertasAdmin() {
 
                 {/* Product info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{p.nombre}</p>
-                  <p className="text-xs text-gray-500">{p.codigo} · {p.categoria}</p>
+                  <p className="text-sm font-semibold text-[var(--admin-text-hi)] truncate">{p.nombre}</p>
+                  <p className="text-xs text-[var(--admin-text-lo)]">{p.codigo} · {p.categoria}</p>
                 </div>
 
                 {/* Original price */}
                 <div className="text-center shrink-0">
-                  <p className="text-[10px] font-bold text-gray-600 uppercase">Original</p>
-                  <p className="text-sm font-bold text-gray-400">
+                  <p className="text-[10px] font-bold text-[var(--admin-text-lo)] uppercase">Original</p>
+                  <p className="text-sm font-bold text-[var(--admin-text-lo)]">
                     ${p.precioOriginal.toLocaleString("es-UY")}
                   </p>
                 </div>
 
                 {/* Offer price input */}
                 <div className="text-center shrink-0">
-                  <p className="text-[10px] font-bold text-gray-600 uppercase">Oferta</p>
+                  <p className="text-[10px] font-bold text-[var(--admin-text-lo)] uppercase">Oferta</p>
                   <input
                     type="number"
                     value={p.precioOferta}
                     onChange={(e) =>
                       updateProducto(p.codigo, { precioOferta: Number(e.target.value) })
                     }
-                    className="w-24 rounded-lg bg-white/5 border border-white/10 px-2 py-1.5 text-sm text-center font-bold text-green-400 focus:outline-none focus:border-green-400/40"
+                    className="w-24 rounded-lg bg-[var(--admin-bg)] border border-[var(--admin-border)] px-2 py-1.5 text-sm text-center font-bold text-green-600 dark:text-green-400 focus:outline-none focus:border-green-500"
                   />
                 </div>
 
@@ -389,10 +389,10 @@ export default function OfertasAdmin() {
                   <span
                     className={`rounded-lg px-2.5 py-1 text-xs font-black ${
                       p.descuento >= 20
-                        ? "bg-red-500/20 text-red-400"
+                        ? "bg-red-500/20 text-red-600 dark:text-red-400"
                         : p.descuento >= 10
-                          ? "bg-amber-500/20 text-amber-400"
-                          : "bg-green-500/20 text-green-400"
+                          ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                          : "bg-green-500/20 text-green-600 dark:text-green-400"
                     }`}
                   >
                     {p.descuento}% OFF
@@ -402,7 +402,7 @@ export default function OfertasAdmin() {
                 {/* Remove */}
                 <button
                   onClick={() => removeProducto(p.codigo)}
-                  className="rounded-lg bg-red-500/10 px-2.5 py-1.5 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-all shrink-0"
+                  className="rounded-lg bg-red-500/10 px-2.5 py-1.5 text-xs font-bold text-red-500 hover:bg-red-500/20 transition-all shrink-0"
                 >
                   ✕
                 </button>
@@ -416,8 +416,8 @@ export default function OfertasAdmin() {
       {config.productos.length === 0 && (
         <div className="text-center py-16">
           <span className="text-5xl block mb-4">🏷️</span>
-          <h3 className="text-lg font-bold text-gray-400">Sin productos en oferta</h3>
-          <p className="text-sm text-gray-600 mt-2">
+          <h3 className="text-lg font-bold text-[var(--admin-text-lo)]">Sin productos en oferta</h3>
+          <p className="text-sm text-[var(--admin-text-lo)]/80 mt-2">
             Usá el botón de arriba para seleccionar productos del catálogo
           </p>
         </div>

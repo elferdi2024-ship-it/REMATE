@@ -8,7 +8,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/lib/toast-context";
 import Image from "next/image";
 import type { BrandConfig, BrandAsset, BrandTier } from "@/types/brands";
-import { TIER_COLORS, TIER_WEIGHTS } from "@/types/brands";
+import { TIER_COLORS } from "@/types/brands";
 import { DEFAULT_BRANDS } from "@/lib/brands";
 import { differenceInDays, format, isPast, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -21,7 +21,6 @@ export default function PublicidadAdmin() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [editingBrand, setEditingBrand] = useState<BrandConfig | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const toast = useToast();
 
@@ -246,27 +245,27 @@ export default function PublicidadAdmin() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00E5FF] border-t-transparent" />
+      <div className="flex items-center justify-center p-12 text-[var(--admin-text-hi)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--admin-accent)] border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-[var(--admin-text-mid)]">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-bebas text-3xl tracking-widest text-white">
-            PUBLICIDAD <span className="text-[#00E5FF]">& MARCAS</span>
+          <h1 className="font-bebas text-3xl tracking-widest text-[var(--admin-text-hi)]">
+            PUBLICIDAD <span className="text-[var(--admin-accent)]">& MARCAS</span>
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-[var(--admin-text-lo)]">
             Gestioná las marcas patrocinantes y sus assets publicitarios
           </p>
         </div>
         <button
           onClick={() => setShowNewForm(!showNewForm)}
-          className="rounded-xl bg-[#00E5FF]/10 px-5 py-2.5 text-sm font-bold text-[#00E5FF] transition-all hover:bg-[#00E5FF]/20 border border-[#00E5FF]/20"
+          className="rounded-xl bg-[var(--admin-accent)]/10 px-5 py-2.5 text-sm font-bold text-[var(--admin-accent)] transition-all hover:bg-[var(--admin-accent)]/20 border border-[var(--admin-accent)]/20"
         >
           + Nueva Marca
         </button>
@@ -277,31 +276,31 @@ export default function PublicidadAdmin() {
         <div className="grid gap-4 md:grid-cols-2">
           {expiredCampaigns.length > 0 && (
             <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-5">
-              <h3 className="font-bebas text-xl text-red-400 mb-3 flex items-center gap-2">
+              <h3 className="font-bebas text-xl text-red-600 dark:text-red-400 mb-3 flex items-center gap-2">
                 <span>⚠️</span> Campañas Vencidas
               </h3>
               <ul className="space-y-2">
                 {expiredCampaigns.map(b => (
-                  <li key={b.id} className="flex justify-between text-sm text-white bg-black/20 p-2 rounded-lg">
+                  <li key={b.id} className="flex justify-between text-sm text-[var(--admin-text-hi)] bg-[var(--admin-bg)] p-2 rounded-lg border border-[var(--admin-border)]">
                     <span className="font-bold">{b.name}</span>
-                    <span className="text-red-400">Venció: {format(parseISO(b.expiresAt!), "dd MMM yyyy", { locale: es })}</span>
+                    <span className="text-red-600 dark:text-red-400">Venció: {format(parseISO(b.expiresAt!), "dd MMM yyyy", { locale: es })}</span>
                   </li>
                 ))}
               </ul>
             </div>
           )}
           {upcomingExpirations.length > 0 && (
-            <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-5">
-              <h3 className="font-bebas text-xl text-yellow-400 mb-3 flex items-center gap-2">
+            <div className="rounded-2xl border border-yellow-500/35 bg-yellow-500/10 p-5">
+              <h3 className="font-bebas text-xl text-yellow-600 dark:text-yellow-400 mb-3 flex items-center gap-2">
                 <span>⏱</span> Próximas a Vencer
               </h3>
               <ul className="space-y-2">
                 {upcomingExpirations.map(b => {
                   const days = differenceInDays(parseISO(b.expiresAt!), new Date());
                   return (
-                    <li key={b.id} className="flex justify-between text-sm text-white bg-black/20 p-2 rounded-lg">
+                    <li key={b.id} className="flex justify-between text-sm text-[var(--admin-text-hi)] bg-[var(--admin-bg)] p-2 rounded-lg border border-[var(--admin-border)]">
                       <span className="font-bold">{b.name}</span>
-                      <span className="text-yellow-400">Vence en {days} días</span>
+                      <span className="text-yellow-600 dark:text-yellow-400">Vence en {days} días</span>
                     </li>
                   );
                 })}
@@ -322,22 +321,22 @@ export default function PublicidadAdmin() {
         const images = brand.assets.filter((a) => a.type === "image");
         const videos = brand.assets.filter((a) => a.type === "video");
         
-        let statusColor = brand.active ? "text-green-400" : "text-gray-500";
+        let statusColor = brand.active ? "text-green-500 dark:text-green-400" : "text-[var(--admin-text-lo)]";
         let statusText = brand.active ? "ACTIVA" : "PAUSADA";
 
         if (brand.active && brand.expiresAt && isPast(parseISO(brand.expiresAt))) {
-          statusColor = "text-red-400";
+          statusColor = "text-red-500 dark:text-red-400";
           statusText = "VENCIDA";
         }
 
         return (
           <div
             key={brand.id}
-            className="overflow-hidden rounded-2xl border bg-[#0A0F1C] shadow-xl"
-            style={{ borderColor: brand.active ? tierStyle.border : "rgba(255,255,255,0.05)" }}
+            className="overflow-hidden rounded-2xl border bg-[var(--admin-card-bg)] shadow-xl"
+            style={{ borderColor: brand.active ? tierStyle.border : "var(--admin-border)" }}
           >
             {/* Brand header */}
-            <div className="flex flex-col gap-4 border-b border-white/5 p-5 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-4 border-b border-[var(--admin-border)] p-5 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-4">
                 {/* Logo */}
                 <div
@@ -357,7 +356,7 @@ export default function PublicidadAdmin() {
                 </div>
 
                 <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-[var(--admin-text-hi)] flex items-center gap-2">
                     {brand.name}
                     <span className={`text-[10px] uppercase tracking-widest font-black ${statusColor}`}>
                       • {statusText}
@@ -370,7 +369,7 @@ export default function PublicidadAdmin() {
                     >
                       {brand.tier}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-[var(--admin-text-lo)]">
                       {images.length} imgs · {videos.length} videos
                     </span>
                   </div>
@@ -379,14 +378,14 @@ export default function PublicidadAdmin() {
 
               <div className="flex flex-wrap items-center gap-3">
                 {/* Expiration date */}
-                <div className="flex items-center gap-2 rounded-lg bg-white/5 px-3 py-1.5 border border-white/10">
-                  <span className="text-xs text-gray-500">Vence:</span>
+                <div className="flex items-center gap-2 rounded-lg bg-[var(--admin-bg)] px-3 py-1.5 border border-[var(--admin-border)]">
+                  <span className="text-xs text-[var(--admin-text-lo)]">Vence:</span>
                   <input
                     type="date"
                     value={brand.expiresAt ? brand.expiresAt.split("T")[0] : ""}
                     onChange={(e) => updateExpiration(brand.id, e.target.value ? new Date(e.target.value).toISOString() : "")}
-                    className="bg-transparent text-xs font-bold text-white focus:outline-none"
-                    style={{ colorScheme: "dark" }}
+                    className="bg-transparent text-xs font-bold text-[var(--admin-text-hi)] focus:outline-none"
+                    style={{ colorScheme: "light" }}
                   />
                 </div>
 
@@ -394,10 +393,10 @@ export default function PublicidadAdmin() {
                 <select
                   value={brand.tier}
                   onChange={(e) => changeTier(brand.id, e.target.value as BrandTier)}
-                  className="rounded-lg bg-white/5 px-3 py-2 text-xs font-bold text-white border border-white/10"
+                  className="rounded-lg bg-[var(--admin-bg)] px-3 py-2 text-xs font-bold text-[var(--admin-text-hi)] border border-[var(--admin-border)]"
                 >
                   {TIERS.map((t) => (
-                    <option key={t} value={t} className="bg-[#0A0F1C]">
+                    <option key={t} value={t} className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
                       {t.charAt(0).toUpperCase() + t.slice(1)}
                     </option>
                   ))}
@@ -408,8 +407,8 @@ export default function PublicidadAdmin() {
                   onClick={() => toggleActive(brand.id)}
                   className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
                     brand.active
-                      ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                      : "bg-red-500/10 text-red-400 border border-red-500/20"
+                      ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
+                      : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
                   }`}
                 >
                   {brand.active ? "✓ Activa" : "✗ Pausada"}
@@ -418,7 +417,7 @@ export default function PublicidadAdmin() {
                 {/* Delete */}
                 <button
                   onClick={() => deleteBrand(brand.id)}
-                  className="rounded-lg bg-red-500/10 px-3 py-2 text-xs font-bold text-red-400 transition-all hover:bg-red-500/20"
+                  className="rounded-lg bg-red-500/10 px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 transition-all hover:bg-red-500/20"
                 >
                   🗑
                 </button>
@@ -426,8 +425,8 @@ export default function PublicidadAdmin() {
             </div>
 
             {/* Upload buttons */}
-            <div className="flex flex-wrap gap-3 border-b border-white/5 p-4">
-              <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-white/10 border border-white/5">
+            <div className="flex flex-wrap gap-3 border-b border-[var(--admin-border)] p-4">
+              <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)]">
                 📷 Subir Imagen
                 <input
                   type="file"
@@ -436,7 +435,7 @@ export default function PublicidadAdmin() {
                   onChange={(e) => e.target.files?.[0] && handleUploadAsset(brand.id, e.target.files[0], "image")}
                 />
               </label>
-              <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-white/10 border border-white/5">
+              <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)]">
                 🎬 Subir Video
                 <input
                   type="file"
@@ -445,7 +444,7 @@ export default function PublicidadAdmin() {
                   onChange={(e) => e.target.files?.[0] && handleUploadAsset(brand.id, e.target.files[0], "video")}
                 />
               </label>
-              <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-white/10 border border-white/5">
+              <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)]">
                 🏷️ Subir Logo
                 <input
                   type="file"
@@ -458,13 +457,13 @@ export default function PublicidadAdmin() {
               {/* Upload progress */}
               {uploading === brand.id && (
                 <div className="flex items-center gap-2 ml-auto">
-                  <div className="h-1 w-24 bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-1 w-24 bg-[var(--admin-border)] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#00E5FF] transition-all"
+                      className="h-full bg-[var(--admin-accent)] transition-all"
                       style={{ width: `${uploadProgress}%` }}
                     />
                   </div>
-                  <span className="text-[10px] text-[#00E5FF] font-bold">{Math.round(uploadProgress)}%</span>
+                  <span className="text-[10px] text-[var(--admin-accent)] font-bold">{Math.round(uploadProgress)}%</span>
                 </div>
               )}
             </div>
@@ -472,7 +471,7 @@ export default function PublicidadAdmin() {
             {/* Assets grid */}
             <div className="p-4">
               {brand.assets.length === 0 ? (
-                <p className="text-center text-sm text-gray-600 py-8">
+                <p className="text-center text-sm text-[var(--admin-text-lo)] py-8">
                   Sin assets. Subí imágenes o videos para esta marca.
                 </p>
               ) : (
@@ -480,7 +479,7 @@ export default function PublicidadAdmin() {
                   {brand.assets.map((asset) => (
                     <div
                       key={asset.id}
-                      className="group relative aspect-square overflow-hidden rounded-xl bg-white/5"
+                      className="group relative aspect-square overflow-hidden rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)]"
                     >
                       {asset.type === "image" ? (
                         <Image
@@ -521,15 +520,15 @@ export default function PublicidadAdmin() {
             </div>
 
             {/* Categories */}
-            <div className="border-t border-white/5 p-4">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">
+            <div className="border-t border-[var(--admin-border)] p-4">
+              <p className="text-[10px] font-bold text-[var(--admin-text-lo)] uppercase tracking-widest mb-2">
                 Categorías asociadas
               </p>
               <div className="flex flex-wrap gap-1">
                 {brand.categories.map((cat) => (
                   <span
                     key={cat}
-                    className="rounded-lg bg-white/5 px-2 py-1 text-[10px] font-semibold text-gray-400 border border-white/5"
+                    className="rounded-lg bg-[var(--admin-bg)] px-2 py-1 text-[10px] font-semibold text-[var(--admin-text-lo)] border border-[var(--admin-border)]"
                   >
                     {cat}
                   </span>
@@ -568,52 +567,52 @@ function NewBrandForm({
   const [expiresAt, setExpiresAt] = useState("");
 
   return (
-    <div className="rounded-2xl border border-[#00E5FF]/20 bg-[#0A0F1C] p-6 shadow-xl">
-      <h3 className="text-sm font-bold text-[#00E5FF] uppercase tracking-widest mb-4">
+    <div className="rounded-2xl border border-[var(--admin-accent)]/20 bg-[var(--admin-card-bg)] p-6 shadow-xl text-[var(--admin-text-mid)] animate-in slide-in-from-top-2 duration-300">
+      <h3 className="text-sm font-bold text-[var(--admin-accent)] uppercase tracking-widest mb-4">
         Nueva Marca Publicitaria
       </h3>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div>
-          <label className="block text-xs font-bold text-gray-400 mb-1">Nombre</label>
+          <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Nombre</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Ej: Centenario"
-            className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+            className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/40"
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-gray-400 mb-1">Color</label>
+          <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Color</label>
           <div className="flex items-center gap-2">
             <input
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="h-10 w-10 rounded-lg border border-white/10 bg-transparent cursor-pointer"
+              className="h-10 w-10 rounded-lg border border-[var(--admin-border)] bg-transparent cursor-pointer"
             />
             <input
               type="text"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="flex-1 rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white focus:outline-none"
+              className="flex-1 rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] focus:outline-none"
             />
           </div>
         </div>
         <div>
-          <label className="block text-xs font-bold text-gray-400 mb-1">Nivel</label>
+          <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Nivel</label>
           <select
             value={tier}
             onChange={(e) => setTier(e.target.value as BrandTier)}
-            className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white focus:outline-none"
+            className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] focus:outline-none"
           >
-            <option value="bronce" className="bg-[#0A0F1C]">🥉 Bronce</option>
-            <option value="plata" className="bg-[#0A0F1C]">🥈 Plata</option>
-            <option value="oro" className="bg-[#0A0F1C]">🥇 Oro</option>
+            <option value="bronce" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">🥉 Bronce</option>
+            <option value="plata" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">🥈 Plata</option>
+            <option value="oro" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">🥇 Oro</option>
           </select>
         </div>
         <div className="sm:col-span-2 lg:col-span-2">
-          <label className="block text-xs font-bold text-gray-400 mb-1">
+          <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">
             Categorías (separadas por coma)
           </label>
           <input
@@ -621,19 +620,19 @@ function NewBrandForm({
             value={categories}
             onChange={(e) => setCategories(e.target.value)}
             placeholder="BEBIDAS ALCOHÓLICAS, CONSERVAS Y ENLATADOS"
-            className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+            className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/40"
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-gray-400 mb-1">
+          <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">
             Fecha de Fin (Opcional)
           </label>
           <input
             type="date"
             value={expiresAt}
             onChange={(e) => setExpiresAt(e.target.value)}
-            className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00E5FF]/40"
-            style={{ colorScheme: "dark" }}
+            className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] focus:outline-none focus:border-[var(--admin-accent)]/40"
+            style={{ colorScheme: "light" }}
           />
         </div>
       </div>
@@ -641,13 +640,13 @@ function NewBrandForm({
         <button
           onClick={() => name.trim() && onSubmit({ name, color, categories, tier, expiresAt: expiresAt ? new Date(expiresAt).toISOString() : "" })}
           disabled={!name.trim()}
-          className="rounded-xl bg-[#00E5FF]/10 px-6 py-2.5 text-sm font-bold text-[#00E5FF] transition-all hover:bg-[#00E5FF]/20 disabled:opacity-30 border border-[#00E5FF]/20"
+          className="rounded-xl bg-[var(--admin-accent)]/10 px-6 py-2.5 text-sm font-bold text-[var(--admin-accent)] transition-all hover:bg-[var(--admin-accent)]/20 disabled:opacity-30 border border-[var(--admin-accent)]/20"
         >
           Crear Marca
         </button>
         <button
           onClick={onCancel}
-          className="rounded-xl bg-white/5 px-6 py-2.5 text-sm font-bold text-gray-400 transition-all hover:bg-white/10 border border-white/5"
+          className="rounded-xl bg-[var(--admin-bg)] px-6 py-2.5 text-sm font-bold text-[var(--admin-text-lo)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)]"
         >
           Cancelar
         </button>
@@ -697,51 +696,51 @@ function BannerConfigSection({
   };
 
   return (
-    <div className="border-t border-white/5">
+    <div className="border-t border-[var(--admin-border)]">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
+        className="flex w-full items-center justify-between p-4 text-left hover:bg-[var(--admin-bg)] transition-colors"
       >
         <div className="flex items-center gap-2">
           <span className="text-lg">🎨</span>
           <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+            <p className="text-[10px] font-bold text-[var(--admin-text-lo)] uppercase tracking-widest">
               Personalización del Banner
             </p>
-            <p className="text-xs text-gray-600 mt-0.5">
+            <p className="text-xs text-[var(--admin-text-lo)]/80 mt-0.5">
               Headline, tagline, chips, badge y textos CTA
             </p>
           </div>
         </div>
-        <span className="text-gray-600 text-xs">{isOpen ? "▾" : "▸"}</span>
+        <span className="text-[var(--admin-text-lo)] text-xs">{isOpen ? "▾" : "▸"}</span>
       </button>
 
       {isOpen && (
-        <div className="border-t border-white/5 p-5 space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="border-t border-[var(--admin-border)] p-5 space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
           {/* Headline & Tagline */}
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-xs font-bold text-gray-400 mb-1">
-                Headline <span className="text-gray-600 font-normal">(título principal del banner)</span>
+              <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">
+                Headline <span className="text-[var(--admin-text-lo)]/60 font-normal">(título principal del banner)</span>
               </label>
               <input
                 type="text"
                 value={headline}
                 onChange={(e) => setHeadline(e.target.value)}
                 placeholder={brand.name}
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+                className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/40"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-400 mb-1">
-                Tagline <span className="text-gray-600 font-normal">(subtítulo)</span>
+              <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">
+                Tagline <span className="text-[var(--admin-text-lo)]/60 font-normal">(subtítulo)</span>
               </label>
               <input
                 type="text"
                 value={tagline}
                 onChange={(e) => setTagline(e.target.value)}
                 placeholder="Para los que saben lo que quieren"
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+                className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/40"
               />
             </div>
           </div>
@@ -749,19 +748,19 @@ function BannerConfigSection({
           {/* Badge & CTA */}
           <div className="grid gap-4 md:grid-cols-3">
             <div>
-              <label className="block text-xs font-bold text-gray-400 mb-1">
-                Badge <span className="text-gray-600 font-normal">(esquina superior)</span>
+              <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">
+                Badge <span className="text-[var(--admin-text-lo)]/60 font-normal">(esquina superior)</span>
               </label>
               <input
                 type="text"
                 value={badgeText}
                 onChange={(e) => setBadgeText(e.target.value)}
                 placeholder="Promo activa hoy"
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+                className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/40"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-400 mb-1">
+              <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">
                 CTA - Variante A
               </label>
               <input
@@ -769,11 +768,11 @@ function BannerConfigSection({
                 value={ctaTextA}
                 onChange={(e) => setCtaTextA(e.target.value)}
                 placeholder="ABRIR OFERTAS"
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+                className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/40"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-400 mb-1">
+              <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">
                 CTA - Variante B
               </label>
               <input
@@ -781,26 +780,26 @@ function BannerConfigSection({
                 value={ctaTextB}
                 onChange={(e) => setCtaTextB(e.target.value)}
                 placeholder="VER PROMOCIONES"
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+                className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/40"
               />
             </div>
           </div>
 
           {/* Chips / Tags */}
           <div>
-            <label className="block text-xs font-bold text-gray-400 mb-2">
-              Chips / Tags <span className="text-gray-600 font-normal">(badges del banner)</span>
+            <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-2">
+              Chips / Tags <span className="text-[var(--admin-text-lo)]/60 font-normal">(badges del banner)</span>
             </label>
             <div className="flex flex-wrap gap-2 mb-3">
               {chips.map((chip) => (
                 <span
                   key={chip}
-                  className="group flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-300"
+                  className="group flex items-center gap-1.5 rounded-full bg-[var(--admin-bg)] border border-[var(--admin-border)] px-3 py-1.5 text-xs font-semibold text-[var(--admin-text-mid)]"
                 >
                   {chip}
                   <button
                     onClick={() => removeChip(chip)}
-                    className="flex h-4 w-4 items-center justify-center rounded-full bg-red-500/20 text-red-400 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="flex h-4 w-4 items-center justify-center rounded-full bg-red-500/20 text-red-500 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     ✕
                   </button>
@@ -814,12 +813,12 @@ function BannerConfigSection({
                 onChange={(e) => setNewChip(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addChip())}
                 placeholder="Nuevo chip... (Enter para agregar)"
-                className="flex-1 rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[#00E5FF]/40"
+                className="flex-1 rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/55 focus:outline-none focus:border-[var(--admin-accent)]/40"
               />
               <button
                 onClick={addChip}
                 disabled={!newChip.trim()}
-                className="rounded-xl bg-white/5 px-4 py-2 text-sm font-bold text-white hover:bg-white/10 disabled:opacity-30 border border-white/5"
+                className="rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-sm font-bold text-[var(--admin-text-hi)] hover:bg-[var(--admin-input-bg)] disabled:opacity-30 border border-[var(--admin-border)]"
               >
                 + Agregar
               </button>
@@ -827,8 +826,8 @@ function BannerConfigSection({
           </div>
 
           {/* Banner Preview */}
-          <div className="rounded-xl border border-white/5 bg-black/20 p-4">
-            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">
+          <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] p-4">
+            <p className="text-[10px] font-bold text-[var(--admin-text-lo)] uppercase tracking-widest mb-3">
               Vista previa del banner
             </p>
             <div
@@ -889,7 +888,7 @@ function BannerConfigSection({
           <div className="flex justify-end">
             <button
               onClick={handleSave}
-              className="rounded-xl bg-[#00E5FF] px-6 py-2.5 text-sm font-bold text-[#050914] transition-all hover:bg-white"
+              className="rounded-xl bg-[var(--admin-accent)] px-6 py-2.5 text-sm font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90"
             >
               💾 Guardar Banner
             </button>

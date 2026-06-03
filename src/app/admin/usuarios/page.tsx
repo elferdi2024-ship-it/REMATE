@@ -1,3 +1,4 @@
+// filepath: src/app/admin/usuarios/page.tsx
 "use client";
 
 import { useState, FormEvent, useEffect } from "react";
@@ -54,7 +55,7 @@ export default function UsuariosPage() {
   if (user?.email !== "rnt.atlantida@gmail.com") {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-xl font-bold text-red-500">Acceso denegado. No tienes permisos para ver esta sección.</p>
+        <p className="text-xl font-bold text-red-500 dark:text-red-400">Acceso denegado. No tienes permisos para ver esta sección.</p>
       </div>
     );
   }
@@ -127,7 +128,7 @@ export default function UsuariosPage() {
       alert("Error al actualizar el rol");
     }
   };
- 
+  
   const handleBranchChange = async (userId: string, newBranchId: string) => {
     try {
       await updateDoc(doc(db, "usuarios", userId), { sucursalId: newBranchId });
@@ -169,40 +170,40 @@ export default function UsuariosPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 text-[var(--admin-text-mid)]">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-bebas text-3xl tracking-wide text-white">GESTIÓN DE USUARIOS</h2>
-          <p className="text-sm text-gray-400">Crea nuevos accesos, edita roles y gestiona contraseñas.</p>
+          <h2 className="font-bebas text-3xl tracking-wide text-[var(--admin-text-hi)]">GESTIÓN DE USUARIOS</h2>
+          <p className="text-sm text-[var(--admin-text-lo)]">Crea nuevos accesos, edita roles y gestiona contraseñas.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Lado izquierdo: Crear Usuario */}
         <div className="lg:col-span-1">
-          <div className="rounded-xl border border-white/5 bg-[#0A0F1C] p-6 shadow-2xl">
-            <h3 className="mb-4 text-lg font-bold text-white">NUEVO USUARIO</h3>
+          <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 shadow-2xl">
+            <h3 className="mb-4 text-lg font-bold text-[var(--admin-text-hi)]">NUEVO USUARIO</h3>
             <form onSubmit={handleCreateUser} className="space-y-5">
               {message && (
-                <div className={`rounded-lg p-4 text-sm font-semibold ${message.type === "success" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}`}>
+                <div className={`rounded-lg p-4 text-sm font-semibold ${message.type === "success" ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"}`}>
                   {message.text}
                 </div>
               )}
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-300">Correo Electrónico</label>
+                <label className="mb-1 block text-sm font-medium text-[var(--admin-text-mid)]">Correo Electrónico</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="ejemplo@correo.com"
-                  className="w-full rounded-lg border border-white/10 bg-black/50 px-4 py-2.5 text-white placeholder-gray-500 focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF]"
+                  className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-2.5 text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/55 focus:border-[var(--admin-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-accent)]"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-300">Contraseña (mínimo 6 caracteres)</label>
+                <label className="mb-1 block text-sm font-medium text-[var(--admin-text-mid)]">Contraseña (mínimo 6 caracteres)</label>
                 <input
                   type="password"
                   value={password}
@@ -210,33 +211,33 @@ export default function UsuariosPage() {
                   required
                   minLength={6}
                   placeholder="••••••"
-                  className="w-full rounded-lg border border-white/10 bg-black/50 px-4 py-2.5 text-white placeholder-gray-500 focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF]"
+                  className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-2.5 text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/55 focus:border-[var(--admin-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-accent)]"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-300">Nivel de Acceso (Rol)</label>
+                <label className="mb-1 block text-sm font-medium text-[var(--admin-text-mid)]">Nivel de Acceso (Rol)</label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as "empleado" | "admin" | "owner")}
-                  className="w-full rounded-lg border border-white/10 bg-black/50 px-4 py-2.5 text-white focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF]"
+                  className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-2.5 text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-accent)]"
                 >
-                  <option value="empleado">Empleado (Solo ve Pedidos del Local)</option>
-                  <option value="owner">Dueño (Ve Pedidos y Estadísticas)</option>
-                  <option value="admin">Administrador (Acceso Total)</option>
+                  <option value="empleado" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">Empleado (Solo ve Pedidos del Local)</option>
+                  <option value="owner" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">Dueño (Ve Pedidos y Estadísticas)</option>
+                  <option value="admin" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">Administrador (Acceso Total)</option>
                 </select>
               </div>
 
               {role === "empleado" && (
                 <div className="animate-in slide-in-from-top-2 duration-300">
-                  <label className="mb-1 block text-sm font-medium text-[#00E5FF]">Asignar Local / Sucursal</label>
+                  <label className="mb-1 block text-sm font-medium text-[var(--admin-accent)]">Asignar Local / Sucursal</label>
                   <select
                     value={sucursalId}
                     onChange={(e) => setSucursalId(e.target.value)}
-                    className="w-full rounded-lg border border-[#00E5FF]/30 bg-black/50 px-4 py-2.5 text-white focus:border-[#00E5FF] focus:outline-none focus:ring-1 focus:ring-[#00E5FF]"
+                    className="w-full rounded-lg border border-[var(--admin-accent)]/30 bg-[var(--admin-bg)] px-4 py-2.5 text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-accent)]"
                   >
                     {SUCURSALES.map((s) => (
-                      <option key={s.id} value={s.id}>
+                      <option key={s.id} value={s.id} className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
                         {s.nombre} ({s.direccion})
                       </option>
                     ))}
@@ -247,7 +248,7 @@ export default function UsuariosPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg bg-[#00E5FF] px-4 py-3 font-bold text-black transition-all hover:bg-[#00cce6] disabled:opacity-50"
+                className="w-full rounded-lg bg-[var(--admin-accent)] px-4 py-3 font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 disabled:opacity-50"
               >
                 {loading ? "CREANDO..." : "CREAR USUARIO"}
               </button>
@@ -257,17 +258,17 @@ export default function UsuariosPage() {
 
         {/* Lado derecho: Lista de Usuarios */}
         <div className="lg:col-span-2">
-          <div className="rounded-xl border border-white/5 bg-[#0A0F1C] p-6 shadow-2xl">
-            <h3 className="mb-4 text-lg font-bold text-white">USUARIOS ACTUALES</h3>
+          <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 shadow-2xl">
+            <h3 className="mb-4 text-lg font-bold text-[var(--admin-text-hi)]">USUARIOS ACTUALES</h3>
             
             {loadingUsers ? (
               <div className="flex h-32 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00E5FF] border-t-transparent"></div>
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--admin-accent)] border-t-transparent"></div>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-gray-300">
-                  <thead className="bg-white/5 text-xs uppercase text-gray-400">
+                <table className="w-full text-left text-sm text-[var(--admin-text-lo)]">
+                  <thead className="bg-[var(--admin-bg)] text-xs uppercase text-[var(--admin-text-lo)]">
                     <tr>
                       <th className="px-4 py-3">Correo</th>
                       <th className="px-4 py-3">Rol</th>
@@ -277,18 +278,18 @@ export default function UsuariosPage() {
                   </thead>
                   <tbody>
                     {usersList.map((u) => (
-                      <tr key={u.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                        <td className="px-4 py-4 font-medium text-white">{u.email}</td>
+                      <tr key={u.id} className="border-b border-[var(--admin-border)] hover:bg-[var(--admin-input-bg)]/30 transition-colors">
+                        <td className="px-4 py-4 font-medium text-[var(--admin-text-hi)]">{u.email}</td>
                         <td className="px-4 py-4">
                           <select
                             value={u.role}
                             onChange={(e) => handleRoleChange(u.id, e.target.value as "admin" | "empleado" | "owner")}
                             disabled={u.email === "rnt.atlantida@gmail.com"}
-                            className="rounded-lg border border-white/10 bg-black/50 px-2 py-1 text-xs text-white focus:border-[#00E5FF] focus:outline-none disabled:opacity-50"
+                            className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-2 py-1 text-xs text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none disabled:opacity-50"
                           >
-                            <option value="empleado">Empleado</option>
-                            <option value="owner">Dueño</option>
-                            <option value="admin">Administrador</option>
+                            <option value="empleado" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">Empleado</option>
+                            <option value="owner" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">Dueño</option>
+                            <option value="admin" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">Administrador</option>
                           </select>
                         </td>
                         <td className="px-4 py-4">
@@ -296,30 +297,30 @@ export default function UsuariosPage() {
                             <select
                               value={u.sucursalId || "la-paz"}
                               onChange={(e) => handleBranchChange(u.id, e.target.value)}
-                              className="rounded-lg border border-[#00E5FF]/20 bg-black/50 px-2 py-1 text-xs text-white focus:border-[#00E5FF] focus:outline-none"
+                              className="rounded-lg border border-[var(--admin-accent)]/20 bg-[var(--admin-bg)] px-2 py-1 text-xs text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none"
                             >
                               {SUCURSALES.map((s) => (
-                                <option key={s.id} value={s.id}>
+                                <option key={s.id} value={s.id} className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
                                   {s.nombre}
                                 </option>
                               ))}
                             </select>
                           ) : (
-                            <span className="text-xs text-gray-500">—</span>
+                            <span className="text-xs text-[var(--admin-text-lo)]/50">—</span>
                           )}
                         </td>
                         <td className="px-4 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handlePasswordReset(u.email)}
-                              className="rounded bg-blue-500/10 px-3 py-1.5 text-xs font-bold text-blue-400 hover:bg-blue-500/20 transition-colors"
+                              className="rounded bg-blue-500/10 px-3 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition-colors"
                             >
                               Reset Clave
                             </button>
                             <button
                               onClick={() => handleDeleteUser(u.id, u.email)}
                               disabled={u.email === "rnt.atlantida@gmail.com"}
-                              className="rounded bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                              className="rounded bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
                             >
                               Revocar
                             </button>

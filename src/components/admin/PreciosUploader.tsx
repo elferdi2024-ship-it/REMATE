@@ -1,6 +1,7 @@
+// filepath: src/components/admin/PreciosUploader.tsx
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
+import { useState, useRef } from "react";
 import { type WorkBook } from "xlsx";
 import * as XLSX from "xlsx";
 import { db } from "@/lib/firebase";
@@ -226,7 +227,7 @@ export default function PreciosUploader() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-[var(--admin-text-mid)]">
       {!file && (
         <div
           onDrop={(e) => {
@@ -247,31 +248,31 @@ export default function PreciosUploader() {
           onClick={() => fileInputRef.current?.click()}
           className={`group relative flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed px-6 py-20 transition-all duration-300 ${
             isDragOver
-              ? "border-[#00E5FF] bg-[#00E5FF]/10 shadow-[0_0_30px_rgba(0,229,255,0.1)]"
-              : "border-white/20 bg-[#0A0F1C] hover:border-[#00E5FF]/50 hover:bg-white/5"
+              ? "border-[var(--admin-accent)] bg-[var(--admin-accent)]/10 shadow-[0_0_30px_var(--admin-accent-glow)]"
+              : "border-[var(--admin-border)] bg-[var(--admin-card-bg)] hover:border-[var(--admin-accent)]/50 hover:bg-[var(--admin-input-bg)]"
           }`}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#00E5FF]/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[var(--admin-accent)]/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           <div className="relative z-10 flex flex-col items-center">
-            <span className="mb-6 rounded-2xl bg-white/5 p-4 text-5xl shadow-xl transition-transform duration-300 group-hover:-translate-y-2 group-hover:scale-110">
+            <span className="mb-6 rounded-2xl bg-[var(--admin-bg)] border border-[var(--admin-border)] p-4 text-5xl shadow-xl transition-transform duration-300 group-hover:-translate-y-2 group-hover:scale-110">
               📊
             </span>
-            <h3 className="text-xl font-bold text-white">Arrastrá el archivo aquí</h3>
-            <p className="mt-2 text-sm text-gray-400">o hacé click para explorar tus carpetas</p>
+            <h3 className="text-xl font-bold text-[var(--admin-text-hi)]">Arrastrá el archivo aquí</h3>
+            <p className="mt-2 text-sm text-[var(--admin-text-lo)]">o hacé click para explorar tus carpetas</p>
           </div>
           <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} className="hidden" />
         </div>
       )}
 
       {file && !success && (
-        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0A0F1C] p-4 shadow-lg">
+        <div className="flex items-center justify-between rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 shadow-lg">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/10 text-2xl text-green-400">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/10 text-2xl text-green-500">
               📄
             </div>
             <div>
-              <p className="font-semibold text-white">{file.name}</p>
-              <p className="text-sm text-gray-400">{parsed.length} productos detectados listos para importar</p>
+              <p className="font-semibold text-[var(--admin-text-hi)]">{file.name}</p>
+              <p className="text-sm text-[var(--admin-text-lo)]">{parsed.length} productos detectados listos para importar</p>
             </div>
           </div>
           <button
@@ -281,7 +282,7 @@ export default function PreciosUploader() {
               setPreview([]);
               if (fileInputRef.current) fileInputRef.current.value = "";
             }}
-            className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-gray-400 transition-colors hover:bg-red-500/20 hover:text-red-400"
+            className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--admin-bg)] text-[var(--admin-text-lo)] transition-colors hover:bg-red-500/20 hover:text-red-500"
           >
             ✕
           </button>
@@ -289,48 +290,48 @@ export default function PreciosUploader() {
       )}
 
       {error && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center text-sm font-medium text-red-400">
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center text-sm font-medium text-red-500">
           ⚠️ {error}
         </div>
       )}
 
       {success && (
-        <div className="rounded-xl border border-[#00E5FF]/20 bg-[#00E5FF]/10 p-6 text-center shadow-[0_0_30px_rgba(0,229,255,0.1)]">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#00E5FF] text-3xl text-black shadow-lg">
+        <div className="rounded-xl border border-[var(--admin-accent)]/20 bg-[var(--admin-accent)]/10 p-6 text-center shadow-[0_0_30px_var(--admin-accent-glow)]">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--admin-accent)] text-3xl text-[var(--admin-sidebar-bg)] shadow-lg font-bold">
             ✓
           </div>
-          <h3 className="font-bebas text-3xl tracking-wide text-white">Catálogo Actualizado</h3>
-          <p className="text-[#00E5FF] font-medium mt-1">Los productos se sincronizaron con éxito.</p>
+          <h3 className="font-bebas text-3xl tracking-wide text-[var(--admin-text-hi)]">Catálogo Actualizado</h3>
+          <p className="text-[var(--admin-accent)] font-medium mt-1">Los productos se sincronizaron con éxito.</p>
         </div>
       )}
 
       {preview.length > 0 && !success && (
-        <div className="animate-in slide-in-from-bottom-4 overflow-hidden rounded-2xl border border-white/10 bg-[#0A0F1C] shadow-xl">
-          <div className="border-b border-white/10 bg-white/5 px-6 py-4">
-            <h3 className="font-bold text-white">Vista Previa</h3>
-            <p className="text-xs text-gray-400">Mostrando los primeros {preview.length} resultados</p>
+        <div className="animate-in slide-in-from-bottom-4 overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] shadow-xl">
+          <div className="border-b border-[var(--admin-border)] bg-[var(--admin-bg)] px-6 py-4">
+            <h3 className="font-bold text-[var(--admin-text-hi)]">Vista Previa</h3>
+            <p className="text-xs text-[var(--admin-text-lo)]">Mostrando los primeros {preview.length} resultados</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <tr className="border-b border-[var(--admin-border)] text-left text-xs font-semibold uppercase tracking-wider text-[var(--admin-text-lo)]">
                   <th className="px-6 py-4">Código</th>
                   <th className="px-6 py-4">Producto</th>
                   <th className="px-6 py-4">Categoría</th>
                   <th className="px-6 py-4 text-right">Precio</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-[var(--admin-border)]">
                 {preview.map((p) => (
-                  <tr key={p.codigo} className="transition-colors hover:bg-white/5">
-                    <td className="px-6 py-3 font-mono text-xs text-[#00E5FF]">{p.codigo}</td>
-                    <td className="px-6 py-3 font-medium text-gray-200">{p.nombre}</td>
-                    <td className="px-6 py-3 text-gray-400">
-                      <span className="inline-flex rounded-md bg-white/5 px-2 py-1 text-xs">
+                  <tr key={p.codigo} className="transition-colors hover:bg-[var(--admin-input-bg)]/40 text-[var(--admin-text-mid)]">
+                    <td className="px-6 py-3 font-mono text-xs text-[var(--admin-accent)]">{p.codigo}</td>
+                    <td className="px-6 py-3 font-medium text-[var(--admin-text-hi)]">{p.nombre}</td>
+                    <td className="px-6 py-3 text-[var(--admin-text-lo)]">
+                      <span className="inline-flex rounded-md bg-[var(--admin-bg)] border border-[var(--admin-border)] px-2 py-1 text-xs">
                         {p.categoria}
                       </span>
                     </td>
-                    <td className="px-6 py-3 text-right font-mono font-bold text-white">
+                    <td className="px-6 py-3 text-right font-mono font-bold text-[var(--admin-text-hi)]">
                       {formatCurrency(p.precio)}
                     </td>
                   </tr>
@@ -342,14 +343,14 @@ export default function PreciosUploader() {
       )}
 
       {uploading && (
-        <div className="rounded-2xl border border-[#00E5FF]/20 bg-[#00E5FF]/5 p-6">
+        <div className="rounded-2xl border border-[var(--admin-accent)]/20 bg-[var(--admin-accent)]/5 p-6">
           <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="font-semibold text-white">Actualizando Base de Datos...</span>
-            <span className="font-bold text-[#00E5FF]">{uploadProgress}%</span>
+            <span className="font-semibold text-[var(--admin-text-hi)]">Actualizando Base de Datos...</span>
+            <span className="font-bold text-[var(--admin-accent)]">{uploadProgress}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-black">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--admin-bg)] border border-[var(--admin-border)]">
             <div
-              className="h-full bg-gradient-to-r from-blue-500 to-[#00E5FF] transition-all duration-300"
+              className="h-full bg-gradient-to-r from-blue-500 to-[var(--admin-accent)] transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}
             />
           </div>
@@ -359,10 +360,10 @@ export default function PreciosUploader() {
       {parsed.length > 0 && !uploading && !success && (
         <button
           onClick={handleConfirm}
-          className="group relative w-full overflow-hidden rounded-xl bg-white p-[1px] font-bold uppercase tracking-widest text-black transition-transform hover:scale-[1.02] active:scale-95"
+          className="group relative w-full overflow-hidden rounded-xl bg-[var(--admin-accent)] p-[1px] font-bold uppercase tracking-widest text-[var(--admin-sidebar-bg)] transition-transform hover:scale-[1.02] active:scale-95"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-[#00E5FF] via-blue-500 to-[#00E5FF] opacity-100 transition-opacity duration-300 group-hover:opacity-80" />
-          <div className="relative flex items-center justify-center gap-2 bg-white px-8 py-4 text-sm transition-colors group-hover:bg-transparent group-hover:text-white">
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--admin-accent)] via-blue-500 to-[var(--admin-accent)] opacity-100 transition-opacity duration-300 group-hover:opacity-80" />
+          <div className="relative flex items-center justify-center gap-2 bg-[var(--admin-accent)] text-[var(--admin-sidebar-bg)] px-8 py-4 text-sm font-black tracking-widest">
             Confirmar Importación <span>→</span>
           </div>
         </button>

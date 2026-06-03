@@ -1,3 +1,4 @@
+// filepath: src/app/admin/publicidad/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -15,17 +16,17 @@ export default function PublicidadPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-[var(--admin-text-mid)]">
       {/* Tabs */}
-      <div className="flex border-b border-white/10 overflow-x-auto">
+      <div className="flex border-b border-[var(--admin-border)] overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`shrink-0 px-6 py-3 text-sm font-bold uppercase tracking-widest transition-all ${
               activeTab === tab.key
-                ? "border-b-2 border-[#00E5FF] text-[#00E5FF]"
-                : "text-gray-500 hover:text-white"
+                ? "border-b-2 border-[var(--admin-accent)] text-[var(--admin-accent)]"
+                : "text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)]"
             }`}
           >
             {tab.label}
