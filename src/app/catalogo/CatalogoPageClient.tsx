@@ -1164,21 +1164,26 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
               }
             `}</style>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-              <span style={{ fontSize: "20px" }}>⭐</span>
-              <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "1.5px", color: "var(--oscuro, #1A1410)", fontFamily: "var(--font-display)" }}>
-                Ofertas Súper Destacadas Premium
-              </h3>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", width: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "20px" }}>⭐</span>
+                <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "1.5px", color: "var(--oscuro, #1A1410)", fontFamily: "var(--font-display)" }}>
+                  Ofertas Súper Destacadas Premium
+                </h3>
+              </div>
+              <span className="md:hidden text-[9px] font-black text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full uppercase tracking-widest animate-pulse flex items-center gap-1 shrink-0">
+                Deslizar ➔
+              </span>
             </div>
 
-            {/* Carrusel flexible en móvil, grilla en desktop */}
-            <div className="flex md:grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 no-scrollbar snap-x snap-mandatory">
+            {/* Carrusel flexible en móvil (snap-start y ancho 76vw para que asome la siguiente), grilla en desktop */}
+            <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 no-scrollbar snap-x snap-mandatory">
               {promosVisibles.map((promo) => {
                 const inCartQty = qtyMap[`PROMO-${promo.id}`] || 0;
                 return (
                   <div
                     key={promo.id}
-                    className="flex-shrink-0 w-[88vw] sm:w-[48vw] md:w-auto snap-center rounded-2xl overflow-hidden border border-amber-500/20 bg-white dark:bg-zinc-900 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-500/40 relative aspect-square flex flex-col group"
+                    className="flex-shrink-0 w-[76vw] sm:w-[48vw] md:w-auto snap-start rounded-2xl overflow-hidden border border-amber-500/20 bg-white dark:bg-zinc-900 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-500/40 relative aspect-square flex flex-col group"
                   >
                     {/* Badge de Oferta Premium */}
                     <div className="absolute top-3 left-3 z-20 bg-gradient-to-r from-red-600 to-amber-500 text-white text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-lg shadow-md animate-pulse">
