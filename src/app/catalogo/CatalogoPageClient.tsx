@@ -1143,10 +1143,6 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         sucursalId={sucursalId}
       />
 
-      <div className="page-wrapper">
-        <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
-      </div>
-
       {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS) ── */}
       {ofertasConfig?.activa && ofertasConfig.premiumPromos && ofertasConfig.premiumPromos.filter(p => p.activa).length > 0 && (
         <div className="page-wrapper" style={{ marginTop: "16px", marginBottom: "20px" }}>
@@ -1241,6 +1237,10 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           </div>
         </div>
       )}
+
+      <div className="page-wrapper">
+        <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
+      </div>
 
 
       {/* ── BANNER PREMIUM DE OFERTAS DE LA SEMANA ── */}
