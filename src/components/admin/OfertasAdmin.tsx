@@ -110,7 +110,11 @@ export default function OfertasAdmin() {
   }, []);
 
   // Remove product
-  const removeProducto = useCallback((codigo: string) => {
+  const removeProducto = useCallback((codigo: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setConfig((prev) => ({
       ...prev,
       productos: prev.productos.filter((p) => p.codigo !== codigo),
@@ -136,7 +140,11 @@ export default function OfertasAdmin() {
   }, []);
 
   // Toggle destacado
-  const toggleDestacado = useCallback((codigo: string) => {
+  const toggleDestacado = useCallback((codigo: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     updateProducto(codigo, {
       destacado: !config.productos.find((p) => p.codigo === codigo)?.destacado,
     });
@@ -182,7 +190,11 @@ export default function OfertasAdmin() {
   }, [toast]);
 
   // Add Premium Promo
-  const handleAddPremiumPromo = useCallback(() => {
+  const handleAddPremiumPromo = useCallback((e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!newPromoTitle.trim() || newPromoPrice === "" || newPromoQty === "" || !newPromoImage) {
       toast.error("Por favor completa todos los campos, incluyendo la imagen.");
       return;
@@ -210,7 +222,11 @@ export default function OfertasAdmin() {
   }, [newPromoTitle, newPromoPrice, newPromoQty, newPromoImage, toast]);
 
   // Remove Premium Promo
-  const handleRemovePremiumPromo = useCallback((id: string) => {
+  const handleRemovePremiumPromo = useCallback((id: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setConfig((prev) => ({
       ...prev,
       premiumPromos: (prev.premiumPromos || []).filter((p) => p.id !== id),
@@ -219,7 +235,11 @@ export default function OfertasAdmin() {
   }, [toast]);
 
   // Toggle Premium Promo Active Status
-  const handleTogglePremiumPromoActive = useCallback((id: string) => {
+  const handleTogglePremiumPromoActive = useCallback((id: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setConfig((prev) => ({
       ...prev,
       premiumPromos: (prev.premiumPromos || []).map((p) =>
@@ -426,7 +446,8 @@ export default function OfertasAdmin() {
             </div>
 
             <button
-              onClick={handleAddPremiumPromo}
+              type="button"
+              onClick={(e) => handleAddPremiumPromo(e)}
               className="rounded-xl bg-[var(--admin-accent)] px-5 py-2.5 text-xs font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 shrink-0"
             >
               ＋ Agregar Promoción Premium
@@ -468,7 +489,8 @@ export default function OfertasAdmin() {
                       {promo.activa ? "Activa" : "Pausada"}
                     </span>
                     <button
-                      onClick={() => handleTogglePremiumPromoActive(promo.id)}
+                      type="button"
+                      onClick={(e) => handleTogglePremiumPromoActive(promo.id, e)}
                       className={`relative h-5 w-9 rounded-full transition-colors ${
                         promo.activa ? "bg-green-500" : "bg-[var(--admin-input-bg)] border border-[var(--admin-border)]"
                       }`}
@@ -482,7 +504,8 @@ export default function OfertasAdmin() {
                   </div>
 
                   <button
-                    onClick={() => handleRemovePremiumPromo(promo.id)}
+                    type="button"
+                    onClick={(e) => handleRemovePremiumPromo(promo.id, e)}
                     className="rounded-lg bg-red-500/10 px-2 py-1 text-[10px] font-bold text-red-500 hover:bg-red-500/20 transition-all"
                   >
                     🗑 Eliminar
@@ -593,7 +616,8 @@ export default function OfertasAdmin() {
               >
                 {/* Star toggle */}
                 <button
-                  onClick={() => toggleDestacado(p.codigo)}
+                  type="button"
+                  onClick={(e) => toggleDestacado(p.codigo, e)}
                   className={`text-lg transition-all ${
                     p.destacado ? "text-amber-400 scale-110" : "text-[var(--admin-text-lo)] hover:text-amber-400"
                   }`}
@@ -646,7 +670,8 @@ export default function OfertasAdmin() {
 
                 {/* Remove */}
                 <button
-                  onClick={() => removeProducto(p.codigo)}
+                  type="button"
+                  onClick={(e) => removeProducto(p.codigo, e)}
                   className="rounded-lg bg-red-500/10 px-2.5 py-1.5 text-xs font-bold text-red-500 hover:bg-red-500/20 transition-all shrink-0"
                 >
                   ✕
