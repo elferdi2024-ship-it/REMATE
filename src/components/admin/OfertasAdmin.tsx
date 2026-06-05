@@ -20,6 +20,7 @@ const DEFAULT_CONFIG: OfertaConfig = {
 
 export default function OfertasAdmin() {
   const toast = useToast();
+  const { error: toastError } = toast;
   const [config, setConfig] = useState<OfertaConfig>(DEFAULT_CONFIG);
   const [catalogo, setCatalogo] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,13 +56,13 @@ export default function OfertasAdmin() {
         }
       } catch (e) {
         console.error("Error loading ofertas config:", e);
-        toast.error("Error al cargar configuración");
+        toastError("Error al cargar configuración");
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [toast]);
+  }, [toastError]);
 
   // Categories from catalogo
   const categorias = useMemo(() => {

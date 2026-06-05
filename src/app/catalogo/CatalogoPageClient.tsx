@@ -1150,100 +1150,90 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS) ── */}
       {ofertasConfig?.activa && ofertasConfig.premiumPromos && ofertasConfig.premiumPromos.filter(p => p.activa).length > 0 && (
         <div className="page-wrapper" style={{ marginTop: "16px", marginBottom: "20px" }}>
+          {/* Ocultar barra de scroll para el carrusel de móvil */}
+          <style>{`
+            .no-scrollbar::-webkit-scrollbar {
+              display: none;
+            }
+            .no-scrollbar {
+              -ms-overflow-style: none;
+              scrollbar-width: none;
+            }
+          `}</style>
+
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
             <span style={{ fontSize: "20px" }}>⭐</span>
             <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "1.5px", color: "var(--oscuro, #1A1410)", fontFamily: "var(--font-display)" }}>
               Ofertas Súper Destacadas Premium
             </h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          {/* Carrusel flexible en móvil, grilla en desktop */}
+          <div className="flex md:grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 no-scrollbar snap-x snap-mandatory">
             {ofertasConfig.premiumPromos.filter(p => p.activa).map((promo) => {
               const inCartQty = qtyMap[`PROMO-${promo.id}`] || 0;
               return (
                 <div
                   key={promo.id}
-                  style={{
-                    position: "relative",
-                    background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.02) 100%)",
-                    borderRadius: "20px",
-                    border: "1.5px solid rgba(248, 150, 30, 0.25)",
-                    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                  }}
-                  className="hover:scale-[1.01] hover:shadow-[0_12px_35px_rgba(0,0,0,0.12)] group"
+                  className="flex-shrink-0 w-[88vw] sm:w-[48vw] md:w-auto snap-center rounded-2xl overflow-hidden border border-amber-500/20 bg-white dark:bg-zinc-900 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-500/40 relative aspect-square flex flex-col group"
                 >
-                  {/* Image wrapper */}
-                  <div style={{ position: "relative", width: "100%", aspectRatio: "1/1", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {/* Badge de Oferta Premium */}
+                  <div className="absolute top-3 left-3 z-20 bg-gradient-to-r from-red-600 to-amber-500 text-white text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-lg shadow-md animate-pulse">
+                    🔥 SUPER OFERTA
+                  </div>
+
+                  {/* Imagen 1:1 Completa con Zoom al Hover */}
+                  <div className="relative w-full h-full overflow-hidden bg-white">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={promo.imagen}
                       alt={promo.titulo}
-                      style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
-                  
-                  {/* Content */}
-                  <div style={{ padding: "18px", display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between", background: "rgba(26,20,16,0.03)", backdropFilter: "blur(4px)" }}>
-                    <div>
-                      <h4 style={{ margin: "0 0 8px 0", fontSize: "14px", fontWeight: 900, color: "var(--oscuro, #1A1410)", textTransform: "uppercase", letterSpacing: "0.5px", lineHeight: "1.3" }}>
-                        {promo.titulo}
-                      </h4>
-                      <p style={{ margin: 0, fontSize: "11px", color: "var(--muted, #9C8570)", fontWeight: 700 }}>
-                        Cantidad: {promo.cantidad} un.
-                      </p>
-                    </div>
-                    
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "16px" }}>
-                      <span style={{ fontSize: "1.35rem", fontWeight: 900, color: "var(--rojo, #E8302A)", fontFamily: "var(--font-display)" }}>
+
+                  {/* Barra de control flotante inferior traslúcida */}
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent p-4 pt-12 flex items-center justify-between z-10">
+                    <div className="flex flex-col min-w-0 pr-2">
+                      <span className="text-white font-black text-xl tracking-tight leading-none">
                         ${promo.precio.toLocaleString("es-UY")}
                       </span>
-
-                      {inCartQty > 0 ? (
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--rojo, #E8302A)", borderRadius: "999px", padding: "6px 12px", color: "#fff" }}>
-                          <button
-                            onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty - 1)}
-                            style={{ background: "none", border: "none", color: "#fff", fontWeight: "bold", fontSize: "1.2rem", cursor: "pointer", padding: "0 4px" }}
-                          >
-                            -
-                          </button>
-                          <span style={{ fontSize: "0.9rem", fontWeight: 900 }}>{inCartQty}</span>
-                          <button
-                            onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty + 1)}
-                            style={{ background: "none", border: "none", color: "#fff", fontWeight: "bold", fontSize: "1.2rem", cursor: "pointer", padding: "0 4px" }}
-                          >
-                            +
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={(e) => handleAddProduct({
-                            codigo: `PROMO-${promo.id}`,
-                            nombre: promo.titulo,
-                            precio: promo.precio,
-                            categoria: "OFERTAS PREMIUM",
-                            imagen: promo.imagen,
-                          }, e)}
-                          style={{
-                            background: "linear-gradient(135deg, var(--rojo, #E8302A) 0%, #B91C1C 100%)",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "12px",
-                            padding: "10px 18px",
-                            fontSize: "0.82rem",
-                            fontWeight: 800,
-                            cursor: "pointer",
-                            boxShadow: "0 4px 12px rgba(232, 48, 42, 0.25)",
-                            transition: "all 0.2s ease",
-                          }}
-                          className="hover:scale-105 active:scale-95"
-                        >
-                          Agregar al pedido
-                        </button>
-                      )}
+                      <span className="text-[10px] text-zinc-300 font-bold uppercase tracking-wider mt-1 truncate max-w-[150px] sm:max-w-none">
+                        {promo.titulo}
+                      </span>
                     </div>
+
+                    {/* Botón de compra / Control de cantidad */}
+                    {inCartQty > 0 ? (
+                      <div className="flex items-center gap-3.5 bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-3 py-2 text-white font-bold shrink-0 shadow-lg">
+                        <button
+                          onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty - 1)}
+                          className="hover:text-red-500 text-sm font-black px-1.5 transition-colors"
+                        >
+                          -
+                        </button>
+                        <span className="text-xs tracking-tight font-black">{inCartQty}</span>
+                        <button
+                          onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty + 1)}
+                          className="hover:text-green-500 text-sm font-black px-1.5 transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={(e) => handleAddProduct({
+                          codigo: `PROMO-${promo.id}`,
+                          nombre: promo.titulo,
+                          precio: promo.precio,
+                          categoria: "OFERTAS PREMIUM",
+                          imagen: promo.imagen,
+                        }, e)}
+                        className="bg-gradient-to-r from-[#E8302A] to-[#B91C1C] hover:from-[#FF4D47] hover:to-[#D32F2F] text-white font-extrabold text-[10px] px-4 py-2.5 rounded-xl shadow-[0_4px_12px_rgba(232,48,42,0.35)] transition-all hover:scale-105 active:scale-95 uppercase tracking-wider shrink-0"
+                      >
+                        Llevar
+                      </button>
+                    )}
                   </div>
                 </div>
               );

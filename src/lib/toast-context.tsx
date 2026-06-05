@@ -7,6 +7,7 @@ import React, {
   useState,
   useRef,
   useEffect,
+  useMemo,
   type ReactNode,
 } from "react";
 
@@ -87,8 +88,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     info: "\u2139",
   };
 
+  const contextValue = useMemo(() => ({ showToast, success, error, warning, info }), [
+    showToast,
+    success,
+    error,
+    warning,
+    info,
+  ]);
+
   return (
-    <ToastContext.Provider value={{ showToast, success, error, warning, info }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       {/* Inline keyframes for toast animation */}
       <style>{`
