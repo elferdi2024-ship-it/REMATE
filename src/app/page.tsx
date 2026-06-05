@@ -105,15 +105,10 @@ export default function LandingPage() {
     const sucursal = SUCURSALES.find(s => s.id === id);
     const nombre = sucursal ? sucursal.nombre : "";
 
-    if (selectedSucursal === id) {
-      // If already active, enter catalog immediately
-      router.push(`/catalogo?sucursal=${id}`);
-    } else {
-      // If not active, select branch & update active catalog locally
-      ls.setSelectedSucursal(id);
-      setSelectedSucursal(id);
-      toast.success(`🏪 Sucursal ${nombre} seleccionada. ¡Ya podés ver su catálogo!`);
-    }
+    ls.setSelectedSucursal(id);
+    setSelectedSucursal(id);
+    toast.success(`🏪 Seleccionada: ${nombre}. Cargando catálogo...`);
+    router.push(`/catalogo?sucursal=${id}`);
   };
 
   useEffect(() => {

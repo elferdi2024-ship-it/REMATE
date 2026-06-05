@@ -604,7 +604,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     (producto: Producto, e?: React.MouseEvent) => {
       addItem(producto);
       if (e) {
-        flyToCart(e, producto.imagen, EMOJI_POR_CATEGORIA[producto.categoria]);
+        flyToCart(e, producto.imagen, EMOJI_POR_CATEGORIA[producto.categoria] || "⭐");
       }
     },
     [addItem]
@@ -618,14 +618,31 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         const current = qtyMap[codigo] || 0;
         const delta = qty - current;
         if (delta > 0) {
-          for (let i = 0; i < delta; i++) addItem({ codigo, nombre: "", precio: 0 });
+          let nombre = "";
+          let precio = 0;
+          if (codigo.startsWith("PROMO-")) {
+            const promoId = codigo.replace("PROMO-", "");
+            const promo = ofertasConfig?.premiumPromos?.find((p) => p.id === promoId);
+            if (promo) {
+              nombre = promo.titulo;
+              precio = promo.precio;
+            }
+          } else {
+            const prod = productos.find((p) => p.codigo === codigo);
+            if (prod) {
+              nombre = prod.nombre;
+              precio = prod.precio;
+            }
+          }
+          for (let i = 0; i < delta; i++) addItem({ codigo, nombre, precio });
         } else {
           for (let i = 0; i < -delta; i++) updateQty(codigo, -1);
         }
       }
     },
-    [qtyMap, addItem, removeItem, updateQty]
+    [qtyMap, addItem, removeItem, updateQty, ofertasConfig, productos]
   );
+
 
   const handleToggleVista = useCallback((v: Vista) => {
     setVista(v);
@@ -1129,6 +1146,112 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       <div className="page-wrapper">
         <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
       </div>
+
+      {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS) ── */}
+      {ofertasConfig?.activa && ofertasConfig.premiumPromos && ofertasConfig.premiumPromos.filter(p => p.activa).length > 0 && (
+        <div className="page-wrapper" style={{ marginTop: "16px", marginBottom: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+            <span style={{ fontSize: "20px" }}>⭐</span>
+            <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "1.5px", color: "var(--oscuro, #1A1410)", fontFamily: "var(--font-display)" }}>
+              Ofertas Súper Destacadas Premium
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {ofertasConfig.premiumPromos.filter(p => p.activa).map((promo) => {
+              const inCartQty = qtyMap[`PROMO-${promo.id}`] || 0;
+              return (
+                <div
+                  key={promo.id}
+                  style={{
+                    position: "relative",
+                    background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.02) 100%)",
+                    borderRadius: "20px",
+                    border: "1.5px solid rgba(248, 150, 30, 0.25)",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                    overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                  }}
+                  className="hover:scale-[1.01] hover:shadow-[0_12px_35px_rgba(0,0,0,0.12)] group"
+                >
+                  {/* Image wrapper */}
+                  <div style={{ position: "relative", width: "100%", aspectRatio: "1/1", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={promo.imagen}
+                      alt={promo.titulo}
+                      style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                    />
+                  </div>
+                  
+                  {/* Content */}
+                  <div style={{ padding: "18px", display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between", background: "rgba(26,20,16,0.03)", backdropFilter: "blur(4px)" }}>
+                    <div>
+                      <h4 style={{ margin: "0 0 8px 0", fontSize: "14px", fontWeight: 900, color: "var(--oscuro, #1A1410)", textTransform: "uppercase", letterSpacing: "0.5px", lineHeight: "1.3" }}>
+                        {promo.titulo}
+                      </h4>
+                      <p style={{ margin: 0, fontSize: "11px", color: "var(--muted, #9C8570)", fontWeight: 700 }}>
+                        Cantidad: {promo.cantidad} un.
+                      </p>
+                    </div>
+                    
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "16px" }}>
+                      <span style={{ fontSize: "1.35rem", fontWeight: 900, color: "var(--rojo, #E8302A)", fontFamily: "var(--font-display)" }}>
+                        ${promo.precio.toLocaleString("es-UY")}
+                      </span>
+
+                      {inCartQty > 0 ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--rojo, #E8302A)", borderRadius: "999px", padding: "6px 12px", color: "#fff" }}>
+                          <button
+                            onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty - 1)}
+                            style={{ background: "none", border: "none", color: "#fff", fontWeight: "bold", fontSize: "1.2rem", cursor: "pointer", padding: "0 4px" }}
+                          >
+                            -
+                          </button>
+                          <span style={{ fontSize: "0.9rem", fontWeight: 900 }}>{inCartQty}</span>
+                          <button
+                            onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty + 1)}
+                            style={{ background: "none", border: "none", color: "#fff", fontWeight: "bold", fontSize: "1.2rem", cursor: "pointer", padding: "0 4px" }}
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={(e) => handleAddProduct({
+                            codigo: `PROMO-${promo.id}`,
+                            nombre: promo.titulo,
+                            precio: promo.precio,
+                            categoria: "OFERTAS PREMIUM",
+                            imagen: promo.imagen,
+                          }, e)}
+                          style={{
+                            background: "linear-gradient(135deg, var(--rojo, #E8302A) 0%, #B91C1C 100%)",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "12px",
+                            padding: "10px 18px",
+                            fontSize: "0.82rem",
+                            fontWeight: 800,
+                            cursor: "pointer",
+                            boxShadow: "0 4px 12px rgba(232, 48, 42, 0.25)",
+                            transition: "all 0.2s ease",
+                          }}
+                          className="hover:scale-105 active:scale-95"
+                        >
+                          Agregar al pedido
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
 
       {/* ── BANNER PREMIUM DE OFERTAS DE LA SEMANA ── */}
       {ofertasConfig?.activa && ofertasConfig.productos && ofertasConfig.productos.length > 0 && (

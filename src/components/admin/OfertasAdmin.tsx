@@ -2,17 +2,19 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { db } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/lib/toast-context";
 import type { Producto } from "@/types";
-import type { OfertaProducto, OfertaConfig } from "@/types/ofertas";
+import type { OfertaProducto, OfertaConfig, PremiumPromo } from "@/types/ofertas";
 
 const DEFAULT_CONFIG: OfertaConfig = {
   activa: false,
   titulo: "Ofertas de la Semana",
   subtitulo: "Aprovechá precios únicos por tiempo limitado",
   productos: [],
+  premiumPromos: [],
   updatedAt: new Date().toISOString(),
 };
 
@@ -25,6 +27,14 @@ export default function OfertasAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [catFilter, setCatFilter] = useState("");
   const [showSelector, setShowSelector] = useState(false);
+
+  // Premium promos state
+  const [newPromoTitle, setNewPromoTitle] = useState("");
+  const [newPromoPrice, setNewPromoPrice] = useState<number | "">("");
+  const [newPromoQty, setNewPromoQty] = useState<number | "">("");
+  const [newPromoImage, setNewPromoImage] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Load config + catalogo
   useEffect(() => {
@@ -131,6 +141,92 @@ export default function OfertasAdmin() {
       destacado: !config.productos.find((p) => p.codigo === codigo)?.destacado,
     });
   }, [config.productos, updateProducto]);
+
+  // Image Upload for Premium Promo
+  const handleUploadImage = useCallback(async (file: File) => {
+    if (!storage) {
+      toast.error("Firebase Storage no está configurado");
+      return;
+    }
+    setUploadingImage(true);
+    setUploadProgress(0);
+
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const fileName = `promo-${Date.now()}.${ext}`;
+      const storageRef = ref(storage, `ofertas/${fileName}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        },
+        (error) => {
+          console.error("Error uploading image:", error);
+          toast.error("Error al subir la imagen");
+          setUploadingImage(false);
+        },
+        async () => {
+          const url = await getDownloadURL(uploadTask.snapshot.ref);
+          setNewPromoImage(url);
+          setUploadingImage(false);
+          toast.success("Imagen subida correctamente");
+        }
+      );
+    } catch (e) {
+      console.error(e);
+      toast.error("Error al procesar archivo");
+      setUploadingImage(false);
+    }
+  }, [toast]);
+
+  // Add Premium Promo
+  const handleAddPremiumPromo = useCallback(() => {
+    if (!newPromoTitle.trim() || newPromoPrice === "" || newPromoQty === "" || !newPromoImage) {
+      toast.error("Por favor completa todos los campos, incluyendo la imagen.");
+      return;
+    }
+
+    const newPromo: PremiumPromo = {
+      id: `PREMIUM-${Date.now()}`,
+      titulo: newPromoTitle.trim(),
+      cantidad: Number(newPromoQty),
+      precio: Number(newPromoPrice),
+      imagen: newPromoImage,
+      activa: true,
+    };
+
+    setConfig((prev) => ({
+      ...prev,
+      premiumPromos: [...(prev.premiumPromos || []), newPromo],
+    }));
+
+    setNewPromoTitle("");
+    setNewPromoPrice("");
+    setNewPromoQty("");
+    setNewPromoImage("");
+    toast.success("Promoción premium agregada temporalmente. Guarda cambios para confirmar.");
+  }, [newPromoTitle, newPromoPrice, newPromoQty, newPromoImage, toast]);
+
+  // Remove Premium Promo
+  const handleRemovePremiumPromo = useCallback((id: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      premiumPromos: (prev.premiumPromos || []).filter((p) => p.id !== id),
+    }));
+    toast.success("Promoción eliminada temporalmente. Guarda cambios para confirmar.");
+  }, [toast]);
+
+  // Toggle Premium Promo Active Status
+  const handleTogglePremiumPromoActive = useCallback((id: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      premiumPromos: (prev.premiumPromos || []).map((p) =>
+        p.id === id ? { ...p, activa: !p.activa } : p
+      ),
+    }));
+  }, []);
 
   // Save to Firestore
   const handleSave = useCallback(async () => {
@@ -247,6 +343,155 @@ export default function OfertasAdmin() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Promociones Premium Destacadas */}
+      <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 space-y-6">
+        <div>
+          <h3 className="text-sm font-bold text-[var(--admin-text-lo)] uppercase tracking-widest flex items-center gap-2">
+            ⭐ Promociones Premium Destacadas (Banners)
+          </h3>
+          <p className="text-xs text-[var(--admin-text-lo)]/80 mt-1">
+            Carga imágenes promocionales grandes que aparecerán en el catálogo como productos premium destacados.
+          </p>
+        </div>
+
+        {/* Formulario de Nueva Promoción Premium */}
+        <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)]/50 p-4 space-y-4">
+          <h4 className="text-xs font-bold text-[var(--admin-text-hi)] uppercase tracking-wider">
+            Agregar Nueva Promoción Premium
+          </h4>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Título de la Oferta</label>
+              <input
+                type="text"
+                placeholder="Ej. COCA / SPRITE 2 X $250"
+                value={newPromoTitle}
+                onChange={(e) => setNewPromoTitle(e.target.value)}
+                className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Precio Combo ($)</label>
+              <input
+                type="number"
+                placeholder="Ej. 250"
+                value={newPromoPrice}
+                onChange={(e) => setNewPromoPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Cantidad de Producto (ej. 2 para 2x)</label>
+              <input
+                type="number"
+                placeholder="Ej. 2"
+                value={newPromoQty}
+                onChange={(e) => setNewPromoQty(e.target.value === "" ? "" : Number(e.target.value))}
+                className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/50"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
+            {/* Selector e indicador de imagen */}
+            <div className="flex items-center gap-4">
+              <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)] shrink-0">
+                📷 {uploadingImage ? "Subiendo..." : "Subir Imagen Promocional"}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  disabled={uploadingImage}
+                  onChange={(e) => e.target.files?.[0] && handleUploadImage(e.target.files[0])}
+                />
+              </label>
+
+              {uploadingImage && (
+                <span className="text-xs text-[var(--admin-accent)] font-semibold">
+                  Subiendo... {Math.round(uploadProgress)}%
+                </span>
+              )}
+
+              {newPromoImage && !uploadingImage && (
+                <div className="flex items-center gap-2">
+                  <div className="relative w-12 h-12 rounded-lg border border-[var(--admin-border)] overflow-hidden">
+                    <img src={newPromoImage} alt="Preview" className="object-cover w-full h-full" />
+                  </div>
+                  <span className="text-xs text-green-500 font-medium">✓ Imagen cargada</span>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={handleAddPremiumPromo}
+              className="rounded-xl bg-[var(--admin-accent)] px-5 py-2.5 text-xs font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 shrink-0"
+            >
+              ＋ Agregar Promoción Premium
+            </button>
+          </div>
+        </div>
+
+        {/* Lista de Promociones Premium Agregadas */}
+        {(config.premiumPromos || []).length === 0 ? (
+          <p className="text-sm text-[var(--admin-text-lo)] text-center py-6 border border-dashed border-[var(--admin-border)] rounded-xl">
+            No hay promociones premium configuradas aún.
+          </p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {(config.premiumPromos || []).map((promo) => (
+              <div
+                key={promo.id}
+                className={`flex flex-col rounded-xl border p-4 bg-[var(--admin-bg)]/30 ${
+                  promo.activa ? "border-[var(--admin-border)]" : "border-red-500/20 opacity-60"
+                }`}
+              >
+                {/* Image preview */}
+                <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-[var(--admin-border)] bg-white mb-3">
+                  <img src={promo.imagen} alt={promo.titulo} className="object-contain w-full h-full" />
+                </div>
+
+                <h5 className="text-sm font-bold text-[var(--admin-text-hi)] truncate">{promo.titulo}</h5>
+                
+                <div className="flex items-center justify-between text-xs text-[var(--admin-text-lo)] mt-1 mb-3">
+                  <span>Cant: {promo.cantidad} un.</span>
+                  <span className="font-bold text-green-600 dark:text-green-400">
+                    ${promo.precio.toLocaleString("es-UY")}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between mt-auto border-t border-[var(--admin-border)]/50 pt-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-[var(--admin-text-lo)] uppercase">
+                      {promo.activa ? "Activa" : "Pausada"}
+                    </span>
+                    <button
+                      onClick={() => handleTogglePremiumPromoActive(promo.id)}
+                      className={`relative h-5 w-9 rounded-full transition-colors ${
+                        promo.activa ? "bg-green-500" : "bg-[var(--admin-input-bg)] border border-[var(--admin-border)]"
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-md transition-transform ${
+                          promo.activa ? "translate-x-4" : "translate-x-0.5"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => handleRemovePremiumPromo(promo.id)}
+                    className="rounded-lg bg-red-500/10 px-2 py-1 text-[10px] font-bold text-red-500 hover:bg-red-500/20 transition-all"
+                  >
+                    🗑 Eliminar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Product Selector Toggle */}

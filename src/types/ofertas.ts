@@ -9,11 +9,22 @@ export interface OfertaProducto {
   destacado: boolean;
 }
 
+export interface PremiumPromo {
+  id: string;
+  titulo: string;
+  cantidad: number;
+  precio: number;
+  imagen: string;
+  activa: boolean;
+}
+
 export interface OfertaConfig {
   activa: boolean;
   titulo: string;
   subtitulo: string;
   productos: OfertaProducto[];
+  premiumPromos?: PremiumPromo[];
   expiresAt?: string;
   updatedAt: string;
 }
+
