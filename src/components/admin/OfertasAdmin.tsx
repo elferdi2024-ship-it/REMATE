@@ -1,7 +1,7 @@
 // filepath: src/components/admin/OfertasAdmin.tsx
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { db, storage } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -36,6 +36,7 @@ export default function OfertasAdmin() {
   const [newPromoImage, setNewPromoImage] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const loadedRef = useRef(false);
 
   // Load config + catalogo
   useEffect(() => {
@@ -59,10 +60,32 @@ export default function OfertasAdmin() {
         toastError("Error al cargar configuración");
       } finally {
         setLoading(false);
+        setTimeout(() => {
+          loadedRef.current = true;
+        }, 300);
       }
     }
     load();
   }, [toastError]);
+
+  // Auto-save to Firestore on config change (with debounce)
+  useEffect(() => {
+    if (!loadedRef.current) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        await setDoc(doc(db, "configuracion", "ofertas"), {
+          ...config,
+          updatedAt: new Date().toISOString(),
+        });
+        console.log("Configuración auto-guardada en Firestore");
+      } catch (e) {
+        console.error("Error en auto-guardado de ofertas:", e);
+      }
+    }, 1200); // 1.2s debounce to prevent firestore spam
+
+    return () => clearTimeout(timer);
+  }, [config]);
 
   // Categories from catalogo
   const categorias = useMemo(() => {
