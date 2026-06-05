@@ -1144,99 +1144,107 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       />
 
       {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS) ── */}
-      {ofertasConfig?.activa && ofertasConfig.premiumPromos && ofertasConfig.premiumPromos.filter(p => p.activa).length > 0 && (
-        <div className="page-wrapper" style={{ marginTop: "16px", marginBottom: "20px" }}>
-          {/* Ocultar barra de scroll para el carrusel de móvil */}
-          <style>{`
-            .no-scrollbar::-webkit-scrollbar {
-              display: none;
-            }
-            .no-scrollbar {
-              -ms-overflow-style: none;
-              scrollbar-width: none;
-            }
-          `}</style>
+      {(() => {
+        const promosVisibles = (ofertasConfig?.premiumPromos || [])
+          .filter(p => p.activa)
+          .filter(p => !p.sucursalId || p.sucursalId === sucursalId);
 
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-            <span style={{ fontSize: "20px" }}>⭐</span>
-            <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "1.5px", color: "var(--oscuro, #1A1410)", fontFamily: "var(--font-display)" }}>
-              Ofertas Súper Destacadas Premium
-            </h3>
-          </div>
+        if (promosVisibles.length === 0) return null;
 
-          {/* Carrusel flexible en móvil, grilla en desktop */}
-          <div className="flex md:grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 no-scrollbar snap-x snap-mandatory">
-            {ofertasConfig.premiumPromos.filter(p => p.activa).map((promo) => {
-              const inCartQty = qtyMap[`PROMO-${promo.id}`] || 0;
-              return (
-                <div
-                  key={promo.id}
-                  className="flex-shrink-0 w-[88vw] sm:w-[48vw] md:w-auto snap-center rounded-2xl overflow-hidden border border-amber-500/20 bg-white dark:bg-zinc-900 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-500/40 relative aspect-square flex flex-col group"
-                >
-                  {/* Badge de Oferta Premium */}
-                  <div className="absolute top-3 left-3 z-20 bg-gradient-to-r from-red-600 to-amber-500 text-white text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-lg shadow-md animate-pulse">
-                    🔥 SUPER OFERTA
-                  </div>
+        return (
+          <div className="page-wrapper" style={{ marginTop: "16px", marginBottom: "20px" }}>
+            {/* Ocultar barra de scroll para el carrusel de móvil */}
+            <style>{`
+              .no-scrollbar::-webkit-scrollbar {
+                display: none;
+              }
+              .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+            `}</style>
 
-                  {/* Imagen 1:1 Completa con Zoom al Hover */}
-                  <div className="relative w-full h-full overflow-hidden bg-white">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={promo.imagen}
-                      alt={promo.titulo}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+              <span style={{ fontSize: "20px" }}>⭐</span>
+              <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "1.5px", color: "var(--oscuro, #1A1410)", fontFamily: "var(--font-display)" }}>
+                Ofertas Súper Destacadas Premium
+              </h3>
+            </div>
 
-                  {/* Barra de control flotante inferior traslúcida */}
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent p-4 pt-12 flex items-center justify-between z-10">
-                    <div className="flex flex-col min-w-0 pr-2">
-                      <span className="text-white font-black text-xl tracking-tight leading-none">
-                        ${promo.precio.toLocaleString("es-UY")}
-                      </span>
-                      <span className="text-[10px] text-zinc-300 font-bold uppercase tracking-wider mt-1 truncate max-w-[150px] sm:max-w-none">
-                        {promo.titulo}
-                      </span>
+            {/* Carrusel flexible en móvil, grilla en desktop */}
+            <div className="flex md:grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 no-scrollbar snap-x snap-mandatory">
+              {promosVisibles.map((promo) => {
+                const inCartQty = qtyMap[`PROMO-${promo.id}`] || 0;
+                return (
+                  <div
+                    key={promo.id}
+                    className="flex-shrink-0 w-[88vw] sm:w-[48vw] md:w-auto snap-center rounded-2xl overflow-hidden border border-amber-500/20 bg-white dark:bg-zinc-900 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-500/40 relative aspect-square flex flex-col group"
+                  >
+                    {/* Badge de Oferta Premium */}
+                    <div className="absolute top-3 left-3 z-20 bg-gradient-to-r from-red-600 to-amber-500 text-white text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-lg shadow-md animate-pulse">
+                      🔥 SUPER OFERTA
                     </div>
 
-                    {/* Botón de compra / Control de cantidad */}
-                    {inCartQty > 0 ? (
-                      <div className="flex items-center gap-3.5 bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-3 py-2 text-white font-bold shrink-0 shadow-lg">
-                        <button
-                          onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty - 1)}
-                          className="hover:text-red-500 text-sm font-black px-1.5 transition-colors"
-                        >
-                          -
-                        </button>
-                        <span className="text-xs tracking-tight font-black">{inCartQty}</span>
-                        <button
-                          onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty + 1)}
-                          className="hover:text-green-500 text-sm font-black px-1.5 transition-colors"
-                        >
-                          +
-                        </button>
+                    {/* Imagen 1:1 Completa con Zoom al Hover */}
+                    <div className="relative w-full h-full overflow-hidden bg-white">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={promo.imagen}
+                        alt={promo.titulo}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+
+                    {/* Barra de control flotante inferior traslúcida */}
+                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent p-4 pt-12 flex items-center justify-between z-10">
+                      <div className="flex flex-col min-w-0 pr-2">
+                        <span className="text-white font-black text-xl tracking-tight leading-none">
+                          ${promo.precio.toLocaleString("es-UY")}
+                        </span>
+                        <span className="text-[10px] text-zinc-300 font-bold uppercase tracking-wider mt-1 truncate max-w-[150px] sm:max-w-none">
+                          {promo.titulo}
+                        </span>
                       </div>
-                    ) : (
-                      <button
-                        onClick={(e) => handleAddProduct({
-                          codigo: `PROMO-${promo.id}`,
-                          nombre: promo.titulo,
-                          precio: promo.precio,
-                          categoria: "OFERTAS PREMIUM",
-                          imagen: promo.imagen,
-                        }, e)}
-                        className="bg-gradient-to-r from-[#E8302A] to-[#B91C1C] hover:from-[#FF4D47] hover:to-[#D32F2F] text-white font-extrabold text-[10px] px-4 py-2.5 rounded-xl shadow-[0_4px_12px_rgba(232,48,42,0.35)] transition-all hover:scale-105 active:scale-95 uppercase tracking-wider shrink-0"
-                      >
-                        Llevar
-                      </button>
-                    )}
+
+                      {/* Botón de compra / Control de cantidad */}
+                      {inCartQty > 0 ? (
+                        <div className="flex items-center gap-3.5 bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-3 py-2 text-white font-bold shrink-0 shadow-lg">
+                          <button
+                            onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty - 1)}
+                            className="hover:text-red-500 text-sm font-black px-1.5 transition-colors"
+                          >
+                            -
+                          </button>
+                          <span className="text-xs tracking-tight font-black">{inCartQty}</span>
+                          <button
+                            onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty + 1)}
+                            className="hover:text-green-500 text-sm font-black px-1.5 transition-colors"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={(e) => handleAddProduct({
+                            codigo: `PROMO-${promo.id}`,
+                            nombre: promo.titulo,
+                            precio: promo.precio,
+                            categoria: "OFERTAS PREMIUM",
+                            imagen: promo.imagen,
+                          }, e)}
+                          className="bg-gradient-to-r from-[#E8302A] to-[#B91C1C] hover:from-[#FF4D47] hover:to-[#D32F2F] text-white font-extrabold text-[10px] px-4 py-2.5 rounded-xl shadow-[0_4px_12px_rgba(232,48,42,0.35)] transition-all hover:scale-105 active:scale-95 uppercase tracking-wider shrink-0"
+                        >
+                          Llevar
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <div className="page-wrapper">
         <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />

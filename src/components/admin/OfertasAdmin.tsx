@@ -6,6 +6,7 @@ import { db, storage } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/lib/toast-context";
+import { SUCURSALES } from "@/lib/sucursales";
 import type { Producto } from "@/types";
 import type { OfertaProducto, OfertaConfig, PremiumPromo } from "@/types/ofertas";
 
@@ -34,6 +35,7 @@ export default function OfertasAdmin() {
   const [newPromoPrice, setNewPromoPrice] = useState<number | "">("");
   const [newPromoQty, setNewPromoQty] = useState<number | "">("");
   const [newPromoImage, setNewPromoImage] = useState("");
+  const [newPromoBranch, setNewPromoBranch] = useState<string>("todas");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const loadedRef = useRef(false);
@@ -231,6 +233,7 @@ export default function OfertasAdmin() {
       precio: Number(newPromoPrice),
       imagen: newPromoImage,
       activa: true,
+      sucursalId: newPromoBranch === "todas" ? null : newPromoBranch,
     };
 
     setConfig((prev) => ({
@@ -242,8 +245,9 @@ export default function OfertasAdmin() {
     setNewPromoPrice("");
     setNewPromoQty("");
     setNewPromoImage("");
+    setNewPromoBranch("todas");
     toast.success("Promoción premium agregada temporalmente. Guarda cambios para confirmar.");
-  }, [newPromoTitle, newPromoPrice, newPromoQty, newPromoImage, toast]);
+  }, [newPromoTitle, newPromoPrice, newPromoQty, newPromoImage, newPromoBranch, toast]);
 
   // Remove Premium Promo
   const handleRemovePremiumPromo = useCallback((id: string, e?: React.MouseEvent) => {
@@ -406,7 +410,7 @@ export default function OfertasAdmin() {
             Agregar Nueva Promoción Premium
           </h4>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">Título de la Oferta</label>
               <input
@@ -436,6 +440,23 @@ export default function OfertasAdmin() {
                 onChange={(e) => setNewPromoQty(e.target.value === "" ? "" : Number(e.target.value))}
                 className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:outline-none focus:border-[var(--admin-accent)]/50"
               />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[var(--admin-text-lo)] mb-1">
+                📍 Sucursal Destino <span className="text-[var(--admin-text-lo)]/60 font-normal">(Exclusivo)</span>
+              </label>
+              <select
+                value={newPromoBranch}
+                onChange={(e) => setNewPromoBranch(e.target.value)}
+                className="w-full rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] focus:outline-none focus:border-[var(--admin-accent)]/50"
+              >
+                <option value="todas">🌍 Todas las Sucursales</option>
+                {SUCURSALES.map((suc) => (
+                  <option key={suc.id} value={suc.id}>
+                    📍 {suc.nombre} ({suc.direccion})
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -500,7 +521,16 @@ export default function OfertasAdmin() {
 
                 <h5 className="text-sm font-bold text-[var(--admin-text-hi)] truncate">{promo.titulo}</h5>
                 
-                <div className="flex items-center justify-between text-xs text-[var(--admin-text-lo)] mt-1 mb-3">
+                <div className="text-[10px] font-semibold text-[var(--admin-text-lo)] mt-1 flex items-center gap-1">
+                  <span>📍</span>
+                  <span>
+                    {promo.sucursalId
+                      ? SUCURSALES.find((s) => s.id === promo.sucursalId)?.nombre || "Sucursal desconocida"
+                      : "Todas las sucursales"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-[var(--admin-text-lo)] mt-2 mb-3">
                   <span>Cant: {promo.cantidad} un.</span>
                   <span className="font-bold text-green-600 dark:text-green-400">
                     ${promo.precio.toLocaleString("es-UY")}

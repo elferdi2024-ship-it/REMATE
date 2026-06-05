@@ -16,6 +16,7 @@ export interface PremiumPromo {
   precio: number;
   imagen: string;
   activa: boolean;
+  sucursalId?: string | null;
 }
 
 export interface OfertaConfig {
