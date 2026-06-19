@@ -933,32 +933,37 @@ export default function OfertasAdmin() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
             {/* Selector e indicador de imagen */}
-            <div className="flex items-center gap-4">
-              <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)] shrink-0">
-                📷 {uploadingImage ? "Subiendo..." : "Subir Imagen Promocional"}
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  disabled={uploadingImage}
-                  onChange={(e) => e.target.files?.[0] && handleUploadImage(e.target.files[0])}
-                />
-              </label>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-4">
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)] shrink-0">
+                  📷 {uploadingImage ? "Subiendo..." : "Subir Imagen Promocional"}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    disabled={uploadingImage}
+                    onChange={(e) => e.target.files?.[0] && handleUploadImage(e.target.files[0])}
+                  />
+                </label>
 
-              {uploadingImage && (
-                <span className="text-xs text-[var(--admin-accent)] font-semibold">
-                  Subiendo... {Math.round(uploadProgress)}%
-                </span>
-              )}
+                {uploadingImage && (
+                  <span className="text-xs text-[var(--admin-accent)] font-semibold">
+                    Subiendo... {Math.round(uploadProgress)}%
+                  </span>
+                )}
 
-              {newPromoImage && !uploadingImage && (
-                <div className="flex items-center gap-2">
-                  <div className="relative w-12 h-12 rounded-lg border border-[var(--admin-border)] overflow-hidden">
-                    <img src={newPromoImage} alt="Preview" className="object-cover w-full h-full" />
+                {newPromoImage && !uploadingImage && (
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-12 h-12 rounded-lg border border-[var(--admin-border)] overflow-hidden">
+                      <img src={newPromoImage} alt="Preview" className="object-cover w-full h-full" />
+                    </div>
+                    <span className="text-xs text-green-500 font-medium">✓ Imagen cargada</span>
                   </div>
-                  <span className="text-xs text-green-500 font-medium">✓ Imagen cargada</span>
-                </div>
-              )}
+                )}
+              </div>
+              <span className="text-[10px] text-[var(--admin-text-lo)]/70">
+                💡 <b>Diseño óptimo:</b> Proporción <b>1:1 (cuadrada)</b>. Mínimo 800x800 px recomendado. Se recortará a 1:1.
+              </span>
             </div>
 
             <button
@@ -986,7 +991,7 @@ export default function OfertasAdmin() {
                 }`}
               >
                 {/* Image preview */}
-                <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-[var(--admin-border)] bg-white mb-3">
+                <div className="relative aspect-square w-full rounded-lg overflow-hidden border border-[var(--admin-border)] bg-white mb-3">
                   <img src={promo.imagen} alt={promo.titulo} className="object-contain w-full h-full" />
                 </div>
 
@@ -1104,24 +1109,29 @@ export default function OfertasAdmin() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
-            <div className="flex items-center gap-4">
-              <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)] shrink-0">
-                📷 {bbUploading ? "Subiendo..." : "Subir Imagen del Banner"}
-                <input type="file" className="hidden" accept="image/*" disabled={bbUploading} onChange={(e) => e.target.files?.[0] && handleUploadBbImage(e.target.files[0])} />
-              </label>
-              {bbUploading && (
-                <span className="text-xs text-[var(--admin-accent)] font-semibold">
-                  Subiendo... {Math.round(bbUploadProgress)}%
-                </span>
-              )}
-              {bbImagen && !bbUploading && (
-                <div className="flex items-center gap-2">
-                  <div className="relative w-12 h-12 rounded-lg border border-[var(--admin-border)] overflow-hidden">
-                    <img src={bbImagen} alt="Preview" className="object-cover w-full h-full" />
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-4">
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)] shrink-0">
+                  📷 {bbUploading ? "Subiendo..." : "Subir Imagen del Banner"}
+                  <input type="file" className="hidden" accept="image/*" disabled={bbUploading} onChange={(e) => e.target.files?.[0] && handleUploadBbImage(e.target.files[0])} />
+                </label>
+                {bbUploading && (
+                  <span className="text-xs text-[var(--admin-accent)] font-semibold">
+                    Subiendo... {Math.round(bbUploadProgress)}%
+                  </span>
+                )}
+                {bbImagen && !bbUploading && (
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-12 h-12 rounded-lg border border-[var(--admin-border)] overflow-hidden">
+                      <img src={bbImagen} alt="Preview" className="object-cover w-full h-full" />
+                    </div>
+                    <span className="text-xs text-green-500 font-medium">✓ Imagen cargada</span>
                   </div>
-                  <span className="text-xs text-green-500 font-medium">✓ Imagen cargada</span>
-                </div>
-              )}
+                )}
+              </div>
+              <span className="text-[10px] text-[var(--admin-text-lo)]/70">
+                💡 <b>Diseño óptimo:</b> Proporción <b>1:1 (cuadrada/logo)</b>. Recomendado PNG transparente. Se muestra contenido a la derecha.
+              </span>
             </div>
             <button type="button" onClick={(e) => handleAddBrandBanner(e)} className="rounded-xl bg-[var(--admin-accent)] px-5 py-2.5 text-xs font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 shrink-0">
               ＋ Agregar Banner de Marca
@@ -1433,24 +1443,29 @@ export default function OfertasAdmin() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
-            <div className="flex items-center gap-4">
-              <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)] shrink-0">
-                📷 {coUploading ? "Subiendo..." : "Subir Imagen"}
-                <input type="file" className="hidden" accept="image/*" disabled={coUploading} onChange={(e) => e.target.files?.[0] && handleUploadCoImage(e.target.files[0])} />
-              </label>
-              {coUploading && (
-                <span className="text-xs text-[var(--admin-accent)] font-semibold">
-                  Subiendo... {Math.round(coUploadProgress)}%
-                </span>
-              )}
-              {coImagen && !coUploading && (
-                <div className="flex items-center gap-2">
-                  <div className="relative w-12 h-12 rounded-lg border border-[var(--admin-border)] overflow-hidden">
-                    <img src={coImagen} alt="Preview" className="object-cover w-full h-full" />
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-4">
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)] shrink-0">
+                  📷 {coUploading ? "Subiendo..." : "Subir Imagen"}
+                  <input type="file" className="hidden" accept="image/*" disabled={coUploading} onChange={(e) => e.target.files?.[0] && handleUploadCoImage(e.target.files[0])} />
+                </label>
+                {coUploading && (
+                  <span className="text-xs text-[var(--admin-accent)] font-semibold">
+                    Subiendo... {Math.round(coUploadProgress)}%
+                  </span>
+                )}
+                {coImagen && !coUploading && (
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-12 h-12 rounded-lg border border-[var(--admin-border)] overflow-hidden">
+                      <img src={coImagen} alt="Preview" className="object-cover w-full h-full" />
+                    </div>
+                    <span className="text-xs text-green-500 font-medium">✓ Imagen cargada</span>
                   </div>
-                  <span className="text-xs text-green-500 font-medium">✓ Imagen cargada</span>
-                </div>
-              )}
+                )}
+              </div>
+              <span className="text-[10px] text-[var(--admin-text-lo)]/70">
+                💡 <b>Diseño óptimo:</b> Proporción <b>3:2 (rectangular)</b>. Ej: 600x400 px. Se recortará para encajar a la derecha.
+              </span>
             </div>
             <button type="button" onClick={(e) => handleAddCategoryOffer(e)} className="rounded-xl bg-[var(--admin-accent)] px-5 py-2.5 text-xs font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 shrink-0">
               ＋ Agregar Oferta por Categoría

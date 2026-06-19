@@ -11,6 +11,7 @@ import { useBrands } from "@/hooks/useBrands";
 import { SUCURSALES } from "@/lib/sucursales";
 import * as ls from "@/lib/ls";
 import { useToast } from "@/lib/toast-context";
+import { useCart } from "@/lib/cart-context";
 
 /* ═══════════════════════════════════════════════════════════════════
    LANDING PAGE — Distribuidora El Remate
@@ -100,28 +101,18 @@ export default function LandingPage() {
   const [configCats, setConfigCats] = useState<Record<string, string>>({});
   const [selectedSucursal, setSelectedSucursal] = useState<string>("");
   const { brands } = useBrands();
+  const { items: cartItems, clearCart } = useCart();
 
   const handleSelectSucursal = (id: string) => {
     const sucursal = SUCURSALES.find(s => s.id === id);
     const nombre = sucursal ? sucursal.nombre : "";
 
-    if (typeof window !== "undefined") {
-      const rawCart = sessionStorage.getItem("elremate_cart");
-      if (rawCart) {
-        try {
-          const cartItems = JSON.parse(rawCart);
-          if (Array.isArray(cartItems) && cartItems.length > 0) {
-            const confirmacion = confirm(
-              "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
-            );
-            if (!confirmacion) return;
-            sessionStorage.removeItem("elremate_cart");
-            window.dispatchEvent(new Event("storage"));
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
+    if (cartItems.length > 0) {
+      const confirmacion = confirm(
+        "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
+      );
+      if (!confirmacion) return;
+      clearCart();
     }
 
     ls.setSelectedSucursal(id);
@@ -1248,7 +1239,7 @@ export default function LandingPage() {
                         e.currentTarget.style.transform = "translateY(0)";
                       }}
                     >
-                      {isActive ? "INGRESAR AL CATÁLOGO ⚡" : "SELECCIONAR SUCURSAL ➡️"}
+                      {isActive ? "INGRESAR AL CATÁLOGO ⚡" : "VER CATÁLOGO ➡️"}
                     </button>
                   </div>
                 </div>

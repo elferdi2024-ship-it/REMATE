@@ -7,12 +7,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { SUCURSALES } from "@/lib/sucursales";
 import * as ls from "@/lib/ls";
+import { useCart } from "@/lib/cart-context";
 
 export default function SeleccionarSucursalPage() {
   const router = useRouter();
   const [currentSucursal, setCurrentSucursal] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [mounted, setMounted] = useState<boolean>(false);
+  const { items: cartItems, clearCart } = useCart();
 
   useEffect(() => {
     setMounted(true);
@@ -20,23 +22,12 @@ export default function SeleccionarSucursalPage() {
   }, []);
 
   const handleSelect = (id: string) => {
-    if (typeof window !== "undefined") {
-      const rawCart = sessionStorage.getItem("elremate_cart");
-      if (rawCart) {
-        try {
-          const cartItems = JSON.parse(rawCart);
-          if (Array.isArray(cartItems) && cartItems.length > 0) {
-            const confirmacion = confirm(
-              "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
-            );
-            if (!confirmacion) return;
-            sessionStorage.removeItem("elremate_cart");
-            window.dispatchEvent(new Event("storage"));
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
+    if (cartItems.length > 0) {
+      const confirmacion = confirm(
+        "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
+      );
+      if (!confirmacion) return;
+      clearCart();
     }
 
     ls.setSelectedSucursal(id);
