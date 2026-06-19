@@ -50,6 +50,9 @@
   --shadow-md:    0 4px 16px rgba(17,11,8,0.12);
   --shadow-lg:    0 12px 40px rgba(17,11,8,0.18);
   --shadow-panel: -8px 0 48px rgba(0,0,0,0.30);
+  --shadow-3d:    0 20px 40px rgba(17,11,8,0.08), 0 1px 3px rgba(17,11,8,0.02);
+  --shadow-glow-rojo: 0 0 20px rgba(232, 48, 42, 0.25);
+  --shadow-glow-verde: 0 0 20px rgba(26, 122, 66, 0.22);
 
   /* ── Radius ── */
   --r-sm: 8px;
@@ -119,6 +122,24 @@
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+@keyframes softPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.04); opacity: 0.92; }
+}
+
+@keyframes borderGlow {
+  0%, 100% { border-color: rgba(232, 48, 42, 0.15); box-shadow: 0 4px 12px rgba(232, 48, 42, 0.03); }
+  50% { border-color: rgba(232, 48, 42, 0.5); box-shadow: 0 8px 24px rgba(232, 48, 42, 0.2); }
+}
+
+.animate-soft-pulse {
+  animation: softPulse 2.5s ease-in-out infinite;
+}
+
+.animate-border-glow {
+  animation: borderGlow 3s ease-in-out infinite;
 }
 
 .premium-glass {
@@ -3139,14 +3160,19 @@ html.dark-mode body { background: var(--bg); }
 
 @keyframes pulseGlow {
   0% {
-    box-shadow: 0 4px 12px rgba(214,40,40,0.3);
+    box-shadow: 0 4px 12px rgba(214,40,40,0.2);
   }
   50% {
-    box-shadow: 0 4px 20px rgba(214,40,40,0.6);
+    box-shadow: 0 6px 24px rgba(214,40,40,0.55);
   }
   100% {
-    box-shadow: 0 4px 12px rgba(214,40,40,0.3);
+    box-shadow: 0 4px 12px rgba(214,40,40,0.2);
   }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+  border-radius: 30px;
 }
 
 /* Highly Visible Premium ResultsBar Search Input v2.0 */

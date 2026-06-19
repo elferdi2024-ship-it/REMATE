@@ -101,6 +101,7 @@ function OfertaMiniCard({
     >
       {/* Discount badge */}
       <div
+        className="animate-soft-pulse"
         style={{
           position: "absolute",
           top: "8px",

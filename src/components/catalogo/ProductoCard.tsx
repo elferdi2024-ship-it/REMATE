@@ -122,7 +122,7 @@ export default function ProductoCard({
       style={{
         background: "var(--white)",
         border: isHovered 
-          ? "1px solid rgba(232, 48, 42, 0.25)" 
+          ? "1px solid rgba(232, 48, 42, 0.35)" 
           : isInCart
             ? "1.5px solid var(--verde)" 
             : "1px solid rgba(17,11,8,0.08)",
@@ -132,12 +132,12 @@ export default function ProductoCard({
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        transform: isHovered ? "translateY(-6px)" : "translateY(0)",
+        transform: isHovered ? "translateY(-6px) scale(1.01)" : "translateY(0)",
         boxShadow: isHovered 
-          ? "0 20px 35px rgba(17,11,8,0.12), 0 4px 12px rgba(17,11,8,0.04)"
+          ? "0 20px 40px rgba(17,11,8,0.08), 0 1px 3px rgba(17,11,8,0.02)"
           : isInCart
-            ? "0 10px 24px rgba(46,125,50,0.06)"
-            : "0 8px 24px rgba(17,11,8,0.04)",
+            ? "0 10px 24px rgba(26,122,66,0.06), 0 0 0 3px rgba(26,122,66,0.06)"
+            : "0 8px 24px rgba(17,11,8,0.03)",
         cursor: "pointer"
       } as React.CSSProperties}
     >
@@ -202,11 +202,13 @@ export default function ProductoCard({
             <div className="float-qty-ctrl" style={{ 
               display: "flex",
               alignItems: "center",
-              background: "var(--white)",
+              background: "rgba(255, 255, 255, 0.85)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
               borderRadius: "24px",
               height: "42px",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-              border: "1.5px solid rgba(46,125,50,0.25)",
+              boxShadow: "0 8px 20px rgba(17,11,8,0.1)",
+              border: "1.5px solid rgba(26,122,66,0.3)",
               padding: "0 4px"
             }}>
               <button className="float-qty-btn minus" onClick={handleDec} style={{ padding: "0 10px", fontSize: "1.2rem", fontWeight: "bold" }}>&#8722;</button>
@@ -243,7 +245,7 @@ export default function ProductoCard({
               className="btn-float-add" 
               onClick={handleAdd} 
               style={{
-                background: "linear-gradient(135deg, var(--oscuro), #4b5563)",
+                background: "var(--rojo)",
                 color: "white",
                 border: "none",
                 borderRadius: "50%",
@@ -252,13 +254,19 @@ export default function ProductoCard({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 6px 14px rgba(0,0,0,0.2)",
+                boxShadow: "0 4px 10px rgba(232, 48, 42, 0.2)",
                 cursor: "pointer",
                 transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-                transform: isHovered ? "scale(1.08)" : "scale(1)",
+                transform: isHovered ? "scale(1.1) translateY(-1px)" : "scale(1)",
               }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.15)"}
-              onMouseLeave={(e) => e.currentTarget.style.transform = isHovered ? "scale(1.08)" : "scale(1)"}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.15) translateY(-1px)";
+                e.currentTarget.style.boxShadow = "0 8px 20px rgba(232, 48, 42, 0.4)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = isHovered ? "scale(1.1) translateY(-1px)" : "scale(1)";
+                e.currentTarget.style.boxShadow = "0 4px 10px rgba(232, 48, 42, 0.2)";
+              }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 5v14M5 12h14"/>

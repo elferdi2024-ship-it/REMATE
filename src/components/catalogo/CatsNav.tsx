@@ -56,78 +56,80 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
         ‹
       </button>
 
-      <div className="cats-wrap" ref={scrollRef} style={{ width: "100%", overflowX: "auto", scrollbarWidth: "none" }}>
-        <div className="cats-inner-circular" style={{ 
-          gap: "24px", 
-          padding: "16px 20px",
-          display: "flex",
-          width: "max-content",
-          minWidth: "100%",
-          alignItems: "flex-start"
-        }}>
-          {categorias.map((cat) => {
-            const emoji = EMOJI_POR_CATEGORIA[cat] || "📦";
-            const isActive = cat === activeCat || (cat === "Todos" && (activeCat === "" || activeCat === "Todos"));
-            return (
-              <button
-                key={cat}
-                className={`cat-circle-btn${isActive ? " active" : ""}`}
-                onClick={() => onSelect(cat)}
-                aria-pressed={isActive}
-                style={{ 
-                    width: "80px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    border: "none",
-                    background: "transparent",
-                    cursor: "pointer",
-                    padding: 0,
-                    flexShrink: 0
-                }}
-              >
-                <div className="cat-circle-icon" style={{ 
-                  width: "62px", 
-                  height: "62px", 
-                  fontSize: "1.8rem",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: "50%",
-                  background: isActive ? "var(--rojo)" : "var(--bg2)",
-                  color: isActive ? "white" : "inherit",
-                  boxShadow: isActive ? "0 8px 16px var(--rojo-glow)" : "0 2px 4px rgba(0,0,0,0.04)",
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  border: isActive ? "2px solid var(--rojo)" : "1px solid var(--border)"
-                }}>
-                  {configCats[cat] ? (
-                    <div style={{ position: "relative", width: "70%", height: "70%" }}>
-                      <Image 
-                        src={configCats[cat]} 
-                        alt={cat} 
-                        fill 
-                        className="object-contain"
-                      />
-                    </div>
-                  ) : (
-                    emoji
-                  )}
-                </div>
-                <span className="cat-circle-label" style={{ 
-                  fontFamily: "var(--font-body)",
-                  fontSize: "10px", 
-                  marginTop: "10px",
-                  fontWeight: isActive ? 800 : 600,
-                  color: isActive ? "var(--rojo)" : "var(--muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                  textAlign: "center",
-                  lineHeight: "1.2",
-                  maxWidth: "100%"
-                }}>{cat}</span>
-              </button>
-            );
-          })}
+      <div style={{ position: "relative", width: "100%", overflow: "hidden", display: "flex", alignItems: "center" }}>
+        {/* Desvanecimiento Izquierdo */}
+        <div className="scroll-fade-left" style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: "48px",
+          background: "linear-gradient(to right, rgba(255,255,255,0.95) 20%, transparent 100%)",
+          zIndex: 5,
+          pointerEvents: "none"
+        }} />
+        
+        {/* Desvanecimiento Derecho */}
+        <div className="scroll-fade-right" style={{
+          position: "absolute",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: "48px",
+          background: "linear-gradient(to left, rgba(255,255,255,0.95) 20%, transparent 100%)",
+          zIndex: 5,
+          pointerEvents: "none"
+        }} />
+
+        <div className="cats-wrap" ref={scrollRef} style={{ width: "100%", overflowX: "auto", scrollbarWidth: "none" }}>
+          <div className="cats-inner-circular" style={{ 
+            gap: "24px", 
+            padding: "16px 24px",
+            display: "flex",
+            width: "max-content",
+            minWidth: "100%",
+            alignItems: "flex-start"
+          }}>
+            {categorias.map((cat) => {
+              const emoji = EMOJI_POR_CATEGORIA[cat] || "📦";
+              const isActive = cat === activeCat || (cat === "Todos" && (activeCat === "" || activeCat === "Todos"));
+              return (
+                <button
+                  key={cat}
+                  className={`cat-circle-btn${isActive ? " active" : ""}`}
+                  onClick={() => onSelect(cat)}
+                  aria-pressed={isActive}
+                  style={{ 
+                      width: "80px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      border: "none",
+                      background: "transparent",
+                      cursor: "pointer",
+                      padding: 0,
+                      flexShrink: 0
+                  }}
+                >
+                  <div className="cat-circle-icon">
+                    {configCats[cat] ? (
+                      <div style={{ position: "relative", width: "70%", height: "70%" }}>
+                        <Image 
+                          src={configCats[cat]} 
+                          alt={cat} 
+                          fill 
+                          className="object-contain animate-icon-subtle"
+                        />
+                      </div>
+                    ) : (
+                      emoji
+                    )}
+                  </div>
+                  <span className="cat-circle-label">{cat}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -157,14 +159,78 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
           justify-content: center;
           font-size: 24px;
           color: var(--oscuro);
-          transition: all 0.2s;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .nav-arrow:hover {
           background: var(--bg2);
           transform: translateY(-50%) scale(1.1);
+          box-shadow: 0 6px 16px rgba(0,0,0,0.15);
         }
         .nav-arrow.left { left: 10px; }
         .nav-arrow.right { right: 10px; }
+
+        .cat-circle-btn {
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cat-circle-btn:hover {
+          transform: translateY(-3px);
+        }
+        .cat-circle-btn:active {
+          transform: scale(0.95);
+        }
+
+        .cat-circle-icon {
+          width: 62px;
+          height: 62px;
+          font-size: 1.8rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background: var(--bg2);
+          color: inherit;
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          border: 1px solid var(--border);
+          box-shadow: 0 2px 8px rgba(17,11,8,0.02);
+        }
+        
+        .cat-circle-btn:hover .cat-circle-icon {
+          background: var(--crema-2);
+          border-color: var(--border-2);
+          box-shadow: 0 4px 12px rgba(17,11,8,0.06);
+          transform: scale(1.05);
+        }
+
+        .cat-circle-btn.active .cat-circle-icon {
+          background: var(--rojo);
+          color: white;
+          border-color: var(--rojo);
+          box-shadow: 0 8px 20px var(--rojo-glow), 0 0 0 3px rgba(232, 48, 42, 0.15);
+          transform: scale(1.05);
+        }
+
+        .cat-circle-label {
+          font-family: var(--font-body);
+          font-size: 10px;
+          margin-top: 10px;
+          fontWeight: 600;
+          color: var(--muted);
+          text-transform: uppercase;
+          letter-spacing: "0.5px";
+          text-align: center;
+          line-height: "1.2";
+          max-width: 100%;
+          transition: color 0.3s, font-weight 0.3s;
+        }
+
+        .cat-circle-btn.active .cat-circle-label {
+          font-weight: 800;
+          color: var(--rojo);
+        }
+
+        .cat-circle-btn:hover .cat-circle-label {
+          color: var(--text);
+        }
 
         @media (min-width: 1024px) {
           .nav-arrow { display: flex; }
