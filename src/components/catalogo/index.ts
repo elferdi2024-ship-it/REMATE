@@ -11,3 +11,8 @@ export { default as FloatCartBtn } from "./FloatCartBtn";
 export { default as MarketingRail } from "./MarketingRail";
 export { default as ConversionStrip } from "./ConversionStrip";
 export { default as BrandRail } from "./BrandRail";
+export { default as OfertasDestacadasRail } from "./OfertasDestacadasRail";
+export { default as BrandBannersRail } from "./BrandBannersRail";
+export { default as FlashOffersRail } from "./FlashOffersRail";
+export { default as CategoryOffersRail } from "./CategoryOffersRail";
+export { default as SponsoredProductsRail } from "./SponsoredProductsRail";

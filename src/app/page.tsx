@@ -105,6 +105,25 @@ export default function LandingPage() {
     const sucursal = SUCURSALES.find(s => s.id === id);
     const nombre = sucursal ? sucursal.nombre : "";
 
+    if (typeof window !== "undefined") {
+      const rawCart = sessionStorage.getItem("elremate_cart");
+      if (rawCart) {
+        try {
+          const cartItems = JSON.parse(rawCart);
+          if (Array.isArray(cartItems) && cartItems.length > 0) {
+            const confirmacion = confirm(
+              "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
+            );
+            if (!confirmacion) return;
+            sessionStorage.removeItem("elremate_cart");
+            window.dispatchEvent(new Event("storage"));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
     ls.setSelectedSucursal(id);
     setSelectedSucursal(id);
     toast.success(`🏪 Seleccionada: ${nombre}. Cargando catálogo...`);

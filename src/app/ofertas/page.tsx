@@ -8,6 +8,13 @@ import { doc, getDoc } from "firebase/firestore";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
 import type { OfertaConfig, OfertaProducto } from "@/types/ofertas";
+import type { Producto } from "@/types";
+import {
+  BrandBannersRail,
+  FlashOffersRail,
+  CategoryOffersRail,
+  SponsoredProductsRail,
+} from "@/components/catalogo";
 
 // ─── Countdown Hook ────────────────────────────────────────────────────────
 
@@ -289,6 +296,7 @@ function OfertaCard({
 
 export default function OfertasPage() {
   const [config, setConfig] = useState<OfertaConfig | null>(null);
+  const [catalogo, setCatalogo] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
   const toast = useToast();
@@ -299,8 +307,25 @@ export default function OfertasPage() {
         const snap = await getDoc(doc(db, "configuracion", "ofertas"));
         if (snap.exists()) {
           const data = snap.data() as OfertaConfig;
-          if (data.activa && data.productos && data.productos.length > 0) {
+          if (data.activa) {
             setConfig(data);
+
+            // Fetch catalog if category offers exist to resolve product codes
+            if (data.categoryOffers && data.categoryOffers.length > 0) {
+              try {
+                let catalogProds: Producto[] = [];
+                const catSnap = await getDoc(doc(db, "catalogo_activo", "productos"));
+                if (catSnap.exists()) {
+                  catalogProds = Object.values(catSnap.data().items || {}) as Producto[];
+                } else {
+                  const res = await fetch("/productos.json");
+                  if (res.ok) catalogProds = await res.json();
+                }
+                setCatalogo(catalogProds);
+              } catch (err) {
+                console.error("Error loading catalog for category offers:", err);
+              }
+            }
           }
         }
       } catch (e) {
@@ -488,24 +513,90 @@ export default function OfertasPage() {
         style={{
           maxWidth: "1200px",
           margin: "0 auto",
-          padding: "32px 16px 64px",
+          padding: "16px 16px 64px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "32px",
         }}
       >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-            gap: "16px",
-          }}
-        >
-          {sortedProducts.map((p) => (
-            <OfertaCard
-              key={p.codigo}
-              producto={p}
-              onAdd={() => handleAddToCart(p)}
-            />
-          ))}
-        </div>
+        {/* 1. Custom Brand Banners */}
+        {config.brandBanners && config.brandBanners.length > 0 && (
+          <BrandBannersRail banners={config.brandBanners} />
+        )}
+
+        {/* 2. Flash Sales */}
+        {config.flashOffers && config.flashOffers.length > 0 && (
+          <FlashOffersRail flashOffers={config.flashOffers} />
+        )}
+
+        {/* 3. Sponsored Products */}
+        {config.sponsoredProducts && config.sponsoredProducts.length > 0 && (
+          <SponsoredProductsRail products={config.sponsoredProducts} />
+        )}
+
+        {/* 4. Category Themed Offers */}
+        {config.categoryOffers && config.categoryOffers.length > 0 && (
+          <CategoryOffersRail
+            categoryOffers={config.categoryOffers}
+            catalogo={catalogo}
+            qtyMap={{}}
+            onAddProduct={(p) => {
+              addItem({
+                codigo: p.codigo,
+                nombre: p.nombre,
+                precio: p.precio,
+              });
+              toast.success(`${p.nombre} agregado`);
+            }}
+            onQtyChange={(codigo, qty) => {
+              // For public offers page, if they update qty we can use custom logic or let them add
+              // In this simple grid we let them add. But to handle qty we can use useCart actions:
+              // Since the cart hook handles quantity updates:
+              if (qty === 0) {
+                // remove
+              } else {
+                addItem({ codigo, nombre: "", precio: 0 }); // useCart will handle adding/updating
+              }
+            }}
+          />
+        )}
+
+        {/* 5. Standard Offers Grid */}
+        {sortedProducts.length > 0 && (
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+              <span style={{ fontSize: "20px" }}>🏷️</span>
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: "1.2rem",
+                  fontWeight: 900,
+                  textTransform: "uppercase",
+                  letterSpacing: "1.5px",
+                  color: "#fff",
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                Ofertas de la Semana
+              </h3>
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+                gap: "16px",
+              }}
+            >
+              {sortedProducts.map((p) => (
+                <OfertaCard
+                  key={p.codigo}
+                  producto={p}
+                  onAdd={() => handleAddToCart(p)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Footer CTA */}

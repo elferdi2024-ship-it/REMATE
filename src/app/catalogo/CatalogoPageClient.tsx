@@ -16,9 +16,12 @@ import {
   ResultsBar,
   ProductoGrid,
   FloatCartBtn,
-  MarketingRail,
-  ConversionStrip,
   BrandRail,
+  OfertasDestacadasRail,
+  BrandBannersRail,
+  FlashOffersRail,
+  CategoryOffersRail,
+  SponsoredProductsRail,
 } from "@/components/catalogo";
 import { useBrands } from "@/hooks/useBrands";
 import type { OfertaConfig } from "@/types/ofertas";
@@ -823,8 +826,17 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
       // 4. GENERAR Y ENVIAR POR WHATSAPP (Lo más importante)
       try {
+        const sucursalActiva = SUCURSALES.find((s) => s.id === sucursalId);
+        let telefonoWhatsApp = process.env.NEXT_PUBLIC_WA_NUMBER!;
+
+        if (sucursalActiva && sucursalActiva.telefono) {
+          const telLimpio = sucursalActiva.telefono.replace(/\s/g, "");
+          const sinCero = telLimpio.startsWith("0") ? telLimpio.slice(1) : telLimpio;
+          telefonoWhatsApp = `598${sinCero}`;
+        }
+
         await enviarFacturaWhatsApp(
-          process.env.NEXT_PUBLIC_WA_NUMBER!,
+          telefonoWhatsApp,
           nombre,
           tel,
           cartItems,
@@ -832,7 +844,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           "/logo.png",
           orderId,
           deliveryDireccion,
-          true // skipRedirect = true: descarga el comprobante y no redirige a WhatsApp
+          false // skipRedirect = false: descarga la factura e inicia la redirección a WhatsApp para enviar el pedido
         );
       } catch (waErr) {
         console.error("❌ WhatsApp: Error al enviar factura:", waErr);
@@ -855,6 +867,23 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const handleSendWA = useCallback(() => {
     handleConfirmSend();
   }, [handleConfirmSend]);
+
+  const handleSucursalChange = useCallback((newId: string) => {
+    if (cartItems.length > 0) {
+      const confirmacion = confirm(
+        "Al cambiar de sucursal se vaciará tu carrito actual para evitar inconsistencias en precios y disponibilidad de stock. ¿Deseas cambiar?"
+      );
+      if (!confirmacion) return;
+      clearCart();
+    }
+    setSucursalId(newId);
+    ls.setSelectedSucursal(newId);
+    
+    // Sincronizar URL
+    const params = new URLSearchParams(window.location.search);
+    params.set("sucursal", newId);
+    router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+  }, [cartItems, clearCart, router]);
 
 
   const handleLoadSharedCart = useCallback(() => {
@@ -1003,10 +1032,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         </div>
         <Ticker />
         <div className="page-wrapper">
-          <ConversionStrip />
-        </div>
-        <div className="page-wrapper">
-          <MarketingRail cartQty={0} isLoggedIn={false} />
+          <OfertasDestacadasRail />
         </div>
         <div className="page-wrapper">
           <div ref={gridRef}>
@@ -1253,84 +1279,42 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
       <div className="page-wrapper">
         <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
+        {ofertasConfig?.brandBanners && (
+          <BrandBannersRail banners={ofertasConfig.brandBanners} />
+        )}
       </div>
 
-
-      {/* ── BANNER PREMIUM DE OFERTAS DE LA SEMANA ── */}
-      {ofertasConfig?.activa && ofertasConfig.productos && ofertasConfig.productos.length > 0 && (
-        <div className="page-wrapper" style={{ marginTop: "8px", marginBottom: "16px" }}>
-          <Link
-            href="/ofertas"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              background: "linear-gradient(135deg, #E8302A 0%, #B91C1C 100%)",
-              color: "#fff",
-              borderRadius: "16px",
-              padding: "16px 20px",
-              textDecoration: "none",
-              boxShadow: "0 10px 25px rgba(232, 48, 42, 0.25)",
-              position: "relative",
-              overflow: "hidden",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-1px) scale(1.005)";
-              e.currentTarget.style.boxShadow = "0 12px 30px rgba(232, 48, 42, 0.35)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "none";
-              e.currentTarget.style.boxShadow = "0 10px 25px rgba(232, 48, 42, 0.25)";
-            }}
-          >
-            {/* Ambient background glow */}
-            <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 80% 50%, rgba(255,255,255,0.15) 0%, transparent 60%)", pointerEvents: "none" }} />
-            
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", zIndex: 2 }}>
-              <span style={{ fontSize: "24px" }}>🔥</span>
-              <div style={{ textAlign: "left" }}>
-                <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 900, letterSpacing: "0.5px", textTransform: "uppercase" }}>
-                  {ofertasConfig.titulo || "Ofertas de la Semana"}
-                </h4>
-                <p style={{ margin: "2px 0 0 0", fontSize: "12px", color: "rgba(255,255,255,0.85)", fontWeight: 500 }}>
-                  {ofertasConfig.subtitulo || `Aprovechá precios únicos en ${ofertasConfig.productos.length} productos seleccionados.`}
-                </p>
-              </div>
-            </div>
-            
-            <span style={{
-              background: "rgba(255,255,255,0.2)",
-              padding: "6px 14px",
-              borderRadius: "999px",
-              fontSize: "11px",
-              fontWeight: 800,
-              textTransform: "uppercase",
-              letterSpacing: "0.8px",
-              zIndex: 2,
-              flexShrink: 0,
-            }}>
-              Ver Todo →
-            </span>
-          </Link>
-        </div>
-      )}
 
       {/* Ticker */}
       <Ticker />
 
       <div className="page-wrapper">
-        <ConversionStrip />
-      </div>
-
-      <div className="page-wrapper">
-        <MarketingRail cartQty={totalQty} isLoggedIn={!!user} />
+        <OfertasDestacadasRail />
+        {ofertasConfig?.flashOffers && (
+          <div style={{ marginTop: "16px" }}>
+            <FlashOffersRail flashOffers={ofertasConfig.flashOffers} />
+          </div>
+        )}
+        {ofertasConfig?.sponsoredProducts && (
+          <div style={{ marginTop: "16px" }}>
+            <SponsoredProductsRail products={ofertasConfig.sponsoredProducts} />
+          </div>
+        )}
       </div>
 
       {/* Contenido del catálogo — max-width desktop */}
       <div className="page-wrapper">
 
         {/* Category nav */}
+        {ofertasConfig?.categoryOffers && (
+          <CategoryOffersRail
+            categoryOffers={ofertasConfig.categoryOffers}
+            catalogo={productos}
+            qtyMap={qtyMap}
+            onAddProduct={handleAddProduct}
+            onQtyChange={handleQtyChange}
+          />
+        )}
 
         {categorias.length > 0 && (
           <CatsNav
@@ -1438,7 +1422,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         metodoEntrega={metodoEntrega}
         onMetodoEntregaChange={setMetodoEntrega}
         sucursalId={sucursalId}
-        onSucursalChange={setSucursalId}
+        onSucursalChange={handleSucursalChange}
         isTiendaCerrada={!tiendaConfig.pedidosAbiertos}
         relatedProducts={cartRecommendations}
         onAddProduct={handleAddProduct}
