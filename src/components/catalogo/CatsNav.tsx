@@ -213,12 +213,12 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
           font-family: var(--font-body);
           font-size: 10px;
           margin-top: 10px;
-          fontWeight: 600;
+          font-weight: 600;
           color: var(--muted);
           text-transform: uppercase;
-          letter-spacing: "0.5px";
+          letter-spacing: 0.5px;
           text-align: center;
-          line-height: "1.2";
+          line-height: 1.2;
           max-width: 100%;
           transition: color 0.3s, font-weight 0.3s;
         }

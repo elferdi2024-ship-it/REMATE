@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "El Remate Ads — Publicidad para tu Marca",
+  description: "Conectá tu marca con miles de comercios uruguayos. Publicidad nativa dentro del catálogo mayorista más usado de Canelones.",
+};
 
 const WA_LINK = "https://wa.me/59899322325?text=Hola%2C%20quiero%20info%20sobre%20El%20Remate%20Ads";
 

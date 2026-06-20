@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
+import Image from "next/image";
 import type { SponsoredProduct } from "@/types/ofertas";
 
 interface SponsoredProductsRailProps {
@@ -125,10 +126,9 @@ export default function SponsoredProductsRail({ products = [] }: SponsoredProduc
 
               {/* Product Image if available */}
               {p.imagen && (
-                <div style={{ width: "100%", height: "90px", display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "8px" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.imagen} alt={p.nombreProducto} style={{ maxHeight: "90px", maxWidth: "100%", objectFit: "contain", borderRadius: "6px" }} />
-                </div>
+                 <div style={{ width: "100%", height: "90px", position: "relative", marginBottom: "8px" }}>
+                   <Image src={p.imagen} alt={p.nombreProducto} fill sizes="(max-width: 768px) 150px, 200px" style={{ objectFit: "contain", borderRadius: "6px" }} />
+                 </div>
               )}
 
               {/* Product Name */}

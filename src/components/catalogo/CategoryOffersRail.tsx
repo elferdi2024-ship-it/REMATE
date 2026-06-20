@@ -4,6 +4,7 @@
 import { useState } from "react";
 import type { CategoryOffer } from "@/types/ofertas";
 import type { Producto } from "@/types";
+import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
 
@@ -102,8 +103,7 @@ export default function CategoryOffersRail({
 
               {offer.imagen && (
                 <div style={{ width: "120px", height: "80px", position: "relative", borderRadius: "10px", overflow: "hidden" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={offer.imagen} alt={offer.titulo} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <Image src={offer.imagen} alt={offer.titulo} fill sizes="120px" style={{ objectFit: "cover" }} />
                 </div>
               )}
             </div>

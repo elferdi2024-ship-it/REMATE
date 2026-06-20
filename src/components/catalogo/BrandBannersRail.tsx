@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { BrandBanner } from "@/types/ofertas";
 
 interface BrandBannersRailProps {
@@ -163,13 +164,12 @@ export default function BrandBannersRail({ banners = [] }: BrandBannersRailProps
               position: "relative",
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={currentBanner.imagen}
               alt={currentBanner.marcaNombre}
+              fill
+              sizes="(max-width: 768px) 35vw, 15vw"
               style={{
-                maxHeight: "140px",
-                maxWidth: "100%",
                 objectFit: "contain",
                 borderRadius: "8px",
                 filter: "drop-shadow(0 10px 15px rgba(0,0,0,0.2))",

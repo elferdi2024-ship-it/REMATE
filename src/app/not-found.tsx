@@ -26,8 +26,8 @@ export default function NotFound() {
       >
         404
       </h1>
-      <p style={{ color: "rgba(255,255,255,0.5)", marginTop: "8px" }}>
-        Pagina no encontrada
+      <p style={{ color: "var(--on-dark-mid, #C8C3BC)", marginTop: "8px" }}>
+        Página no encontrada
       </p>
       <Link
         href="/catalogo"
@@ -43,7 +43,7 @@ export default function NotFound() {
           letterSpacing: "1px",
         }}
       >
-        Volver al catalogo
+        Volver al catálogo
       </Link>
     </div>
   );

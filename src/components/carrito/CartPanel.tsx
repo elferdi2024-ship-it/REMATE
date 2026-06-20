@@ -3,6 +3,7 @@
 
 import { CartItem, Producto } from '@/types';
 import type { MetodoEntrega } from '@/lib/sucursales';
+import Image from 'next/image';
 import CartItemRow from './CartItem';
 import CartFooter from './CartFooter';
 import AdPopup from './AdPopup';
@@ -227,8 +228,7 @@ export default function CartPanel({
                   >
                     <div style={{ position: 'relative', width: '100%', height: '70px', borderRadius: '6px', overflow: 'hidden', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {prod.imagen ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={prod.imagen} alt={prod.nombre} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        <Image src={prod.imagen} alt={prod.nombre} fill sizes="70px" style={{ objectFit: 'contain' }} />
                       ) : (
                         <span style={{ fontSize: '1.5rem' }}>📦</span>
                       )}

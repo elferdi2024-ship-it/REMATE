@@ -9,9 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        bebas: ["'Bebas Neue'", "sans-serif"],
-        body: ["'DM Sans'", "system-ui", "sans-serif"],
-        serif: ["'DM Serif Display'", "Georgia", "serif"],
+        bebas: ["var(--font-bebas)", "sans-serif"],
+        body: ["var(--font-body)", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
       },
     },
   },

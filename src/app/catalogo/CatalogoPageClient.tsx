@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, Suspense, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/lib/toast-context";
@@ -1218,10 +1219,11 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
                     {/* Imagen 1:1 Completa con Zoom al Hover */}
                     <div className="relative w-full h-full overflow-hidden bg-white">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <Image
                         src={promo.imagen}
                         alt={promo.titulo}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>

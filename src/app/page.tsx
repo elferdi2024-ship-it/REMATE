@@ -342,7 +342,7 @@ export default function LandingPage() {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                boxShadow: "0 4px 18 rgba(232,48,42,0.35)",
+                boxShadow: "0 4px 18px rgba(232,48,42,0.35)",
                 transition: "all 0.15s",
               }}
             >
@@ -520,7 +520,7 @@ export default function LandingPage() {
                   }}
                 >
                   {item}
-                  <span style={{ color: "var(--rojo, #D62828)", margin: "0 4px", opacity: 2 }}>
+                  <span style={{ color: "var(--rojo, #D62828)", margin: "0 4px", opacity: 1 }}>
                     ★
                   </span>
                 </span>
@@ -1299,7 +1299,7 @@ export default function LandingPage() {
             Contactanos por WhatsApp y te respondemos al instante
           </p>
           <a
-            href="https://wa.me/59894717052"
+            href="https://wa.me/59899322325"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -1358,7 +1358,7 @@ export default function LandingPage() {
             />
           </div>
           <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.35)", marginBottom: "6px" }}>
-            Copyright © 2026 Distribuidora El Remate. Todos los derechos reservados.
+            Copyright © {new Date().getFullYear()} Distribuidora El Remate. Todos los derechos reservados.
           </p>
           <p style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.2)" }}>
             Powered by Dafna y Mateo Asencio

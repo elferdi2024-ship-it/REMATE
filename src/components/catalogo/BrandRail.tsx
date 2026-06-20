@@ -269,7 +269,22 @@ function BrandBubble({ brand, isActive, onSelect, isMobile }: BrandBubbleProps) 
           )}
         </div>
       </div>
-
+      <span
+        style={{
+          marginTop: "6px",
+          fontSize: "10px",
+          fontWeight: 700,
+          color: isActive ? "#00E5FF" : "rgba(255,255,255,0.6)",
+          transition: "color 0.3s",
+          textAlign: "center",
+          maxWidth: "75px",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {brand.name}
+      </span>
     </div>
   );
 }

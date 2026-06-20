@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback } from "react";
+import Image from "next/image";
 import type { Producto } from "@/types";
 import { EMOJI_POR_CATEGORIA } from "@/types";
 
@@ -115,12 +116,12 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
       }}>
         {producto.imagen ? (
           <div style={{ position: "relative", width: "100%", height: "100%" }}>
-            <img 
+            <Image 
               src={producto.imagen} 
               alt={producto.nombre}
-              loading="lazy"
-              decoding="async"
-              style={{ objectFit: "contain", width: "100%", height: "100%", padding: "4px" }} 
+              fill
+              sizes="50px"
+              style={{ objectFit: "contain", padding: "4px" }} 
             />
           </div>
         ) : (

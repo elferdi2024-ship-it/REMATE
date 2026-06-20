@@ -37,14 +37,9 @@ export default function Toast({ message, type, visible, onDismiss }: ToastProps)
       role="status"
       aria-live="polite"
       style={{
-        position: "fixed",
         bottom: "1rem",
-        left: "50%",
-        transform: `translateX(-50%) translateY(${visible ? "0" : "1rem"})`,
-        zIndex: 9999,
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? ("auto" as const) : ("none" as const),
-        transition: "transform 0.3s ease-out, opacity 0.3s ease-out",
         maxWidth: "calc(100vw - 2rem)",
         background: "var(--oscuro)",
         borderLeft: `4px solid ${BORDER_COLORS[type]}`,
@@ -58,7 +53,9 @@ export default function Toast({ message, type, visible, onDismiss }: ToastProps)
         fontSize: "0.875rem",
         lineHeight: "1.4",
       }}
-      className="sm:left-auto sm:right-6 sm:translate-x-0 sm:max-w-sm"
+      className={`fixed z-[9999] transition-all duration-300 ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none"
+      } left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:translate-x-0 sm:max-w-sm`}
     >
       <span
         style={{
