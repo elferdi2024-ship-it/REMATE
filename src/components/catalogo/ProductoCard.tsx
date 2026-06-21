@@ -3,6 +3,7 @@ import type { Producto } from "@/types";
 import type { BrandConfig } from "@/types/brands";
 import { EMOJI_POR_CATEGORIA } from "@/types";
 import Image from "next/image";
+import { useFavoritos } from "@/lib/favoritos-context";
 
 interface ProductoCardProps {
   producto: Producto;
@@ -94,6 +95,9 @@ export default function ProductoCard({
   const [isHovered, setIsHovered] = React.useState(false);
   const isInCart = qty > 0;
 
+  const { isFavorito, toggleFavorito } = useFavoritos();
+  const favorito = isFavorito(producto.codigo);
+
   const handleAdd = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     onAdd(producto, e);
@@ -141,8 +145,6 @@ export default function ProductoCard({
         cursor: "pointer"
       } as React.CSSProperties}
     >
-      {/* Tag 'Oportunidad' removido */}
-
       <div className="card-thumb" style={{ 
         background: "linear-gradient(180deg, #ffffff 0%, #f9f8f6 100%)", 
         borderRadius: "14px",
@@ -156,6 +158,77 @@ export default function ProductoCard({
         position: "relative",
         overflow: "hidden"
       }}>
+        {/* Botón de Favorito */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFavorito(producto.codigo);
+          }}
+          className="fav-btn"
+          style={{
+            position: "absolute",
+            top: "8px",
+            left: "8px",
+            zIndex: 15,
+            background: "rgba(255, 255, 255, 0.85)",
+            border: "none",
+            borderRadius: "50%",
+            width: "36px",
+            height: "36px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            transition: "all 0.2s ease",
+            color: favorito ? "var(--rojo, #E8302A)" : "#A89E94",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.1)";
+            e.currentTarget.style.background = "#fff";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.background = "rgba(255, 255, 255, 0.85)";
+          }}
+          aria-label={favorito ? "Quitar de favoritos" : "Guardar en favoritos"}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill={favorito ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+          </svg>
+        </button>
+
+        {/* Badge de Descuento */}
+        {producto.precioAnterior && producto.precioAnterior > producto.precio && (
+          <div
+            style={{
+              position: "absolute",
+              top: "8px",
+              right: "8px",
+              zIndex: 15,
+              background: "linear-gradient(135deg, #E8302A 0%, #B91C1C 100%)",
+              color: "#fff",
+              fontSize: "10px",
+              fontWeight: 900,
+              padding: "4px 8px",
+              borderRadius: "8px",
+              boxShadow: "0 2px 8px rgba(232, 48, 42, 0.3)",
+              letterSpacing: "0.5px",
+            }}
+          >
+            -{Math.round((1 - producto.precio / producto.precioAnterior) * 100)}%
+          </div>
+        )}
+
         {producto.imagen ? (
           <Image 
             src={producto.imagen} 
@@ -206,12 +279,12 @@ export default function ProductoCard({
               backdropFilter: "blur(12px)",
               WebkitBackdropFilter: "blur(12px)",
               borderRadius: "24px",
-              height: "42px",
+              height: "44px",
               boxShadow: "0 8px 20px rgba(17,11,8,0.1)",
               border: "1.5px solid rgba(26,122,66,0.3)",
               padding: "0 4px"
             }}>
-              <button className="float-qty-btn minus" onClick={handleDec} style={{ padding: "0 10px", fontSize: "1.2rem", fontWeight: "bold" }}>&#8722;</button>
+              <button className="float-qty-btn minus" onClick={handleDec} style={{ width: "44px", height: "44px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", fontWeight: "bold" }}>&#8722;</button>
               <input 
                 type="number" 
                 value={qty || ''} 
@@ -238,7 +311,7 @@ export default function ProductoCard({
                   fontSize: "1rem"
                 }} 
               />
-              <button className="float-qty-btn plus" onClick={handleInc} style={{ padding: "0 10px", fontSize: "1.2rem", fontWeight: "bold" }}>+</button>
+              <button className="float-qty-btn plus" onClick={handleInc} style={{ width: "44px", height: "44px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", fontWeight: "bold" }}>+</button>
             </div>
           ) : (
             <button 
@@ -249,8 +322,8 @@ export default function ProductoCard({
                 color: "white",
                 border: "none",
                 borderRadius: "50%",
-                width: "38px",
-                height: "38px",
+                width: "44px",
+                height: "44px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -268,7 +341,7 @@ export default function ProductoCard({
                 e.currentTarget.style.boxShadow = "0 4px 10px rgba(232, 48, 42, 0.2)";
               }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 5v14M5 12h14"/>
               </svg>
             </button>
@@ -300,21 +373,38 @@ export default function ProductoCard({
       </div>
 
       <div className="card-body" style={{ padding: "0 4px 48px 4px", flex: 1, display: "flex", flexDirection: "column" }}>
-        <span className="card-cat-badge" style={{ 
-          background: badgeBg, 
-          color: badgeColor, 
-          fontSize: "8px", 
-          fontWeight: 800, 
-          textTransform: "uppercase", 
-          padding: "2px 6px", 
-          borderRadius: "4px", 
-          marginBottom: "6px", 
-          display: "inline-block",
-          letterSpacing: "0.5px",
-          width: "fit-content"
-        }}>
-          {producto.categoria}
-        </span>
+        <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "6px" }}>
+          <span className="card-cat-badge" style={{ 
+            background: badgeBg, 
+            color: badgeColor, 
+            fontSize: "8px", 
+            fontWeight: 800, 
+            textTransform: "uppercase", 
+            padding: "2px 6px", 
+            borderRadius: "4px", 
+            display: "inline-block",
+            letterSpacing: "0.5px",
+            width: "fit-content"
+          }}>
+            {producto.categoria}
+          </span>
+          {producto.marca && (
+            <span style={{ 
+              fontSize: "8px", 
+              fontWeight: 800, 
+              color: "var(--muted)", 
+              textTransform: "uppercase",
+              padding: "2px 6px", 
+              borderRadius: "4px", 
+              background: "var(--crema-2)",
+              display: "inline-block",
+              letterSpacing: "0.5px",
+              width: "fit-content"
+            }}>
+              {producto.marca}
+            </span>
+          )}
+        </div>
 
         <h3 className="card-name" style={{ 
           fontSize: "0.85rem", 
@@ -333,6 +423,19 @@ export default function ProductoCard({
         </h3>
 
         <div style={{ marginTop: "auto" }}>
+          {producto.precioAnterior && producto.precioAnterior > producto.precio && (
+            <div className="card-price-old" style={{ 
+              fontFamily: "var(--font-display)",
+              fontSize: "0.9rem", 
+              fontWeight: 500,
+              color: "var(--faint, #888078)", 
+              textDecoration: "line-through",
+              marginBottom: "2px",
+              lineHeight: "1"
+            }}>
+              {formatPrice(producto.precioAnterior)}
+            </div>
+          )}
           <div className="card-price" style={{ 
             fontFamily: "var(--font-display)",
             fontSize: "1.4rem", 
@@ -343,8 +446,14 @@ export default function ProductoCard({
           }}>
             {formatPrice(producto.precio)}
           </div>
-          <div style={{ fontSize: "10px", color: "var(--muted)", fontWeight: 700, textTransform: "uppercase", marginTop: "4px", letterSpacing: "0.5px" }}>
-            Unidad IVA Incl.
+          <div style={{ fontSize: "10px", color: "var(--muted)", fontWeight: 700, textTransform: "uppercase", marginTop: "4px", letterSpacing: "0.5px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4px" }}>
+            <span>Unidad IVA Incl.</span>
+            {producto.contenido && (
+              <>
+                <span style={{ color: "var(--border-2, #C8C2B8)" }}>•</span>
+                <span style={{ color: "var(--verde, #1A7A42)" }}>{producto.contenido}</span>
+              </>
+            )}
           </div>
         </div>
       </div>

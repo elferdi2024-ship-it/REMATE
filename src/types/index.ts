@@ -6,6 +6,8 @@ export interface Producto {
   imagen?: string;
   marca?: string;
   deshabilitado?: boolean;
+  precioAnterior?: number;
+  contenido?: string;
 }
 
 export interface CartItem {

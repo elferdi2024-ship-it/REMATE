@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, DM_Sans, DM_Serif_Display, Bebas_Neue } from "next/f
 import { AuthProvider } from "@/lib/auth-context";
 import { CartProvider } from "@/lib/cart-context";
 import { ToastProvider } from "@/lib/toast-context";
+import { FavoritosProvider } from "@/lib/favoritos-context";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import "./globals.css";
 
@@ -140,8 +141,10 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <ToastProvider>
-              {children}
-              <PWAInstallPrompt />
+              <FavoritosProvider>
+                {children}
+                <PWAInstallPrompt />
+              </FavoritosProvider>
             </ToastProvider>
           </CartProvider>
         </AuthProvider>

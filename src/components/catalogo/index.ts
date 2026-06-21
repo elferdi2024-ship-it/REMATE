@@ -16,3 +16,7 @@ export { default as BrandBannersRail } from "./BrandBannersRail";
 export { default as FlashOffersRail } from "./FlashOffersRail";
 export { default as CategoryOffersRail } from "./CategoryOffersRail";
 export { default as SponsoredProductsRail } from "./SponsoredProductsRail";
+export { default as BottomNavBar } from "./BottomNavBar";
+export { default as FilterSheet } from "./FilterSheet";
+export { default as ReorderRail } from "./ReorderRail";
+

@@ -23,7 +23,11 @@ import {
   FlashOffersRail,
   CategoryOffersRail,
   SponsoredProductsRail,
+  BottomNavBar,
+  FilterSheet,
+  ReorderRail,
 } from "@/components/catalogo";
+import { useFavoritos } from "@/lib/favoritos-context";
 import { useBrands } from "@/hooks/useBrands";
 import type { OfertaConfig } from "@/types/ofertas";
 
@@ -296,6 +300,14 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const searchParams = useSearchParams();
   const urlSearch = searchParams?.get("search") || "";
   const urlCategoria = searchParams?.get("categoria") || "";
+  const urlSort = searchParams?.get("sort") || "relevancia";
+  const urlMarcas = useMemo(() => {
+    const m = searchParams?.get("marcas");
+    return m ? m.split(",") : [];
+  }, [searchParams]);
+  const urlMinPrecio = Number(searchParams?.get("minPrecio")) || 0;
+  const urlMaxPrecio = Number(searchParams?.get("maxPrecio")) || 0;
+  const urlSoloOfertas = searchParams?.get("ofertas") === "true";
 
   const { items: cartItems, addItem, removeItem, updateQty, clearCart, total, totalQty } = useCart();
   const { brands } = useBrands();
@@ -303,6 +315,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const { user, signOut } = useAuth();
   const toast = useToast();
   const isOnline = useOnline();
+  const { favoritos } = useFavoritos();
 
   // Local state
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -314,16 +327,28 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [vista, setVista] = useState<Vista>("grilla");
   const [alias, setAlias] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("inicio");
 
   // Hydration fix: Load client-only data after mount
   const [mounted, setMounted] = useState(false);
   const [direccion, setDireccion] = useState("");
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
   useEffect(() => {
     setMounted(true);
     setVista(ls.getVista());
     setAlias(ls.getAlias());
     setTelefono(ls.getTelefono());
     setDireccion(ls.getDireccion());
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 1000);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   const [clientNotes, setClientNotes] = useState("");
   const [sharedCart, setSharedCart] = useState<CartItem[] | null>(null);
@@ -548,14 +573,39 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     return [...CATEGORIAS];
   }, []);
 
-  // Filter by search and category (memoized for performance)
+  // Filter by search, category, activeTab (favorites), brand, price and offers (memoized for performance)
   const filtrados = useMemo(() => {
     let result = productos.filter((p) => (p.precio || 0) > 0);
 
+    // 1. Filtrar por pestaña "Favoritos" en el BottomNav
+    if (activeTab === "favoritos") {
+      result = result.filter((p) => favoritos.includes(p.codigo));
+    }
+
+    // 2. Filtrar por categoría (URL)
     if (categoria) {
       result = result.filter((p) => p.categoria === categoria);
     }
 
+    // 3. Filtrar por marcas seleccionadas (Filtros Avanzados)
+    if (urlMarcas.length > 0) {
+      result = result.filter((p) => p.marca && urlMarcas.includes(p.marca));
+    }
+
+    // 4. Filtrar por rango de precios
+    if (urlMinPrecio > 0) {
+      result = result.filter((p) => p.precio >= urlMinPrecio);
+    }
+    if (urlMaxPrecio > 0) {
+      result = result.filter((p) => p.precio <= urlMaxPrecio);
+    }
+
+    // 5. Filtrar por solo ofertas
+    if (urlSoloOfertas) {
+      result = result.filter((p) => p.precioAnterior && p.precioAnterior > p.precio);
+    }
+
+    // 6. Filtrar por búsqueda de texto
     if (debouncedSearch.trim()) {
       const normalize = (s: string) =>
         s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -563,15 +613,53 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       const searchTerms = normalize(debouncedSearch.trim()).split(/\s+/);
       
       result = result.filter((p) => {
-        // Buscamos en nombre, codigo y tambien en la categoria (que funciona como filtro extra)
-        // Como la DB actual no tiene el campo "marca", las marcas suelen estar en el "nombre"
-        const searchableText = normalize(`${p.nombre} ${p.codigo} ${p.categoria}`);
+        const searchableText = normalize(`${p.nombre} ${p.codigo} ${p.categoria} ${p.marca || ""}`);
         return searchTerms.every((term) => searchableText.includes(term));
       });
     }
 
+    // 7. Ordenamiento (Sort)
+    if (urlSort === "precio-asc") {
+      result.sort((a, b) => a.precio - b.precio);
+    } else if (urlSort === "precio-desc") {
+      result.sort((a, b) => b.precio - a.precio);
+    } else if (urlSort === "nombre-asc") {
+      result.sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+    } else if (urlSort === "oferta-desc") {
+      result.sort((a, b) => {
+        const descA = a.precioAnterior && a.precioAnterior > a.precio ? (a.precioAnterior - a.precio) / a.precioAnterior : 0;
+        const descB = b.precioAnterior && b.precioAnterior > b.precio ? (b.precioAnterior - b.precio) / b.precioAnterior : 0;
+        return descB - descA;
+      });
+    }
+
     return result;
-  }, [productos, categoria, debouncedSearch]);
+  }, [productos, categoria, debouncedSearch, activeTab, favoritos, urlMarcas, urlMinPrecio, urlMaxPrecio, urlSoloOfertas, urlSort]);
+
+  // Marcas únicas disponibles para la categoría actual
+  const marcasDisponibles = useMemo(() => {
+    let items = productos;
+    if (categoria) {
+      items = items.filter((p) => p.categoria === categoria);
+    }
+    const marcasUnicas = new Set<string>();
+    items.forEach((p) => {
+      if (p.marca && p.marca.trim()) {
+        marcasUnicas.add(p.marca.trim());
+      }
+    });
+    return Array.from(marcasUnicas).sort();
+  }, [productos, categoria]);
+
+  // Contador de filtros activos
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (urlMarcas.length > 0) count += urlMarcas.length;
+    if (urlMinPrecio > 0) count += 1;
+    if (urlMaxPrecio > 0) count += 1;
+    if (urlSoloOfertas) count += 1;
+    return count;
+  }, [urlMarcas, urlMinPrecio, urlMaxPrecio, urlSoloOfertas]);
 
   // Instant suggestions filter for ultra-responsive live search autocomplete
   const instantSuggestions = useMemo(() => {
@@ -652,6 +740,47 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     setVista(v);
     ls.setVista(v);
   }, []);
+
+  const handleSortChange = useCallback((sort: string) => {
+    const params = new URLSearchParams(window.location.search);
+    if (sort && sort !== "relevancia") params.set("sort", sort);
+    else params.delete("sort");
+    router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+  }, [router]);
+
+  const handleMarcasChange = useCallback((marcas: string[]) => {
+    const params = new URLSearchParams(window.location.search);
+    if (marcas.length > 0) params.set("marcas", marcas.join(","));
+    else params.delete("marcas");
+    router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+  }, [router]);
+
+  const handlePrecioRangeChange = useCallback((min: number, max: number) => {
+    const params = new URLSearchParams(window.location.search);
+    if (min > 0) params.set("minPrecio", String(min));
+    else params.delete("minPrecio");
+    
+    if (max > 0 && max !== Infinity) params.set("maxPrecio", String(max));
+    else params.delete("maxPrecio");
+    
+    router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+  }, [router]);
+
+  const handleSoloOfertasChange = useCallback((val: boolean) => {
+    const params = new URLSearchParams(window.location.search);
+    if (val) params.set("ofertas", "true");
+    else params.delete("ofertas");
+    router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+  }, [router]);
+
+  const handleClearAllFilters = useCallback(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.delete("marcas");
+    params.delete("minPrecio");
+    params.delete("maxPrecio");
+    params.delete("ofertas");
+    router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+  }, [router]);
 
   const handleSaveAlias = useCallback((a: string) => {
     setAlias(a);
@@ -1306,6 +1435,14 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
       {/* Contenido del catálogo — max-width desktop */}
       <div className="page-wrapper">
+        {/* Tus Compras Frecuentes / Reorder Express */}
+        <ReorderRail
+          productos={productos}
+          pedidos={pedidos}
+          qtyMap={qtyMap}
+          onAddProduct={handleAddProduct}
+          onQtyChange={handleQtyChange}
+        />
 
         {/* Category nav */}
         {ofertasConfig?.categoryOffers && (
@@ -1343,6 +1480,10 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             onSearchChange={setSearchDebounced}
             marketAd={<AdSlotPlacement slot="results" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />}
             ofertasCount={ofertasConfig?.activa && ofertasConfig.productos ? ofertasConfig.productos.length : 0}
+            sortBy={urlSort}
+            onSortChange={handleSortChange}
+            onOpenFilters={() => setFilterSheetOpen(true)}
+            activeFiltersCount={activeFiltersCount}
           />
         </div>
 
@@ -1457,10 +1598,79 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onQuickView={(p) => setQuickViewProduct(p)}
       />
 
-      {/* User Panel */}
+      {/* Filter Sheet (Mobile Bottom Sheet) */}
+      <FilterSheet
+        isOpen={filterSheetOpen}
+        onClose={() => setFilterSheetOpen(false)}
+        marcasDisponibles={marcasDisponibles}
+        marcasSeleccionadas={urlMarcas}
+        onMarcasChange={handleMarcasChange}
+        minPrecio={urlMinPrecio}
+        maxPrecio={urlMaxPrecio}
+        onPrecioRangeChange={handlePrecioRangeChange}
+        soloOfertas={urlSoloOfertas}
+        onSoloOfertasChange={handleSoloOfertasChange}
+        onClearAll={handleClearAllFilters}
+        totalFiltrados={filtrados.length}
+      />
 
-      {/* Factura Modal (Preview & WhatsApp send) */}
-      {/* El modal de factura ya no es necesario como paso intermedio */}
+      {/* Bottom Nav Bar (Mobile) */}
+      <BottomNavBar
+        activeTab={activeTab}
+        onTabSelect={(tab) => {
+          setActiveTab(tab);
+          if (tab === "buscar") {
+            const searchInput = document.querySelector(".results-search-input") as HTMLInputElement;
+            if (searchInput) {
+              searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+              searchInput.focus();
+            }
+          } else if (tab === "inicio") {
+            const params = new URLSearchParams(window.location.search);
+            params.delete("categoria");
+            params.delete("search");
+            params.delete("marcas");
+            params.delete("minPrecio");
+            params.delete("maxPrecio");
+            params.delete("ofertas");
+            router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+          }
+        }}
+        cartQty={totalQty}
+        onOpenCart={() => setCartOpen(true)}
+        onOpenUser={() => setUserPanelOpen(true)}
+      />
+
+      {/* Scroll to Top FAB */}
+      {showScrollTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          style={{
+            position: "fixed",
+            bottom: "calc(env(safe-area-inset-bottom, 12px) + 72px)",
+            right: "20px",
+            zIndex: 90,
+            background: "var(--oscuro, #111)",
+            color: "#fff",
+            border: "none",
+            borderRadius: "50%",
+            width: "44px",
+            height: "44px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            cursor: "pointer",
+            transition: "opacity 0.2s ease, transform 0.2s ease",
+            animation: "fadeIn 0.2s ease-in-out",
+          }}
+          aria-label="Volver arriba"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="18 15 12 9 6 15" />
+          </svg>
+        </button>
+      )}
     </>
   );
 }

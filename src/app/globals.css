@@ -3367,4 +3367,128 @@ html.dark-mode body { background: var(--bg); }
   display: none;
 }
 
+/* ══════════════════════════════════════════════════════════
+   MOBILE FIRST IMPROVEMENTS & PERSISTENT NAVIGATION SUITE
+   ══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Subir el botón flotante del carrito para no colisionar con la barra de navegación inferior */
+  .float-cart {
+    bottom: 82px !important;
+    right: 16px !important;
+    left: auto !important;
+    transform: none !important;
+    border-radius: 50% !important;
+    width: 56px !important;
+    height: 56px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .float-cart span:first-child {
+    font-size: 20px !important;
+  }
+  
+  .float-cart .float-qty {
+    position: absolute !important;
+    top: -4px !important;
+    right: -4px !important;
+    background: var(--rojo, #E8302A) !important;
+    color: #fff !important;
+    border-radius: 50% !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    font-size: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 900 !important;
+    border: 2px solid #fff !important;
+    margin: 0 !important;
+  }
+
+  .float-cart .float-total {
+    display: none !important; /* Ocultar total en botón flotante mobile para evitar congestión */
+  }
+
+  /* Compactar el Hero en mobile */
+  .hero-compact {
+    height: auto !important;
+    min-height: 250px !important;
+    padding-top: 24px !important;
+    padding-bottom: 24px !important;
+  }
+
+  .hero-inner-v2 {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Ocultar elementos secundarios del Hero en mobile */
+  .hero-logo-center {
+    padding: 10px 0 !important;
+  }
+
+  .hero-inner-v2 p {
+    font-size: 0.85rem !important;
+  }
+
+  .hero-inner-v2 span.hero-eyebrow-badge {
+    font-size: 8px !important;
+  }
+
+  /* Padding inferior de la página para evitar que el BottomNavBar solape el contenido final */
+  body, .page-wrapper {
+    padding-bottom: 96px !important;
+  }
+
+  /* CatsNav sticky transitions */
+  .cats-nav-sticky {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 80 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid rgba(17, 11, 8, 0.06) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 8px 12px !important;
+  }
+
+  /* Inputs de precio sin flechas por defecto */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+/* Animaciones compartidas para las hojas móviles */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-soft-pulse {
+  animation: softPulse 2s infinite ease-in-out;
+}
+
+@keyframes softPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+
 

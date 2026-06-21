@@ -14,6 +14,10 @@ interface ResultsBarProps {
   onSearchChange?: (v: string) => void;
   marketAd?: React.ReactNode;
   ofertasCount?: number;
+  sortBy?: string;
+  onSortChange?: (val: string) => void;
+  onOpenFilters?: () => void;
+  activeFiltersCount?: number;
 }
 
 export default function ResultsBar({
@@ -25,6 +29,10 @@ export default function ResultsBar({
   onSearchChange,
   marketAd,
   ofertasCount,
+  sortBy = "relevancia",
+  onSortChange,
+  onOpenFilters,
+  activeFiltersCount = 0,
 }: ResultsBarProps) {
   const [inputValue, setInputValue] = useState(searchQuery || "");
 
@@ -144,9 +152,76 @@ export default function ResultsBar({
         </div>
       )}
 
-      {/* Contador + toggle vista */}
-      <div className="results-bar-right">
-        <span className="results-count">
+      {/* Contador + toggle vista + Ordenar + Filtros */}
+      <div className="results-bar-right" style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+        {/* Botón Filtros Avanzados (Mobile) */}
+        {onOpenFilters && (
+          <button
+            onClick={onOpenFilters}
+            className="md:hidden flex items-center gap-1.5 px-3 py-2 bg-[#F5F2EE] hover:bg-[#EDE9E3] border border-[#C8C2B8] rounded-xl text-xs font-bold text-[#3A3330] transition-colors"
+            style={{ height: "36px" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: "2px" }}>
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            </svg>
+            Filtros
+            {activeFiltersCount > 0 && (
+              <span className="bg-[#E8302A] text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                {activeFiltersCount}
+              </span>
+            )}
+          </button>
+        )}
+
+        {/* Ordenar por dropdown */}
+        {onSortChange && (
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <select
+              value={sortBy}
+              onChange={(e) => onSortChange(e.target.value)}
+              className="sort-select"
+              style={{
+                fontFamily: "var(--font-body), sans-serif",
+                fontSize: "12px",
+                fontWeight: 700,
+                color: "var(--texto, #111)",
+                padding: "6px 28px 6px 12px",
+                borderRadius: "12px",
+                border: "1.5px solid var(--border, #DDD8D0)",
+                background: "var(--bg, #fff)",
+                cursor: "pointer",
+                outline: "none",
+                appearance: "none",
+                WebkitAppearance: "none",
+                height: "36px",
+              }}
+            >
+              <option value="relevancia">Relevancia</option>
+              <option value="precio-asc">Precio: Menor a Mayor</option>
+              <option value="precio-desc">Precio: Mayor a Menor</option>
+              <option value="nombre-asc">Nombre: A-Z</option>
+              <option value="oferta-desc">Ofertas Primero</option>
+            </select>
+            <span
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                pointerEvents: "none",
+                color: "var(--muted)",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </span>
+          </div>
+        )}
+
+        <span className="results-count" style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>
           {total} items
         </span>
         <div className="view-toggle">
