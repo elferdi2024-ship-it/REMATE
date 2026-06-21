@@ -3440,7 +3440,7 @@ html.dark-mode body { background: var(--bg); }
   }
 
   /* Padding inferior de la página para evitar que el BottomNavBar solape el contenido final */
-  body, .page-wrapper {
+  body {
     padding-bottom: 96px !important;
   }
 
