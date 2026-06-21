@@ -301,6 +301,14 @@ const getTabIcon = (id: string, isSelected: boolean, cartQty: number) => {
   return iconInner;
 };
 
+interface BottomNavBarProps {
+  activeTab: string;
+  onTabSelect: (tab: string) => void;
+  cartQty: number;
+  onOpenCart: () => void;
+  onOpenUser: () => void;
+}
+
 export default function BottomNavBar({
   activeTab,
   onTabSelect,
