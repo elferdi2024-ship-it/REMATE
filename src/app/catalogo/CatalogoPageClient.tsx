@@ -1617,7 +1617,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       {/* Bottom Nav Bar (Mobile) */}
       <BottomNavBar
         activeTab={activeTab}
-        onTabSelect={(tab) => {
+        onTabSelect={(tab: string) => {
           setActiveTab(tab);
           if (tab === "buscar") {
             const searchInput = document.querySelector(".results-search-input") as HTMLInputElement;
