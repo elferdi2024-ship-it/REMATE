@@ -132,6 +132,13 @@ export default function OfertasAdmin() {
   const [spMarca, setSpMarca] = useState("");
   const [spBadge, setSpBadge] = useState("Patrocinado");
   const [spPrecioPromo, setSpPrecioPromo] = useState<number | "">("");
+  const [spMode, setSpMode] = useState<"catalogo" | "manual">("catalogo");
+  const [spManualNombre, setSpManualNombre] = useState("");
+  const [spManualMarca, setSpManualMarca] = useState("");
+  const [spManualBadge, setSpManualBadge] = useState("Patrocinado");
+  const [spManualImagen, setSpManualImagen] = useState("");
+  const [spManualUploading, setSpManualUploading] = useState(false);
+  const [spManualUploadProgress, setSpManualUploadProgress] = useState(0);
 
   // ── Category Offers state ───────────────────────────────────────────────
   const [coTitulo, setCoTitulo] = useState("");
@@ -416,16 +423,16 @@ export default function OfertasAdmin() {
       e.preventDefault();
       e.stopPropagation();
     }
-    if (!newPromoTitle.trim() || newPromoPrice === "" || newPromoQty === "" || !newPromoImage) {
-      toast.error("Por favor completa todos los campos, incluyendo la imagen.");
+    if (!newPromoTitle.trim() || !newPromoImage) {
+      toast.error("Por favor completa el título y la imagen.");
       return;
     }
 
     const newPromo: PremiumPromo = {
       id: `PREMIUM-${Date.now()}`,
       titulo: newPromoTitle.trim(),
-      cantidad: Number(newPromoQty),
-      precio: Number(newPromoPrice),
+      cantidad: newPromoQty === "" ? null : Number(newPromoQty),
+      precio: newPromoPrice === "" ? null : Number(newPromoPrice),
       imagen: newPromoImage,
       activa: true,
       sucursalId: newPromoBranch === "todas" ? null : newPromoBranch,
@@ -591,6 +598,50 @@ export default function OfertasAdmin() {
       toast.success("Producto patrocinado eliminado.");
     },
     [toast]
+  );
+
+  const handleUploadSpManualImage = useCallback(
+    (file: File) =>
+      uploadGenericImage(
+        file,
+        "sponsored-manual",
+        setSpManualUploadProgress,
+        setSpManualImagen,
+        setSpManualUploading
+      ),
+    [uploadGenericImage]
+  );
+
+  const handleAddSponsoredManual = useCallback(
+    (e?: React.MouseEvent) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (!spManualNombre.trim() || !spManualImagen) {
+        toast.error("El nombre y la imagen son obligatorios para el patrocinado manual.");
+        return;
+      }
+      const sp: SponsoredProduct = {
+        id: `SP-MANUAL-${Date.now()}`,
+        nombreProducto: spManualNombre.trim(),
+        marcaNombre: spManualMarca.trim(),
+        imagen: spManualImagen,
+        badgeTexto: spManualBadge.trim() || "Patrocinado",
+        activo: true,
+        orden: (config.sponsoredProducts || []).length,
+      };
+      setConfig((prev) => ({
+        ...prev,
+        sponsoredProducts: [...(prev.sponsoredProducts || []), sp],
+      }));
+      setSpManualNombre("");
+      setSpManualMarca("");
+      setSpManualBadge("Patrocinado");
+      setSpManualImagen("");
+      toast.success("Publicidad patrocinada agregada.");
+    },
+    [spManualNombre, spManualMarca, spManualBadge, spManualImagen, config.sponsoredProducts, toast]
   );
 
   // ── Category Offers handlers ────────────────────────────────────────────
@@ -1007,9 +1058,9 @@ export default function OfertasAdmin() {
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-[var(--admin-text-lo)] mt-2 mb-3">
-                  <span>Cant: {promo.cantidad} un.</span>
+                  <span>Cant: {promo.cantidad !== null && promo.cantidad !== undefined ? `${promo.cantidad} un.` : "-"}</span>
                   <span className="font-bold text-green-600 dark:text-green-400">
-                    ${promo.precio.toLocaleString("es-UY")}
+                    {promo.precio !== null && promo.precio !== undefined ? `$${promo.precio.toLocaleString("es-UY")}` : "Sin precio"}
                   </span>
                 </div>
 
@@ -1217,56 +1268,146 @@ export default function OfertasAdmin() {
       >
         {/* Form */}
         <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)]/50 p-4 space-y-4">
-          <h4 className="text-xs font-bold text-[var(--admin-text-hi)] uppercase tracking-wider">
-            Agregar Producto Patrocinado
-          </h4>
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <label className={LABEL_CLS}>Nombre de Marca</label>
-              <input type="text" placeholder="Marca patrocinadora" value={spMarca} onChange={(e) => setSpMarca(e.target.value)} className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Texto del Badge</label>
-              <input type="text" placeholder="Patrocinado" value={spBadge} onChange={(e) => setSpBadge(e.target.value)} className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Precio Promo (opcional)</label>
-              <input
-                type="number"
-                placeholder="Dejar vacío para precio original"
-                value={spPrecioPromo}
-                onChange={(e) => setSpPrecioPromo(e.target.value === "" ? "" : Number(e.target.value))}
-                className={INPUT_CLS}
-              />
-            </div>
+          <div className="flex gap-4 border-b border-[var(--admin-border)]/50 pb-2">
+            <button
+              type="button"
+              onClick={() => setSpMode("catalogo")}
+              className={`text-xs font-bold uppercase tracking-wider pb-1 transition-all ${
+                spMode === "catalogo"
+                  ? "text-[var(--admin-accent)] border-b-2 border-[var(--admin-accent)]"
+                  : "text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)]"
+              }`}
+            >
+              Seleccionar del Catálogo
+            </button>
+            <button
+              type="button"
+              onClick={() => setSpMode("manual")}
+              className={`text-xs font-bold uppercase tracking-wider pb-1 transition-all ${
+                spMode === "manual"
+                  ? "text-[var(--admin-accent)] border-b-2 border-[var(--admin-accent)]"
+                  : "text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)]"
+              }`}
+            >
+              Crear Patrocinado Manual (Sin Precio / Publicidad)
+            </button>
           </div>
 
-          <div>
-            <label className={LABEL_CLS}>Buscar Producto del Catálogo</label>
-            <input type="text" placeholder="Buscar por nombre o código..." value={spSearch} onChange={(e) => setSpSearch(e.target.value)} className={INPUT_CLS} />
-          </div>
+          {spMode === "catalogo" && (
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold text-[var(--admin-text-hi)] uppercase tracking-wider">
+                Agregar Producto Patrocinado desde Catálogo
+              </h4>
 
-          {spSearch.trim() && spFilteredCatalogo.length > 0 && (
-            <div className="grid gap-2 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
-              {spFilteredCatalogo.map((p) => (
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className={LABEL_CLS}>Nombre de Marca</label>
+                  <input type="text" placeholder="Marca patrocinadora" value={spMarca} onChange={(e) => setSpMarca(e.target.value)} className={INPUT_CLS} />
+                </div>
+                <div>
+                  <label className={LABEL_CLS}>Texto del Badge</label>
+                  <input type="text" placeholder="Patrocinado" value={spBadge} onChange={(e) => setSpBadge(e.target.value)} className={INPUT_CLS} />
+                </div>
+                <div>
+                  <label className={LABEL_CLS}>Precio Promo (opcional)</label>
+                  <input
+                    type="number"
+                    placeholder="Dejar vacío para precio original"
+                    value={spPrecioPromo}
+                    onChange={(e) => setSpPrecioPromo(e.target.value === "" ? "" : Number(e.target.value))}
+                    className={INPUT_CLS}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={LABEL_CLS}>Buscar Producto del Catálogo</label>
+                <input type="text" placeholder="Buscar por nombre o código..." value={spSearch} onChange={(e) => setSpSearch(e.target.value)} className={INPUT_CLS} />
+              </div>
+
+              {spSearch.trim() && spFilteredCatalogo.length > 0 && (
+                <div className="grid gap-2 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
+                  {spFilteredCatalogo.map((p) => (
+                    <button
+                      key={p.codigo}
+                      onClick={() => handleAddSponsoredProduct(p)}
+                      className="flex items-center justify-between gap-3 rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-3 text-left hover:bg-[var(--admin-input-bg)] hover:border-[var(--admin-accent)]/20 transition-all group"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-[var(--admin-text-hi)] truncate">{p.nombre}</p>
+                        <p className="text-xs text-[var(--admin-text-lo)]">{p.codigo} · {p.categoria}</p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-sm font-bold text-[var(--admin-text-hi)]">${p.precio.toLocaleString("es-UY")}</span>
+                        <span className="rounded-lg bg-[var(--admin-accent)]/10 px-2.5 py-1 text-xs font-bold text-[var(--admin-accent)] opacity-0 group-hover:opacity-100 transition-opacity">
+                          + Patrocinar
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {spMode === "manual" && (
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold text-[var(--admin-text-hi)] uppercase tracking-wider">
+                Agregar Producto Patrocinado Manual (Sin Precio / Publicidad)
+              </h4>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className={LABEL_CLS}>Nombre de la Publicidad / Producto</label>
+                  <input type="text" placeholder="Ej. Coca-Cola 1.5L Promo" value={spManualNombre} onChange={(e) => setSpManualNombre(e.target.value)} className={INPUT_CLS} />
+                </div>
+                <div>
+                  <label className={LABEL_CLS}>Marca Patrocinadora</label>
+                  <input type="text" placeholder="Ej. Coca-Cola" value={spManualMarca} onChange={(e) => setSpManualMarca(e.target.value)} className={INPUT_CLS} />
+                </div>
+                <div>
+                  <label className={LABEL_CLS}>Texto del Badge</label>
+                  <input type="text" placeholder="Patrocinado" value={spManualBadge} onChange={(e) => setSpManualBadge(e.target.value)} className={INPUT_CLS} />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center gap-4">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)] shrink-0">
+                      📷 {spManualUploading ? "Subiendo..." : "Subir Imagen Publicitaria"}
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        disabled={spManualUploading}
+                        onChange={(e) => e.target.files?.[0] && handleUploadSpManualImage(e.target.files[0])}
+                      />
+                    </label>
+                    {spManualUploading && (
+                      <span className="text-xs text-[var(--admin-accent)] font-semibold">
+                        Subiendo... {Math.round(spManualUploadProgress)}%
+                      </span>
+                    )}
+                    {spManualImagen && !spManualUploading && (
+                      <div className="flex items-center gap-2">
+                        <div className="relative w-12 h-12 rounded-lg border border-[var(--admin-border)] overflow-hidden">
+                          <img src={spManualImagen} alt="Preview" className="object-cover w-full h-full" />
+                        </div>
+                        <span className="text-xs text-green-500 font-medium">✓ Imagen cargada</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <button
-                  key={p.codigo}
-                  onClick={() => handleAddSponsoredProduct(p)}
-                  className="flex items-center justify-between gap-3 rounded-xl bg-[var(--admin-bg)] border border-[var(--admin-border)] px-4 py-3 text-left hover:bg-[var(--admin-input-bg)] hover:border-[var(--admin-accent)]/20 transition-all group"
+                  type="button"
+                  onClick={(e) => handleAddSponsoredManual(e)}
+                  className="rounded-xl bg-[var(--admin-accent)] px-5 py-2.5 text-xs font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 shrink-0"
                 >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-[var(--admin-text-hi)] truncate">{p.nombre}</p>
-                    <p className="text-xs text-[var(--admin-text-lo)]">{p.codigo} · {p.categoria}</p>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-sm font-bold text-[var(--admin-text-hi)]">${p.precio.toLocaleString("es-UY")}</span>
-                    <span className="rounded-lg bg-[var(--admin-accent)]/10 px-2.5 py-1 text-xs font-bold text-[var(--admin-accent)] opacity-0 group-hover:opacity-100 transition-opacity">
-                      + Patrocinar
-                    </span>
-                  </div>
+                  ＋ Agregar Patrocinado Manual
                 </button>
-              ))}
+              </div>
             </div>
           )}
         </div>
@@ -1293,7 +1434,7 @@ export default function OfertasAdmin() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-[var(--admin-text-hi)] truncate">{sp.nombreProducto}</p>
                   <p className="text-xs text-[var(--admin-text-lo)]">
-                    {sp.codigoProducto} · {sp.marcaNombre && <span className="text-[var(--admin-accent)]">{sp.marcaNombre}</span>}
+                    {sp.codigoProducto ? `${sp.codigoProducto} · ` : ""}{sp.marcaNombre && <span className="text-[var(--admin-accent)]">{sp.marcaNombre}</span>}
                   </p>
                 </div>
                 <span className="rounded-lg bg-purple-500/15 px-2.5 py-1 text-[10px] font-black text-purple-500 shrink-0 uppercase">
@@ -1302,7 +1443,11 @@ export default function OfertasAdmin() {
                 <div className="text-center shrink-0">
                   <p className="text-[10px] font-bold text-[var(--admin-text-lo)]">Precio</p>
                   <p className="text-sm font-bold text-[var(--admin-text-hi)]">
-                    ${(sp.precioPromo ?? sp.precioOriginal).toLocaleString("es-UY")}
+                    {sp.precioOriginal !== undefined && sp.precioOriginal !== null ? (
+                      `$${(sp.precioPromo ?? sp.precioOriginal).toLocaleString("es-UY")}`
+                    ) : (
+                      "Sin precio"
+                    )}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

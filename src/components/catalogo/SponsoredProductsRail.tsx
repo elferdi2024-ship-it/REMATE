@@ -21,9 +21,9 @@ export default function SponsoredProductsRail({ products = [] }: SponsoredProduc
     .sort((a, b) => (a.orden || 0) - (b.orden || 0));
 
   const handleAddToCart = (p: SponsoredProduct) => {
-    const finalPrice = p.precioPromo || p.precioOriginal;
+    const finalPrice = p.precioPromo || p.precioOriginal || 0;
     addItem({
-      codigo: p.codigoProducto,
+      codigo: p.codigoProducto || `SP-MANUAL-${p.id}`,
       nombre: p.nombreProducto,
       precio: finalPrice,
     });
@@ -72,8 +72,9 @@ export default function SponsoredProductsRail({ products = [] }: SponsoredProduc
         }}
       >
         {activeProducts.map((p) => {
-          const finalPrice = p.precioPromo || p.precioOriginal;
-          const hasDiscount = p.precioPromo && p.precioPromo < p.precioOriginal;
+          const hasPrice = p.precioOriginal !== undefined && p.precioOriginal !== null && p.precioOriginal > 0;
+          const finalPrice = p.precioPromo || p.precioOriginal || 0;
+          const hasDiscount = p.precioPromo && p.precioOriginal && p.precioPromo < p.precioOriginal;
 
           return (
             <div
@@ -150,53 +151,59 @@ export default function SponsoredProductsRail({ products = [] }: SponsoredProduc
               </h4>
 
               {/* Price */}
-              <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "12px", marginTop: "auto" }}>
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 900,
-                    color: "#22C55E",
-                    fontFamily: "var(--font-display)",
-                  }}
-                >
-                  ${finalPrice.toLocaleString("es-UY")}
-                </span>
-                {hasDiscount && (
+              {hasPrice && (
+                <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "12px", marginTop: "auto" }}>
                   <span
                     style={{
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      color: "rgba(255,255,255,0.25)",
-                      textDecoration: "line-through",
+                      fontSize: "18px",
+                      fontWeight: 900,
+                      color: "#22C55E",
+                      fontFamily: "var(--font-display)",
                     }}
                   >
-                    ${p.precioOriginal.toLocaleString("es-UY")}
+                    ${finalPrice.toLocaleString("es-UY")}
                   </span>
-                )}
-              </div>
+                  {hasDiscount && (
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: "rgba(255,255,255,0.25)",
+                        textDecoration: "line-through",
+                      }}
+                    >
+                      ${p.precioOriginal!.toLocaleString("es-UY")}
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* Add button */}
-              <button
-                onClick={() => handleAddToCart(p)}
-                disabled={addedMap[p.id]}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  borderRadius: "10px",
-                  border: "none",
-                  background: addedMap[p.id] ? "#22C55E" : "rgba(255,255,255,0.06)",
-                  borderStyle: addedMap[p.id] ? "none" : "solid",
-                  borderWidth: addedMap[p.id] ? 0 : "1px",
-                  borderColor: "rgba(255,255,255,0.15)",
-                  color: "#fff",
-                  fontSize: "12px",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                  transition: "background 0.2s",
-                }}
-              >
-                {addedMap[p.id] ? "✓ Agregado" : "Agregar"}
-              </button>
+              {hasPrice ? (
+                <button
+                  onClick={() => handleAddToCart(p)}
+                  disabled={addedMap[p.id]}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    borderRadius: "10px",
+                    border: "none",
+                    background: addedMap[p.id] ? "#22C55E" : "rgba(255,255,255,0.06)",
+                    borderStyle: addedMap[p.id] ? "none" : "solid",
+                    borderWidth: addedMap[p.id] ? 0 : "1px",
+                    borderColor: "rgba(255,255,255,0.15)",
+                    color: "#fff",
+                    fontSize: "12px",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    transition: "background 0.2s",
+                  }}
+                >
+                  {addedMap[p.id] ? "✓ Agregado" : "Agregar"}
+                </button>
+              ) : (
+                <div style={{ marginTop: "auto" }} />
+              )}
             </div>
           );
         })}

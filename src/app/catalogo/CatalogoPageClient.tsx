@@ -717,7 +717,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             const promo = ofertasConfig?.premiumPromos?.find((p) => p.id === promoId);
             if (promo) {
               nombre = promo.titulo;
-              precio = promo.precio;
+              precio = promo.precio ?? 0;
             }
           } else {
             const prod = productos.find((p) => p.codigo === codigo);
@@ -1336,6 +1336,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 no-scrollbar snap-x snap-mandatory">
               {promosVisibles.map((promo) => {
                 const inCartQty = qtyMap[`PROMO-${promo.id}`] || 0;
+                const hasPrice = promo.precio !== null && promo.precio !== undefined && promo.precio > 0;
                 return (
                   <div
                     key={promo.id}
@@ -1343,7 +1344,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
                   >
                     {/* Badge de Oferta Premium */}
                     <div className="absolute top-3 left-3 z-20 bg-gradient-to-r from-red-600 to-amber-500 text-white text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-lg shadow-md animate-pulse">
-                      🔥 SUPER OFERTA
+                      {hasPrice ? "🔥 SUPER OFERTA" : "⭐ DESTACADO"}
                     </div>
 
                     {/* Imagen 1:1 Completa con Zoom al Hover */}
@@ -1360,44 +1361,48 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
                     {/* Barra de control flotante inferior traslúcida */}
                     <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent p-4 pt-12 flex items-center justify-between z-10">
                       <div className="flex flex-col min-w-0 pr-2">
-                        <span className="text-white font-black text-xl tracking-tight leading-none">
-                          ${promo.precio.toLocaleString("es-UY")}
-                        </span>
+                        {hasPrice && (
+                          <span className="text-white font-black text-xl tracking-tight leading-none">
+                            ${promo.precio!.toLocaleString("es-UY")}
+                          </span>
+                        )}
                         <span className="text-[10px] text-zinc-300 font-bold uppercase tracking-wider mt-1 truncate max-w-[150px] sm:max-w-none">
                           {promo.titulo}
                         </span>
                       </div>
 
                       {/* Botón de compra / Control de cantidad */}
-                      {inCartQty > 0 ? (
-                        <div className="flex items-center gap-3.5 bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-3 py-2 text-white font-bold shrink-0 shadow-lg">
+                      {hasPrice && (
+                        inCartQty > 0 ? (
+                          <div className="flex items-center gap-3.5 bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-3 py-2 text-white font-bold shrink-0 shadow-lg">
+                            <button
+                              onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty - 1)}
+                              className="hover:text-red-500 text-sm font-black px-1.5 transition-colors"
+                            >
+                              -
+                            </button>
+                            <span className="text-xs tracking-tight font-black">{inCartQty}</span>
+                            <button
+                              onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty + 1)}
+                              className="hover:text-green-500 text-sm font-black px-1.5 transition-colors"
+                            >
+                              +
+                            </button>
+                          </div>
+                        ) : (
                           <button
-                            onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty - 1)}
-                            className="hover:text-red-500 text-sm font-black px-1.5 transition-colors"
+                            onClick={(e) => handleAddProduct({
+                              codigo: `PROMO-${promo.id}`,
+                              nombre: promo.titulo,
+                              precio: promo.precio!,
+                              categoria: "OFERTAS PREMIUM",
+                              imagen: promo.imagen,
+                            }, e)}
+                            className="bg-gradient-to-r from-[#E8302A] to-[#B91C1C] hover:from-[#FF4D47] hover:to-[#D32F2F] text-white font-extrabold text-[10px] px-4 py-2.5 rounded-xl shadow-[0_4px_12px_rgba(232,48,42,0.35)] transition-all hover:scale-105 active:scale-95 uppercase tracking-wider shrink-0"
                           >
-                            -
+                            Llevar
                           </button>
-                          <span className="text-xs tracking-tight font-black">{inCartQty}</span>
-                          <button
-                            onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty + 1)}
-                            className="hover:text-green-500 text-sm font-black px-1.5 transition-colors"
-                          >
-                            +
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={(e) => handleAddProduct({
-                            codigo: `PROMO-${promo.id}`,
-                            nombre: promo.titulo,
-                            precio: promo.precio,
-                            categoria: "OFERTAS PREMIUM",
-                            imagen: promo.imagen,
-                          }, e)}
-                          className="bg-gradient-to-r from-[#E8302A] to-[#B91C1C] hover:from-[#FF4D47] hover:to-[#D32F2F] text-white font-extrabold text-[10px] px-4 py-2.5 rounded-xl shadow-[0_4px_12px_rgba(232,48,42,0.35)] transition-all hover:scale-105 active:scale-95 uppercase tracking-wider shrink-0"
-                        >
-                          Llevar
-                        </button>
+                        )
                       )}
                     </div>
                   </div>

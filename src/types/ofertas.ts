@@ -12,8 +12,8 @@ export interface OfertaProducto {
 export interface PremiumPromo {
   id: string;
   titulo: string;
-  cantidad: number;
-  precio: number;
+  cantidad: number | null;
+  precio: number | null;
   imagen: string;
   activa: boolean;
   sucursalId?: string | null;
@@ -39,11 +39,11 @@ export interface BrandBanner {
 /** Producto patrocinado — posición preferencial en grilla */
 export interface SponsoredProduct {
   id: string;
-  codigoProducto: string;
+  codigoProducto?: string;
   nombreProducto: string;
   marcaNombre: string;
-  precioOriginal: number;
-  precioPromo?: number;
+  precioOriginal?: number | null;
+  precioPromo?: number | null;
   imagen?: string;
   badgeTexto: string;
   activo: boolean;
