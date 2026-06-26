@@ -858,12 +858,12 @@ html.dark-mode body { background: var(--bg); }
   margin-bottom: 14px;
 }
 .cat-section-title {
-  font-family: var(--font-display), sans-serif;
-  font-size: 1.4rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: 1.15rem;
   color: var(--oscuro);
   margin: 0;
-  letter-spacing: -0.3px;
-  font-weight: 800;
+  letter-spacing: -0.1px;
+  font-weight: 700;
   white-space: normal;
 }
 .cat-section-divider {
@@ -2885,9 +2885,6 @@ html.dark-mode body { background: var(--bg); }
 }
 .cat-section-header {
   margin-bottom: 6px;
-}
-.cat-section-title {
-  letter-spacing: 0.2px;
 }
 .cat-section-count {
   background: #f2e2d9;

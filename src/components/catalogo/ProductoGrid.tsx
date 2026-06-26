@@ -394,7 +394,7 @@ export default function ProductoGrid({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", minWidth: 0, flex: "1 1 auto" }}>
-                  <h2 className="cat-section-title">{cat}</h2>
+                  <h2 className="cat-section-title">{cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}</h2>
                   <span className="cat-section-count">
                     {catProds.length} {catProds.length === 1 ? 'item' : 'items'}
                   </span>
