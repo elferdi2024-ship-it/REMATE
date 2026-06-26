@@ -322,7 +322,13 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   
   const scrollToGrid = () => {
     if (gridRef.current) {
-      gridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const rect = gridRef.current.getBoundingClientRect();
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const targetY = rect.top + scrollTop - 100; // offset sticky navigation bar
+      window.scrollTo({
+        top: Math.max(0, targetY),
+        behavior: "smooth"
+      });
     }
   };
 
@@ -485,7 +491,13 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       setTimeout(() => {
         const searchInput = document.querySelector(".results-search-input") as HTMLInputElement;
         if (searchInput) {
-          searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+          const rect = searchInput.getBoundingClientRect();
+          const scrollTop = window.scrollY || document.documentElement.scrollTop;
+          const targetY = rect.top + scrollTop - (window.innerHeight / 2) + (rect.height / 2);
+          window.scrollTo({
+            top: Math.max(0, targetY),
+            behavior: "smooth"
+          });
           searchInput.focus();
         }
       }, 300);
@@ -1699,7 +1711,13 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           if (tab === "buscar") {
             const searchInput = document.querySelector(".results-search-input") as HTMLInputElement;
             if (searchInput) {
-              searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+              const rect = searchInput.getBoundingClientRect();
+              const scrollTop = window.scrollY || document.documentElement.scrollTop;
+              const targetY = rect.top + scrollTop - (window.innerHeight / 2) + (rect.height / 2);
+              window.scrollTo({
+                top: Math.max(0, targetY),
+                behavior: "smooth"
+              });
               searchInput.focus();
             }
           } else if (tab === "inicio") {

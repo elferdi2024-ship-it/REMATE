@@ -200,8 +200,8 @@ export default function Buscador({
           type="text"
           className={
             variant === "light"
-              ? "w-full py-2.5 pl-11 pr-20 bg-white border border-stone-200 focus:border-[#E8302A] rounded-full text-stone-800 placeholder-stone-400 font-semibold text-sm outline-none transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] focus:shadow-[0_4px_16px_rgba(232,48,42,0.06)]"
-              : "buscador-input"
+              ? "results-search-input w-full py-2.5 pl-11 pr-20 bg-white border border-stone-200 focus:border-[#E8302A] rounded-full text-stone-800 placeholder-stone-400 font-semibold text-sm outline-none transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] focus:shadow-[0_4px_16px_rgba(232,48,42,0.06)]"
+              : "results-search-input buscador-input"
           }
           placeholder={placeholder}
           value={inputValue}
