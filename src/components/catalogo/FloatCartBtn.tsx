@@ -24,11 +24,13 @@ export default function FloatCartBtn({
 
   return (
     <button
-      className={`float-cart ${hasItems ? "has-items" : ""}`}
+      className={`float-cart float-cart-btn ${hasItems ? "has-items" : ""}`}
       onClick={onClick}
       aria-label="Abrir carrito"
     >
-      <span>&#128722; Pedido</span>
+      <span>
+        &#128722;<span className="float-cart-text"> Pedido</span>
+      </span>
       {hasItems && <span className="float-qty">{totalQty}</span>}
       {hasItems && <span className="float-total">{formatPrice(total)}</span>}
     </button>

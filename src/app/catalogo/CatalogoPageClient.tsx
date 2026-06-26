@@ -1740,6 +1740,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       {showScrollTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className={`scroll-to-top-btn ${totalQty > 0 ? "has-cart" : ""}`}
           style={{
             position: "fixed",
             bottom: "calc(env(safe-area-inset-bottom, 12px) + 72px)",
@@ -1756,7 +1757,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             justifyContent: "center",
             boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
             cursor: "pointer",
-            transition: "opacity 0.2s ease, transform 0.2s ease",
+            transition: "bottom 0.3s ease, opacity 0.2s ease, transform 0.2s ease",
             animation: "fadeIn 0.2s ease-in-out",
           }}
           aria-label="Volver arriba"

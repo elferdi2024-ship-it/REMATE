@@ -1550,6 +1550,10 @@ html.dark-mode body { background: var(--bg); }
 .float-cart.has-items { transform: translateX(-50%) translateY(0); opacity: 1; }
 .float-cart:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.50); }
 
+.float-cart-text {
+  margin-left: 6px;
+}
+
 .float-qty {
   background: var(--rojo); color: #fff;
   border-radius: 50%; width: 20px; height: 20px;
@@ -3419,6 +3423,14 @@ html.dark-mode body { background: var(--bg); }
 
   .float-cart .float-total {
     display: none !important; /* Ocultar total en botón flotante mobile para evitar congestión */
+  }
+
+  .float-cart-text {
+    display: none !important;
+  }
+
+  .scroll-to-top-btn.has-cart {
+    bottom: calc(env(safe-area-inset-bottom, 12px) + 146px) !important;
   }
 
   /* Compactar el Hero en mobile */
