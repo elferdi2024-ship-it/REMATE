@@ -864,7 +864,7 @@ html.dark-mode body { background: var(--bg); }
   margin: 0;
   letter-spacing: -0.3px;
   font-weight: 800;
-  white-space: nowrap;
+  white-space: normal;
 }
 .cat-section-divider {
   flex: 1;
@@ -879,6 +879,7 @@ html.dark-mode body { background: var(--bg); }
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ── Cat carousel — horizontal scroll ── */

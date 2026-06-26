@@ -373,35 +373,74 @@ export default function ProductoGrid({
             onSelectBrand={onSelectBrand}
           >
             <section className="cat-section">
-              <div className="cat-section-header" style={
-                isSponsoredCategory ? {
-                  background: `linear-gradient(90deg, ${adBrand.color || 'var(--primary-color)'}18 0%, transparent 60%)`,
-                  borderLeft: `4px solid ${adBrand.color || 'var(--primary-color)'}`,
-                  padding: "12px 16px",
-                  borderRadius: "0 8px 8px 0",
+              <div 
+                className="cat-section-header" 
+                style={{
                   display: "flex",
-                  alignItems: "center"
-                } : {}
-              }>
-                <h2 className="cat-section-title">{cat}</h2>
-                <div className="cat-section-divider" style={{ display: isSponsoredCategory ? "none" : "block" }} />
-                {isSponsoredCategory ? (
-                  <span style={{ fontSize: "11px", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6, fontWeight: 600, marginLeft: "auto" }}>
-                    PRESENTADO POR
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "10px",
+                  marginBottom: "12px",
+                  paddingBottom: "8px",
+                  borderBottom: "1.5px solid rgba(17,11,8,0.06)",
+                  ...(isSponsoredCategory ? {
+                    background: `linear-gradient(90deg, ${adBrand.color || 'var(--primary-color)'}12 0%, transparent 100%)`,
+                    borderLeft: `4px solid ${adBrand.color || 'var(--primary-color)'}`,
+                    padding: "10px 16px 10px 12px",
+                    borderRadius: "0 12px 12px 0",
+                    borderBottom: "none",
+                  } : {})
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", minWidth: 0, flex: "1 1 auto" }}>
+                  <h2 className="cat-section-title">{cat}</h2>
+                  <span className="cat-section-count">
+                    {catProds.length} {catProds.length === 1 ? 'item' : 'items'}
+                  </span>
+                </div>
+                {isSponsoredCategory && (
+                  <div 
+                    style={{ 
+                      fontSize: "10px", 
+                      color: "var(--muted)", 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: "6px", 
+                      fontWeight: 800, 
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                      marginLeft: "auto",
+                      flexShrink: 0
+                    }}
+                  >
+                    <span>Presentado por</span>
                     {adBrand.logoUrl ? (
-                      <span style={{ position: "relative", width: 64, height: 20, display: "inline-block" }}>
+                      <span style={{ position: "relative", width: 68, height: 20, display: "inline-block", background: "rgba(255,255,255,0.45)", borderRadius: "4px", padding: "2px", border: "1px solid rgba(0,0,0,0.04)" }}>
                         <Image
                           src={adBrand.logoUrl}
                           alt={adBrand.name}
                           fill
-                          sizes="64px"
-                          style={{ objectFit: "contain" }}
+                          sizes="68px"
+                          style={{ objectFit: "contain", padding: "1px" }}
                         />
                       </span>
-                    ) : adBrand.name}
-                  </span>
-                ) : (
-                  <span className="cat-section-count">{catProds.length} items</span>
+                    ) : (
+                      <span 
+                        style={{ 
+                          background: adBrand.color || '#E8302A', 
+                          color: "#fff", 
+                          padding: "3px 8px", 
+                          borderRadius: "4px", 
+                          fontSize: "9px", 
+                          fontWeight: 900,
+                          letterSpacing: "0.5px"
+                        }}
+                      >
+                        {adBrand.name}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
               <CategoryCarousel
