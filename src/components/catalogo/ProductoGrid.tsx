@@ -4,6 +4,7 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import type { Producto, Vista } from "@/types";
+import { EMOJI_POR_CATEGORIA } from "@/types";
 import ProductoCard from "./ProductoCard";
 import ProductoRow from "./ProductoRow";
 import { BrandSpotlight, BrandVideoCard, SponsoredBanner, SponsoredProduct, NativeStoryCard, FlashDealCard } from "@/components/ads";
@@ -22,6 +23,7 @@ interface ProductoGridProps {
   onQtyChange: (codigo: string, qty: number) => void;
   onQuickView?: (producto: Producto) => void;
   onSelectBrand?: (brandName: string) => void;
+  onSelectCategory?: (category: string) => void;
 }
 
 /**
@@ -301,6 +303,7 @@ export default function ProductoGrid({
   onQtyChange,
   onQuickView,
   onSelectBrand,
+  onSelectCategory,
 }: ProductoGridProps) {
   const [columns, setColumns] = useState(2);
   const { brands } = useBrands();
@@ -394,7 +397,25 @@ export default function ProductoGrid({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", minWidth: 0, flex: "1 1 auto" }}>
-                  <h2 className="cat-section-title">{cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}</h2>
+                  <button
+                    onClick={() => onSelectCategory?.(cat)}
+                    disabled={!onSelectCategory}
+                    className={`group flex items-center gap-2 bg-stone-50 border border-stone-200/80 rounded-full px-3.5 py-1.5 transition-all text-left shadow-[0_2px_6px_rgba(0,0,0,0.02)] active:scale-95 outline-none ${
+                      onSelectCategory ? 'hover:bg-[#E8302A]/5 hover:border-[#E8302A]/20 hover:shadow-[0_4px_12px_rgba(232,48,42,0.06)] cursor-pointer' : 'cursor-default'
+                    }`}
+                  >
+                    <span className="text-sm shrink-0 bg-white border border-stone-200 shadow-sm w-7 h-7 rounded-full flex items-center justify-center transition-transform group-hover:scale-110">
+                      {EMOJI_POR_CATEGORIA[cat] || "📦"}
+                    </span>
+                    <h2 className="cat-section-title transition-colors group-hover:text-[#E8302A]">
+                      {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
+                    </h2>
+                    {onSelectCategory && (
+                      <span className="text-stone-400 group-hover:text-[#E8302A] text-xs font-black transition-all group-hover:translate-x-0.5">
+                        ➔
+                      </span>
+                    )}
+                  </button>
                   <span className="cat-section-count">
                     {catProds.length} {catProds.length === 1 ? 'item' : 'items'}
                   </span>

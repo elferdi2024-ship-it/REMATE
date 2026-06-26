@@ -1595,6 +1595,13 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             onQtyChange={handleQtyChange}
             onQuickView={(p) => setQuickViewProduct(p)}
             onSelectBrand={handleBrandFilter}
+            onSelectCategory={(cat) => {
+              const params = new URLSearchParams(window.location.search);
+              if (cat === "Todos") params.delete("categoria");
+              else params.set("categoria", cat);
+              router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+              scrollToGrid();
+            }}
           />
         )}
       </div>
