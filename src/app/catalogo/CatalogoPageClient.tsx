@@ -284,6 +284,37 @@ function getSemanticDomain(product: Producto): SemanticDomain {
   return "general_food";
 }
 
+function PremiumCountdown({ expiresAt }: { expiresAt: string }) {
+  const [remaining, setRemaining] = useState(() =>
+    Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000))
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const diff = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+      setRemaining(diff);
+      if (diff <= 0) clearInterval(interval);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+
+  if (remaining <= 0) return null;
+
+  const h = Math.floor(remaining / 3600);
+  const m = Math.floor((remaining % 3600) / 60);
+  const s = remaining % 60;
+  const isUrgent = remaining < 3600;
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 bg-[#E8302A]/10 border border-[#E8302A]/25 rounded-lg px-2.5 py-1 text-xs font-black text-[#E8302A] tracking-wider font-mono shrink-0 ${
+        isUrgent ? "animate-pulse" : ""
+      }`}
+    >
+      ⏱ {String(h).padStart(2, "0")}:{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
+    </span>
+  );
+}
 
 export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Refs para Auto-Scroll
@@ -1351,12 +1382,13 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
               }
             `}</style>
 
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", width: "100%" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", width: "100%", flexWrap: "wrap", gap: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                 <span style={{ fontSize: "20px" }}>⭐</span>
                 <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "1.5px", color: "var(--oscuro, #1A1410)", fontFamily: "var(--font-display)" }}>
                   Ofertas Súper Destacadas Premium
                 </h3>
+                {ofertasConfig?.expiresAt && <PremiumCountdown expiresAt={ofertasConfig.expiresAt} />}
               </div>
               <span className="md:hidden text-[9px] font-black text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full uppercase tracking-widest animate-pulse flex items-center gap-1 shrink-0">
                 Deslizar ➔
@@ -1520,6 +1552,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             onSortChange={handleSortChange}
             onOpenFilters={() => setFilterSheetOpen(true)}
             activeFiltersCount={activeFiltersCount}
+            suggestedProducts={instantSuggestions}
+            onSelectSuggestion={handleSelectSuggestion}
           />
         </div>
 

@@ -1,7 +1,7 @@
 "use client";
 // filepath: src/components/catalogo/FilterSheet.tsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface FilterSheetProps {
   isOpen: boolean;
@@ -34,11 +34,50 @@ export default function FilterSheet({
 }: FilterSheetProps) {
   const [localMin, setLocalMin] = useState<string>(minPrecio ? String(minPrecio) : "");
   const [localMax, setLocalMax] = useState<string>(maxPrecio ? String(maxPrecio) : "");
+  const sheetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLocalMin(minPrecio ? String(minPrecio) : "");
     setLocalMax(maxPrecio ? String(maxPrecio) : "");
   }, [minPrecio, maxPrecio]);
+
+  // Focus trap and Escape key listener
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Set focus on open
+    sheetRef.current?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+      if (e.key === "Tab") {
+        if (!sheetRef.current) return;
+        const focusableElements = sheetRef.current.querySelectorAll(
+          'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]'
+        );
+        if (focusableElements.length === 0) return;
+        const first = focusableElements[0] as HTMLElement;
+        const last = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            last.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === last) {
+            first.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -89,7 +128,12 @@ export default function FilterSheet({
 
       {/* Sheet Content */}
       <div
-        className="filter-sheet"
+        ref={sheetRef}
+        tabIndex={-1}
+        className="filter-sheet outline-none"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="filters-title"
         style={{
           position: "relative",
           zIndex: 1,
@@ -137,6 +181,7 @@ export default function FilterSheet({
         >
           <div>
             <h3
+              id="filters-title"
               style={{
                 margin: 0,
                 fontSize: "1.1rem",
@@ -151,20 +196,49 @@ export default function FilterSheet({
               {totalFiltrados} productos encontrados
             </span>
           </div>
-          <button
-            onClick={handleClear}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "var(--rojo, #E8302A)",
-              fontSize: "12px",
-              fontWeight: 800,
-              cursor: "pointer",
-              padding: "4px 8px",
-            }}
-          >
-            Limpiar todo
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <button
+              onClick={handleClear}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "var(--rojo, #E8302A)",
+                fontSize: "12px",
+                fontWeight: 800,
+                cursor: "pointer",
+                padding: "4px 8px",
+              }}
+            >
+              Limpiar todo
+            </button>
+            <button
+              onClick={onClose}
+              aria-label="Cerrar filtros"
+              style={{
+                background: "rgba(0,0,0,0.04)",
+                border: "none",
+                borderRadius: "50%",
+                width: "28px",
+                height: "28px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--oscuro, #111)",
+                fontWeight: "bold",
+                fontSize: "14px",
+                cursor: "pointer",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(0,0,0,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(0,0,0,0.04)";
+              }}
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* Body Scroll */}
@@ -183,8 +257,13 @@ export default function FilterSheet({
             }}
           >
             <div>
-              <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--oscuro)", display: "block" }}>
+              <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--oscuro)", display: "flex", alignItems: "center", gap: "6px" }}>
                 🔥 Solo Ofertas
+                {soloOfertas && (
+                  <span className="text-[9px] bg-red-600 text-white font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider animate-pulse">
+                    Activo
+                  </span>
+                )}
               </span>
               <span style={{ fontSize: "11px", color: "var(--muted)", fontWeight: 600 }}>
                 Ver productos con descuento activo
@@ -192,6 +271,7 @@ export default function FilterSheet({
             </div>
             <button
               onClick={() => onSoloOfertasChange(!soloOfertas)}
+              aria-label="Alternar mostrar solo ofertas"
               style={{
                 width: "48px",
                 height: "28px",
@@ -229,9 +309,17 @@ export default function FilterSheet({
                 textTransform: "uppercase",
                 letterSpacing: "0.5px",
                 color: "var(--oscuro)",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px"
               }}
             >
-              Rango de Precio ($)
+              <span>Rango de Precio ($)</span>
+              {(localMin !== "" || localMax !== "") && (
+                <span className="text-[9px] bg-amber-500 text-black font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider">
+                  Filtrado
+                </span>
+              )}
             </h4>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div style={{ flex: 1, position: "relative" }}>
@@ -311,9 +399,17 @@ export default function FilterSheet({
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
                   color: "var(--oscuro)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px"
                 }}
               >
-                Filtrar por Marca
+                <span>Filtrar por Marca</span>
+                {marcasSeleccionadas.length > 0 && (
+                  <span className="text-[9px] bg-[#E8302A] text-white font-black px-2 py-0.5 rounded-full">
+                    {marcasSeleccionadas.length}
+                  </span>
+                )}
               </h4>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {marcasDisponibles.map((brand) => {
