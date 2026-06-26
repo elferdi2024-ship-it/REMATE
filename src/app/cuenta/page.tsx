@@ -10,6 +10,8 @@ import { useListas } from "@/hooks/useListas";
 import AuthForm from "@/components/usuario/AuthForm";
 import { guardarPedidoUsuario } from "@/lib/pedidos";
 import * as ls from "@/lib/ls";
+import { useCart } from "@/lib/cart-context";
+import BottomNavBar from "@/components/catalogo/BottomNavBar";
 
 interface LSPedido {
   fecha: string;
@@ -28,6 +30,7 @@ import { timeAgo } from "@/lib/format";
 
 export default function CuentaPage() {
   const router = useRouter();
+  const { totalQty } = useCart();
   const { user, loading: authLoading, signOut } = useAuth();
   const toast = useToast();
   const { pedidos } = usePedidosCloud();
@@ -510,6 +513,23 @@ export default function CuentaPage() {
           Cerrar sesion
         </button>
       </main>
+
+      {/* Navigation Bar (Mobile) */}
+      <BottomNavBar
+        activeTab="cuenta"
+        onTabSelect={(tab: string) => {
+          if (tab === "buscar") {
+            router.push("/catalogo?focusSearch=true");
+          } else if (tab === "favoritos") {
+            router.push("/catalogo?tab=favoritos");
+          } else if (tab === "inicio") {
+            router.push("/");
+          }
+        }}
+        cartQty={totalQty}
+        onOpenCart={() => router.push("/catalogo?openCart=true")}
+        onOpenUser={() => router.push("/cuenta")}
+      />
     </>
   );
 }

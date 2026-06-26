@@ -9,11 +9,13 @@ import { useToast } from "@/lib/toast-context";
 import { useListas } from "@/hooks/useListas";
 import ListaCard from "@/componentes/listas/ListaCard";
 import type { ListaItem } from "@/lib/listas";
+import BottomNavBar from "@/components/catalogo/BottomNavBar";
+import Skeleton from "@/components/ui/Skeleton";
 
 export default function ListasPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { items: cartItems, addItem } = useCart();
+  const { items: cartItems, addItem, totalQty } = useCart();
   const toast = useToast();
   const { listas, loading, crearLista, eliminarLista } = useListas();
 
@@ -63,31 +65,7 @@ export default function ListasPage() {
   );
 
   // Loading state
-  if (authLoading || (user && loading)) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "var(--bg, #F4F6FB)",
-        }}
-      >
-        <div
-          style={{
-            width: "40px",
-            height: "40px",
-            border: "3px solid var(--border, #E8DDD0)",
-            borderTopColor: "var(--rojo, #D62828)",
-            borderRadius: "50%",
-            animation: "spin 0.8s linear infinite",
-          }}
-        />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
+
 
   // Not logged in (will redirect, but show something meanwhile)
   if (!user) {
@@ -182,8 +160,24 @@ export default function ListasPage() {
       </header>
 
       {/* Lists */}
-      <main style={{ padding: "16px", maxWidth: "600px", margin: "0 auto" }}>
-        {listas.length === 0 ? (
+      <main style={{ padding: "16px", maxWidth: "600px", margin: "0 auto", paddingBottom: "110px" }}>
+        {(authLoading || loading) ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  background: "var(--white, #FFFFFF)",
+                  border: "1.5px solid var(--border, #E8DDD0)",
+                  borderRadius: "var(--r-lg, 16px)",
+                  padding: "16px",
+                }}
+              >
+                <Skeleton variant="card" lines={3} />
+              </div>
+            ))}
+          </div>
+        ) : listas.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -375,6 +369,23 @@ export default function ListasPage() {
           </div>
         </div>
       )}
+
+      {/* Navigation Bar (Mobile) */}
+      <BottomNavBar
+        activeTab="cuenta"
+        onTabSelect={(tab: string) => {
+          if (tab === "buscar") {
+            router.push("/catalogo?focusSearch=true");
+          } else if (tab === "favoritos") {
+            router.push("/catalogo?tab=favoritos");
+          } else if (tab === "inicio") {
+            router.push("/");
+          }
+        }}
+        cartQty={totalQty}
+        onOpenCart={() => router.push("/catalogo?openCart=true")}
+        onOpenUser={() => router.push("/cuenta")}
+      />
     </>
   );
 }

@@ -19,6 +19,7 @@ import TickerMarquee from "@/components/catalogo/TickerMarquee";
 import FeatureCards from "@/components/catalogo/FeatureCards";
 import StepProcess from "@/components/catalogo/StepProcess";
 import BranchSection from "@/components/catalogo/BranchSection";
+import BottomNavBar from "@/components/catalogo/BottomNavBar";
 
 const CATEGORIAS = [
   { icono: "🫗", nombre: "ACEITES Y GRASAS", titulo: "Aceites y Grasas" },
@@ -50,7 +51,7 @@ export default function LandingPage() {
   const [configCats, setConfigCats] = useState<Record<string, string>>({});
   const [selectedSucursal, setSelectedSucursal] = useState<string>("");
   const { brands } = useBrands();
-  const { items: cartItems, clearCart } = useCart();
+  const { items: cartItems, clearCart, totalQty } = useCart();
 
   const handleSelectSucursal = (id: string) => {
     const sucursal = SUCURSALES.find(s => s.id === id);
@@ -240,6 +241,23 @@ export default function LandingPage() {
           </p>
         </div>
       </footer>
+
+      {/* Navigation Bar (Mobile) */}
+      <BottomNavBar
+        activeTab="inicio"
+        onTabSelect={(tab: string) => {
+          if (tab === "buscar") {
+            router.push("/catalogo?focusSearch=true");
+          } else if (tab === "favoritos") {
+            router.push("/catalogo?tab=favoritos");
+          } else if (tab === "inicio") {
+            router.push("/");
+          }
+        }}
+        cartQty={totalQty}
+        onOpenCart={() => router.push("/catalogo?openCart=true")}
+        onOpenUser={() => router.push("/cuenta")}
+      />
     </div>
   );
 }

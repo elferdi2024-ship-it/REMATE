@@ -434,6 +434,37 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     }
   }, [mounted, searchParams, router]);
 
+  // Sync tab, search focus and cart parameters from URL
+  useEffect(() => {
+    if (!mounted) return;
+    const tab = searchParams?.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    }
+    const openCart = searchParams?.get("openCart");
+    if (openCart === "true") {
+      setCartOpen(true);
+      const params = new URLSearchParams(window.location.search);
+      params.delete("openCart");
+      router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+    }
+    const focusSearch = searchParams?.get("focusSearch");
+    if (focusSearch === "true") {
+      setActiveTab("buscar");
+      setTimeout(() => {
+        const searchInput = document.querySelector(".results-search-input") as HTMLInputElement;
+        if (searchInput) {
+          searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+          searchInput.focus();
+        }
+      }, 300);
+      const params = new URLSearchParams(window.location.search);
+      params.delete("focusSearch");
+      router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+    }
+  }, [mounted, searchParams, router]);
+
+
   // Fetch branch-specific or global productos
   useEffect(() => {
     if (!sucursalId) return;

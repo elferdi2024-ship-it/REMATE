@@ -1704,10 +1704,14 @@ html.dark-mode body { background: var(--bg); }
    OVERLAY + SIDE PANEL
    ══════════════════════════════════════════════════════════ */
 .overlay {
-  display: none; position: fixed; inset: 0;
+  position: fixed; inset: 0;
   background: rgba(0,0,0,0.72); z-index: 200; backdrop-filter: blur(4px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.32s ease;
 }
-.overlay.open { display: block; }
+.overlay.open {
+  opacity: 1; pointer-events: auto;
+}
 
 .side-panel {
   position: fixed; top: 0; bottom: 0; width: 100%; max-width: 440px;
