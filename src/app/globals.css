@@ -113,6 +113,16 @@
 }
 
 /* Keyframes globales para animaciones ultra-smooth (Fase 2 & 4) */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
 @keyframes shimmerPulse {
   0%, 100% { opacity: 0.45; background-color: var(--bg2); }
   50% { opacity: 0.90; background-color: var(--border); }
@@ -1610,7 +1620,6 @@ html.dark-mode body { background: var(--bg); }
   padding: 20px;
   animation: fadeIn 0.15s ease;
 }
-@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
 .confirm-modal-box {
   background: var(--white); border-radius: var(--r-lg);
@@ -3068,10 +3077,7 @@ html.dark-mode body { background: var(--bg); }
 }
 
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+
 
 
 /* --- ANIMACIONES MICRO-INTERACCIONES --- */
@@ -3469,26 +3475,7 @@ html.dark-mode body { background: var(--bg); }
   }
 }
 
-/* Animaciones compartidas para las hojas móviles */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
 
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-.animate-soft-pulse {
-  animation: softPulse 2s infinite ease-in-out;
-}
-
-@keyframes softPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
 
 
 

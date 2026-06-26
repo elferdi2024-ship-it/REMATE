@@ -17,30 +17,8 @@ interface ListaCardProps {
   onAgregarTodo: (items: ListaItem[]) => void;
 }
 
-function timeAgo(date: any): string {
-  const now = new Date();
-  let d: Date;
-  if (date instanceof Date) {
-    d = date;
-  } else if (typeof date === "string") {
-    d = new Date(date);
-  } else if (date?.toDate) {
-    d = date.toDate();
-  } else if (date?.seconds) {
-    d = new Date(date.seconds * 1000);
-  } else {
-    return "hace tiempo";
-  }
+import { timeAgo } from "@/lib/format";
 
-  const diffMs = now.getTime() - d.getTime();
-  const diffDays = Math.floor(diffMs / 86400000);
-  if (diffDays === 0) return "hoy";
-  if (diffDays === 1) return "hace 1 dia";
-  if (diffDays < 30) return `hace ${diffDays} dias`;
-  const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths === 1) return "hace 1 mes";
-  return `hace ${diffMonths} meses`;
-}
 
 export default function ListaCard({
   lista,

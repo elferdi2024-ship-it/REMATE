@@ -51,9 +51,8 @@ function formatDate(date: any): string {
   return `${day} ${month} ${year} \u00b7 ${hours}:${mins}`;
 }
 
-function formatPrice(n: number): string {
-  return `$${n.toLocaleString("es-UY", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-}
+import { formatPrice } from "@/lib/format";
+
 
 export default function HistorialPage() {
   const router = useRouter();

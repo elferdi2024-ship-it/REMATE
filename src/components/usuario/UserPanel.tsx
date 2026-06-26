@@ -37,41 +37,9 @@ interface UserPanelProps {
   onOpenAuth?: () => void;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────
+import { timeAgo, formatPrice, formatDate } from "@/lib/format";
 
-function timeAgo(date: any): string {
-  const now = new Date();
-  let d: Date;
-  if (date instanceof Date) d = date;
-  else if (typeof date === "string") d = new Date(date);
-  else if (date?.toDate) d = date.toDate();
-  else if (date?.seconds) d = new Date(date.seconds * 1000);
-  else return "hace tiempo";
 
-  const diffMs = now.getTime() - d.getTime();
-  const diffDays = Math.floor(diffMs / 86400000);
-  if (diffDays === 0) return "hoy";
-  if (diffDays === 1) return "hace 1 día";
-  if (diffDays < 30) return `hace ${diffDays} días`;
-  const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths === 1) return "hace 1 mes";
-  return `hace ${diffMonths} meses`;
-}
-
-function formatDate(date: any): string {
-  let d: Date;
-  if (date instanceof Date) d = date;
-  else if (typeof date === "string") d = new Date(date);
-  else if (date?.toDate) d = date.toDate();
-  else if (date?.seconds) d = new Date(date.seconds * 1000);
-  else return "";
-  const months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-  return `${d.getDate()} ${months[d.getMonth()]} · ${d.getHours().toString().padStart(2,"0")}:${d.getMinutes().toString().padStart(2,"0")}`;
-}
-
-function formatPrice(n: number): string {
-  return `$${n.toLocaleString("es-UY", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-}
 
 // ── PedidoCard con historial granular ─────────────────────────────────────
 

@@ -23,30 +23,8 @@ interface LSPedido {
   notas?: string;
 }
 
-function timeAgo(date: Date | string | { seconds: number } | { toDate: () => Date }): string {
-  const now = new Date();
-  let d: Date;
-  if (date instanceof Date) {
-    d = date;
-  } else if (typeof date === "string") {
-    d = new Date(date);
-  } else if (typeof date === "object" && "toDate" in date) {
-    d = (date as { toDate: () => Date }).toDate();
-  } else if (typeof date === "object" && "seconds" in date) {
-    d = new Date((date as { seconds: number }).seconds * 1000);
-  } else {
-    return "hace tiempo";
-  }
+import { timeAgo } from "@/lib/format";
 
-  const diffMs = now.getTime() - d.getTime();
-  const diffDays = Math.floor(diffMs / 86400000);
-  if (diffDays === 0) return "hoy";
-  if (diffDays === 1) return "hace 1 dia";
-  if (diffDays < 30) return `hace ${diffDays} dias`;
-  const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths === 1) return "hace 1 mes";
-  return `hace ${diffMonths} meses`;
-}
 
 export default function CuentaPage() {
   const router = useRouter();
