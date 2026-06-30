@@ -6,6 +6,7 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { useToast } from "@/lib/toast-context";
 import { SUCURSALES } from "@/lib/sucursales";
+import { getAllSucursalConfigs, setSucursalWhatsApp, type SucursalConfig } from "@/lib/sucursales-config";
 import { CATEGORIAS } from "@/types";
 import Image from "next/image";
 
@@ -30,6 +31,16 @@ export default function AdminSucursales() {
   const [hasCustomCatalog, setHasCustomCatalog] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
+
+  // WhatsApp phone config state
+  const [waConfigs, setWaConfigs] = useState<Record<string, SucursalConfig>>({});
+  const [waEditing, setWaEditing] = useState<Record<string, string>>({});
+  const [waSaving, setWaSaving] = useState<string | null>(null);
+
+  // Load WA configs on mount
+  useEffect(() => {
+    getAllSucursalConfigs().then(setWaConfigs).catch(console.error);
+  }, []);
 
   // Filters & Search
   const [search, setSearch] = useState<string>("");
@@ -176,6 +187,36 @@ export default function AdminSucursales() {
     }
   };
 
+  const handleWaPhoneChange = (sucursalId: string, value: string) => {
+    setWaEditing(prev => ({ ...prev, [sucursalId]: value }));
+  };
+
+  const handleWaPhoneSave = async (sucursalId: string) => {
+    const raw = waEditing[sucursalId];
+    if (!raw?.trim()) return;
+
+    // Normalizar: quitar espacios, +, guiones. Si empieza con 0, agregar 598
+    let phone = raw.replace(/[\s+\-]/g, "");
+    if (phone.startsWith("0")) {
+      phone = "598" + phone.slice(1);
+    } else if (!phone.startsWith("598")) {
+      phone = "598" + phone;
+    }
+
+    setWaSaving(sucursalId);
+    try {
+      await setSucursalWhatsApp(sucursalId, phone);
+      setWaConfigs(prev => ({ ...prev, [sucursalId]: { telefonoWhatsApp: phone } }));
+      setWaEditing(prev => { const n = {...prev}; delete n[sucursalId]; return n; });
+      toast.success(`Teléfono WhatsApp actualizado para ${SUCURSALES.find(s => s.id === sucursalId)?.nombre}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al guardar teléfono");
+    } finally {
+      setWaSaving(null);
+    }
+  };
+
   // Build current display items:
   // If branch custom catalog exists, we display its items.
   // BUT we must also show any NEW products added to the master catalog that are missing in the branch.
@@ -230,6 +271,102 @@ export default function AdminSucursales() {
 
   return (
     <div className="space-y-6 text-[var(--admin-text-mid)]">
+      {/* ── WhatsApp por Sucursal ─────────────────────────────── */}
+      <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 space-y-4">
+        <div>
+          <h2 className="font-bebas text-3xl tracking-wider text-[var(--admin-text-hi)]">
+            📱 WhatsApp por Sucursal
+          </h2>
+          <p className="text-sm text-[var(--admin-text-lo)] mt-1">
+            Configurá el número de WhatsApp donde cada sucursal recibe los pedidos. Los clientes enviarán su pedido directo a este número.
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {SUCURSALES.map((s) => {
+            const currentPhone = waConfigs[s.id]?.telefonoWhatsApp || "";
+            const editValue = waEditing[s.id];
+            const isEditing = editValue !== undefined;
+            const isSaving = waSaving === s.id;
+            const displayPhone = currentPhone
+              ? `+${currentPhone.slice(0, 3)} ${currentPhone.slice(3, 5)} ${currentPhone.slice(5, 8)} ${currentPhone.slice(8)}`
+              : "No configurado";
+
+            return (
+              <div
+                key={s.id}
+                className={`rounded-xl border p-4 space-y-3 transition-all ${
+                  currentPhone
+                    ? "border-green-500/30 bg-green-500/5"
+                    : "border-amber-500/30 bg-amber-500/5"
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-bold text-sm text-[var(--admin-text-hi)]">
+                      🏪 {s.nombre}
+                    </h3>
+                    <p className="text-xs text-[var(--admin-text-lo)]">{s.direccion}</p>
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                      currentPhone
+                        ? "bg-green-500/20 text-green-600 dark:text-green-400"
+                        : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                    }`}
+                  >
+                    {currentPhone ? "Activo" : "Pendiente"}
+                  </span>
+                </div>
+
+                {/* Current number display */}
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">📲</span>
+                  <span className={`text-sm font-mono font-bold ${
+                    currentPhone ? "text-green-600 dark:text-green-400" : "text-amber-500"
+                  }`}>
+                    {displayPhone}
+                  </span>
+                </div>
+
+                {/* Edit form */}
+                <div className="flex gap-2">
+                  <input
+                    type="tel"
+                    placeholder="Ej: 094611400"
+                    value={isEditing ? editValue : ""}
+                    onChange={(e) => handleWaPhoneChange(s.id, e.target.value)}
+                    disabled={isSaving}
+                    className="flex-1 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2 text-xs font-mono text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:border-[var(--admin-accent)] focus:outline-none disabled:opacity-50"
+                  />
+                  <button
+                    onClick={() => handleWaPhoneSave(s.id)}
+                    disabled={!isEditing || !editValue?.trim() || isSaving}
+                    className="rounded-lg bg-[var(--admin-accent)] px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    {isSaving ? "..." : "Guardar"}
+                  </button>
+                </div>
+
+                {/* Helper text */}
+                <p className="text-[10px] text-[var(--admin-text-lo)]">
+                  Tel. actual en sistema: {s.telefono}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
+          <p className="text-xs text-blue-600 dark:text-blue-400">
+            💡 <strong>Formato:</strong> Podés ingresar el número con o sin código de país. Ejemplos válidos: <code className="bg-blue-500/10 px-1 rounded">094611400</code>, <code className="bg-blue-500/10 px-1 rounded">59894611400</code>
+          </p>
+        </div>
+      </div>
+
+      {/* Separador visual */}
+      <hr className="border-[var(--admin-border)]" />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>

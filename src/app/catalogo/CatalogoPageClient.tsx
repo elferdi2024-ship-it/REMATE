@@ -51,6 +51,7 @@ import { encodeCartToURL, decodeCartFromURL } from "@/lib/cart-share";
 import { haptic } from "@/lib/haptic";
 import * as ls from "@/lib/ls";
 import { SUCURSALES, type MetodoEntrega } from "@/lib/sucursales";
+import { getSucursalWhatsApp } from "@/lib/sucursales-config";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import type { Vista, CartItem, Producto } from "@/types";
@@ -1030,14 +1031,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
       // 4. GENERAR Y ENVIAR POR WHATSAPP (Lo más importante)
       try {
-        // TODO: Cuando se active routing por sucursal, descomentar este bloque
-        // const sucursalActiva = SUCURSALES.find((s) => s.id === sucursalId);
-        // if (sucursalActiva && sucursalActiva.telefono) {
-        //   const telLimpio = sucursalActiva.telefono.replace(/\s/g, "");
-        //   const sinCero = telLimpio.startsWith("0") ? telLimpio.slice(1) : telLimpio;
-        //   telefonoWhatsApp = `598${sinCero}`;
-        // }
-        const telefonoWhatsApp = process.env.NEXT_PUBLIC_WA_NUMBER!; // Canelones: 59894611400
+        // Routing dinámico: lee el teléfono WA de Firestore por sucursal, fallback a env var (Canelones)
+        const telefonoWhatsApp = await getSucursalWhatsApp(sucursalId);
 
         await enviarFacturaWhatsApp(
           telefonoWhatsApp,
