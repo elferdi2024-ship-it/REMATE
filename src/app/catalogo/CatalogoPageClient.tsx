@@ -1030,14 +1030,14 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
       // 4. GENERAR Y ENVIAR POR WHATSAPP (Lo más importante)
       try {
-        const sucursalActiva = SUCURSALES.find((s) => s.id === sucursalId);
-        let telefonoWhatsApp = process.env.NEXT_PUBLIC_WA_NUMBER!;
-
-        if (sucursalActiva && sucursalActiva.telefono) {
-          const telLimpio = sucursalActiva.telefono.replace(/\s/g, "");
-          const sinCero = telLimpio.startsWith("0") ? telLimpio.slice(1) : telLimpio;
-          telefonoWhatsApp = `598${sinCero}`;
-        }
+        // TODO: Cuando se active routing por sucursal, descomentar este bloque
+        // const sucursalActiva = SUCURSALES.find((s) => s.id === sucursalId);
+        // if (sucursalActiva && sucursalActiva.telefono) {
+        //   const telLimpio = sucursalActiva.telefono.replace(/\s/g, "");
+        //   const sinCero = telLimpio.startsWith("0") ? telLimpio.slice(1) : telLimpio;
+        //   telefonoWhatsApp = `598${sinCero}`;
+        // }
+        const telefonoWhatsApp = process.env.NEXT_PUBLIC_WA_NUMBER!; // Canelones: 59894611400
 
         await enviarFacturaWhatsApp(
           telefonoWhatsApp,
