@@ -20,9 +20,35 @@ export default function DeliveryMethodSelector({
 
   return (
     <div className="delivery-method-wrapper">
-      <div className="delivery-method-label">🚚 ¿Cómo recibís tu pedido?</div>
+      {/* ── Sucursal picker (siempre visible) ── */}
+      <div className="branch-picker-compact">
+        <label className="branch-picker-compact-label" htmlFor="branchSelect">
+          📍 Sucursal
+        </label>
+        <select
+          id="branchSelect"
+          className="branch-select"
+          value={sucursalId || ''}
+          onChange={(e) => onSucursalChange(e.target.value)}
+        >
+          <option value="" disabled>
+            Elegí tu sucursal...
+          </option>
+          {SUCURSALES.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.nombre} — {s.direccion}
+            </option>
+          ))}
+        </select>
+        {selectedSucursal && (
+          <div className="branch-selected-compact">
+            ✅ {selectedSucursal.nombre} · {selectedSucursal.direccion} · 📞 {selectedSucursal.telefono}
+          </div>
+        )}
+      </div>
 
-      {/* ── Toggle buttons ── */}
+      {/* ── Toggle entrega ── */}
+      <div className="delivery-method-label">🚚 ¿Cómo recibís tu pedido?</div>
       <div className="delivery-toggle-row">
         <button
           type="button"
@@ -48,34 +74,6 @@ export default function DeliveryMethodSelector({
           </span>
         </button>
       </div>
-
-      {/* ── Branch picker (only when retiro) ── */}
-      {metodo === 'retiro' && (
-        <div className="branch-picker-wrapper">
-          <div className="branch-picker-label">📍 Elegí tu sucursal</div>
-
-          <div className="branch-picker-grid">
-            {SUCURSALES.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                className={`branch-card ${sucursalId === s.id ? 'selected' : ''}`}
-                onClick={() => onSucursalChange(s.id)}
-              >
-                <span className="branch-card-name">{s.nombre}</span>
-                <span className="branch-card-addr">{s.direccion}</span>
-                <span className="branch-card-tel">📞 {s.telefono}</span>
-              </button>
-            ))}
-          </div>
-
-          {selectedSucursal && (
-            <div className="branch-selected-badge">
-              ✅ Retiro en <strong>{selectedSucursal.nombre}</strong> — {selectedSucursal.direccion}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

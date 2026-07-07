@@ -51,41 +51,23 @@ export default function CartFooter({
   onSucursalChange,
   isTiendaCerrada = false,
 }: CartFooterProps) {
+  const isDisabled = isProcessing || isTiendaCerrada || !sucursalId;
+
   return (
-    <div className="cart-footer">
-      {/* ── Total ── */}
-      <div className="cart-total-section">
-        <div className="cart-total-row">
-          <span className="cart-total-label">Total estimado</span>
-          <span className="cart-total-amount">${total.toLocaleString('es-UY')}</span>
-        </div>
-        <div className="cart-disclaimer">* Los precios son estimativos y pueden variar.</div>
-      </div>
-
-      {/* ── Share ── */}
-      <div className="cart-share-section">
-        <button className="btn-share-cart" onClick={onShare}>
-          🔗 Compartir este pedido por WhatsApp
-        </button>
-        {shareLink && (
-          <div className="share-link-row">
-            <input
-              type="text"
-              className="share-link-input"
-              value={shareLink}
-              readOnly
-            />
-            <button className="btn-copy-link" onClick={onCopyShareLink}>
-              Copiar
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* ── Order form ── */}
-      <div className="cart-order-section">
+    <>
+      {/* ── Sección de formulario scrolleable (dentro de cart-body) ── */}
+      <div className="cart-checkout-form">
         <div className="cart-section-title">Completá tu pedido</div>
 
+        {/* Selector de método de entrega + sucursal */}
+        <DeliveryMethodSelector
+          metodo={metodoEntrega}
+          onMetodoChange={onMetodoEntregaChange}
+          sucursalId={sucursalId}
+          onSucursalChange={onSucursalChange}
+        />
+
+        {/* Fila nombre + teléfono */}
         <div className="cart-form-row">
           <div>
             <label className="field-label" htmlFor="clientName">
@@ -115,17 +97,9 @@ export default function CartFooter({
           </div>
         </div>
 
-        {/* ── Delivery method selector ── */}
-        <DeliveryMethodSelector
-          metodo={metodoEntrega}
-          onMetodoChange={onMetodoEntregaChange}
-          sucursalId={sucursalId}
-          onSucursalChange={onSucursalChange}
-        />
-
-        {/* ── Address field — only for home delivery ── */}
+        {/* Campo dirección — solo para envío a domicilio */}
         {metodoEntrega === 'envio' && onDireccionChange && (
-          <div style={{ marginBottom: '10px' }}>
+          <div>
             <label className="field-label" htmlFor="clientDir">
               📍 Dirección de entrega
             </label>
@@ -140,78 +114,65 @@ export default function CartFooter({
           </div>
         )}
 
+        {/* Notas */}
         {onClientNotesChange && (
-          <>
+          <div>
             <label className="field-label" htmlFor="clientNotes">
-              📝 Notas del pedido (opcional)
+              📝 Notas (opcional)
             </label>
             <textarea
               id="clientNotes"
               className="field-input"
-              placeholder="Entregar en depósito trasero, horario preferido..."
+              placeholder="Horario preferido, instrucciones..."
               value={clientNotes || ''}
               onChange={(e) => onClientNotesChange(e.target.value)}
               rows={2}
-              style={{ marginBottom: '10px', resize: 'vertical' }}
+              style={{ resize: 'vertical' }}
             />
-          </>
+          </div>
         )}
 
-        {onSaveLista && (
-          <button className="btn-save-lista" onClick={onSaveLista}>
-            Guardar como lista ↗
+        {/* Fila de acciones: compartir + vaciar */}
+        <div className="cart-actions-row">
+          <button className="cart-action-btn" onClick={onShare} type="button">
+            🔗 Compartir
           </button>
-        )}
+          <button className="cart-action-btn cart-action-btn--danger" onClick={onClear} type="button">
+            🗑️ Vaciar
+          </button>
+        </div>
+      </div>
 
-        {/* ── WhatsApp Button ── */}
-        <button 
-          className="btn-whatsapp" 
+      {/* ── Barra inferior fija ── */}
+      <div className="cart-sticky-footer">
+        <div className="cart-sticky-total">
+          <span className="cart-sticky-total-label">Total</span>
+          <span className="cart-sticky-total-amount">${total.toLocaleString('es-UY')}</span>
+          <span className="cart-sticky-disclaimer">* Precios estimativos</span>
+        </div>
+        <button
+          className={`btn-whatsapp-compact ${
+            isDisabled ? 'btn-whatsapp-compact--disabled' : ''
+          }`}
           onClick={onSendWA}
-          disabled={isProcessing || isTiendaCerrada || (metodoEntrega === 'retiro' && !sucursalId)}
-          style={{ 
-            opacity: isProcessing || isTiendaCerrada || (metodoEntrega === 'retiro' && !sucursalId) ? 0.7 : 1, 
-            cursor: isProcessing || isTiendaCerrada || (metodoEntrega === 'retiro' && !sucursalId) ? 'not-allowed' : 'pointer',
-            ...(isTiendaCerrada ? {
-              background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              boxShadow: 'none'
-            } : {})
-          }}
+          disabled={isDisabled}
+          type="button"
         >
           {isProcessing ? (
-            <div className="btn-whatsapp-text">
-              <span className="btn-wa-main">PROCESANDO...</span>
-              <span className="btn-wa-sub">Estamos preparando tu pedido</span>
-            </div>
+            <span className="btn-wa-loading">Enviando…</span>
           ) : isTiendaCerrada ? (
-            <div className="btn-whatsapp-text">
-              <span className="btn-wa-main" style={{ color: '#ef4444' }}>TOMA DE PEDIDOS PAUSADA</span>
-              <span className="btn-wa-sub" style={{ color: '#94a3b8' }}>Disculpe las molestias. Intente más tarde.</span>
-            </div>
-          ) : (metodoEntrega === 'retiro' && !sucursalId) ? (
-            <div className="btn-whatsapp-text">
-              <span className="btn-wa-main">ELEGÍ UNA SUCURSAL</span>
-              <span className="btn-wa-sub">Seleccioná dónde retirar arriba ☝️</span>
-            </div>
+            <span className="btn-wa-closed">Pausado</span>
+          ) : !sucursalId ? (
+            <span className="btn-wa-no-branch">Elegí sucursal ☝️</span>
           ) : (
             <>
               <WhatsAppIcon />
-              <div className="btn-whatsapp-text">
-                <span className="btn-wa-main">ENVIAR PEDIDO</span>
-                <span className="btn-wa-sub">Abre WhatsApp al instante</span>
-              </div>
+              <span>ENVIAR PEDIDO</span>
             </>
           )}
         </button>
       </div>
-
-      {/* ── Clear cart ── */}
-      <div style={{ padding: '8px 16px 14px' }}>
-        <button className="btn-clear-cart" onClick={onClear}>
-          Limpiar carrito
-        </button>
-      </div>
-    </div>
+    </>
   );
 }
 

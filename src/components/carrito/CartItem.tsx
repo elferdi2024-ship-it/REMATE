@@ -1,3 +1,4 @@
+// filepath: src/components/carrito/CartItem.tsx
 'use client';
 
 import { useState } from 'react';
@@ -22,22 +23,10 @@ export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRow
         <div className="cart-item-name" title={item.nombre}>
           {item.nombre}
         </div>
-        <div className="cart-item-subtotal">
-          ${subtotal.toLocaleString('es-UY')}
+        <div className="cart-item-price-qty">
+          <span className="cart-item-unit-price">${item.precio.toLocaleString('es-UY')} c/u</span>
+          <span className="cart-item-subtotal">${subtotal.toLocaleString('es-UY')}</span>
         </div>
-        <button
-          className="cart-note-toggle"
-          onClick={() => setShowNote(!showNote)}
-        >
-          {showNote ? '▲' : '▼'} Nota
-        </button>
-        {showNote && (
-          <input
-            type="text"
-            className="field-input cart-note-input"
-            placeholder="Ej: sin golpes, entrega en depósito..."
-          />
-        )}
       </div>
       <div className="cart-item-qty">
         <button
@@ -49,13 +38,13 @@ export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRow
               onUpdateQty(item.codigo, -1);
             }
           }}
-          aria-label="Reducir cantidad"
+          aria-label={item.cantidad <= 1 ? 'Eliminar producto' : 'Reducir cantidad'}
         >
-          −
+          {item.cantidad <= 1 ? '🗑' : '−'}
         </button>
         <input
           type="number"
-          className="qty-val field-input"
+          className="qty-val"
           value={item.cantidad || ''}
           onChange={(e) => {
             if (e.target.value === '') {
@@ -69,7 +58,6 @@ export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRow
             }
           }}
           onFocus={(e) => e.target.select()}
-          style={{ width: "40px", textAlign: "center", padding: "4px", height: "100%", background: "transparent", border: "none", outline: "none", MozAppearance: "textfield" }}
         />
         <button
           className="qty-btn"
@@ -79,18 +67,11 @@ export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRow
           +
         </button>
       </div>
-      <button
-        className="cart-item-remove"
-        onClick={() => onRemove(item.codigo)}
-        aria-label="Eliminar producto"
-      >
-        ✕
-      </button>
     </div>
   );
 }
 
-/* ── Emoji resolution ── */
+/* ── Resolución de emoji por categoría ── */
 const KEYWORD_MAP: Record<string, string[]> = {
   'Aceites y Aderezos': ['aceite', 'aceituna', 'aderezo', 'mayonesa', 'ketchup', 'mostaza', 'barbacoa', 'vinagre', 'salsa'],
   'Bebidas': ['agua', 'jugo', 'gaseosa', 'cerveza', 'vino', 'refresco', 'bebida', 'sidra', 'fernet', 'whisky', 'sprite', 'pepsi', 'coca'],

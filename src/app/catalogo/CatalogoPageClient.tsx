@@ -445,7 +445,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   const categoria = urlCategoria; // Categoria is entirely derived from URL
 
-  // Enforce branch selection from URL or local storage
+  // Load branch from URL or localStorage (no redirect - branch is optional for browsing)
   useEffect(() => {
     if (!mounted) return;
 
@@ -457,18 +457,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       if (valid) {
         setSucursalId(urlSucursal);
         if (savedSucursal !== urlSucursal) ls.setSelectedSucursal(urlSucursal);
-      } else {
-        const searchStr = typeof window !== "undefined" ? window.location.search : "";
-        router.replace(`/seleccionar-sucursal${searchStr}`);
       }
     } else if (savedSucursal) {
-      const params = new URLSearchParams(window.location.search);
-      params.set("sucursal", savedSucursal);
-      router.replace(`/catalogo?${params.toString()}`);
       setSucursalId(savedSucursal);
-    } else {
-      const searchStr = typeof window !== "undefined" ? window.location.search : "";
-      router.replace(`/seleccionar-sucursal${searchStr}`);
     }
   }, [mounted, searchParams, router]);
 
@@ -511,7 +502,6 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   // Fetch branch-specific or global productos
   useEffect(() => {
-    if (!sucursalId) return;
     const currentId = sucursalId;
     let cancelled = false;
 
@@ -523,16 +513,18 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         let loadedFromBranch = false;
         
         try {
-          const branchSnap = await getDoc(doc(db, "sucursales_catalogos", currentId));
-          if (branchSnap.exists()) {
-            const branchData = branchSnap.data();
-            const items = branchData.items || {};
-            const itemsList = Object.values(items) as Producto[];
-            const activeItems = itemsList.filter((item) => !item.deshabilitado);
-            if (activeItems.length > 0) {
-              data = activeItems;
-              loadedFromBranch = true;
-              console.log(`🏪 Catálogo personalizado cargado para sucursal: ${currentId} (${data.length} productos)`);
+          if (currentId) {
+            const branchSnap = await getDoc(doc(db, "sucursales_catalogos", currentId));
+            if (branchSnap.exists()) {
+              const branchData = branchSnap.data();
+              const items = branchData.items || {};
+              const itemsList = Object.values(items) as Producto[];
+              const activeItems = itemsList.filter((item) => !item.deshabilitado);
+              if (activeItems.length > 0) {
+                data = activeItems;
+                loadedFromBranch = true;
+                console.log(`🏪 Catálogo personalizado cargado para sucursal: ${currentId} (${data.length} productos)`);
+              }
             }
           }
         } catch (e) {
@@ -587,7 +579,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     return () => {
       cancelled = true;
     };
-  }, [sucursalId]);
+  }, [sucursalId, mounted]);
 
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 

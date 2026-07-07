@@ -57,6 +57,11 @@ export default function LandingPage() {
     const sucursal = SUCURSALES.find(s => s.id === id);
     const nombre = sucursal ? sucursal.nombre : "";
 
+    if (id === selectedSucursal) {
+      handleEnterCatalog(id);
+      return;
+    }
+
     if (cartItems.length > 0) {
       const confirmacion = confirm(
         "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
@@ -67,7 +72,24 @@ export default function LandingPage() {
 
     ls.setSelectedSucursal(id);
     setSelectedSucursal(id);
-    toast.success(`🏪 Seleccionada: ${nombre}. Cargando catálogo...`);
+    toast.success(`🏪 Seleccionada: ${nombre}. Ahora podés navegar por categorías o ingresar al catálogo.`);
+  };
+
+  const handleEnterCatalog = (id: string) => {
+    const sucursal = SUCURSALES.find(s => s.id === id);
+    const nombre = sucursal ? sucursal.nombre : "";
+
+    if (cartItems.length > 0 && id !== selectedSucursal) {
+      const confirmacion = confirm(
+        "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
+      );
+      if (!confirmacion) return;
+      clearCart();
+    }
+
+    ls.setSelectedSucursal(id);
+    setSelectedSucursal(id);
+    toast.success(`🏪 Cargando catálogo de ${nombre}...`);
     router.push(`/catalogo?sucursal=${id}`);
   };
 
@@ -151,7 +173,7 @@ export default function LandingPage() {
                 href={
                   selectedSucursal
                     ? `/catalogo?categoria=${encodeURIComponent(cat.nombre)}&sucursal=${selectedSucursal}`
-                    : `/seleccionar-sucursal?categoria=${encodeURIComponent(cat.nombre)}`
+                    : `/catalogo?categoria=${encodeURIComponent(cat.nombre)}`
                 }
                 className="bg-white rounded-[12px] border border-[#DDD8D0] hover:border-[#C8C2B8] p-6 md:p-3 text-center no-underline transition-all duration-150 flex flex-col items-center gap-2.5 shadow-[0_1px_3px_rgba(17,11,8,0.08)] hover:-translate-y-1 hover:shadow-[0_4px_16px_rgba(17,11,8,0.12)]"
               >
@@ -176,7 +198,7 @@ export default function LandingPage() {
 
           <div className="text-center mt-10">
             <Link
-              href={selectedSucursal ? `/catalogo?sucursal=${selectedSucursal}` : "/seleccionar-sucursal"}
+              href={selectedSucursal ? `/catalogo?sucursal=${selectedSucursal}` : "/catalogo"}
               className="inline-flex items-center gap-2 bg-[#1A1410] text-white rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] no-underline transition-all duration-150 hover:bg-[#2C2318]"
             >
               VER CATÁLOGO COMPLETO →
@@ -192,6 +214,7 @@ export default function LandingPage() {
       <BranchSection
         selectedSucursal={selectedSucursal}
         onSelectSucursal={handleSelectSucursal}
+        onEnterCatalog={handleEnterCatalog}
       />
 
       {/* Contacto */}

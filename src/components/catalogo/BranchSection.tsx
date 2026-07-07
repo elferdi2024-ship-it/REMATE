@@ -1,3 +1,4 @@
+// filepath: src/components/catalogo/BranchSection.tsx
 "use client";
 
 import React from "react";
@@ -6,9 +7,14 @@ import { SUCURSALES } from "@/lib/sucursales";
 interface BranchSectionProps {
   selectedSucursal: string;
   onSelectSucursal: (id: string) => void;
+  onEnterCatalog?: (id: string) => void;
 }
 
-export default function BranchSection({ selectedSucursal, onSelectSucursal }: BranchSectionProps) {
+export default function BranchSection({ 
+  selectedSucursal, 
+  onSelectSucursal, 
+  onEnterCatalog 
+}: BranchSectionProps) {
   const activeSucursal = SUCURSALES.find(s => s.id === selectedSucursal);
 
   return (
@@ -23,7 +29,7 @@ export default function BranchSection({ selectedSucursal, onSelectSucursal }: Br
           </p>
           {selectedSucursal && activeSucursal && (
             <div className="inline-flex items-center gap-2 bg-[#E8302A]/8 border border-[#E8302A]/25 rounded-[20px] px-5 py-2 mt-4 text-[0.85rem] font-bold text-[#E8302A] shadow-[0_2px_10px_rgba(232,48,42,0.08)]">
-              🏪 SUCURSAL ACTIVA:{" "}
+              🏪 SUCURSAL SELECCIONADA:{" "}
               <strong className="text-[#111111] uppercase">
                 {activeSucursal.nombre}
               </strong>
@@ -40,7 +46,7 @@ export default function BranchSection({ selectedSucursal, onSelectSucursal }: Br
                 onClick={() => onSelectSucursal(sucursal.id)}
                 className={`bg-white rounded-[16px] p-7 transition-all duration-200 cursor-pointer flex flex-col justify-between relative ${
                   isActive
-                    ? "border-2 border-[#E8302A] shadow-[0_0_30px_rgba(232,48,42,0.25)]"
+                    ? "border-2 border-[#E8302A] shadow-[0_0_30px_rgba(232,48,42,0.25)] scale-[1.02]"
                     : "border border-[#DDD8D0] shadow-[0_4px_16px_rgba(17,11,8,0.12)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(17,11,8,0.18)] hover:border-[#E8302A]"
                 }`}
               >
@@ -48,8 +54,8 @@ export default function BranchSection({ selectedSucursal, onSelectSucursal }: Br
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-[2rem]">🏪</span>
                     {isActive && (
-                      <span className="bg-[#E8302A] text-white text-[0.65rem] font-bold uppercase padding py-1 px-2.5 rounded letter-spacing tracking-[1px] shadow-[0_2px_8px_rgba(232,48,42,0.3)]">
-                        ACTIVA
+                      <span className="bg-[#E8302A] text-white text-[0.65rem] font-bold uppercase py-1 px-2.5 rounded tracking-[1px] shadow-[0_2px_8px_rgba(232,48,42,0.3)]">
+                        SELECCIONADA
                       </span>
                     )}
                   </div>
@@ -76,7 +82,11 @@ export default function BranchSection({ selectedSucursal, onSelectSucursal }: Br
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSelectSucursal(sucursal.id);
+                      if (onEnterCatalog) {
+                        onEnterCatalog(sucursal.id);
+                      } else {
+                        onSelectSucursal(sucursal.id);
+                      }
                     }}
                     className={`w-full border-0 rounded-[8px] py-2.5 px-3.5 font-bebas text-[1.05rem] tracking-[1.5px] cursor-pointer transition-all flex items-center justify-center gap-1.5 text-white ${
                       isActive
