@@ -117,6 +117,42 @@ export default function LandingPage() {
       {/* Marquee Ticker */}
       <TickerMarquee />
 
+      {/* Banner Especial Cumpleaños */}
+      <section className="py-6 px-5 max-w-[1200px] mx-auto">
+        <Link 
+          href="/fiesta" 
+          className="relative block w-full rounded-[24px] overflow-hidden bg-[#0A0A0A] text-white shadow-[0_10px_40px_rgba(229,57,53,0.15)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_15px_50px_rgba(229,57,53,0.25)] border border-[#E53935]/30 group"
+        >
+          {/* Overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent z-10" />
+          
+          {/* Imagen de fondo */}
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1000')] bg-cover bg-center opacity-40 group-hover:opacity-60 transition-transform duration-700 group-hover:scale-105" />
+          
+          {/* Elementos Decorativos Neon */}
+          <div className="absolute -left-20 -top-20 w-64 h-64 bg-[#E53935] blur-[100px] rounded-full opacity-30 pointer-events-none group-hover:opacity-50 transition-opacity" />
+          <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-[#FFB300] blur-[100px] rounded-full opacity-20 pointer-events-none group-hover:opacity-40 transition-opacity" />
+
+          <div className="relative z-20 p-8 md:p-12 flex flex-col justify-center h-full min-h-[220px]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#E53935] text-white text-[10px] md:text-xs font-bold tracking-[2px] uppercase rounded-full w-max mb-4 shadow-[0_0_15px_rgba(229,57,53,0.5)]">
+              <span className="animate-pulse">🔥</span> NUEVO
+            </span>
+            <h2 className="font-bebas text-[clamp(2.5rem,5vw,4rem)] leading-[0.85] tracking-[1px] mb-3">
+              ARMÁ TU CUMPLEAÑOS <br /> 
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFB300] to-[#E53935]">
+                A PRECIO MAYORISTA
+              </span>
+            </h2>
+            <p className="text-white/70 text-sm md:text-[1.1rem] font-light max-w-[450px] mb-6 leading-relaxed">
+              Combos explosivos de hamburguesas, bebidas frías y hielo. La mejor fiesta sin fundirte.
+            </p>
+            <div className="flex items-center gap-3 font-bebas text-xl md:text-2xl text-white group-hover:text-[#FFB300] transition-colors w-max bg-white/10 px-5 py-2.5 rounded-xl border border-white/10 backdrop-blur-sm">
+              VER OFERTAS <span className="text-2xl leading-none">→</span>
+            </div>
+          </div>
+        </Link>
+      </section>
+
       {/* Brand Strip (Ads) */}
       <BrandStrip brands={brands} title="Marcas que nos acompañan" dark />
 
