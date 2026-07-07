@@ -328,7 +328,7 @@ export default function TutorialPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-              <div className="relative w-9 h-9 sm:w-10 sm:h-10 bg-red-600 rounded-xl flex items-center justify-center font-serif text-base sm:text-lg font-bold shadow-lg shadow-red-600/20">
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 bg-red-600 rounded-lg flex items-center justify-center font-serif text-base sm:text-lg font-bold shadow-lg shadow-red-600/20">
                 🔨
               </div>
               <div>
@@ -345,14 +345,14 @@ export default function TutorialPage() {
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={toggleMute}
-              className="px-2.5 py-1.5 sm:p-2.5 text-xs sm:text-sm rounded-xl border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition-all text-neutral-300 hover:text-white"
+              className="px-2.5 py-1.5 sm:p-2.5 text-xs sm:text-sm rounded-lg border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition-all text-neutral-300 hover:text-white"
               title={isMuted ? "Activar Voz" : "Silenciar Voz"}
             >
               {isMuted ? "🔇 Sin Voz" : "🔊 Con Voz"}
             </button>
             <Link
               href="/catalogo"
-              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-md shadow-red-600/10 flex items-center gap-1.5"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition-all shadow-md shadow-red-600/10 flex items-center gap-1.5"
             >
               Catálogo ➡️
             </Link>
@@ -367,12 +367,12 @@ export default function TutorialPage() {
         <section className="w-full lg:col-span-5 flex flex-col items-center">
           <div 
             ref={phoneWrapperRef}
-            className="relative w-full overflow-hidden flex justify-center bg-neutral-900/10 rounded-[42px] p-2"
+            className="relative w-full overflow-hidden flex justify-center bg-neutral-900/10 rounded-[34px] p-2"
             style={{ height: `${600 * scale}px` }}
           >
             {/* Phone Frame Mockup (Matches El Remate client visual experience) */}
             <div 
-              className="absolute left-0 top-0 w-[300px] h-[600px] origin-top-left bg-[#F5F2EE] border-4 border-neutral-800 rounded-[40px] overflow-hidden flex flex-col select-none ring-1 ring-black/10"
+              className="absolute left-0 top-0 w-[300px] h-[600px] origin-top-left bg-[#FAF8F5] border-4 border-neutral-800 rounded-[30px] overflow-hidden flex flex-col select-none ring-1 ring-black/10"
               style={{ transform: `scale(${scale})` }}
             >
               {/* Phone Notch */}
@@ -381,7 +381,7 @@ export default function TutorialPage() {
               </div>
 
               {/* Status bar mock */}
-              <div className="h-6 w-full px-5 pt-1.5 flex justify-between items-center text-[7.5px] font-mono text-neutral-500 z-20 bg-[#F5F2EE]">
+              <div className="h-6 w-full px-5 pt-1.5 flex justify-between items-center text-[7.5px] font-mono text-neutral-500 z-20 bg-[#FAF8F5]">
                 <span className="font-bold">00:18</span>
                 <div className="flex gap-1 items-center">
                   <span>📶</span>
@@ -394,48 +394,48 @@ export default function TutorialPage() {
                 
                 {/* 1. SELECCIONAR SUCURSAL SCREEN (Beige layout) */}
                 {sim.screen === "sucursal" && (
-                  <div className="flex-1 flex flex-col p-4 pt-6 justify-between bg-[#F5F2EE] animate-in fade-in duration-300">
+                  <div className="flex-1 flex flex-col p-4 pt-6 justify-between bg-[#FAF8F5] animate-in fade-in duration-300">
                     <div className="space-y-4 mt-2">
-                      <div className="w-11 h-11 bg-[#E8302A] rounded-2xl flex items-center justify-center text-xl shadow-md mx-auto">🔨</div>
+                      <div className="w-11 h-11 bg-[#E8302A] rounded-lg flex items-center justify-center text-xl shadow-md mx-auto">🔨</div>
                       <div className="text-center space-y-1.5">
                         <h4 className="font-display font-bold text-2xl text-[#111111] uppercase tracking-tight">EL REMATE</h4>
-                        <p className="text-[10px] text-[#5C5550] font-medium leading-normal px-4">Elegí tu sucursal más cercana para ver stock y ofertas de tu zona.</p>
+                        <p className="text-[10px] text-gray-500 font-medium leading-normal px-4">Elegí tu sucursal más cercana para ver stock y ofertas de tu zona.</p>
                       </div>
 
                       <div className="space-y-2.5 pt-3">
                         {/* Canelones Card (Highlighted) */}
                         <div 
                           onClick={() => handleStepSelect(1)}
-                          className="bg-white border-2 border-[#E8302A] rounded-xl p-3.5 flex justify-between items-center cursor-pointer shadow-[0_4px_16px_rgba(232,48,42,0.12)] transition-all hover:translate-y-[-1px]"
+                          className="bg-white border-2 border-[#E8302A] rounded-lg p-3.5 flex justify-between items-center cursor-pointer shadow-[0_4px_16px_rgba(232,48,42,0.12)] transition-all hover:translate-y-[-1px]"
                         >
                           <div>
                             <p className="font-bold text-[#111111] text-[12px]">Sucursal Canelones 🏪</p>
-                            <p className="text-[9px] text-[#5C5550] mt-0.5">Ruta 5 km 45, Canelones</p>
+                            <p className="text-[9px] text-gray-500 mt-0.5">Ruta 5 km 45, Canelones</p>
                           </div>
                           <span className="text-[#E8302A] text-xs font-black">➡️</span>
                         </div>
 
                         {/* Atlántida Card */}
-                        <div className="bg-white/60 border border-[#DDD8D0] rounded-xl p-3.5 flex justify-between items-center opacity-70">
+                        <div className="bg-white border border-gray-200 rounded-lg p-3.5 flex justify-between items-center opacity-70">
                           <div>
                             <p className="font-bold text-[#3A3330] text-[12px]">Sucursal Atlántida</p>
-                            <p className="text-[9px] text-[#888078] mt-0.5">Ruta Interbalnearia km 46</p>
+                            <p className="text-[9px] text-gray-400 mt-0.5">Ruta Interbalnearia km 46</p>
                           </div>
-                          <span className="text-[#888078] text-xs">➡️</span>
+                          <span className="text-gray-400 text-xs">➡️</span>
                         </div>
 
                         {/* Las Piedras Card */}
-                        <div className="bg-white/60 border border-[#DDD8D0] rounded-xl p-3.5 flex justify-between items-center opacity-70">
+                        <div className="bg-white border border-gray-200 rounded-lg p-3.5 flex justify-between items-center opacity-70">
                           <div>
                             <p className="font-bold text-[#3A3330] text-[12px]">Sucursal Las Piedras</p>
-                            <p className="text-[9px] text-[#888078] mt-0.5">Dr. Pouey 632</p>
+                            <p className="text-[9px] text-gray-400 mt-0.5">Dr. Pouey 632</p>
                           </div>
-                          <span className="text-[#888078] text-xs">➡️</span>
+                          <span className="text-gray-400 text-xs">➡️</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-center text-[8px] text-[#888078] font-bold tracking-widest uppercase mb-1">
+                    <div className="text-center text-[8px] text-gray-400 font-bold tracking-widest uppercase mb-1">
                       Distribuidora Mayorista Canelones
                     </div>
                   </div>
@@ -457,7 +457,7 @@ export default function TutorialPage() {
                     <div className="border-b border-gray-100 bg-[#F8FAFC]">
                       {/* Search Bar mockup */}
                       <div className="px-3 pt-2">
-                        <div className="bg-white border border-[#DDD8D0] rounded-xl py-1.5 px-2.5 text-[9px] text-[#888078] flex items-center gap-2 shadow-sm">
+                        <div className="bg-white border border-gray-200 rounded-lg py-1.5 px-2.5 text-[9px] text-gray-400 flex items-center gap-2 shadow-sm">
                           <span>🔍</span>
                           <span className="font-medium">Buscar productos mayoristas...</span>
                         </div>
@@ -469,7 +469,7 @@ export default function TutorialPage() {
                           {/* Todos */}
                           <div className="flex flex-col items-center gap-1">
                             <div className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-sm shadow-sm transition-all">📦</div>
-                            <span className="text-[8px] font-bold text-[#5C5550] uppercase tracking-wider">Todos</span>
+                            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-wider">Todos</span>
                           </div>
                           {/* Bebidas */}
                           <div className="flex flex-col items-center gap-1">
@@ -477,7 +477,7 @@ export default function TutorialPage() {
                               sim.screen === "catalogo" ? "border-gray-200 bg-white" : "border-[#E8302A] bg-[#FEF2F1]"
                             }`}>🍾</div>
                             <span className={`text-[8px] font-bold uppercase tracking-wider ${
-                              sim.screen === "catalogo" ? "text-[#5C5550]" : "text-[#E8302A]"
+                              sim.screen === "catalogo" ? "text-gray-500" : "text-[#E8302A]"
                             }`}>Bebidas</span>
                           </div>
                           {/* Almacén */}
@@ -486,7 +486,7 @@ export default function TutorialPage() {
                               sim.screen === "catalogo" ? "border-[#E8302A] bg-[#FEF2F1]" : "border-gray-200 bg-white"
                             }`}>🧉</div>
                             <span className={`text-[8px] font-bold uppercase tracking-wider ${
-                              sim.screen === "catalogo" ? "text-[#E8302A]" : "text-[#5C5550]"
+                              sim.screen === "catalogo" ? "text-[#E8302A]" : "text-gray-500"
                             }`}>Almacén</span>
                           </div>
                         </div>
@@ -498,7 +498,7 @@ export default function TutorialPage() {
                       {/* Product 1: Yerba Mate */}
                       <div 
                         onClick={() => handleStepSelect(2)}
-                        className="bg-white border border-[#DDD8D0] rounded-xl p-2.5 flex flex-col justify-between cursor-pointer hover:border-gray-300 shadow-sm"
+                        className="bg-white border border-gray-200 rounded-lg p-2.5 flex flex-col justify-between cursor-pointer hover:border-gray-300 shadow-sm"
                       >
                         <div className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center text-3xl mb-1.5 relative overflow-hidden border border-gray-100">
                           🧉
@@ -506,30 +506,30 @@ export default function TutorialPage() {
                         </div>
                         <div>
                           <p className="font-bold text-[9.5px] text-[#3A3330] line-clamp-2 leading-tight">Yerba Mate Premium 1kg</p>
-                          <p className="text-[7.5px] text-[#888078] font-mono mt-0.5">Cód: 77301240</p>
+                          <p className="text-[7.5px] text-gray-400 font-mono mt-0.5">Cód: 77301240</p>
                         </div>
                         <div className="flex items-end justify-between mt-2 pt-1.5 border-t border-gray-100">
                           <div>
                             <p className="text-[14px] font-bebas font-bold text-[#E8302A] leading-none">{formatCurrency(350)}</p>
-                            <p className="text-[6.5px] text-[#5C5550] font-bold uppercase tracking-widest mt-0.5">unidad</p>
+                            <p className="text-[6.5px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">unidad</p>
                           </div>
                           <span className="w-5.5 h-5.5 bg-[#E8302A] rounded-md flex items-center justify-center text-white text-[10px] shadow-sm">+</span>
                         </div>
                       </div>
 
                       {/* Product 2: Aceite */}
-                      <div className="bg-white border border-[#DDD8D0] rounded-xl p-2.5 flex flex-col justify-between opacity-80 shadow-sm">
+                      <div className="bg-white border border-gray-200 rounded-lg p-2.5 flex flex-col justify-between opacity-80 shadow-sm">
                         <div className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center text-3xl mb-1.5 border border-gray-100">
                           🍾
                         </div>
                         <div>
                           <p className="font-bold text-[9.5px] text-[#3A3330] line-clamp-2 leading-tight">Aceite de Oliva Extra V. 500ml</p>
-                          <p className="text-[7.5px] text-[#888078] font-mono mt-0.5">Cód: 87654321</p>
+                          <p className="text-[7.5px] text-gray-400 font-mono mt-0.5">Cód: 87654321</p>
                         </div>
                         <div className="flex items-end justify-between mt-2 pt-1.5 border-t border-gray-100">
                           <div>
                             <p className="text-[14px] font-bebas font-bold text-[#E8302A] leading-none">{formatCurrency(750)}</p>
-                            <p className="text-[6.5px] text-[#5C5550] font-bold uppercase tracking-widest mt-0.5">unidad</p>
+                            <p className="text-[6.5px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">unidad</p>
                           </div>
                           <span className="w-5.5 h-5.5 bg-gray-200 text-gray-500 rounded-md flex items-center justify-center text-[10px] shadow-sm">+</span>
                         </div>
@@ -583,25 +583,25 @@ export default function TutorialPage() {
                             </div>
                             <div className="grid grid-cols-4 gap-2">
                               {/* 6 u */}
-                              <div className="py-2.5 bg-gray-50 border border-gray-200 rounded-[14px] text-center opacity-70">
+                              <div className="py-2.5 bg-gray-50 border border-gray-200 rounded-md text-center opacity-70">
                                 <span className="text-[7.5px] font-bold text-gray-400 block">LLEVAR</span>
                                 <span className="text-xs font-black text-gray-800">6 u.</span>
                               </div>
                               {/* 12 u (Highlighted) */}
                               <div 
                                 onClick={() => handleStepSelect(3)}
-                                className="py-2.5 bg-[#FEF2F1] border-2 border-[#E8302A] rounded-[14px] text-center cursor-pointer hover:bg-red-50"
+                                className="py-2.5 bg-[#FEF2F1] border-2 border-[#E8302A] rounded-md text-center cursor-pointer hover:bg-red-50"
                               >
                                 <span className="text-[7.5px] font-bold text-[#E8302A] block animate-pulse">LLEVAR</span>
                                 <span className="text-xs font-black text-[#E8302A]">12 u. 🔥</span>
                               </div>
                               {/* 24 u */}
-                              <div className="py-2.5 bg-gray-50 border border-gray-200 rounded-[14px] text-center opacity-70">
+                              <div className="py-2.5 bg-gray-50 border border-gray-200 rounded-md text-center opacity-70">
                                 <span className="text-[7.5px] font-bold text-gray-400 block">LLEVAR</span>
                                 <span className="text-xs font-black text-gray-800">24 u.</span>
                               </div>
                               {/* 48 u */}
-                              <div className="py-2.5 bg-gray-50 border border-gray-200 rounded-[14px] text-center opacity-70">
+                              <div className="py-2.5 bg-gray-50 border border-gray-200 rounded-md text-center opacity-70">
                                 <span className="text-[7.5px] font-bold text-gray-400 block">LLEVAR</span>
                                 <span className="text-xs font-black text-gray-800">48 u.</span>
                               </div>
@@ -610,7 +610,7 @@ export default function TutorialPage() {
 
                           <button 
                             onClick={() => handleStepSelect(3)}
-                            className="w-full bg-[#111111] hover:bg-black text-white font-bold text-xs py-3 rounded-[20px] transition-all text-center uppercase tracking-wider"
+                            className="w-full bg-[#111111] hover:bg-black text-white font-bold text-xs py-3 rounded-[16px] transition-all text-center uppercase tracking-wider"
                           >
                             Agregar al Pedido 🛒
                           </button>
@@ -627,22 +627,22 @@ export default function TutorialPage() {
                       {/* Header */}
                       <div className="border-b border-gray-100 pb-2.5 flex items-center justify-between">
                         <h4 className="font-display font-extrabold text-sm text-gray-900 uppercase">Mi Pedido</h4>
-                        <span onClick={() => handleStepSelect(1)} className="text-[9px] text-[#5C5550] hover:text-[#E8302A] font-bold uppercase cursor-pointer">Volver</span>
+                        <span onClick={() => handleStepSelect(1)} className="text-[9px] text-gray-500 hover:text-[#E8302A] font-bold uppercase cursor-pointer">Volver</span>
                       </div>
 
                       {/* Cart Items list */}
                       <div className="space-y-2">
-                        <div className="bg-gray-50 border border-gray-200/50 rounded-xl p-3 flex justify-between items-center shadow-sm">
+                        <div className="bg-gray-50 border border-gray-200/50 rounded-lg p-3 flex justify-between items-center shadow-sm">
                           <div className="flex items-center gap-2.5">
                             <span className="text-2xl">🧉</span>
                             <div>
                               <p className="font-bold text-[#111111] text-[10px]">Yerba Mate Premium</p>
-                              <p className="text-[8px] text-[#5C5550] mt-0.5">Bulto cerrado · 12 unidades</p>
+                              <p className="text-[8px] text-gray-500 mt-0.5">Bulto cerrado · 12 unidades</p>
                             </div>
                           </div>
                           <div className="text-right">
                             <p className="font-mono font-bold text-[#E8302A]">{formatCurrency(4200)}</p>
-                            <p className="text-[7.5px] text-[#888078] font-bold font-mono">({formatCurrency(350)} u.)</p>
+                            <p className="text-[7.5px] text-gray-400 font-bold font-mono">({formatCurrency(350)} u.)</p>
                           </div>
                         </div>
                       </div>
@@ -650,7 +650,7 @@ export default function TutorialPage() {
 
                     {/* Totals & Continue button */}
                     <div className="space-y-3 pt-3 border-t border-gray-100">
-                      <div className="space-y-1.5 text-[8.5px] text-[#5C5550] font-mono">
+                      <div className="space-y-1.5 text-[8.5px] text-gray-500 font-mono">
                         <div className="flex justify-between"><span>SUBTOTAL:</span><span>{formatCurrency(4200)}</span></div>
                         <div className="flex justify-between text-[#1A7A42] font-black bg-[#EBF7F0] px-2 py-0.5 rounded"><span>ENVÍO A LOCAL:</span><span>GRATIS 🚚</span></div>
                         <div className="flex justify-between text-[#111111] font-extrabold text-[11.5px] pt-2 border-t border-dashed border-gray-200">
@@ -660,7 +660,7 @@ export default function TutorialPage() {
 
                       <button 
                         onClick={() => handleStepSelect(4)}
-                        className="w-full bg-[#E8302A] hover:bg-[#C4231E] text-white text-[10px] font-black tracking-wider py-3 rounded-xl transition-all shadow-md shadow-[#E8302A]/10 text-center uppercase"
+                        className="w-full bg-[#E8302A] hover:bg-[#C4231E] text-white text-[10px] font-black tracking-wider py-3 rounded-lg transition-all shadow-md shadow-[#E8302A]/10 text-center uppercase"
                       >
                         CONTINUAR COMPRA ➡️
                       </button>
@@ -675,7 +675,7 @@ export default function TutorialPage() {
                       {/* Header */}
                       <div className="border-b border-gray-100 pb-2.5 flex items-center justify-between">
                         <h4 className="font-display font-extrabold text-sm text-gray-900 uppercase">Datos del Local</h4>
-                        <span onClick={() => handleStepSelect(3)} className="text-[9px] text-[#5C5550] font-bold uppercase cursor-pointer">Volver</span>
+                        <span onClick={() => handleStepSelect(3)} className="text-[9px] text-gray-500 font-bold uppercase cursor-pointer">Volver</span>
                       </div>
 
                       {/* Checkout fields */}
@@ -685,7 +685,7 @@ export default function TutorialPage() {
                         </div>
 
                         <div>
-                          <label className="text-[7.5px] uppercase tracking-widest text-[#888078] font-bold block mb-0.5">Nombre del Local / Comercio</label>
+                          <label className="text-[7.5px] uppercase tracking-widest text-gray-400 font-bold block mb-0.5">Nombre del Local / Comercio</label>
                           <input 
                             type="text" 
                             disabled 
@@ -694,7 +694,7 @@ export default function TutorialPage() {
                           />
                         </div>
                         <div>
-                          <label className="text-[7.5px] uppercase tracking-widest text-[#888078] font-bold block mb-0.5">Teléfono Celular (WhatsApp)</label>
+                          <label className="text-[7.5px] uppercase tracking-widest text-gray-400 font-bold block mb-0.5">Teléfono Celular (WhatsApp)</label>
                           <input 
                             type="text" 
                             disabled 
@@ -703,7 +703,7 @@ export default function TutorialPage() {
                           />
                         </div>
                         <div>
-                          <label className="text-[7.5px] uppercase tracking-widest text-[#888078] font-bold block mb-0.5">Dirección de Entrega</label>
+                          <label className="text-[7.5px] uppercase tracking-widest text-gray-400 font-bold block mb-0.5">Dirección de Entrega</label>
                           <input 
                             type="text" 
                             disabled 
@@ -716,7 +716,7 @@ export default function TutorialPage() {
 
                     <button 
                       onClick={() => handleStepSelect(5)}
-                      className="w-full bg-[#1A7A42] hover:bg-[#145E33] text-white text-[10px] font-black tracking-widest py-3 rounded-xl transition-all shadow-md shadow-[#1A7A42]/10 text-center uppercase flex items-center justify-center gap-1.5"
+                      className="w-full bg-[#1A7A42] hover:bg-[#145E33] text-white text-[10px] font-black tracking-widest py-3 rounded-lg transition-all shadow-md shadow-[#1A7A42]/10 text-center uppercase flex items-center justify-center gap-1.5"
                     >
                       ✔️ CONFIRMAR Y ENVIAR PEDIDO
                     </button>
@@ -806,14 +806,14 @@ export default function TutorialPage() {
             {isPlaying ? (
               <button
                 onClick={pauseTutorial}
-                className="px-5 py-2 sm:px-6 sm:py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white text-xs sm:text-sm font-semibold rounded-xl transition-all flex items-center gap-1.5 border border-white/5"
+                className="px-5 py-2 sm:px-6 sm:py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition-all flex items-center gap-1.5 border border-white/5"
               >
                 ⏸️ Pausar Guía
               </button>
             ) : (
               <button
                 onClick={startTutorial}
-                className="px-5 py-2 sm:px-6 sm:py-2.5 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-md shadow-red-600/10 flex items-center gap-1.5"
+                className="px-5 py-2 sm:px-6 sm:py-2.5 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition-all shadow-md shadow-red-600/10 flex items-center gap-1.5"
               >
                 ▶️ Iniciar Guía
               </button>
@@ -826,7 +826,7 @@ export default function TutorialPage() {
           
           {/* MASCOT DIALOGUE PANEL */}
           <div className="relative bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md shadow-xl flex items-start gap-5 w-full">
-            <div className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-neutral-900 border border-white/10 overflow-hidden flex items-center justify-center p-1">
+            <div className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-neutral-900 border border-white/10 overflow-hidden flex items-center justify-center p-1">
               <Image
                 src={getMascotSrc()}
                 alt="Marti El Martillo"
@@ -845,7 +845,7 @@ export default function TutorialPage() {
             </div>
 
             <div className="flex-1">
-              <div className="relative bg-neutral-900 border border-white/10 rounded-2xl px-5 py-3 text-neutral-200 text-sm shadow-md">
+              <div className="relative bg-neutral-900 border border-white/10 rounded-lg px-5 py-3 text-neutral-200 text-sm shadow-md">
                 <div className="absolute top-8 -left-2.5 w-5 h-5 bg-neutral-900 border-l border-b border-white/10 rotate-45" />
                 
                 <div className="flex items-center justify-between mb-1.5">
@@ -877,7 +877,7 @@ export default function TutorialPage() {
                   <div
                     key={step.id}
                     onClick={() => handleStepSelect(idx)}
-                    className={`flex items-start gap-4 p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                    className={`flex items-start gap-4 p-3.5 rounded-lg border transition-all cursor-pointer ${
                       isActive
                         ? "bg-red-950/30 border-red-500/50 shadow-md"
                         : "bg-white/5 border-white/5 hover:border-white/15 hover:bg-white/10"
@@ -914,13 +914,13 @@ export default function TutorialPage() {
             <div className="flex gap-3 justify-center flex-wrap">
               <Link
                 href="/manual_usuario_comerciantes.md"
-                className="px-3.5 py-2 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white rounded-xl text-xs font-semibold transition-all"
+                className="px-3.5 py-2 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white rounded-lg text-xs font-semibold transition-all"
               >
                 📄 Descargar Manual (.md)
               </Link>
               <a
                 href="https://wa.me/59892265952"
-                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-md shadow-emerald-600/10"
+                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shadow-md shadow-emerald-600/10"
               >
                 💬 Contactar Soporte
               </a>
