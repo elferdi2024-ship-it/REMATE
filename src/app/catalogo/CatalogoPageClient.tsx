@@ -1321,31 +1321,66 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onIgnore={handleIgnoreSharedCart}
       />
 
-      <div className="page-wrapper" style={{ marginTop: "12px", marginBottom: "4px" }}>
+      <div className="page-wrapper" style={{ marginTop: "16px", marginBottom: "8px" }}>
         <Link
           href="/tutorial"
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            background: "rgba(232, 48, 42, 0.06)",
-            border: "1.5px dashed rgba(232, 48, 42, 0.3)",
-            borderRadius: "16px",
-            padding: "10px 18px",
+            background: "linear-gradient(90deg, #1A1A1A 0%, #2A2A2A 100%)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            borderRadius: "var(--r-md)",
+            padding: "12px 20px",
             textDecoration: "none",
-            color: "inherit",
-            transition: "all 0.2s ease",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            transition: "transform 0.2s ease, box-shadow 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 8px 16px rgba(0,0,0,0.15)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "18px" }}>🔨</span>
-            <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--rojo, #D62828)" }}>
-              ¿Primera vez comprando? Mirá la guía interactiva explicada con VOZ por &quot;Marti&quot;.
-            </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{
+              background: "rgba(232, 48, 42, 0.15)",
+              color: "#E8302A",
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "1.1rem"
+            }}>
+              ✨
+            </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "#FFFFFF", letterSpacing: "0.01em" }}>
+                ¿Primera vez en El Remate?
+              </span>
+              <span style={{ fontSize: "0.75rem", fontWeight: 500, color: "#A0A0A0" }}>
+                Mirá la guía interactiva explicada con voz por "Marti"
+              </span>
+            </div>
           </div>
-          <span style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--rojo, #D62828)", textTransform: "uppercase" }}>
-            Ver Guía ➡️
-          </span>
+          <div style={{
+            background: "var(--rojo, #D62828)",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: "var(--r-sm)",
+            fontSize: "0.75rem",
+            fontWeight: 800,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            boxShadow: "0 2px 8px rgba(232, 48, 42, 0.3)"
+          }}>
+            Ver Guía
+          </div>
         </Link>
       </div>
 

@@ -105,7 +105,7 @@ export default function ProductoCard({
           : isInCart
             ? "1px solid var(--verde)" 
             : "1px solid rgba(0,0,0,0.05)",
-        borderRadius: "16px",
+        borderRadius: "var(--r-md)",
         padding: "12px",
         transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
         display: "flex",
@@ -122,7 +122,7 @@ export default function ProductoCard({
     >
       <div className="card-thumb" style={{ 
         background: "linear-gradient(180deg, #ffffff 0%, #f9f8f6 100%)", 
-        borderRadius: "14px",
+        borderRadius: "calc(var(--r-md) - 2px)",
         aspectRatio: "1 / 1",
         height: "auto",
         marginBottom: "10px",
