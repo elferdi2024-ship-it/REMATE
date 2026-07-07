@@ -33,6 +33,8 @@ import type { OfertaConfig } from "@/types/ofertas";
 
 import CartPanel from "@/components/carrito/CartPanel";
 import UserPanel from "@/components/usuario/UserPanel";
+import BranchBar from "@/components/catalogo/BranchBar";
+import BranchSelectModal from "@/components/catalogo/BranchSelectModal";
 import FacturaModal from "@/components/catalogo/FacturaModal";
 import OnlineBanner from "@/components/ui/OnlineBanner";
 import QuickViewModal from "@/components/catalogo/QuickViewModal";
@@ -396,6 +398,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [metodoEntrega, setMetodoEntrega] = useState<MetodoEntrega>('envio');
   const [sucursalId, setSucursalId] = useState<string | null>(null);
+  const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
 
   // Search state for instant feedback on input, synced with URL
   const [search, setSearch] = useState(urlSearch);
@@ -1217,6 +1220,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           recentSearches={[]}
           onSelectSuggestion={() => {}}
           sucursalId={sucursalId}
+          onChangeBranch={() => setIsBranchModalOpen(true)}
         />
         <div className="page-wrapper">
           <AdSlotPlacement slot="hero" onBrandFilter={() => {}} />
@@ -1286,7 +1290,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   }
 
   return (
-    <>
+    <div className="catalogo-page-wrapper">
       <OnlineBanner />
 
       {/* Banners dinámicos premium controlados desde el panel de administración (Reloj Suizo) */}
@@ -1358,6 +1362,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         recentSearches={recentSearches}
         onSelectSuggestion={handleSelectSuggestion}
         sucursalId={sucursalId}
+        onChangeBranch={() => setIsBranchModalOpen(true)}
       />
 
       {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS) ── */}
@@ -1754,7 +1759,19 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           </svg>
         </button>
       )}
-    </>
+
+      {/* Branch Selector Premium */}
+      <BranchBar
+        sucursalName={SUCURSALES.find(s => s.id === sucursalId)?.nombre || null}
+        onClick={() => setIsBranchModalOpen(true)}
+      />
+      <BranchSelectModal
+        isOpen={isBranchModalOpen}
+        onClose={() => setIsBranchModalOpen(false)}
+        currentSucursalId={sucursalId}
+        onSelect={handleSucursalChange}
+      />
+    </div>
   );
 }
 

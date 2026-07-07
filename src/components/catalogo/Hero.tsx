@@ -21,6 +21,7 @@ interface HeroProps {
   recentSearches?: string[];
   onSelectSuggestion?: (query: string) => void;
   sucursalId?: string | null;
+  onChangeBranch?: () => void;
 }
 
 import { formatPrice } from "@/lib/format";
@@ -40,6 +41,7 @@ export default function Hero({
   recentSearches = [],
   onSelectSuggestion,
   sucursalId = null,
+  onChangeBranch,
 }: HeroProps) {
   const sucursalObj = SUCURSALES.find((s) => s.id === sucursalId);
   const trustItems = ["Precios mayoristas reales", "Pedido en minutos", "Atencion por WhatsApp"];
@@ -110,8 +112,9 @@ export default function Hero({
           <div style={{ marginBottom: "10px", display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
             <span className="hero-eyebrow-badge">MAYORISTA · DISTRIBUIDORA · CANELONES</span>
             {sucursalObj && (
-              <Link
-                href="/seleccionar-sucursal"
+              <button
+                type="button"
+                onClick={onChangeBranch}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -127,6 +130,7 @@ export default function Hero({
                   textDecoration: "none",
                   boxShadow: "0 2px 10px rgba(232,48,42,0.1)",
                   transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                  cursor: "pointer",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-1px) scale(1.03)';
@@ -143,7 +147,7 @@ export default function Hero({
               >
                 <span>🏪 {sucursalObj.nombre}</span>
                 <span style={{ color: "#E8302A", fontSize: "0.6rem", fontWeight: 900 }}>· Cambiar</span>
-              </Link>
+              </button>
             )}
           </div>
 
