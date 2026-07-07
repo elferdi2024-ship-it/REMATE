@@ -149,35 +149,9 @@ export async function enviarFacturaWhatsApp(
     return;
   }
 
-  // 2. Intentar Web Share API (SOLO EN MÓVILES)
-  // En PC evitamos navigator.share porque abre el selector de sistema molesto
-  if (blob && isMobile() && supportsShareFiles()) {
-    const file = new File([blob], `pedido-${numFinal}.png`, {
-      type: "image/png",
-    });
-
-    if (navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          // El texto aparece como caption en WhatsApp mobile
-          text: `Pedido #${numFinal} — el remate`,
-        });
-        return; // éxito: usuario eligió WhatsApp desde el selector nativo
-      } catch (err: any) {
-        // El usuario canceló el selector — no es un error real
-        if (err?.name !== "AbortError") {
-          console.error("Error en Web Share:", err);
-        }
-        return;
-      }
-    }
-  }
-
-  // 3. Fallback desktop: descargar imagen + abrir chat de texto
+  // Descarga automática de la factura (tanto en móvil como en PC)
   if (blob) {
     try {
-      // Descarga automática de la factura
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -189,7 +163,7 @@ export async function enviarFacturaWhatsApp(
     }
   }
 
-  // Abrir WhatsApp con el mensaje formateado
+  // Abrir WhatsApp directo al chat de la sucursal
   const mensaje = armarMensajeWA(nombre, telefono, items, notas, numFinal, direccion);
   const encoded = encodeURIComponent(mensaje);
   const url = `https://wa.me/${phone}?text=${encoded}`;

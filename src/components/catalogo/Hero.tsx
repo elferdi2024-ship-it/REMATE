@@ -17,6 +17,7 @@ interface HeroProps {
   userDisplayName?: string;
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
+  onSearchSubmit?: (q: string) => void;
   suggestedProducts?: Producto[];
   recentSearches?: string[];
   onSelectSuggestion?: (query: string) => void;
@@ -37,6 +38,7 @@ export default function Hero({
   userDisplayName,
   searchQuery = "",
   onSearchChange,
+  onSearchSubmit,
   suggestedProducts = [],
   recentSearches = [],
   onSelectSuggestion,
@@ -338,6 +340,14 @@ export default function Hero({
               value={inputValue}
               onChange={handleChange}
               onFocus={() => setIsSearchFocused(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  setIsSearchFocused(false);
+                  onSearchChange?.(inputValue);
+                  if (onSearchSubmit) onSearchSubmit(inputValue);
+                }
+              }}
               aria-label="Buscar producto"
               className="hero-search-input-premium"
             />
@@ -356,7 +366,9 @@ export default function Hero({
 
             <button
               onClick={() => {
+                setIsSearchFocused(false);
                 onSearchChange?.(inputValue);
+                if (onSearchSubmit) onSearchSubmit(inputValue);
               }}
               style={{
                 position: "absolute",

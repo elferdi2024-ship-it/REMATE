@@ -601,8 +601,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       if (term) params.set("search", term);
       else params.delete("search");
       router.replace(`/catalogo?${params.toString()}`, { scroll: false });
-      if (term) scrollToGrid();
-    }, 400); // 400ms for stable grid and URL updates
+    }, 400); // 400ms for stable URL updates
   }, [router]);
 
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -1217,6 +1216,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           isLoggedIn={false}
           searchQuery=""
           onSearchChange={() => {}}
+          onSearchSubmit={() => {}}
           suggestedProducts={[]}
           recentSearches={[]}
           onSelectSuggestion={() => {}}
@@ -1359,6 +1359,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         userDisplayName={user?.displayName || alias || undefined}
         searchQuery={search}
         onSearchChange={setSearchDebounced}
+        onSearchSubmit={handleSelectSuggestion}
         suggestedProducts={instantSuggestions}
         recentSearches={recentSearches}
         onSelectSuggestion={handleSelectSuggestion}
