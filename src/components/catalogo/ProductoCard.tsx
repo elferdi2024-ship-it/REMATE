@@ -250,16 +250,15 @@ export default function ProductoCard({
             <div className="float-qty-ctrl" style={{ 
               display: "flex",
               alignItems: "center",
-              background: "rgba(255, 255, 255, 0.85)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              borderRadius: "24px",
-              height: "44px",
-              boxShadow: "0 8px 20px rgba(17,11,8,0.1)",
-              border: "1.5px solid rgba(26,122,66,0.3)",
-              padding: "0 4px"
+              background: "#fff",
+              borderRadius: "30px",
+              height: "42px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+              border: "1px solid rgba(0,0,0,0.08)",
+              padding: "0 4px",
+              overflow: "hidden"
             }}>
-              <button className="float-qty-btn minus" onClick={handleDec} style={{ width: "44px", height: "44px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", fontWeight: "bold" }}>&#8722;</button>
+              <button className="float-qty-btn minus" onClick={handleDec} aria-label="Disminuir cantidad">&#8722;</button>
               <input 
                 type="number" 
                 value={qty || ''} 
@@ -274,8 +273,8 @@ export default function ProductoCard({
                 onFocus={(e) => e.target.select()}
                 className="float-qty-val" 
                 style={{ 
-                  fontWeight: 800, 
-                  width: "40px", 
+                  fontWeight: 700, 
+                  width: "36px", 
                   textAlign: "center",
                   background: "transparent",
                   border: "none",
@@ -286,7 +285,7 @@ export default function ProductoCard({
                   fontSize: "1rem"
                 }} 
               />
-              <button className="float-qty-btn plus" onClick={handleInc} style={{ width: "44px", height: "44px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", fontWeight: "bold" }}>+</button>
+              <button className="float-qty-btn plus" onClick={handleInc} aria-label="Aumentar cantidad">+</button>
             </div>
           ) : (
             <button 

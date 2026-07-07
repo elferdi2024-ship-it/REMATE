@@ -63,6 +63,7 @@ import categoriaMapping from "@/lib/categoria_mapping.json";
 const catMap = (categoriaMapping as any).mapping || categoriaMapping;
 
 import { flyToCart } from "@/lib/flyToCart";
+import DesktopCategorySidebar from "@/components/catalogo/DesktopCategorySidebar";
 
 interface CatalogoPageClientProps {
   // In the future we can pass pre-loaded products from server
@@ -1528,87 +1529,111 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         )}
 
         {categorias.length > 0 && (
-          <CatsNav
-            categorias={["Todos", ...categorias]}
-            activeCat={activeCat}
-            onSelect={(cat) => {
-              const params = new URLSearchParams(window.location.search);
-              if (cat === "Todos") params.delete("categoria");
-              else params.set("categoria", cat);
-              router.replace(`/catalogo?${params.toString()}`, { scroll: false });
-              scrollToGrid();
-            }}
-          />
+          <div className="lg:hidden">
+            <CatsNav
+              categorias={["Todos", ...categorias]}
+              activeCat={activeCat}
+              onSelect={(cat) => {
+                const params = new URLSearchParams(window.location.search);
+                if (cat === "Todos") params.delete("categoria");
+                else params.set("categoria", cat);
+                router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+                scrollToGrid();
+              }}
+            />
+          </div>
         )}
 
-        {/* Results bar */}
-        <div ref={gridRef}>
-          <ResultsBar
-            showing={filtrados.length}
-            total={filtrados.length}
-            vista={vista}
-            onToggleVista={handleToggleVista}
-            searchQuery={search}
-            onSearchChange={setSearchDebounced}
-            marketAd={<AdSlotPlacement slot="results" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />}
-            ofertasCount={ofertasConfig?.activa && ofertasConfig.productos ? ofertasConfig.productos.length : 0}
-            sortBy={urlSort}
-            onSortChange={handleSortChange}
-            onOpenFilters={() => setFilterSheetOpen(true)}
-            activeFiltersCount={activeFiltersCount}
-            suggestedProducts={instantSuggestions}
-            onSelectSuggestion={handleSelectSuggestion}
-          />
-        </div>
-
-        {/* Product grid/list */}
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-            {[...Array(12)].map((_, i) => (
-              <ProductoSkeleton key={i} />
-            ))}
-          </div>
-        ) : filtrados.length === 0 ? (
-          <div style={{ padding: "32px 16px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div className="no-results" style={{ background: "var(--bg2)", padding: "48px 24px", borderRadius: "var(--r-xl)", maxWidth: "500px", margin: "0 auto 24px", boxShadow: "var(--shadow-sm)" }}>
-              <span className="no-results-icon" style={{ fontSize: "4rem", marginBottom: "16px", display: "block" }}>&#128269;</span>
-              <h3 style={{ fontSize: "1.4rem", fontWeight: 800, marginBottom: "8px", color: "var(--oscuro)", fontFamily: "var(--font-display), sans-serif" }}>No encontramos resultados</h3>
-              <p style={{ color: "var(--muted)", marginBottom: "24px" }}>No hay productos que coincidan con <strong>&quot;{search}&quot;</strong>. Intentá con otro término o limpiá los filtros.</p>
-              <button 
-                onClick={() => {
-                  setSearchDebounced("");
+        <div className="flex gap-6 relative" style={{ alignItems: "flex-start", marginTop: "16px" }}>
+          {/* Desktop Sidebar */}
+          {categorias.length > 0 && (
+            <div className="hidden lg:block">
+              <DesktopCategorySidebar
+                categorias={["Todos", ...categorias]}
+                activeCat={activeCat}
+                onSelect={(cat) => {
                   const params = new URLSearchParams(window.location.search);
-                  params.delete("categoria");
-                  params.delete("search");
+                  if (cat === "Todos") params.delete("categoria");
+                  else params.set("categoria", cat);
                   router.replace(`/catalogo?${params.toString()}`, { scroll: false });
-                }} 
-                style={{ background: "var(--rojo)", color: "white", fontWeight: 700, padding: "12px 24px", borderRadius: "var(--r-md)", border: "none", cursor: "pointer", boxShadow: "0 4px 12px var(--rojo-glow)" }}
-              >
-                Limpiar Búsqueda
-              </button>
+                  scrollToGrid();
+                }}
+              />
             </div>
-            <AdSlotPlacement slot="empty-search" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
+          )}
+
+          {/* Main content */}
+          <div className="flex-1 min-w-0 pb-[100px]">
+            {/* Results bar */}
+            <div ref={gridRef}>
+              <ResultsBar
+                showing={filtrados.length}
+                total={filtrados.length}
+                vista={vista}
+                onToggleVista={handleToggleVista}
+                searchQuery={search}
+                onSearchChange={setSearchDebounced}
+                marketAd={<AdSlotPlacement slot="results" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />}
+                ofertasCount={ofertasConfig?.activa && ofertasConfig.productos ? ofertasConfig.productos.length : 0}
+                sortBy={urlSort}
+                onSortChange={handleSortChange}
+                onOpenFilters={() => setFilterSheetOpen(true)}
+                activeFiltersCount={activeFiltersCount}
+                suggestedProducts={instantSuggestions}
+                onSelectSuggestion={handleSelectSuggestion}
+              />
+            </div>
+
+            {/* Product grid/list */}
+            {loading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                {[...Array(12)].map((_, i) => (
+                  <ProductoSkeleton key={i} />
+                ))}
+              </div>
+            ) : filtrados.length === 0 ? (
+              <div style={{ padding: "32px 16px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <div className="no-results" style={{ background: "var(--bg2)", padding: "48px 24px", borderRadius: "var(--r-xl)", maxWidth: "500px", margin: "0 auto 24px", boxShadow: "var(--shadow-sm)" }}>
+                  <span className="no-results-icon" style={{ fontSize: "4rem", marginBottom: "16px", display: "block" }}>&#128269;</span>
+                  <h3 style={{ fontSize: "1.4rem", fontWeight: 800, marginBottom: "8px", color: "var(--oscuro)", fontFamily: "var(--font-display), sans-serif" }}>No encontramos resultados</h3>
+                  <p style={{ color: "var(--muted)", marginBottom: "24px" }}>No hay productos que coincidan con <strong>&quot;{search}&quot;</strong>. Intentá con otro término o limpiá los filtros.</p>
+                  <button 
+                    onClick={() => {
+                      setSearchDebounced("");
+                      const params = new URLSearchParams(window.location.search);
+                      params.delete("categoria");
+                      params.delete("search");
+                      router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+                    }} 
+                    style={{ background: "var(--rojo)", color: "white", fontWeight: 700, padding: "12px 24px", borderRadius: "var(--r-md)", border: "none", cursor: "pointer", boxShadow: "0 4px 12px var(--rojo-glow)" }}
+                  >
+                    Limpiar Búsqueda
+                  </button>
+                </div>
+                <AdSlotPlacement slot="empty-search" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
+              </div>
+            ) : (
+              <ProductoGrid
+                productos={filtrados}
+                vista={vista}
+                qtyMap={qtyMap}
+                searchTerm={search}
+                onAdd={handleAddProduct}
+                onQtyChange={handleQtyChange}
+                onQuickView={(p) => setQuickViewProduct(p)}
+                onSelectBrand={handleBrandFilter}
+                onSelectCategory={(cat) => {
+                  const params = new URLSearchParams(window.location.search);
+                  if (cat === "Todos") params.delete("categoria");
+                  else params.set("categoria", cat);
+                  router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+                  scrollToGrid();
+                }}
+              />
+            )}
           </div>
-        ) : (
-          <ProductoGrid
-            productos={filtrados}
-            vista={vista}
-            qtyMap={qtyMap}
-            searchTerm={search}
-            onAdd={handleAddProduct}
-            onQtyChange={handleQtyChange}
-            onQuickView={(p) => setQuickViewProduct(p)}
-            onSelectBrand={handleBrandFilter}
-            onSelectCategory={(cat) => {
-              const params = new URLSearchParams(window.location.search);
-              if (cat === "Todos") params.delete("categoria");
-              else params.set("categoria", cat);
-              router.replace(`/catalogo?${params.toString()}`, { scroll: false });
-              scrollToGrid();
-            }}
-          />
-        )}
-      </div>
+        </div>
+        </div>
 
 
       {/* Float cart button */}

@@ -202,10 +202,10 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
         }
 
         .cat-circle-btn.active .cat-circle-icon {
-          background: var(--rojo);
-          color: white;
-          border-color: var(--rojo);
-          box-shadow: 0 8px 20px var(--rojo-glow), 0 0 0 3px rgba(232, 48, 42, 0.15);
+          background: #ffffff;
+          color: var(--rojo);
+          border: 2px solid var(--rojo);
+          box-shadow: 0 4px 14px rgba(232, 48, 42, 0.15);
           transform: scale(1.05);
         }
 
