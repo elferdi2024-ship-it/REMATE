@@ -5,191 +5,177 @@ import FiestaClient from "./FiestaClient";
 
 export const metadata: Metadata = {
   title: "Especial Fiesta | Distribuidora El Remate",
-  description: "Organizá la mejor fiesta con nuestras ofertas exclusivas en bebidas, hamburguesas y más.",
+  description:
+    "Armá tu fiesta con bebidas, parrilla, picada y descartables a precio mayorista.",
 };
+
+const highlights = [
+  { value: "4", label: "categorías para resolver todo" },
+  { value: "24h", label: "ideal para planificar con tiempo" },
+  { value: "$", label: "precios mayoristas" },
+];
+
+const benefits = [
+  {
+    title: "Selección corta",
+    text: "Solo categorías útiles para armar una compra de fiesta sin entrar al catálogo completo.",
+  },
+  {
+    title: "Ritmo mobile",
+    text: "Pocas decisiones por pantalla, búsqueda arriba y acciones claras para sumar productos.",
+  },
+  {
+    title: "Pedido claro",
+    text: "Ves lo elegido, abrís el pedido y cerrás la compra cuando está todo listo.",
+  },
+];
+
+function SparkIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none">
+      <path
+        d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2z"
+        fill="currentColor"
+      />
+      <path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z" fill="currentColor" />
+    </svg>
+  );
+}
 
 export default function FiestaLanding() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-[#E53935] selection:text-white overflow-x-hidden font-body">
-      {/* Navbar Minimalista */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A]/80 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-[1200px] mx-auto px-5 h-[70px] flex items-center justify-between">
-          <Link href="/" className="font-bebas text-2xl tracking-[2px] text-white flex items-center gap-2">
-            <span className="text-[#E53935]">EL</span> REMATE
+    <main className="min-h-screen overflow-x-hidden bg-[#0b0908] text-white selection:bg-[#d7a84f] selection:text-[#140f08] [color-scheme:dark] [touch-action:manipulation]">
+      <Link
+        href="#combos"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-black focus:text-[#12080c]"
+      >
+        Saltar a productos
+      </Link>
+      <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between rounded-full border border-white/10 bg-[#11100f]/82 px-4 shadow-[0_18px_70px_rgba(0,0,0,0.34)] backdrop-blur-xl md:px-5">
+          <Link
+            href="/"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full px-2 font-body text-[0.82rem] font-black uppercase tracking-[0.36em] text-white outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#d7a84f]"
+            aria-label="Volver al inicio de El Remate"
+          >
+            <span className="text-[#d7a84f]">EL</span>
+            <span>REMATE</span>
           </Link>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/catalogo"
-              className="text-sm font-bold tracking-wider text-white/70 hover:text-white transition-colors"
-            >
-              IR AL CATÁLOGO
-            </Link>
-          </div>
+          <Link
+            href="/catalogo"
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#f3ead9] px-4 text-sm font-black tracking-[-0.01em] text-[#17110b] shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] md:px-5"
+          >
+            Catálogo
+          </Link>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative pt-[120px] pb-[80px] lg:pt-[180px] lg:pb-[120px] px-5 flex flex-col items-center justify-center min-h-[90vh] overflow-hidden z-0">
-        {/* Imagen Hero Fondo */}
-        <div className="absolute inset-0 z-[-1]">
-          <Image 
-            src="/fiestahero.png" 
-            alt="Armá tu fiesta" 
-            fill 
-            className="object-cover opacity-60" 
+      <section className="relative isolate flex min-h-[82svh] items-end px-4 pb-10 pt-28 md:min-h-[86svh] md:items-center md:px-6 md:pb-16 md:pt-32">
+        <div className="absolute inset-0 -z-20">
+          <Image
+            src="/fiestahero.png"
+            alt="Mesa de fiesta con bebidas y comida"
+            fill
             priority
+            sizes="100vw"
+            className="object-cover opacity-50 saturate-[0.82]"
           />
-          {/* Overlay gradient para asegurar legibilidad */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0A]/80 via-[#0A0A0A]/60 to-[#0A0A0A]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,9,8,0.24)_0%,rgba(11,9,8,0.78)_58%,#0b0908_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(11,9,8,0.90)_0%,rgba(11,9,8,0.55)_46%,rgba(11,9,8,0.86)_100%)]" />
         </div>
 
-        {/* Elementos Decorativos */}
-        <div className="absolute top-1/4 left-0 w-[50vw] h-[50vw] bg-[#E53935]/20 rounded-full blur-[120px] -translate-x-1/2 pointer-events-none z-[-1]" />
-        <div className="absolute bottom-0 right-0 w-[40vw] h-[40vw] bg-[#FFB300]/10 rounded-full blur-[100px] translate-x-1/3 pointer-events-none z-[-1]" />
-        
-        <div className="relative max-w-[900px] w-full mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8 animate-fade-in-up">
-            <span className="text-xl">🎉</span>
-            <span className="text-xs font-bold tracking-[3px] uppercase text-[#FFB300]">
-              Especial Eventos & Cumpleaños
-            </span>
-          </div>
+        <div className="absolute left-[-20%] top-[18%] -z-10 h-72 w-72 rounded-full bg-[#8f2f22]/18 blur-3xl md:h-[28rem] md:w-[28rem]" />
+        <div className="absolute bottom-[12%] right-[-18%] -z-10 h-72 w-72 rounded-full bg-[#d7a84f]/10 blur-3xl md:h-[30rem] md:w-[30rem]" />
 
-          {/* Título 3D CSS Premium */}
-          <div className="relative group mx-auto mb-8 w-full flex justify-center" style={{ perspective: '1200px' }}>
-            <div className="transform transition-transform duration-700 ease-out group-hover:rotate-x-12 group-hover:rotate-y-[-5deg] group-hover:scale-105">
-              <h1 className="font-bebas text-[clamp(4.5rem,14vw,10rem)] leading-[0.8] tracking-[4px] text-white text-center relative z-10">
-                <span className="block text-3d-neon text-[#FF1744] drop-shadow-[0_0_20px_rgba(255,23,68,0.8)]">ARMÁ LA</span>
-                <span className="block text-3d-neon text-[#FFEA00] drop-shadow-[0_0_30px_rgba(255,234,0,0.9)] ml-4">FIESTA</span>
-              </h1>
+        <div className="mx-auto grid w-full max-w-6xl items-end gap-10 md:grid-cols-[0.98fr_1.02fr] md:items-center">
+          <div className="flex flex-col items-center text-center md:items-start md:text-left max-w-2xl mx-auto w-full">
+            <div className="mb-5 inline-flex min-h-10 items-center rounded-full border border-white/12 bg-white/[0.055] px-4 font-body text-[0.68rem] font-black uppercase tracking-[0.28em] text-[#d7a84f] backdrop-blur-md">
+              Fiesta mayorista
             </div>
-            
-            <style dangerouslySetInnerHTML={{__html: `
-              .text-3d-neon {
-                text-shadow: 
-                  0 1px 0 #cccccc,
-                  0 2px 0 #c9c9c9,
-                  0 3px 0 #bbb,
-                  0 4px 0 #b9b9b9,
-                  0 5px 0 #aaa,
-                  0 6px 1px rgba(0,0,0,.1),
-                  0 0 5px rgba(0,0,0,.1),
-                  0 1px 3px rgba(0,0,0,.3),
-                  0 3px 5px rgba(0,0,0,.2),
-                  0 5px 10px rgba(0,0,0,.25),
-                  0 10px 10px rgba(0,0,0,.2),
-                  0 20px 20px rgba(0,0,0,.15);
-              }
-            `}} />
+
+            <h1 className="sr-only">Armá la fiesta sin fundirte</h1>
+
+            <div className="relative w-full max-w-[680px] overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#120f0d]/58 p-2 shadow-[0_28px_90px_rgba(0,0,0,0.44)] backdrop-blur-sm md:rounded-[2.4rem] md:p-3">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,rgba(215,168,79,0.12),transparent_42%)]" />
+              <Image
+                src="/fiesta_title.png"
+                alt=""
+                width={1024}
+                height={1024}
+                priority
+                sizes="(max-width: 768px) 95vw, 720px"
+                className="relative z-10 -my-9 w-full scale-[1.16] object-contain drop-shadow-[0_16px_34px_rgba(0,0,0,0.55)] md:-my-16 md:scale-[1.12]"
+                style={{ width: "100%", maxWidth: "100%", height: "auto", display: "block" }}
+              />
+            </div>
+
+            <p className="mt-6 max-w-xl text-balance font-serif text-[1.28rem] leading-8 text-white/86 md:text-[1.58rem] md:leading-10">
+              Una selección corta para resolver bebidas, picada, parrilla y extras sin recorrer todo el catálogo.
+            </p>
+
+            <div className="mt-7 flex w-full max-w-md gap-3 md:max-w-none">
+              <Link
+                href="#combos"
+                className="inline-flex min-h-14 flex-1 items-center justify-center whitespace-nowrap rounded-2xl bg-[#f3ead9] px-4 font-body text-sm font-black uppercase tracking-[0.16em] text-[#17110b] shadow-[0_16px_40px_rgba(0,0,0,0.22)] transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] md:px-7"
+              >
+                Productos
+              </Link>
+              <Link
+                href="/catalogo"
+                className="inline-flex min-h-14 flex-1 items-center justify-center whitespace-nowrap rounded-2xl border border-white/12 bg-white/[0.055] px-4 font-body text-sm font-black uppercase tracking-[0.16em] text-white/86 backdrop-blur-md transition-colors hover:bg-white/10 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] md:px-7"
+              >
+                Catálogo
+              </Link>
+            </div>
           </div>
 
-          <p className="text-[clamp(1.1rem,2vw,1.4rem)] text-white/70 mb-10 max-w-[600px] mx-auto font-light leading-relaxed">
-            Combos explosivos, bebidas frías y las mejores hamburguesas. Todo lo que necesitas para tu evento a precio mayorista.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="#combos"
-              className="w-full sm:w-auto px-8 py-4 bg-[#E53935] hover:bg-[#D32F2F] text-white rounded-xl font-bebas text-xl tracking-[2px] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(229,57,53,0.4)] flex items-center justify-center gap-2"
-            >
-              VER COMBOS 🔥
-            </Link>
-            <Link
-              href="/catalogo"
-              className="w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bebas text-xl tracking-[2px] transition-all flex items-center justify-center"
-            >
-              CATÁLOGO COMPLETO
-            </Link>
+          <div className="hidden grid-cols-3 gap-2 rounded-[2rem] border border-white/10 bg-black/30 p-2 shadow-[0_25px_90px_rgba(0,0,0,0.38)] backdrop-blur-md md:grid md:gap-3 md:p-3">
+            {highlights.map((item) => (
+              <div key={item.label} className="rounded-[1.4rem] bg-white/[0.08] p-3 text-center md:p-5">
+                <div className="font-bebas text-4xl leading-none text-[#ffcf33] md:text-5xl">{item.value}</div>
+                <div className="mt-2 text-[0.68rem] font-bold uppercase leading-4 tracking-wide text-white/70 md:text-xs">
+                  {item.label}
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 animate-bounce">
-          <span className="text-[10px] tracking-[2px] uppercase font-bold">Scroll</span>
-          <div className="w-[1px] h-[30px] bg-gradient-to-b from-white to-transparent" />
         </div>
       </section>
 
-      {/* Marquee Cintas */}
-      <div className="bg-[#E53935] py-3 overflow-hidden flex whitespace-nowrap rotate-[-1deg] scale-105 border-y border-white/20 relative z-20">
-        <div className="animate-marquee flex gap-8 items-center text-white font-bebas text-2xl tracking-[2px]">
-          <span>⚡ PRECIOS MAYORISTAS</span>
-          <span>•</span>
-          <span>🍔 COMBOS DE HAMBURGUESAS</span>
-          <span>•</span>
-          <span>🍺 BEBIDAS FRÍAS</span>
-          <span>•</span>
-          <span>⚡ PRECIOS MAYORISTAS</span>
-          <span>•</span>
-          <span>🍔 COMBOS DE HAMBURGUESAS</span>
-          <span>•</span>
-          <span>🍺 BEBIDAS FRÍAS</span>
-          <span>•</span>
-          <span>⚡ PRECIOS MAYORISTAS</span>
-          <span>•</span>
-          <span>🍔 COMBOS DE HAMBURGUESAS</span>
-          <span>•</span>
-          <span>🍺 BEBIDAS FRÍAS</span>
-          <span>•</span>
-        </div>
-      </div>
-
-      {/* Catálogo en vivo de Fiesta */}
-      <div className="relative z-50 px-5">
+      <section id="combos" className="relative scroll-mt-24 px-0 md:px-6">
         <FiestaClient />
-      </div>
+      </section>
 
-      {/* Beneficios */}
-      <section className="py-[80px] px-5 bg-[#111] border-t border-white/5">
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="p-6 text-center border border-white/5 rounded-2xl bg-white/[0.02]">
-            <div className="text-4xl mb-4">💰</div>
-            <h4 className="font-bebas text-2xl tracking-[1px] mb-2">PRECIOS DE MAYORISTA</h4>
-            <p className="text-white/60 text-sm">Comprá para tu evento con precios que rinden mucho más.</p>
-          </div>
-          <div className="p-6 text-center border border-white/5 rounded-2xl bg-white/[0.02]">
-            <div className="text-4xl mb-4">🚚</div>
-            <h4 className="font-bebas text-2xl tracking-[1px] mb-2">ENVÍO O RETIRO</h4>
-            <p className="text-white/60 text-sm">Vos elegís: te lo llevamos o pasás a buscar todo junto.</p>
-          </div>
-          <div className="p-6 text-center border border-white/5 rounded-2xl bg-white/[0.02]">
-            <div className="text-4xl mb-4">🧊</div>
-            <h4 className="font-bebas text-2xl tracking-[1px] mb-2">TODO FRÍO</h4>
-            <p className="text-white/60 text-sm">Avisanos con tiempo y te preparamos la bebida lista para tomar.</p>
-          </div>
+      <section className="px-4 py-12 md:px-6 md:py-18">
+        <div className="mx-auto grid max-w-6xl gap-3 md:grid-cols-3">
+          {benefits.map((benefit) => (
+            <article
+              key={benefit.title}
+              className="rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-5 backdrop-blur"
+            >
+              <h2 className="font-serif text-[1.45rem] leading-7 text-white">{benefit.title}</h2>
+              <p className="mt-2 text-[0.92rem] font-medium leading-6 text-white/60">{benefit.text}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-      {/* CTA Final */}
-      <section className="py-[120px] px-5 relative text-center">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#E53935]/10 pointer-events-none" />
-        <div className="relative z-10 max-w-[600px] mx-auto">
-          <h2 className="font-bebas text-[clamp(3rem,5vw,4.5rem)] leading-none mb-6">
-            ¿LISTO PARA <br />FESTEJAR?
-          </h2>
-          <p className="text-white/70 mb-10">
-            Armá tu carrito con todo lo necesario y nosotros nos encargamos del resto.
+      <section className="px-4 pb-24 text-center md:px-6 md:pb-28">
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-white/10 bg-white/[0.035] p-7 md:p-10">
+          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d7a84f]">Cierre de pedido</p>
+          <h2 className="mt-3 font-serif text-4xl leading-tight text-white md:text-5xl">Todo listo, sin sobrecargar.</h2>
+          <p className="mx-auto mt-4 max-w-xl text-[1.05rem] font-medium leading-8 text-white/72">
+            Sumá lo necesario y seguí el cierre del pedido con una lista clara.
           </p>
           <Link
-            href="/catalogo"
-            className="inline-flex px-10 py-5 bg-white text-black rounded-xl font-bebas text-2xl tracking-[2px] transition-transform hover:scale-105 items-center gap-2"
+            href="#combos"
+            className="mt-7 inline-flex min-h-14 items-center justify-center rounded-2xl bg-[#f3ead9] px-8 font-body text-sm font-black uppercase tracking-[0.16em] text-[#17110b] transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f]"
           >
-            INICIAR PEDIDO 🛒
+            Empezar pedido
           </Link>
         </div>
       </section>
 
-      {/* Custom Styles for Animation */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          animation: marquee 20s linear infinite;
-          width: max-content;
-        }
-      `}} />
-    </div>
+    </main>
   );
 }

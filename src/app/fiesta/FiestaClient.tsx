@@ -1,448 +1,617 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import categoriaMapping from "@/lib/categoria_mapping.json";
-
-const catMap = (categoriaMapping as any).mapping || categoriaMapping;
-
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
 import { haptic } from "@/lib/haptic";
-import { EMOJI_POR_CATEGORIA, Producto } from "@/types";
+import { Producto } from "@/types";
 import { flyToCart } from "@/lib/flyToCart";
 import CartPanel from "@/components/carrito/CartPanel";
 
-// Tarjeta Exclusiva Neon para la Fiesta
+const catMap = (categoriaMapping as any).mapping || categoriaMapping;
+
+type FiestaTab = "bebidas" | "parrilla" | "picada" | "extras";
+type Accent = "blue" | "red" | "yellow" | "neutral";
+
+const tabs: Array<{ id: FiestaTab; label: string; eyebrow: string; accent: Accent }> = [
+  { id: "bebidas", label: "Barra", eyebrow: "Bebidas", accent: "blue" },
+  { id: "parrilla", label: "Parrilla", eyebrow: "Fuego", accent: "red" },
+  { id: "picada", label: "Picada", eyebrow: "Tabla", accent: "yellow" },
+  { id: "extras", label: "Extras", eyebrow: "Final", accent: "neutral" },
+];
+
+const accentStyles: Record<
+  Accent,
+  {
+    badge: string;
+    glow: string;
+    price: string;
+    ring: string;
+    button: string;
+    title: string;
+  }
+> = {
+  blue: {
+    badge: "bg-[#d9c39a] text-[#17110b]",
+    glow: "from-white/[0.07] to-transparent",
+    price: "from-[#f2e3c5] to-[#d7a84f]",
+    ring: "border-white/10",
+    button: "bg-[#f3ead9] text-[#17110b] shadow-[0_12px_28px_rgba(0,0,0,0.20)]",
+    title: "from-[#f2e3c5] to-[#d7a84f]",
+  },
+  red: {
+    badge: "bg-[#d9c39a] text-[#17110b]",
+    glow: "from-white/[0.07] to-transparent",
+    price: "from-[#f2e3c5] to-[#c8845d]",
+    ring: "border-white/10",
+    button: "bg-[#f3ead9] text-[#17110b] shadow-[0_12px_28px_rgba(0,0,0,0.20)]",
+    title: "from-[#f2e3c5] to-[#c8845d]",
+  },
+  yellow: {
+    badge: "bg-[#d9c39a] text-[#17110b]",
+    glow: "from-white/[0.07] to-transparent",
+    price: "from-[#f2e3c5] to-[#d7a84f]",
+    ring: "border-white/10",
+    button: "bg-[#f3ead9] text-[#17110b] shadow-[0_12px_28px_rgba(0,0,0,0.20)]",
+    title: "from-[#f2e3c5] to-[#d7a84f]",
+  },
+  neutral: {
+    badge: "bg-[#d9c39a] text-[#17110b]",
+    glow: "from-white/18 to-transparent",
+    price: "from-[#f2e3c5] to-[#b9ad9a]",
+    ring: "border-white/10",
+    button: "bg-[#f3ead9] text-[#17110b] shadow-[0_12px_28px_rgba(0,0,0,0.20)]",
+    title: "from-[#f2e3c5] to-[#b9ad9a]",
+  },
+};
+
+const fiestaKeywords = [
+  "hamburguesa",
+  "cerveza",
+  "whisky",
+  "vodka",
+  "fernet",
+  "pancho",
+  "chorizo",
+  "hielo",
+  "refresco",
+  "coca",
+  "pepsi",
+  "sprite",
+  "vino",
+  "gin",
+  "ron",
+  "servilleta",
+  "vaso",
+  "descartable",
+  "plato",
+  "cubierto",
+  "snack",
+  "papas fritas",
+  "mani",
+  "maní",
+  "chisitos",
+  "doritos",
+  "jamon",
+  "jamón",
+  "queso",
+  "fiambre",
+  "salame",
+  "bondiola",
+  "aceituna",
+];
+
+const INITIAL_VISIBLE_PRODUCTS = 8;
+const VISIBLE_PRODUCTS_STEP = 8;
+const SEARCH_VISIBLE_PER_SECTION = 4;
+
+function normalize(value?: string) {
+  return (value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function formatPrice(value: number) {
+  return new Intl.NumberFormat("es-UY", {
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function getProductAccent(producto: Producto): Accent {
+  const text = `${normalize(producto.nombre)} ${normalize(producto.categoria)}`;
+  if (text.includes("cerveza") || text.includes("whisky") || text.includes("vodka") || text.includes("fernet") || text.includes("vino") || text.includes("gin") || text.includes("ron")) {
+    return "blue";
+  }
+  if (text.includes("hamburguesa") || text.includes("pancho") || text.includes("chorizo")) {
+    return "red";
+  }
+  if (text.includes("snack") || text.includes("queso") || text.includes("papas") || text.includes("mani")) {
+    return "yellow";
+  }
+  return "neutral";
+}
+
+function PlusIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round">
+      <path d="m21 21-4.35-4.35" />
+      <circle cx="11" cy="11" r="7" />
+    </svg>
+  );
+}
+
 function PremiumProductCard({ producto }: { producto: Producto }) {
   const { items, addItem, removeItem } = useCart();
   const toast = useToast();
-  
-  const cartItem = items.find((i) => i.codigo === producto.codigo);
+  const cartItem = items.find((item) => item.codigo === producto.codigo);
   const qty = cartItem ? cartItem.cantidad : 0;
+  const accent = accentStyles[getProductAccent(producto)];
 
-  const handleAdd = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleAdd = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     haptic.add();
     addItem(producto);
-    flyToCart(e, producto.imagen, EMOJI_POR_CATEGORIA[producto.categoria] || "🛒");
+    flyToCart(event, producto.imagen, "+");
     toast.success(`Agregado: ${producto.nombre}`);
   };
 
-  const handleRemove = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleRemove = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     haptic.remove();
     removeItem(producto.codigo);
   };
 
-  // Determinar color de acento según categoría
-  const isAlcohol = producto.categoria?.toLowerCase().includes("alcohol") || producto.nombre.toLowerCase().includes("cerveza") || producto.nombre.toLowerCase().includes("whisky");
-  const accentColor = isAlcohol ? "from-[#00B0FF] to-[#0081CB]" : "from-[#E53935] to-[#D32F2F]";
-  const shadowColor = isAlcohol ? "rgba(0, 176, 255, 0.4)" : "rgba(229, 57, 53, 0.4)";
-  const borderColor = isAlcohol ? "border-[#00B0FF]/30" : "border-[#E53935]/30";
-
   return (
-    <div className={`relative group bg-[#111] rounded-[16px] md:rounded-2xl overflow-hidden border ${borderColor} transition-all duration-300 hover:-translate-y-1 md:hover:-translate-y-2 hover:shadow-[0_15px_30px_${shadowColor}] flex flex-col h-full`}>
-      {/* Etiqueta Oferta / Precio Especial */}
-      <div className="absolute top-2 right-2 md:top-3 md:right-3 z-20">
-        <span className={`bg-gradient-to-r ${accentColor} text-white text-[8px] md:text-[10px] font-bold px-1.5 md:px-2 py-0.5 md:py-1 rounded-full uppercase tracking-[1px] shadow-lg`}>
+    <article className={`group flex h-full min-h-[258px] flex-col overflow-hidden rounded-[1.2rem] border ${accent.ring} bg-[#14110f]/78 shadow-[0_14px_44px_rgba(0,0,0,0.22)] backdrop-blur transition-transform duration-200 active:scale-[0.99] md:min-h-[342px] md:rounded-[1.55rem] md:hover:-translate-y-0.5`}>
+      <div className="relative h-32 overflow-hidden border-b border-white/[0.06] bg-white/[0.035] md:h-48">
+        <div className={`absolute inset-0 bg-gradient-to-br ${accent.glow}`} />
+        <div className="absolute left-2 top-2 z-10 rounded-full border border-white/10 bg-black/28 px-2.5 py-1 font-body text-[0.54rem] font-black uppercase tracking-[0.18em] text-white/58 backdrop-blur md:left-3 md:top-3">
           Mayorista
-        </span>
-      </div>
-
-      {/* Contenedor de Imagen */}
-      <div className="relative h-[130px] md:h-[200px] w-full p-4 md:p-6 bg-gradient-to-b from-white/[0.08] to-transparent flex items-center justify-center overflow-hidden">
-        {/* Glow de fondo para la imagen */}
-        <div className={`absolute inset-0 bg-gradient-to-tr ${accentColor} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
-        
+        </div>
         {producto.imagen ? (
           <Image
             src={producto.imagen}
             alt={producto.nombre}
             fill
-            className="object-contain drop-shadow-xl group-hover:scale-110 transition-transform duration-500 p-4"
+            sizes="(max-width: 640px) 48vw, (max-width: 1024px) 30vw, 25vw"
+            className="object-contain p-4 drop-shadow-[0_14px_22px_rgba(0,0,0,0.30)] transition-transform duration-300 group-hover:scale-[1.03] md:p-6"
           />
         ) : (
-          <div className="text-6xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-            {EMOJI_POR_CATEGORIA[producto.categoria] || "📦"}
+          <div className="flex h-full items-center justify-center px-4 text-center font-serif text-2xl italic tracking-[-0.03em] text-white/35">
+            El Remate
           </div>
         )}
       </div>
 
-      {/* Info */}
-      <div className="p-3 md:p-5 flex-1 flex flex-col bg-gradient-to-t from-black/40 to-transparent">
-        <h4 className="font-bebas text-lg md:text-2xl leading-[1.1] md:leading-tight mb-2 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-400 transition-colors line-clamp-2">
+      <div className="flex flex-1 flex-col p-3 md:p-5">
+        <p className="mb-2 truncate font-body text-[0.56rem] font-black uppercase tracking-[0.22em] text-white/38 md:text-[0.62rem]">
+          {producto.marca || producto.categoria || "Fiesta"}
+        </p>
+        <h3 className="line-clamp-2 font-body text-[0.92rem] font-black uppercase leading-[1.18] tracking-[0.025em] text-white md:text-[1.05rem]">
           {producto.nombre}
-        </h4>
-        
-        {/* Precios y Botón */}
-        <div className="mt-auto pt-3 md:pt-4 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3">
-          <div className="min-w-0 flex-shrink w-full">
-            <p className="text-white/50 text-[9px] md:text-xs font-light tracking-[1px] uppercase mb-0.5 md:mb-1 truncate">Precio Especial</p>
-            <div className="flex items-baseline gap-1.5 flex-wrap">
-              <span className={`font-bebas text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r ${accentColor} leading-none drop-shadow-md`}>
-                ${producto.precio}
-              </span>
-              {producto.precioAnterior && producto.precioAnterior > producto.precio && (
-                <span className="text-white/30 line-through text-[10px] md:text-sm font-semibold">
-                  ${producto.precioAnterior}
-                </span>
-              )}
+        </h3>
+
+        <div className="mt-auto pt-3 md:pt-4">
+          <div className="mb-2.5 flex items-end justify-between gap-2 md:mb-3">
+            <div>
+              <p className="font-body text-[0.56rem] font-black uppercase tracking-[0.2em] text-white/38">Precio</p>
+              <div className={`bg-gradient-to-r ${accent.price} bg-clip-text font-serif text-[1.85rem] leading-none tracking-[-0.07em] text-transparent md:text-[2.38rem]`}>
+                ${formatPrice(producto.precio)}
+              </div>
             </div>
+            {producto.precioAnterior && producto.precioAnterior > producto.precio ? (
+              <span className="mb-1 text-xs font-bold text-white/35 line-through">${formatPrice(producto.precioAnterior)}</span>
+            ) : null}
           </div>
 
-          {/* Botón Agregar - alineado a la derecha en mobile */}
-          <div className="self-end sm:self-auto w-full sm:w-auto flex justify-end">
-            {qty > 0 ? (
-              <div className="flex items-center gap-2 md:gap-3 bg-white/10 rounded-full px-1.5 md:px-2 py-1 md:py-1 border border-white/20 shadow-inner">
-                <button onClick={handleRemove} className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-white/20 transition-colors text-sm md:text-base">
-                  -
-                </button>
-                <span className="font-bebas text-lg md:text-xl w-4 md:w-4 text-center leading-none mt-0.5">{qty}</span>
-                <button onClick={handleAdd} className={`w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-r ${accentColor} flex items-center justify-center text-white shadow-[0_0_10px_${shadowColor}] transition-transform active:scale-95 text-sm md:text-base`}>
-                  +
-                </button>
-              </div>
-            ) : (
+          {qty > 0 ? (
+            <div className="grid min-h-12 grid-cols-[48px_1fr_48px] items-center rounded-2xl border border-white/10 bg-white/[0.075] p-1">
+              <button
+                onClick={handleRemove}
+                className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-xl font-black text-white transition-colors active:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffcf33]"
+                aria-label={`Quitar ${producto.nombre}`}
+              >
+                -
+              </button>
+              <span className="text-center font-serif text-2xl leading-none text-white" aria-live="polite">
+                {qty}
+              </span>
               <button
                 onClick={handleAdd}
-                className={`w-9 h-9 md:w-12 md:h-12 flex-shrink-0 rounded-full bg-gradient-to-r ${accentColor} flex items-center justify-center text-white shadow-[0_0_15px_${shadowColor}] transition-transform hover:scale-110 active:scale-95`}
+                className={`flex h-11 w-11 items-center justify-center rounded-xl ${accent.button} transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffcf33]`}
+                aria-label={`Agregar otra unidad de ${producto.nombre}`}
               >
-                <svg width="20" height="20" className="md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
+                <PlusIcon />
               </button>
-            )}
-          </div>
+            </div>
+          ) : (
+            <button
+              onClick={handleAdd}
+              className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl ${accent.button} font-body text-[0.72rem] font-black uppercase tracking-[0.18em] transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffcf33] md:min-h-12`}
+              aria-label={`Agregar ${producto.nombre} al pedido`}
+            >
+              Agregar
+              <PlusIcon />
+            </button>
+          )}
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
-// ── EFECTOS DE FONDO FANTÁSTICOS ──
 function FiestaBgFX() {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
-      <div className="absolute top-[10%] left-[5%] w-64 h-64 md:w-96 md:h-96 bg-[#E53935]/20 rounded-full blur-[100px] animate-pulse" />
-      <div className="absolute bottom-[20%] right-[5%] w-72 h-72 md:w-[500px] md:h-[500px] bg-[#FFCA28]/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-[50%] left-[60%] w-48 h-48 md:w-80 md:h-80 bg-[#00B0FF]/15 rounded-full blur-[90px] animate-pulse" style={{ animationDelay: '2s' }} />
+    <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden">
+      <div className="absolute left-[-18%] top-[18%] h-80 w-80 rounded-full bg-[#7b3a24]/10 blur-3xl" />
+      <div className="absolute bottom-[14%] right-[-18%] h-96 w-96 rounded-full bg-[#d7a84f]/8 blur-3xl" />
     </div>
   );
 }
 
-// ── BOTÓN FLOTANTE EXCLUSIVO PARA FIESTA ──
-function FiestaCartBtn({ totalQty, total, onClick }: { totalQty: number, total: number, onClick: () => void }) {
-  const hasItems = totalQty > 0;
-  if (!hasItems) return null;
+function FiestaCartBtn({ totalQty, total, onClick }: { totalQty: number; total: number; onClick: () => void }) {
+  if (totalQty <= 0) return null;
 
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-between w-[92%] max-w-[320px] md:max-w-[360px] bg-gradient-to-r from-[#E53935] to-[#FF9800] px-4 md:px-6 py-2.5 md:py-3 rounded-full shadow-[0_0_30px_rgba(229,57,53,0.5)] hover:scale-105 active:scale-95 transition-all border border-white/20 animate-bounce"
-      style={{ animationDuration: '2s' }}
+      className="fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom,0px)+16px)] z-[100] mx-auto flex min-h-16 max-w-[390px] items-center justify-between rounded-[1.25rem] border border-white/12 bg-[#f3ead9] px-4 text-[#17110b] shadow-[0_18px_50px_rgba(0,0,0,0.34)] transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] md:bottom-6"
+      aria-label="Abrir pedido de fiesta"
     >
-      <div className="flex items-center gap-2 text-white font-bebas text-xl md:text-2xl leading-none pt-1 whitespace-nowrap overflow-hidden">
-        <span>🛒</span>
-        <span className="truncate">VER PEDIDO</span>
-      </div>
-      <div className="flex items-center gap-1.5 md:gap-2 bg-black/40 rounded-full px-2.5 md:px-3 py-1 shadow-inner shrink-0 ml-2">
-        <span className="text-white font-bold text-[11px] md:text-sm bg-white/20 rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center">{totalQty}</span>
-        <span className="text-white font-bebas text-lg md:text-xl pt-0.5 md:pt-1 leading-none">${total}</span>
-      </div>
+      <span className="flex items-center gap-3 font-body text-sm font-black uppercase tracking-[0.18em]">
+        Ver pedido
+        <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-black/10 px-2 text-base font-black">{totalQty}</span>
+      </span>
+      <span className="rounded-full bg-black/10 px-3 py-1.5 font-serif text-2xl leading-none tracking-[-0.05em]">${formatPrice(total)}</span>
     </button>
   );
 }
 
-// ── NAVEGACIÓN STICKY (SISTEMA DE PESTAÑAS) ──
-function FiestaNav({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (t: string) => void }) {
-  const getBtnClass = (tab: string, baseColor: string) => {
-    const isActive = activeTab === tab;
-    return `whitespace-nowrap px-4 py-2 rounded-full font-bebas text-lg md:text-xl transition-all duration-300 ${
-      isActive 
-        ? `bg-${baseColor}/20 text-${baseColor} shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-${baseColor}/50 scale-105` 
-        : `text-white/70 hover:text-white hover:bg-white/10 border border-transparent`
-    }`;
-  };
-
+function FiestaNav({ activeTab, setActiveTab }: { activeTab: FiestaTab; setActiveTab: (tab: FiestaTab) => void }) {
   return (
-    <div className="sticky top-[70px] md:top-[80px] z-[60] flex justify-center mt-2 mb-8 px-4 md:px-0">
-      <div className="flex items-center gap-2 md:gap-4 bg-black/60 backdrop-blur-xl p-1.5 md:p-2 rounded-full border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-x-auto scrollbar-none w-full max-w-max justify-start sm:justify-center">
-        <button onClick={() => setActiveTab('bebidas')} className={getBtnClass('bebidas', '[#00B0FF]')}>
-          🍸 BARRA LIBRE
-        </button>
-        <button onClick={() => setActiveTab('parrilla')} className={getBtnClass('parrilla', '[#E53935]')}>
-          🥩 PARRILLA
-        </button>
-        <button onClick={() => setActiveTab('picada')} className={getBtnClass('picada', '[#FFCA28]')}>
-          🧀 PICADA
-        </button>
-        <button onClick={() => setActiveTab('descartables')} className={getBtnClass('descartables', 'white')}>
-          🥡 EXTRAS
-        </button>
+    <div className="sticky top-[82px] z-40 mx-auto mb-5 mt-1 max-w-5xl px-4 md:top-[92px] md:mb-8">
+      <div className="flex gap-2 overflow-x-auto rounded-[1.15rem] border border-white/10 bg-[#11100f]/88 p-1.5 shadow-[0_14px_44px_rgba(0,0,0,0.26)] backdrop-blur-xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          const accent = accentStyles[tab.accent];
+
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`min-h-14 min-w-[7.25rem] rounded-2xl px-4 text-left transition-[background-color,color,box-shadow,transform] duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] ${
+                isActive ? "bg-[#f3ead9] text-[#17110b]" : "bg-white/[0.035] text-white/84 hover:bg-white/[0.07]"
+              }`}
+              aria-pressed={isActive}
+            >
+              <span className={`block font-body text-[0.58rem] font-black uppercase tracking-[0.2em] ${isActive ? "opacity-75" : "text-white/42"}`}>
+                {tab.eyebrow}
+              </span>
+              <span className="mt-1 block font-serif text-[1.45rem] leading-none tracking-[-0.04em]">{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
+}
+
+function SectionHeader({
+  title,
+  count,
+  accent,
+  visibleCount,
+}: {
+  title: string;
+  count: number;
+  accent: Accent;
+  visibleCount?: number;
+}) {
+  const styles = accentStyles[accent];
+
+  return (
+    <div className="mb-5 flex items-end justify-between gap-4">
+      <div>
+        <p className="mb-2 font-body text-[0.68rem] font-black uppercase tracking-[0.28em] text-white/38">Selección para tu fiesta</p>
+        <h2 className={`bg-gradient-to-r ${styles.title} bg-clip-text font-serif text-5xl leading-none tracking-[-0.08em] text-transparent md:text-6xl`}>
+          {title}
+        </h2>
+      </div>
+      <span className={`mb-1 shrink-0 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider ${styles.badge}`}>
+        {visibleCount && visibleCount < count ? `${visibleCount}/${count}` : count}
+      </span>
+    </div>
+  );
+}
+
+function PremiumLimitNotice({
+  hiddenCount,
+  onShowMore,
+}: {
+  hiddenCount: number;
+  onShowMore?: () => void;
+}) {
+  if (hiddenCount <= 0) return null;
+
+  return (
+    <div className="mt-6 rounded-[1.75rem] border border-white/10 bg-[radial-gradient(circle_at_50%_0%,rgba(255,207,51,0.12),transparent_48%),rgba(255,255,255,0.055)] p-4 text-center shadow-[0_18px_70px_rgba(0,0,0,0.24)] backdrop-blur md:p-5">
+      <p className="mx-auto max-w-xl font-serif text-[1.05rem] leading-7 text-white/72">
+        Te mostramos una selección premium para que la página no sea eterna. Hay {hiddenCount} producto{hiddenCount === 1 ? "" : "s"} más disponibles.
+      </p>
+      {onShowMore ? (
+        <button
+          onClick={onShowMore}
+          className="mt-4 inline-flex min-h-12 items-center justify-center rounded-2xl bg-white px-6 font-body text-xs font-black uppercase tracking-[0.2em] text-[#10090c] transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffcf33]"
+        >
+          Mostrar más
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function getGroups(products: Producto[]) {
+  const parrilla = products.filter((product) => {
+    const name = normalize(product.nombre);
+    return name.includes("hamburguesa") || name.includes("pancho") || name.includes("chorizo");
+  });
+
+  const picada = products.filter((product) => {
+    const name = normalize(product.nombre);
+    const category = normalize(product.categoria);
+    return (
+      name.includes("jamon") ||
+      name.includes("queso") ||
+      name.includes("fiambre") ||
+      name.includes("salame") ||
+      name.includes("bondiola") ||
+      name.includes("aceituna") ||
+      name.includes("snack") ||
+      name.includes("papas") ||
+      name.includes("mani") ||
+      category.includes("snack") ||
+      category.includes("fiambre") ||
+      category.includes("queso")
+    );
+  });
+
+  const extras = products.filter((product) => {
+    const name = normalize(product.nombre);
+    const category = normalize(product.categoria);
+    return (
+      (name.includes("vaso") ||
+        name.includes("servilleta") ||
+        name.includes("descartable") ||
+        name.includes("plato") ||
+        name.includes("cubierto") ||
+        category.includes("descartable")) &&
+      !picada.includes(product)
+    );
+  });
+
+  const bebidas = products.filter((product) => !parrilla.includes(product) && !picada.includes(product) && !extras.includes(product));
+
+  return { bebidas, parrilla, picada, extras };
 }
 
 export default function FiestaClient() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("bebidas");
+  const [activeTab, setActiveTab] = useState<FiestaTab>("bebidas");
   const [cartOpen, setCartOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_PRODUCTS);
   const { items, totalQty, total, updateQty, removeItem } = useCart();
 
   useEffect(() => {
     setMounted(true);
+
     async function loadProducts() {
       try {
         let data: Producto[] = [];
         let loadedFromBranch = false;
-
-        // 1. Intentar cargar desde la sucursal seleccionada (igual que el catálogo principal)
         const currentId = typeof window !== "undefined" ? localStorage.getItem("remate_sucursalId") : null;
+
         if (currentId) {
           try {
             const branchSnap = await getDoc(doc(db, "sucursales_catalogos", currentId));
             if (branchSnap.exists()) {
               const branchData = branchSnap.data();
-              const itemsList = Object.values(branchData.items || {}) as Producto[];
-              data = itemsList.filter((item) => !item.deshabilitado);
+              data = (Object.values(branchData.items || {}) as Producto[]).filter((item) => !item.deshabilitado);
               loadedFromBranch = true;
             }
-          } catch (e) {
-            console.error("Error cargando sucursal en Fiesta:", e);
+          } catch (error) {
+            console.error("Error cargando sucursal en Fiesta:", error);
           }
         }
 
-        // 2. Fallback a catálogo global
         if (!loadedFromBranch) {
           const snap = await getDoc(doc(db, "catalogo_activo", "productos"));
           if (snap.exists()) {
             const docData = snap.data();
-            data = Object.values(docData.items || {}) as Producto[];
-            data = data.filter((item) => !item.deshabilitado); // Aplicar también filtro global
+            data = (Object.values(docData.items || {}) as Producto[]).filter((item) => !item.deshabilitado);
           } else {
-            const res = await fetch("/productos.json");
-            if (res.ok) {
-              data = await res.json();
+            const response = await fetch("/productos.json");
+            if (response.ok) {
+              data = await response.json();
             }
           }
         }
 
-        // Aplicar mapping de categorías del Excel (crucial para que coincida con el catálogo principal)
-        data = data.map(p => {
-          const barcode = String(p.codigo || "").trim();
-          if (catMap[barcode]) {
-            return { ...p, categoria: catMap[barcode] };
-          }
-          return p;
+        const normalizedData = data.map((product) => {
+          const barcode = String(product.codigo || "").trim();
+          return catMap[barcode] ? { ...product, categoria: catMap[barcode] } : product;
         });
 
-        // Filtrar productos relevantes para la fiesta
-        const keywords = [
-          "hamburguesa", "cerveza", "whisky", "vodka", "fernet", "pancho", "chorizo", "hielo", 
-          "refresco", "coca", "pepsi", "sprite", "vino", "gin", "ron",
-          "servilleta", "vaso", "descartable", "plato", "cubierto", 
-          "snack", "papas fritas", "mani", "chisitos", "doritos", "jamon", "queso", "fiambre", "salame", "bondiola", "aceituna"
-        ];
-        
-        const fiestaProducts = data.filter(p => {
-          if (!p.precio || p.precio <= 0) return false;
-          if (p.deshabilitado) return false;
-          
-          const searchName = p.nombre.toLowerCase();
-          const searchCat = (p.categoria || "").toLowerCase();
-          
-          return keywords.some(kw => searchName.includes(kw) || searchCat.includes(kw));
-        });
+        const fiestaProducts = normalizedData
+          .filter((product) => {
+            if (!product.precio || product.precio <= 0 || product.deshabilitado) return false;
+            const searchable = `${normalize(product.nombre)} ${normalize(product.categoria)}`;
+            return fiestaKeywords.some((keyword) => searchable.includes(normalize(keyword)));
+          })
+          .sort((a, b) => b.precio - a.precio);
 
-        // Ordenar por "exclusividad" simulada (primero alcohol caro y hamburguesas)
-        fiestaProducts.sort((a, b) => b.precio - a.precio);
-
-        setProductos(fiestaProducts); // Cargar todos los productos referidos sin límite
-      } catch (err) {
-        console.error("Error loading products for fiesta:", err);
+        setProductos(fiestaProducts);
+      } catch (error) {
+        console.error("Error loading products for fiesta:", error);
       } finally {
         setLoading(false);
       }
     }
+
     loadProducts();
   }, []);
 
-  const filteredProducts = productos.filter(p => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return p.nombre.toLowerCase().includes(q) || (p.categoria || "").toLowerCase().includes(q);
-  });
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) return productos;
+    const query = normalize(searchQuery);
+    return productos.filter((product) => `${normalize(product.nombre)} ${normalize(product.categoria)} ${normalize(product.marca)}`.includes(query));
+  }, [productos, searchQuery]);
 
-  const hamburguesas = filteredProducts.filter(p => {
-    const n = p.nombre.toLowerCase();
-    return n.includes("hamburguesa") || n.includes("pancho") || n.includes("chorizo");
-  });
-
-  const picada = filteredProducts.filter(p => {
-    const n = p.nombre.toLowerCase();
-    const c = (p.categoria || "").toLowerCase();
-    return n.includes("jamon") || n.includes("queso") || n.includes("fiambre") || n.includes("salame") || 
-           n.includes("bondiola") || n.includes("aceituna") || n.includes("snack") || n.includes("papas") || 
-           n.includes("mani") || c.includes("snack") || c.includes("fiambre") || c.includes("queso");
-  });
-  
-  const descartables = filteredProducts.filter(p => {
-    const n = p.nombre.toLowerCase();
-    const c = (p.categoria || "").toLowerCase();
-    return (n.includes("vaso") || n.includes("servilleta") || n.includes("descartable") || n.includes("plato") || n.includes("cubierto") || c.includes("descartable")) 
-           && !picada.includes(p); // Evitar superposición si un vaso de algo dice snack
-  });
-
-  const bebidas = filteredProducts.filter(p => !hamburguesas.includes(p) && !descartables.includes(p) && !picada.includes(p));
+  const groups = useMemo(() => getGroups(filteredProducts), [filteredProducts]);
+  const activeProducts = groups[activeTab];
+  const visibleActiveProducts = activeProducts.slice(0, visibleCount);
+  const activeMeta = tabs.find((tab) => tab.id === activeTab) || tabs[0];
+  useEffect(() => {
+    setVisibleCount(INITIAL_VISIBLE_PRODUCTS);
+  }, [activeTab, searchQuery]);
 
   return (
-    <div className="max-w-[1200px] mx-auto pt-10 pb-20 relative">
+    <div className="relative mx-auto max-w-6xl pb-28 pt-6 md:pb-24 md:pt-10">
       <FiestaBgFX />
-      
+
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="animate-spin w-12 h-12 border-4 border-[#E53935] border-t-transparent rounded-full" />
+        <div className="flex min-h-[320px] items-center justify-center px-4">
+          <div className="h-14 w-14 animate-spin rounded-full border-4 border-[#ff3d5a] border-t-transparent" />
         </div>
       ) : productos.length === 0 ? (
-        <div className="text-center text-white py-20 font-bebas text-2xl">
-          Cargando productos exclusivos...
+        <div className="mx-4 rounded-[1.75rem] border border-white/10 bg-white/[0.055] p-8 text-center">
+          <h2 className="font-serif text-4xl tracking-[-0.06em]">Estamos preparando la góndola</h2>
+          <p className="mt-2 text-white/65">No encontramos productos de fiesta disponibles en este momento.</p>
         </div>
       ) : (
         <>
-          {/* Carrusel Top Ventas / Destacados */}
-          {!searchQuery && (
-            <div className="mb-8 overflow-hidden">
-              <div className="flex items-center gap-2 mb-4 px-4 md:px-0">
-                <span className="text-2xl">🔥</span>
-                <h2 className="font-bebas text-3xl md:text-4xl tracking-[2px] text-transparent bg-clip-text bg-gradient-to-r from-[#FF512F] to-[#F09819]">
-                  TOP VENTAS
-                </h2>
-              </div>
-              <div className="flex overflow-x-auto gap-4 md:gap-6 px-4 md:px-0 pb-6 scrollbar-none snap-x">
-                {productos.slice(0, 6).map(p => (
-                  <div key={p.codigo} className="w-[160px] md:w-[240px] flex-shrink-0 snap-start">
-                    <PremiumProductCard producto={p} />
-                  </div>
-                ))}
+          <div className="px-4">
+            <div className="rounded-[1.35rem] border border-white/10 bg-white/[0.035] p-2.5 backdrop-blur md:p-4">
+              <label htmlFor="fiesta-search" className="sr-only">
+                Buscar productos para fiesta
+              </label>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/45">
+                  <SearchIcon />
+                </span>
+                <input
+                  id="fiesta-search"
+                  type="search"
+                  name="fiesta-search"
+                  inputMode="search"
+                  autoComplete="off"
+                  placeholder="Buscar fernet, hielo, vasos…"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  className="min-h-14 w-full rounded-2xl border border-white/10 bg-black/20 px-12 font-body text-[0.95rem] font-extrabold tracking-[-0.02em] text-white outline-none transition-colors placeholder:text-white/34 focus:border-[#d7a84f] focus:bg-black/30 focus:ring-4 focus:ring-[#d7a84f]/10"
+                />
+                {searchQuery ? (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl bg-white/10 text-lg font-black text-white/70 transition-colors active:bg-white/18 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f]"
+                    aria-label="Limpiar búsqueda"
+                  >
+                    ×
+                  </button>
+                ) : null}
               </div>
             </div>
-          )}
+          </div>
 
           <FiestaNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
-          {/* Buscador de Productos */}
-          <div className="mb-10 px-4 md:px-0">
-            <div className="relative max-w-xl mx-auto group">
-              <input
-                type="text"
-                placeholder="Buscar hielo, vasos, fernet..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-black/40 backdrop-blur-md border border-white/20 rounded-full py-3 md:py-4 px-12 md:px-14 text-white placeholder-white/50 focus:outline-none focus:border-[#00B0FF] focus:bg-black/60 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.5)] font-body text-base md:text-lg"
+          {searchQuery ? (
+            <div className="px-4">
+              <p className="mb-5 rounded-2xl border border-white/10 bg-white/[0.055] px-4 py-3 text-sm font-bold text-white/70">
+                {filteredProducts.length} resultado{filteredProducts.length === 1 ? "" : "s"} para “{searchQuery}”
+              </p>
+            </div>
+          ) : null}
+
+          {searchQuery && filteredProducts.length === 0 ? (
+            <div className="mx-4 rounded-[1.75rem] border border-white/10 bg-white/[0.055] p-8 text-center">
+              <h2 className="font-serif text-4xl tracking-[-0.06em]">Sin resultados</h2>
+              <p className="mt-2 text-white/65">Probá con “hielo”, “vasos”, “fernet” o “hamburguesa”.</p>
+            </div>
+          ) : searchQuery ? (
+            <div className="space-y-12 px-4">
+              {tabs.map((tab) => {
+                const sectionProducts = groups[tab.id];
+                if (sectionProducts.length === 0) return null;
+                const visibleSectionProducts = sectionProducts.slice(0, SEARCH_VISIBLE_PER_SECTION);
+                const hiddenCount = sectionProducts.length - visibleSectionProducts.length;
+
+                return (
+                  <section key={tab.id}>
+                    <SectionHeader
+                      title={tab.label}
+                      count={sectionProducts.length}
+                      accent={tab.accent}
+                      visibleCount={visibleSectionProducts.length}
+                    />
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 md:gap-5">
+                      {visibleSectionProducts.map((product) => (
+                        <PremiumProductCard key={product.codigo} producto={product} />
+                      ))}
+                    </div>
+                    <PremiumLimitNotice hiddenCount={hiddenCount} />
+                  </section>
+                );
+              })}
+            </div>
+          ) : (
+            <section className="px-4">
+              <SectionHeader
+                title={activeMeta.label}
+                count={activeProducts.length}
+                accent={activeMeta.accent}
+                visibleCount={visibleActiveProducts.length}
               />
-              <svg className="absolute left-5 top-1/2 -translate-y-1/2 text-white/50 w-5 h-5 md:w-6 md:h-6 group-focus-within:text-[#00B0FF] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-5 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors">
-                  <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+              {activeProducts.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 md:gap-5">
+                    {visibleActiveProducts.map((product) => (
+                      <PremiumProductCard key={product.codigo} producto={product} />
+                    ))}
+                  </div>
+                  <PremiumLimitNotice
+                    hiddenCount={activeProducts.length - visibleActiveProducts.length}
+                    onShowMore={() => setVisibleCount((current) => current + VISIBLE_PRODUCTS_STEP)}
+                  />
+                </>
+              ) : (
+                <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.055] p-8 text-center text-white/65">
+                  No hay productos cargados en esta categoría.
+                </div>
               )}
-            </div>
-          </div>
-
-          {/* Si no hay resultados de búsqueda */}
-          {searchQuery && filteredProducts.length === 0 && (
-            <div className="text-center text-white/70 py-20 font-body text-xl">
-              No encontramos &quot;{searchQuery}&quot; para tu fiesta.
-            </div>
+            </section>
           )}
-
-          {/* Grillas con animación de fade-in */}
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Sección Barra Libre (Bebidas) */}
-            {(searchQuery ? bebidas.length > 0 : activeTab === 'bebidas') && (
-              <div className="mb-20 pt-4 px-4 md:px-0">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="font-bebas text-4xl md:text-5xl tracking-[2px] text-transparent bg-clip-text bg-gradient-to-r from-[#00B0FF] to-white">
-                    BARRA LIBRE
-                  </h2>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                  {bebidas.map(p => (
-                    <PremiumProductCard key={p.codigo} producto={p} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Sección Hamburguesas / Parrilla */}
-            {(searchQuery ? hamburguesas.length > 0 : activeTab === 'parrilla') && (
-              <div className="mb-20 pt-4 px-4 md:px-0">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="font-bebas text-4xl md:text-5xl tracking-[2px] text-transparent bg-clip-text bg-gradient-to-r from-[#E53935] to-white">
-                    PARA LA PARRILLA
-                  </h2>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                  {hamburguesas.map(p => (
-                    <PremiumProductCard key={p.codigo} producto={p} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Sección Picada */}
-            {(searchQuery ? picada.length > 0 : activeTab === 'picada') && (
-              <div className="mb-20 pt-4 px-4 md:px-0">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="font-bebas text-4xl md:text-5xl tracking-[2px] text-transparent bg-clip-text bg-gradient-to-r from-[#FFCA28] to-white">
-                    PICADA & SNACKS
-                  </h2>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                  {picada.map(p => (
-                    <PremiumProductCard key={p.codigo} producto={p} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Sección Descartables */}
-            {(searchQuery ? descartables.length > 0 : activeTab === 'descartables') && (
-              <div className="mb-20 pt-4 px-4 md:px-0">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="font-bebas text-4xl md:text-5xl tracking-[2px] text-transparent bg-clip-text bg-gradient-to-r from-[#9E9E9E] to-white">
-                    DESCARTABLES
-                  </h2>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                  {descartables.map(p => (
-                    <PremiumProductCard key={p.codigo} producto={p} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
         </>
       )}
 
-      {/* Botón Flotante del Carrito Exclusivo y Panel (sólo client-side) */}
-      {mounted && (
+      {mounted ? (
         <>
           <FiestaCartBtn onClick={() => setCartOpen(true)} totalQty={totalQty} total={total} />
-          
           <CartPanel
             isOpen={cartOpen}
             onClose={() => setCartOpen(false)}
@@ -454,22 +623,33 @@ export default function FiestaClient() {
               setCartOpen(false);
               window.location.href = "/catalogo?openCart=true";
             }}
-            alias={""}
+            alias=""
             onAliasChange={() => {}}
             onShare={() => {}}
             onClear={() => {}}
             shareLink={null}
             onCopyShareLink={() => {}}
-            telefono={""}
+            telefono=""
             onTelefonoChange={() => {}}
-            metodoEntrega={"envio"}
+            metodoEntrega="envio"
             onMetodoEntregaChange={() => {}}
             sucursalId={null}
             onSucursalChange={() => {}}
             isProcessing={false}
           />
         </>
-      )}
+      ) : null}
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            .side-panel .panel-close {
+              min-width: 44px !important;
+              min-height: 44px !important;
+            }
+          `,
+        }}
+      />
     </div>
   );
 }
