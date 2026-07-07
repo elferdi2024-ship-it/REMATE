@@ -58,9 +58,9 @@ export default function FiestaLanding() {
           {/* Título 3D CSS Premium */}
           <div className="relative group mx-auto mb-8 w-full flex justify-center" style={{ perspective: '1200px' }}>
             <div className="transform transition-transform duration-700 ease-out group-hover:rotate-x-12 group-hover:rotate-y-[-5deg] group-hover:scale-105">
-              <h1 className="font-bebas text-[clamp(4.5rem,14vw,10rem)] leading-[0.8] tracking-[4px] text-white text-center">
-                <span className="block text-3d-neon text-[#FF1744] mix-blend-screen drop-shadow-[0_0_20px_rgba(255,23,68,0.5)]">ARMÁ LA</span>
-                <span className="block text-3d-neon text-[#FFEA00] mix-blend-screen drop-shadow-[0_0_30px_rgba(255,234,0,0.6)] ml-4">FIESTA</span>
+              <h1 className="font-bebas text-[clamp(4.5rem,14vw,10rem)] leading-[0.8] tracking-[4px] text-white text-center relative z-10">
+                <span className="block text-3d-neon text-[#FF1744] drop-shadow-[0_0_20px_rgba(255,23,68,0.8)]">ARMÁ LA</span>
+                <span className="block text-3d-neon text-[#FFEA00] drop-shadow-[0_0_30px_rgba(255,234,0,0.9)] ml-4">FIESTA</span>
               </h1>
             </div>
             
