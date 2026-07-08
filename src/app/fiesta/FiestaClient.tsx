@@ -175,8 +175,8 @@ function PremiumProductCard({ producto }: { producto: Producto }) {
   };
 
   return (
-    <article className={`group flex h-full min-h-[258px] flex-col overflow-hidden rounded-[1.2rem] border ${accent.ring} bg-[#14110f]/78 shadow-[0_14px_44px_rgba(0,0,0,0.22)] backdrop-blur transition-transform duration-200 active:scale-[0.99] md:min-h-[342px] md:rounded-[1.55rem] md:hover:-translate-y-0.5`}>
-      <div className="relative h-32 overflow-hidden border-b border-white/[0.06] bg-white/[0.035] md:h-48">
+    <article className={`group flex h-full min-h-[272px] flex-col overflow-hidden rounded-[1.2rem] border ${accent.ring} bg-[#14110f]/78 shadow-[0_14px_44px_rgba(0,0,0,0.22)] backdrop-blur transition-transform duration-200 active:scale-[0.99] md:min-h-[342px] md:rounded-[1.55rem] md:hover:-translate-y-0.5`}>
+      <div className="relative h-36 overflow-hidden border-b border-white/[0.06] bg-white/[0.035] md:h-48">
         <div className={`absolute inset-0 bg-gradient-to-br ${accent.glow}`} />
         <div className="absolute left-2 top-2 z-10 rounded-full border border-white/10 bg-black/28 px-2.5 py-1 font-body text-[0.54rem] font-black uppercase tracking-[0.18em] text-white/58 backdrop-blur md:left-3 md:top-3">
           Mayorista
@@ -200,7 +200,7 @@ function PremiumProductCard({ producto }: { producto: Producto }) {
         <p className="mb-2 truncate font-body text-[0.56rem] font-black uppercase tracking-[0.22em] text-white/38 md:text-[0.62rem]">
           {producto.marca || producto.categoria || "Fiesta"}
         </p>
-        <h3 className="line-clamp-2 font-body text-[0.92rem] font-black uppercase leading-[1.18] tracking-[0.025em] text-white md:text-[1.05rem]">
+        <h3 className="line-clamp-2 font-body text-[0.84rem] font-black uppercase leading-[1.22] tracking-[0.02em] text-white md:text-[1.05rem]">
           {producto.nombre}
         </h3>
 
@@ -282,7 +282,7 @@ function FiestaCartBtn({ totalQty, total, onClick }: { totalQty: number; total: 
 
 function FiestaNav({ activeTab, setActiveTab }: { activeTab: FiestaTab; setActiveTab: (tab: FiestaTab) => void }) {
   return (
-    <div className="sticky top-[82px] z-40 mx-auto mb-5 mt-1 max-w-5xl px-4 md:top-[92px] md:mb-8">
+    <div className="sticky top-[76px] z-40 mx-auto mb-5 mt-1 max-w-5xl px-4 md:top-[92px] md:mb-8">
       <div className="flex gap-2 overflow-x-auto rounded-[1.15rem] border border-white/10 bg-[#11100f]/88 p-1.5 shadow-[0_14px_44px_rgba(0,0,0,0.26)] backdrop-blur-xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -292,15 +292,15 @@ function FiestaNav({ activeTab, setActiveTab }: { activeTab: FiestaTab; setActiv
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`min-h-14 min-w-[7.25rem] rounded-2xl px-4 text-left transition-[background-color,color,box-shadow,transform] duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] ${
+              className={`min-h-12 flex-1 min-w-0 rounded-xl px-3 text-left md:min-h-14 md:rounded-2xl md:px-4 transition-[background-color,color,box-shadow,transform] duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] ${
                 isActive ? "bg-[#f3ead9] text-[#17110b]" : "bg-white/[0.035] text-white/84 hover:bg-white/[0.07]"
               }`}
               aria-pressed={isActive}
             >
-              <span className={`block font-body text-[0.58rem] font-black uppercase tracking-[0.2em] ${isActive ? "opacity-75" : "text-white/42"}`}>
+              <span className={`block font-body text-[0.5rem] font-black uppercase tracking-[0.16em] md:text-[0.58rem] md:tracking-[0.2em] ${isActive ? "opacity-75" : "text-white/42"}`}>
                 {tab.eyebrow}
               </span>
-              <span className="mt-1 block font-serif text-[1.45rem] leading-none tracking-[-0.04em]">{tab.label}</span>
+              <span className="mt-0.5 block font-serif text-[1.15rem] leading-none tracking-[-0.04em] md:mt-1 md:text-[1.45rem]">{tab.label}</span>
             </button>
           );
         })}
@@ -326,7 +326,7 @@ function SectionHeader({
     <div className="mb-5 flex items-end justify-between gap-4">
       <div>
         <p className="mb-2 font-body text-[0.68rem] font-black uppercase tracking-[0.28em] text-white/38">Selección para tu fiesta</p>
-        <h2 className={`bg-gradient-to-r ${styles.title} bg-clip-text font-serif text-5xl leading-none tracking-[-0.08em] text-transparent md:text-6xl`}>
+        <h2 className={`bg-gradient-to-r ${styles.title} bg-clip-text font-serif text-4xl leading-none tracking-[-0.08em] text-transparent md:text-6xl`}>
           {title}
         </h2>
       </div>
@@ -506,7 +506,7 @@ export default function FiestaClient() {
       ) : (
         <>
           <div className="px-4">
-            <div className="rounded-[1.35rem] border border-white/10 bg-white/[0.035] p-2.5 backdrop-blur md:p-4">
+            <div className="rounded-[1.1rem] border border-white/10 bg-white/[0.035] p-2 backdrop-blur md:rounded-[1.35rem] md:p-4">
               <label htmlFor="fiesta-search" className="sr-only">
                 Buscar productos para fiesta
               </label>
@@ -523,7 +523,7 @@ export default function FiestaClient() {
                   placeholder="Buscar fernet, hielo, vasos…"
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  className="min-h-14 w-full rounded-2xl border border-white/10 bg-black/20 px-12 font-body text-[0.95rem] font-extrabold tracking-[-0.02em] text-white outline-none transition-colors placeholder:text-white/34 focus:border-[#d7a84f] focus:bg-black/30 focus:ring-4 focus:ring-[#d7a84f]/10"
+                  className="min-h-12 w-full rounded-xl border border-white/10 bg-black/20 px-11 font-body text-[0.92rem] md:min-h-14 md:rounded-2xl md:px-12 md:text-[0.95rem] font-extrabold tracking-[-0.02em] text-white outline-none transition-colors placeholder:text-white/34 focus:border-[#d7a84f] focus:bg-black/30 focus:ring-4 focus:ring-[#d7a84f]/10"
                 />
                 {searchQuery ? (
                   <button
