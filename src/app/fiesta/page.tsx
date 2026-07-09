@@ -10,41 +10,15 @@ export const metadata: Metadata = {
 };
 
 const highlights = [
-  { value: "4", label: "categorías para resolver todo" },
-  { value: "24h", label: "ideal para planificar con tiempo" },
-  { value: "$", label: "precios mayoristas" },
+  { value: "4", label: "Categorías" },
+  { value: "24h", label: "Planificá" },
+  { value: "$", label: "Mayorista" },
 ];
 
-const benefits = [
-  {
-    title: "Selección corta",
-    text: "Solo categorías útiles para armar una compra de fiesta sin entrar al catálogo completo.",
-  },
-  {
-    title: "Ritmo mobile",
-    text: "Pocas decisiones por pantalla, búsqueda arriba y acciones claras para sumar productos.",
-  },
-  {
-    title: "Pedido claro",
-    text: "Ves lo elegido, abrís el pedido y cerrás la compra cuando está todo listo.",
-  },
-];
-
-function SparkIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-      <path
-        d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2z"
-        fill="currentColor"
-      />
-      <path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z" fill="currentColor" />
-    </svg>
-  );
-}
 
 export default function FiestaLanding() {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#0b0908] text-white selection:bg-[#d7a84f] selection:text-[#140f08] [color-scheme:dark] [touch-action:manipulation]">
+    <main className="min-h-screen overflow-x-hidden bg-[#0a0a0a] text-white selection:bg-[#E8302A] selection:text-white [color-scheme:dark] [touch-action:manipulation]">
       <Link
         href="#combos"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-black focus:text-[#12080c]"
@@ -52,25 +26,25 @@ export default function FiestaLanding() {
         Saltar a productos
       </Link>
       <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between rounded-full border border-white/10 bg-[#11100f]/82 px-4 shadow-[0_18px_70px_rgba(0,0,0,0.34)] backdrop-blur-xl md:px-5">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between rounded-full border border-white/10 bg-black/70 px-4 shadow-[0_18px_70px_rgba(0,0,0,0.34)] backdrop-blur-xl md:h-16 md:px-5">
           <Link
             href="/"
-            className="inline-flex min-h-11 items-center gap-2 rounded-full px-2 font-body text-[0.82rem] font-black uppercase tracking-[0.36em] text-white outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#d7a84f]"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-2 font-bebas text-[1.1rem] tracking-[0.12em] text-white outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#E8302A]"
             aria-label="Volver al inicio de El Remate"
           >
-            <span className="text-[#d7a84f]">EL</span>
+            <span className="text-[#E8302A]">EL</span>
             <span>REMATE</span>
           </Link>
           <Link
             href="/catalogo"
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#f3ead9] px-4 text-sm font-black tracking-[-0.01em] text-[#17110b] shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] md:px-5"
+            className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#E8302A] px-5 text-[0.8rem] font-black tracking-wide text-white shadow-[0_8px_24px_rgba(232,48,42,0.35)] transition-all active:scale-95 hover:bg-[#C4231E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 md:min-h-11 md:px-6 md:text-sm"
           >
             Catálogo
           </Link>
         </div>
       </header>
 
-      <section className="relative isolate flex min-h-[62svh] items-end px-4 pb-8 pt-24 md:min-h-[86svh] md:items-center md:px-6 md:pb-16 md:pt-32">
+      <section className="relative isolate flex min-h-[100svh] flex-col items-center justify-center px-5 pb-10 pt-24 text-center md:min-h-[90svh] md:px-6 md:pb-16 md:pt-32">
         <div className="absolute inset-0 -z-20">
           <Image
             src="/fiestahero.png"
@@ -78,62 +52,52 @@ export default function FiestaLanding() {
             fill
             priority
             sizes="100vw"
-            className="object-cover opacity-50 saturate-[0.82]"
+            className="object-cover opacity-60 saturate-100"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,9,8,0.24)_0%,rgba(11,9,8,0.78)_58%,#0b0908_100%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(11,9,8,0.90)_0%,rgba(11,9,8,0.55)_46%,rgba(11,9,8,0.86)_100%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/40 via-[#0a0a0a]/70 to-[#0a0a0a]" />
         </div>
 
-        <div className="absolute left-[-20%] top-[18%] -z-10 h-72 w-72 rounded-full bg-[#8f2f22]/18 blur-3xl md:h-[28rem] md:w-[28rem]" />
-        <div className="absolute bottom-[12%] right-[-18%] -z-10 h-72 w-72 rounded-full bg-[#d7a84f]/10 blur-3xl md:h-[30rem] md:w-[30rem]" />
+        <div className="absolute left-[-15%] top-[10%] -z-10 h-60 w-60 rounded-full bg-[#E8302A]/20 blur-[100px] md:h-[24rem] md:w-[24rem]" />
+        <div className="absolute bottom-[15%] right-[-10%] -z-10 h-60 w-60 rounded-full bg-[#FFB300]/15 blur-[100px] md:h-[20rem] md:w-[20rem]" />
 
-        <div className="mx-auto grid w-full max-w-6xl items-end gap-5 md:grid-cols-[0.98fr_1.02fr] md:items-center md:gap-10">
-          <div className="flex flex-col items-center text-center md:items-start md:text-left max-w-2xl mx-auto w-full">
-            <div className="mb-3 inline-flex min-h-8 items-center rounded-full border border-white/12 bg-white/[0.055] px-3.5 font-body text-[0.62rem] font-black uppercase tracking-[0.28em] text-[#d7a84f] backdrop-blur-md md:mb-5 md:min-h-10 md:px-4 md:text-[0.68rem]">
-              Fiesta mayorista
-            </div>
-
-            <h1 className="sr-only">Armá la fiesta sin fundirte</h1>
-
-            <div className="relative w-full max-w-[680px] overflow-hidden rounded-[1.1rem] border border-white/10 bg-[#120f0d]/58 p-1.5 shadow-[0_18px_55px_rgba(0,0,0,0.38)] backdrop-blur-sm md:rounded-[2.4rem] md:p-3">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,rgba(215,168,79,0.12),transparent_42%)]" />
-              <Image
-                src="/fiesta_title.png"
-                alt=""
-                width={1024}
-                height={1024}
-                priority
-                sizes="(max-width: 768px) 95vw, 720px"
-                className="relative z-10 -my-6 w-full scale-[1.08] object-contain drop-shadow-[0_16px_34px_rgba(0,0,0,0.55)] md:-my-16 md:scale-[1.12]"
-                style={{ width: "100%", maxWidth: "100%", height: "auto", display: "block" }}
-              />
-            </div>
-
-            <p className="mt-4 max-w-xl text-balance font-serif text-[1.1rem] leading-7 text-white/86 md:mt-6 md:text-[1.58rem] md:leading-10">
-              Una selección corta para resolver bebidas, picada, parrilla y extras sin recorrer todo el catálogo.
-            </p>
-
-            <div className="mt-5 flex w-full max-w-md gap-3 md:mt-7 md:max-w-none">
-              <Link
-                href="#combos"
-                className="inline-flex min-h-12 flex-1 items-center justify-center whitespace-nowrap rounded-2xl bg-[#f3ead9] px-4 font-body text-sm font-black uppercase tracking-[0.16em] text-[#17110b] shadow-[0_16px_40px_rgba(0,0,0,0.22)] transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] md:min-h-14 md:px-7"
-              >
-                Productos
-              </Link>
-              <Link
-                href="/catalogo"
-                className="inline-flex min-h-12 flex-1 items-center justify-center whitespace-nowrap rounded-2xl border border-white/12 bg-white/[0.055] px-4 font-body text-sm font-black uppercase tracking-[0.16em] text-white/86 backdrop-blur-md transition-colors hover:bg-white/10 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] md:min-h-14 md:px-7"
-              >
-                Catálogo
-              </Link>
-            </div>
+        <div className="mx-auto flex w-full max-w-lg flex-col items-center md:max-w-3xl">
+          <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-[#E8302A]/30 bg-[#E8302A]/10 px-4 py-1.5 font-body text-[0.65rem] font-black uppercase tracking-[0.3em] text-[#E8302A] backdrop-blur-md md:mb-6 md:px-5 md:py-2 md:text-xs">
+            <span className="animate-pulse">🔥</span> Fiesta mayorista
           </div>
 
-          <div className="mt-4 flex gap-2 overflow-x-auto rounded-[1rem] border border-white/10 bg-black/30 p-1.5 shadow-[0_14px_44px_rgba(0,0,0,0.28)] backdrop-blur-md [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mt-0 md:grid md:grid-cols-3 md:gap-3 md:overflow-visible md:rounded-[2rem] md:p-3 md:shadow-[0_25px_90px_rgba(0,0,0,0.38)]">
+          <h1 className="font-bebas text-[clamp(2.5rem,8vw,5.5rem)] leading-[0.85] tracking-[2px] uppercase select-none">
+            <span className="block text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.15)]">
+              Armá la fiesta
+            </span>
+            <span className="block bg-gradient-to-r from-[#FFB300] via-[#E8302A] to-[#FF3366] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(232,48,42,0.45)]">
+              sin fundirte
+            </span>
+          </h1>
+
+          <p className="mt-5 max-w-md text-balance font-serif text-[1.05rem] leading-7 text-white/80 md:mt-7 md:max-w-xl md:text-[1.4rem] md:leading-9">
+            Bebidas, picada, parrilla y extras a precio mayorista. Sin recorrer todo el catálogo.
+          </p>
+
+          <div className="mt-6 flex w-full max-w-sm gap-3 md:mt-8 md:max-w-md">
+            <Link
+              href="#combos"
+              className="inline-flex min-h-13 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-[#E8302A] px-5 font-bebas text-[1.15rem] tracking-[0.1em] text-white shadow-[0_12px_36px_rgba(232,48,42,0.4)] transition-all active:scale-95 hover:bg-[#C4231E] hover:shadow-[0_16px_44px_rgba(232,48,42,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 md:min-h-14 md:px-8 md:text-[1.3rem]"
+            >
+              VER PRODUCTOS
+            </Link>
+            <Link
+              href="/catalogo"
+              className="inline-flex min-h-13 flex-1 items-center justify-center whitespace-nowrap rounded-2xl border border-white/15 bg-white/5 px-5 font-bebas text-[1.15rem] tracking-[0.1em] text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 md:min-h-14 md:px-8 md:text-[1.3rem]"
+            >
+              CATÁLOGO
+            </Link>
+          </div>
+
+          <div className="mt-7 grid w-full max-w-sm grid-cols-3 gap-2 md:mt-10 md:max-w-lg md:gap-3">
             {highlights.map((item) => (
-              <div key={item.label} className="shrink-0 flex-1 min-w-[6.5rem] snap-start rounded-[0.8rem] bg-white/[0.08] p-2.5 text-center md:min-w-0 md:rounded-[1.4rem] md:p-5">
-                <div className="font-bebas text-2xl leading-none text-[#ffcf33] md:text-5xl">{item.value}</div>
-                <div className="mt-1 text-[0.54rem] font-bold uppercase leading-3 tracking-wide text-white/70 md:mt-2 md:text-xs md:leading-4">
+              <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 p-3 text-center backdrop-blur-sm md:rounded-[1.4rem] md:p-5">
+                <div className="font-bebas text-[1.6rem] leading-none text-[#E8302A] md:text-4xl">{item.value}</div>
+                <div className="mt-1.5 text-[0.7rem] font-bold uppercase leading-tight tracking-wide text-white/50 md:mt-2 md:text-xs">
                   {item.label}
                 </div>
               </div>
@@ -146,36 +110,47 @@ export default function FiestaLanding() {
         <FiestaClient />
       </section>
 
-      <section className="py-10 md:py-18">
-        <div className="mx-auto max-w-6xl flex gap-3 overflow-x-auto snap-x snap-mandatory px-4 pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:overflow-visible md:px-6 md:pb-0">
-          {benefits.map((benefit) => (
-            <article
-              key={benefit.title}
-              className="shrink-0 w-[78vw] max-w-[300px] snap-start rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-4 backdrop-blur md:w-auto md:max-w-none md:p-5"
-            >
-              <h2 className="font-serif text-[1.3rem] leading-7 text-white md:text-[1.45rem]">{benefit.title}</h2>
-              <p className="mt-1.5 text-[0.88rem] font-medium leading-6 text-white/60 md:mt-2 md:text-[0.92rem]">{benefit.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
 
       <section className="px-4 pb-20 text-center md:px-6 md:pb-28">
-        <div className="mx-auto max-w-3xl rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-5 md:rounded-[2rem] md:p-10">
-          <p className="text-[0.68rem] font-black uppercase tracking-[0.28em] text-[#d7a84f] md:text-xs">Cierre de pedido</p>
-          <h2 className="mt-2 font-serif text-[1.75rem] leading-tight text-white md:mt-3 md:text-5xl">Todo listo, sin sobrecargar.</h2>
-          <p className="mx-auto mt-3 max-w-xl text-[0.95rem] font-medium leading-7 text-white/72 md:mt-4 md:text-[1.05rem] md:leading-8">
-            Sumá lo necesario y seguí el cierre del pedido con una lista clara.
-          </p>
-          <Link
-            href="#combos"
-            className="mt-5 inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#f3ead9] px-6 font-body text-sm font-black uppercase tracking-[0.16em] text-[#17110b] transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] md:mt-7 md:min-h-14 md:px-8"
-          >
-            Empezar pedido
-          </Link>
+        <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-5 md:rounded-[2rem] md:p-10">
+          <div className="absolute inset-0 rounded-[inherit] bg-[conic-gradient(from_0deg,transparent,rgba(232,48,42,0.08)_90deg,transparent_180deg,rgba(232,48,42,0.05)_270deg,transparent)] animate-[spin_12s_linear_infinite]" />
+          <div className="relative">
+            <p className="text-[0.68rem] font-black uppercase tracking-[0.28em] text-[#E8302A] md:text-xs">Cierre de pedido</p>
+            <p className="mt-1 font-body text-sm font-medium text-white/50">¿Ya tenés todo?</p>
+            <h2 className="mt-2 font-serif text-[1.75rem] leading-tight text-white md:mt-3 md:text-5xl">Cerrá tu pedido</h2>
+            <p className="mx-auto mt-3 max-w-xl text-[0.95rem] font-medium leading-7 text-white/72 md:mt-4 md:text-[1.05rem] md:leading-8">
+              Sumá lo necesario y cerrá la compra con una lista clara por WhatsApp.
+            </p>
+            <div className="mt-5 flex flex-col items-center gap-3 md:mt-7 md:flex-row md:justify-center">
+              <Link
+                href="#combos"
+                className="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-2xl bg-[#E8302A] px-6 font-bebas text-[1.1rem] tracking-[0.1em] text-white shadow-[0_12px_36px_rgba(232,48,42,0.4)] transition-all active:scale-95 hover:bg-[#C4231E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 md:min-h-14 md:px-8"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" />
+                </svg>
+                Armar pedido
+              </Link>
+              <Link
+                href="/catalogo"
+                className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 font-bebas text-[1.1rem] tracking-[0.1em] text-white backdrop-blur-md transition-all hover:bg-white/10 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 md:min-h-14 md:px-8"
+              >
+                Ver catálogo completo
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
+      <footer className="border-t border-white/10 bg-[#0a0a0a] px-4 pb-24 pt-10 text-center md:pb-12">
+        <div className="mx-auto max-w-3xl">
+          <Image src="/logo.png" alt="Distribuidora El Remate" width={50} height={50} className="mx-auto mb-4 opacity-50" />
+          <p className="text-[0.7rem] font-medium text-white/30">
+            © {new Date().getFullYear()} Distribuidora El Remate. Todos los derechos reservados.
+          </p>
+          <p className="mt-1 text-[0.6rem] text-white/15">Powered by Dafna y Mateo Asencio</p>
+        </div>
+      </footer>
     </main>
   );
 }

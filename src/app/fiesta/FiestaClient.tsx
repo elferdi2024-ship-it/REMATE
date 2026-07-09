@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import categoriaMapping from "@/lib/categoria_mapping.json";
@@ -11,6 +12,7 @@ import { haptic } from "@/lib/haptic";
 import { Producto } from "@/types";
 import { flyToCart } from "@/lib/flyToCart";
 import CartPanel from "@/components/carrito/CartPanel";
+import BottomNavBar from "@/components/catalogo/BottomNavBar";
 
 const catMap = (categoriaMapping as any).mapping || categoriaMapping;
 
@@ -281,26 +283,44 @@ function FiestaCartBtn({ totalQty, total, onClick }: { totalQty: number; total: 
 }
 
 function FiestaNav({ activeTab, setActiveTab }: { activeTab: FiestaTab; setActiveTab: (tab: FiestaTab) => void }) {
+  const getTabIconPath = (id: FiestaTab) => {
+    switch (id) {
+      case "bebidas": return "/fiesta-barra.png";
+      case "parrilla": return "/fiesta-parrilla.png";
+      case "picada": return "/fiesta-picada.png";
+      case "extras": return "/fiesta-extras.png";
+    }
+  };
+
   return (
-    <div className="sticky top-[76px] z-40 mx-auto mb-5 mt-1 max-w-5xl px-4 md:top-[92px] md:mb-8">
-      <div className="flex gap-2 overflow-x-auto rounded-[1.15rem] border border-white/10 bg-[#11100f]/88 p-1.5 shadow-[0_14px_44px_rgba(0,0,0,0.26)] backdrop-blur-xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="sticky top-[72px] z-40 mx-auto mb-6 mt-1 max-w-5xl px-4 md:top-[88px] md:mb-8">
+      <div className="grid grid-cols-4 gap-1.5 rounded-3xl border border-white/10 bg-black/60 p-1.5 shadow-[0_14px_44px_rgba(0,0,0,0.26)] backdrop-blur-xl md:gap-3 md:rounded-[2rem] md:p-2.5">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
-          const accent = accentStyles[tab.accent];
+          const iconPath = getTabIconPath(tab.id);
 
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`min-h-12 flex-1 min-w-0 rounded-xl px-3 text-left md:min-h-14 md:rounded-2xl md:px-4 transition-[background-color,color,box-shadow,transform] duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7a84f] ${
-                isActive ? "bg-[#f3ead9] text-[#17110b]" : "bg-white/[0.035] text-white/84 hover:bg-white/[0.07]"
+              className={`group flex flex-col items-center justify-center rounded-2xl py-2 px-1 text-center transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8302A] md:py-3.5 md:px-4 ${
+                isActive
+                  ? "bg-[#E8302A] text-white shadow-[0_10px_25px_rgba(232,48,42,0.35)]"
+                  : "bg-white/[0.02] text-white/60 hover:bg-white/[0.08] hover:text-white/80"
               }`}
               aria-pressed={isActive}
             >
-              <span className={`block font-body text-[0.5rem] font-black uppercase tracking-[0.16em] md:text-[0.58rem] md:tracking-[0.2em] ${isActive ? "opacity-75" : "text-white/42"}`}>
-                {tab.eyebrow}
-              </span>
-              <span className="mt-0.5 block font-serif text-[1.15rem] leading-none tracking-[-0.04em] md:mt-1 md:text-[1.45rem]">{tab.label}</span>
+              <div className="relative mb-1 h-9 w-9 transition-transform duration-300 group-hover:scale-110 group-active:scale-95 md:h-12 md:w-12">
+                <Image
+                  src={iconPath}
+                  alt={tab.label}
+                  fill
+                  sizes="(max-width: 768px) 36px, 48px"
+                  className="object-contain filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.2)]"
+                  priority
+                />
+              </div>
+              <span className="block font-bebas text-[0.8rem] leading-none tracking-[0.05em] md:text-[1.1rem]">{tab.label}</span>
             </button>
           );
         })}
@@ -408,6 +428,7 @@ function getGroups(products: Producto[]) {
 }
 
 export default function FiestaClient() {
+  const router = useRouter();
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -496,12 +517,17 @@ export default function FiestaClient() {
 
       {loading ? (
         <div className="flex min-h-[320px] items-center justify-center px-4">
-          <div className="h-14 w-14 animate-spin rounded-full border-4 border-[#ff3d5a] border-t-transparent" />
+          <div className="h-14 w-14 animate-spin rounded-full border-4 border-[#d7a84f] border-t-transparent" />
         </div>
       ) : productos.length === 0 ? (
-        <div className="mx-4 rounded-[1.75rem] border border-white/10 bg-white/[0.055] p-8 text-center">
-          <h2 className="font-serif text-4xl tracking-[-0.06em]">Estamos preparando la góndola</h2>
-          <p className="mt-2 text-white/65">No encontramos productos de fiesta disponibles en este momento.</p>
+        <div className="mx-4 rounded-[1.75rem] border border-white/10 bg-white/[0.055] p-10 text-center backdrop-blur">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-8 w-8 text-white/40" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h2 className="font-serif text-3xl tracking-[-0.06em] text-white md:text-4xl">Estamos preparando la góndola</h2>
+          <p className="mx-auto mt-3 max-w-md text-[0.95rem] font-medium text-white/50">No encontramos productos de fiesta disponibles en este momento. Volvé a intentar en un rato.</p>
         </div>
       ) : (
         <>
@@ -589,7 +615,7 @@ export default function FiestaClient() {
               />
               {activeProducts.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 md:gap-5">
+                  <div key={activeTab} className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 md:gap-5 animate-[fadeIn_0.4s_ease-out]">
                     {visibleActiveProducts.map((product) => (
                       <PremiumProductCard key={product.codigo} producto={product} />
                     ))}
@@ -637,19 +663,30 @@ export default function FiestaClient() {
             onSucursalChange={() => {}}
             isProcessing={false}
           />
+          <BottomNavBar
+            activeTab=""
+            onTabSelect={(tab: string) => {
+              if (tab === "buscar") router.push("/catalogo?focusSearch=true");
+              else if (tab === "favoritos") router.push("/catalogo?tab=favoritos");
+              else if (tab === "inicio") router.push("/");
+            }}
+            cartQty={totalQty}
+            onOpenCart={() => setCartOpen(true)}
+            onOpenUser={() => router.push("/cuenta")}
+          />
         </>
       ) : null}
 
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-            .side-panel .panel-close {
-              min-width: 44px !important;
-              min-height: 44px !important;
-            }
-          `,
-        }}
-      />
+      <style>{`
+        .side-panel .panel-close {
+          min-width: 44px !important;
+          min-height: 44px !important;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

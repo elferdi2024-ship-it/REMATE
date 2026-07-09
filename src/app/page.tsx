@@ -127,7 +127,7 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent z-10" />
           
           {/* Imagen de fondo */}
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1000')] bg-cover bg-center opacity-40 group-hover:opacity-60 transition-transform duration-700 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-[url('/fiestahero.png')] bg-cover bg-center opacity-40 group-hover:opacity-60 transition-transform duration-700 group-hover:scale-105" />
           
           {/* Elementos Decorativos Neon */}
           <div className="absolute -left-20 -top-20 w-64 h-64 bg-[#E53935] blur-[100px] rounded-full opacity-30 pointer-events-none group-hover:opacity-50 transition-opacity" />

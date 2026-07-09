@@ -58,7 +58,7 @@ const getTabIcon = (id: string, isSelected: boolean, cartQty: number) => {
       );
     case "carrito":
       return (
-        <div style={{ position: "relative", width: "24px", height: "24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div className="relative flex h-6 w-6 items-center justify-center">
           {isSelected ? (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -80,17 +80,7 @@ const getTabIcon = (id: string, isSelected: boolean, cartQty: number) => {
             </svg>
           )}
           {cartQty > 0 && (
-            <span
-              className="absolute -top-1.5 -right-2.5 bg-red-600 text-white font-black rounded-full flex items-center justify-center animate-soft-pulse"
-              style={{
-                fontSize: "9px",
-                minWidth: "16px",
-                height: "16px",
-                padding: "0 4px",
-                boxShadow: "0 2px 6px rgba(220,38,38,0.4)",
-                zIndex: 10,
-              }}
-            >
+            <span className="absolute -right-2.5 -top-1.5 z-10 flex min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 py-0 text-[9px] font-black text-white shadow-[0_2px_6px_rgba(220,38,38,0.4)] animate-soft-pulse h-4">
               {cartQty}
             </span>
           )}
@@ -153,70 +143,31 @@ export default function BottomNavBar({
   };
 
   return (
-    <div
-      className="bottom-nav md:hidden"
-      style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        background: "rgba(255, 255, 255, 0.92)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        borderTop: "1px solid rgba(17,11,8,0.06)",
-        paddingBottom: "env(safe-area-inset-bottom, 12px)",
-        paddingTop: "8px",
-        boxShadow: "0 -4px 20px rgba(0,0,0,0.03)",
-        display: "flex",
-        justifyContent: "space-around",
-        alignItems: "center",
-      }}
-    >
+    <div className="bottom-nav fixed bottom-0 left-0 right-0 z-[100] bg-white/[0.92] backdrop-blur-2xl border-t border-black/[0.06] pb-[env(safe-area-inset-bottom,12px)] pt-2 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] flex justify-around items-center md:hidden">
       {tabs.map((tab) => {
         const isSelected = activeTab === tab.id;
         return (
           <button
             key={tab.id}
             onClick={() => handleTabClick(tab.id)}
-            style={{
-              background: "transparent",
-              border: "none",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "2px",
-              color: isSelected ? "#E8302A" : "#6E6864",
-              cursor: "pointer",
-              padding: "4px 8px",
-              minWidth: "60px",
-              transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-            }}
+            className={`bg-transparent border-none flex flex-col items-center justify-center gap-0.5 cursor-pointer px-2 py-1 min-w-[60px] transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+              isSelected ? "text-[#E8302A]" : "text-[#6E6864]"
+            }`}
             aria-label={tab.label}
           >
             <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "44px",
-                height: "30px",
-                borderRadius: "15px",
-                backgroundColor: isSelected ? "rgba(232, 48, 42, 0.08)" : "transparent",
-                transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                transform: isSelected ? "scale(1.05)" : "scale(1)",
-              }}
+              className={`flex items-center justify-center w-11 h-[30px] rounded-[15px] transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                isSelected
+                  ? "bg-[#E8302A]/[0.08] scale-105"
+                  : "bg-transparent scale-100"
+              }`}
             >
               {getTabIcon(tab.id, isSelected, cartQty)}
             </div>
             <span
-              style={{
-                fontSize: "10px",
-                fontWeight: isSelected ? 800 : 500,
-                letterSpacing: "0.1px",
-                transition: "color 0.25s ease",
-              }}
+              className={`text-[10px] tracking-[0.1px] transition-colors duration-[250ms] ${
+                isSelected ? "font-[800]" : "font-[500]"
+              }`}
             >
               {tab.label}
             </span>
