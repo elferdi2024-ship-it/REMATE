@@ -1,4 +1,5 @@
 // filepath: src/components/admin/OfertasAdmin.tsx
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
@@ -17,6 +18,9 @@ import type {
   CategoryOffer,
   FlashOffer,
 } from "@/types/ofertas";
+import { useBrands } from "@/hooks/useBrands";
+import { BrandHeroCarousel, SponsoredBanner, SponsorBadge } from "@/components/ads";
+import { ProductoCard } from "@/components/catalogo";
 
 const DEFAULT_CONFIG: OfertaConfig = {
   activa: false,
@@ -93,6 +97,7 @@ const INPUT_CLS =
 const LABEL_CLS = "block text-xs font-bold text-[var(--admin-text-lo)] mb-1";
 
 export default function OfertasAdmin() {
+  const { brands } = useBrands();
   const toast = useToast();
   const { error: toastError } = toast;
   const [config, setConfig] = useState<OfertaConfig>(DEFAULT_CONFIG);
@@ -1099,6 +1104,26 @@ export default function OfertasAdmin() {
       </div>
 
       {/* ================================================================== */}
+      {/* SECTION 0: 🌟 BRAND HERO CAROUSEL (LIVE PREVIEW)                   */}
+      {/* ================================================================== */}
+      <CollapsibleSection
+        icon="🌟"
+        title="Carrusel de Sponsors (Preview en Vivo)"
+        subtitle="Visualiza qué marcas rotan actualmente en el carrusel de inicio"
+      >
+        <div className="bg-[#f5f2ee] p-4 rounded-xl border border-dashed border-yellow-500/50">
+          <p className="text-xs text-yellow-600/80 mb-3 font-semibold">
+            Así lo ven los usuarios (rotando automáticamente entre marcas activas). 
+            Márgenes y tamaños son ilustrativos. 
+            Para gestionar qué marcas aparecen, ve a la sección de &quot;Publicidad y Retail Media&quot;.
+          </p>
+          <div className="w-full relative mx-auto pointer-events-none" style={{ maxWidth: '1200px' }}>
+            <BrandHeroCarousel brands={brands.filter(b => b.active && ["oro", "plata"].includes(b.tier))} />
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* ================================================================== */}
       {/* SECTION 1: 📢 BANNERS PUBLICITARIOS DE MARCA                       */}
       {/* ================================================================== */}
       <CollapsibleSection
@@ -1106,87 +1131,126 @@ export default function OfertasAdmin() {
         title="Banners Publicitarios de Marca"
         subtitle="Espacios premium full-width para marcas destacadas"
       >
-        {/* Form */}
-        <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)]/50 p-4 space-y-4">
-          <h4 className="text-xs font-bold text-[var(--admin-text-hi)] uppercase tracking-wider">
-            Nuevo Banner de Marca
-          </h4>
+        {/* Form con Live Preview */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)]/50 p-4 space-y-4">
+            <h4 className="text-xs font-bold text-[var(--admin-text-hi)] uppercase tracking-wider flex items-center justify-between">
+              <span>Nuevo Banner de Marca</span>
+              <button type="button" onClick={() => {
+                setBbMarca(""); setBbTitulo(""); setBbSubtitulo(""); setBbImagen(""); setBbCtaTexto(""); setBbCtaLink(""); setBbColorFondo("#1a1a2e"); setBbColorTexto("#ffffff");
+              }} className="text-[10px] text-[var(--admin-text-lo)] hover:text-white">
+                Limpiar campos
+              </button>
+            </h4>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div>
-              <label className={LABEL_CLS}>Nombre de Marca</label>
-              <input type="text" placeholder="Ej. Coca-Cola" value={bbMarca} onChange={(e) => setBbMarca(e.target.value)} className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Título del Banner</label>
-              <input type="text" placeholder="Ej. Promo Verano" value={bbTitulo} onChange={(e) => setBbTitulo(e.target.value)} className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Subtítulo</label>
-              <input type="text" placeholder="Ej. Hasta 30% OFF" value={bbSubtitulo} onChange={(e) => setBbSubtitulo(e.target.value)} className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Texto del CTA</label>
-              <input type="text" placeholder="Ej. Ver productos" value={bbCtaTexto} onChange={(e) => setBbCtaTexto(e.target.value)} className={INPUT_CLS} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Link del CTA</label>
-              <input type="text" placeholder="Ej. /catalogo?marca=coca-cola" value={bbCtaLink} onChange={(e) => setBbCtaLink(e.target.value)} className={INPUT_CLS} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className={LABEL_CLS}>Seleccionar Marca (Opcional)</label>
+                <select 
+                  className={INPUT_CLS} 
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if(!val) return;
+                    const b = brands.find(brand => brand.id === val);
+                    if(b) {
+                      setBbMarca(b.name);
+                      setBbTitulo(b.headline || `Productos ${b.name}`);
+                      setBbSubtitulo(b.tagline || `Descubre lo mejor de ${b.name}`);
+                      if(b.logo) setBbImagen(b.logo);
+                      if(b.color) setBbColorFondo(b.color);
+                      setBbCtaTexto(`Ver ${b.name}`);
+                      setBbCtaLink(`/catalogo?search=${encodeURIComponent(b.name)}`);
+                    }
+                  }}
+                >
+                  <option value="">-- Autocompletar con Marca --</option>
+                  {brands.filter(b => b.active).map(b => (
+                    <option key={b.id} value={b.id}>{b.name} ({b.tier})</option>
+                  ))}
+                </select>
+                <span className="text-[10px] text-[var(--admin-text-lo)]/60 mt-1 block">Rellena automáticamente los campos de abajo</span>
+              </div>
+              
               <div>
-                <label className={LABEL_CLS}>Color Fondo</label>
-                <div className="flex items-center gap-2">
-                  <input type="color" value={bbColorFondo} onChange={(e) => setBbColorFondo(e.target.value)} className="h-10 w-10 rounded-lg border border-[var(--admin-border)] cursor-pointer bg-transparent" />
-                  <span className="text-xs text-[var(--admin-text-lo)] font-mono">{bbColorFondo}</span>
-                </div>
+                <label className={LABEL_CLS}>Nombre de Marca</label>
+                <input type="text" placeholder="Ej. Coca-Cola" value={bbMarca} onChange={(e) => setBbMarca(e.target.value)} className={INPUT_CLS} />
               </div>
               <div>
-                <label className={LABEL_CLS}>Color Texto</label>
-                <div className="flex items-center gap-2">
-                  <input type="color" value={bbColorTexto} onChange={(e) => setBbColorTexto(e.target.value)} className="h-10 w-10 rounded-lg border border-[var(--admin-border)] cursor-pointer bg-transparent" />
-                  <span className="text-xs text-[var(--admin-text-lo)] font-mono">{bbColorTexto}</span>
+                <label className={LABEL_CLS}>Título del Banner</label>
+                <input type="text" placeholder="Ej. Promo Verano" value={bbTitulo} onChange={(e) => setBbTitulo(e.target.value)} className={INPUT_CLS} />
+              </div>
+              <div className="sm:col-span-2">
+                <label className={LABEL_CLS}>Subtítulo</label>
+                <input type="text" placeholder="Ej. Hasta 30% OFF" value={bbSubtitulo} onChange={(e) => setBbSubtitulo(e.target.value)} className={INPUT_CLS} />
+              </div>
+              <div>
+                <label className={LABEL_CLS}>Texto del CTA</label>
+                <input type="text" placeholder="Ej. Ver productos" value={bbCtaTexto} onChange={(e) => setBbCtaTexto(e.target.value)} className={INPUT_CLS} />
+              </div>
+              <div>
+                <label className={LABEL_CLS}>Link del CTA</label>
+                <input type="text" placeholder="Ej. /catalogo?search=coca-cola" value={bbCtaLink} onChange={(e) => setBbCtaLink(e.target.value)} className={INPUT_CLS} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={LABEL_CLS}>Color Fondo</label>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={bbColorFondo} onChange={(e) => setBbColorFondo(e.target.value)} className="h-10 w-10 rounded-lg border border-[var(--admin-border)] cursor-pointer bg-transparent" />
+                    <span className="text-[10px] text-[var(--admin-text-lo)] font-mono">{bbColorFondo}</span>
+                  </div>
+                </div>
+                <div>
+                  <label className={LABEL_CLS}>Color Texto</label>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={bbColorTexto} onChange={(e) => setBbColorTexto(e.target.value)} className="h-10 w-10 rounded-lg border border-[var(--admin-border)] cursor-pointer bg-transparent" />
+                    <span className="text-[10px] text-[var(--admin-text-lo)] font-mono">{bbColorTexto}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Fecha Inicio</label>
-              <input type="datetime-local" value={bbFechaInicio} onChange={(e) => setBbFechaInicio(e.target.value)} className={INPUT_CLS} style={{ colorScheme: "light" }} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Fecha Fin</label>
-              <input type="datetime-local" value={bbFechaFin} onChange={(e) => setBbFechaFin(e.target.value)} className={INPUT_CLS} style={{ colorScheme: "light" }} />
+              <div className="flex flex-col justify-end">
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[var(--admin-input-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)]">
+                  📷 {bbUploading ? "Subiendo..." : "Subir Logo"}
+                  <input type="file" className="hidden" accept="image/*" disabled={bbUploading} onChange={(e) => e.target.files?.[0] && handleUploadBbImage(e.target.files[0])} />
+                </label>
+              </div>
+              <div className="sm:col-span-2 flex justify-end mt-2">
+                <button type="button" onClick={(e) => handleAddBrandBanner(e)} className="w-full sm:w-auto rounded-xl bg-[var(--admin-accent)] px-6 py-2.5 text-xs font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90">
+                  ＋ Agregar Banner de Marca
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center gap-4">
-                <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)] shrink-0">
-                  📷 {bbUploading ? "Subiendo..." : "Subir Imagen del Banner"}
-                  <input type="file" className="hidden" accept="image/*" disabled={bbUploading} onChange={(e) => e.target.files?.[0] && handleUploadBbImage(e.target.files[0])} />
-                </label>
-                {bbUploading && (
-                  <span className="text-xs text-[var(--admin-accent)] font-semibold">
-                    Subiendo... {Math.round(bbUploadProgress)}%
-                  </span>
-                )}
-                {bbImagen && !bbUploading && (
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-12 h-12 rounded-lg border border-[var(--admin-border)] overflow-hidden">
-                      <img src={bbImagen} alt="Preview" className="object-cover w-full h-full" />
-                    </div>
-                    <span className="text-xs text-green-500 font-medium">✓ Imagen cargada</span>
-                  </div>
-                )}
-              </div>
-              <span className="text-[10px] text-[var(--admin-text-lo)]/70">
-                💡 <b>Diseño óptimo:</b> Proporción <b>1:1 (cuadrada/logo)</b>. Recomendado PNG transparente. Se muestra contenido a la derecha.
-              </span>
+          <div className="rounded-xl border border-dashed border-[var(--admin-border)] p-4 flex flex-col justify-center items-center relative overflow-hidden" style={{ background: "url('/catalogo-hero.jpg') center/cover" }}>
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+            <div className="relative z-10 w-full mb-2 flex items-center justify-between">
+               <span className="text-[10px] uppercase font-bold text-white/50 tracking-widest">Vista Previa en Vivo</span>
+               <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
             </div>
-            <button type="button" onClick={(e) => handleAddBrandBanner(e)} className="rounded-xl bg-[var(--admin-accent)] px-5 py-2.5 text-xs font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 shrink-0">
-              ＋ Agregar Banner de Marca
-            </button>
+            
+            <div className="relative z-10 w-full pointer-events-none transform scale-90 sm:scale-100 origin-top">
+              <SponsoredBanner 
+                brand={{ 
+                  id: "preview", 
+                  name: bbMarca || "Marca", 
+                  color: bbColorFondo, 
+                  tier: "oro", 
+                  active: true, 
+                  createdAt: "" 
+                } as any}
+                asset={{ 
+                  id: "asset-preview", 
+                  type: "banner", 
+                  url: bbImagen || "", 
+                  headline: bbTitulo || "Título Promo", 
+                  tagline: bbSubtitulo || "Subtítulo descriptivo", 
+                  actionText: bbCtaTexto || "Ver productos", 
+                  targetUrl: bbCtaLink || "", 
+                  backgroundColor: bbColorFondo, 
+                  textColor: bbColorTexto 
+                } as any} 
+              />
+            </div>
           </div>
         </div>
 
@@ -1299,7 +1363,27 @@ export default function OfertasAdmin() {
                 Agregar Producto Patrocinado desde Catálogo
               </h4>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className={LABEL_CLS}>Autocompletar con Marca Activa</label>
+                  <select 
+                    className={INPUT_CLS}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if(!val) return;
+                      const b = brands.find(brand => brand.id === val);
+                      if(b) {
+                        setSpMarca(b.name);
+                        setSpBadge("Patrocinado");
+                      }
+                    }}
+                  >
+                    <option value="">-- Selecciona una marca --</option>
+                    {brands.filter(b => b.active).map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
                 <div>
                   <label className={LABEL_CLS}>Nombre de Marca</label>
                   <input type="text" placeholder="Marca patrocinadora" value={spMarca} onChange={(e) => setSpMarca(e.target.value)} className={INPUT_CLS} />
@@ -1308,7 +1392,7 @@ export default function OfertasAdmin() {
                   <label className={LABEL_CLS}>Texto del Badge</label>
                   <input type="text" placeholder="Patrocinado" value={spBadge} onChange={(e) => setSpBadge(e.target.value)} className={INPUT_CLS} />
                 </div>
-                <div>
+                <div className="sm:col-span-2">
                   <label className={LABEL_CLS}>Precio Promo (opcional)</label>
                   <input
                     type="number"
@@ -1353,36 +1437,50 @@ export default function OfertasAdmin() {
           {spMode === "manual" && (
             <div className="space-y-4">
               <h4 className="text-xs font-bold text-[var(--admin-text-hi)] uppercase tracking-wider">
-                Agregar Producto Patrocinado Manual (Sin Precio / Publicidad)
+                Crear Producto Publicitario Manual
               </h4>
 
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <label className={LABEL_CLS}>Nombre de la Publicidad / Producto</label>
-                  <input type="text" placeholder="Ej. Coca-Cola 1.5L Promo" value={spManualNombre} onChange={(e) => setSpManualNombre(e.target.value)} className={INPUT_CLS} />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className={LABEL_CLS}>Autocompletar con Marca Activa</label>
+                  <select 
+                    className={INPUT_CLS}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if(!val) return;
+                      const b = brands.find(brand => brand.id === val);
+                      if(b) {
+                        setSpManualMarca(b.name);
+                        setSpManualNombre(`Ver productos de ${b.name}`);
+                      }
+                    }}
+                  >
+                    <option value="">-- Selecciona una marca --</option>
+                    {brands.filter(b => b.active).map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
-                  <label className={LABEL_CLS}>Marca Patrocinadora</label>
-                  <input type="text" placeholder="Ej. Coca-Cola" value={spManualMarca} onChange={(e) => setSpManualMarca(e.target.value)} className={INPUT_CLS} />
+                  <label className={LABEL_CLS}>Nombre / Título</label>
+                  <input type="text" placeholder="Ej. Licores Especiales" value={spManualNombre} onChange={(e) => setSpManualNombre(e.target.value)} className={INPUT_CLS} />
                 </div>
                 <div>
+                  <label className={LABEL_CLS}>Nombre de Marca</label>
+                  <input type="text" placeholder="Ej. JW" value={spManualMarca} onChange={(e) => setSpManualMarca(e.target.value)} className={INPUT_CLS} />
+                </div>
+                <div className="sm:col-span-2">
                   <label className={LABEL_CLS}>Texto del Badge</label>
-                  <input type="text" placeholder="Patrocinado" value={spManualBadge} onChange={(e) => setSpManualBadge(e.target.value)} className={INPUT_CLS} />
+                  <input type="text" placeholder="Publicidad" value={spManualBadge} onChange={(e) => setSpManualBadge(e.target.value)} className={INPUT_CLS} />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between">
+              <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-4">
                     <label className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--admin-bg)] px-4 py-2 text-xs font-bold text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)] border border-[var(--admin-border)] shrink-0">
-                      📷 {spManualUploading ? "Subiendo..." : "Subir Imagen Publicitaria"}
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        disabled={spManualUploading}
-                        onChange={(e) => e.target.files?.[0] && handleUploadSpManualImage(e.target.files[0])}
-                      />
+                      📷 {spManualUploading ? "Subiendo..." : "Subir Imagen del Producto"}
+                      <input type="file" className="hidden" accept="image/*" disabled={spManualUploading} onChange={(e) => e.target.files?.[0] && handleUploadSpManualImage(e.target.files[0])} />
                     </label>
                     {spManualUploading && (
                       <span className="text-xs text-[var(--admin-accent)] font-semibold">
@@ -1404,12 +1502,41 @@ export default function OfertasAdmin() {
                   type="button"
                   onClick={(e) => handleAddSponsoredManual(e)}
                   className="rounded-xl bg-[var(--admin-accent)] px-5 py-2.5 text-xs font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 shrink-0"
+                  disabled={!spManualNombre || !spManualImagen}
                 >
                   ＋ Agregar Patrocinado Manual
                 </button>
               </div>
             </div>
           )}
+
+          {/* Live preview para Sponsored Product */}
+          <div className="mt-6 p-4 rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-input-bg)]/30 flex flex-col items-center">
+            <span className="text-[10px] uppercase font-bold text-[var(--admin-text-lo)] tracking-widest mb-4">Vista Previa (Sponsor Badge)</span>
+            <div className="w-[180px] pointer-events-none">
+               {spMode === "manual" ? (
+                 <div className="relative bg-white rounded-xl shadow border border-[#EBEBEB] overflow-hidden p-3 h-[250px] flex flex-col items-center text-center">
+                   <div className="absolute top-2 left-2 z-10"><SponsorBadge brandName={spManualMarca} /></div>
+                   <div className="w-full aspect-square relative mb-3 bg-gray-50 rounded-lg">
+                      {spManualImagen && <img src={spManualImagen} alt="" className="object-contain w-full h-full" />}
+                   </div>
+                   <p className="text-sm font-bold mt-auto leading-tight">{spManualNombre || "Nombre del Patrocinado"}</p>
+                 </div>
+               ) : (
+                 <div className="relative bg-white rounded-xl shadow border border-[#EBEBEB] overflow-hidden p-3 h-[250px] flex flex-col items-center text-center">
+                   <div className="absolute top-2 left-2 z-10"><SponsorBadge brandName={spMarca} /></div>
+                   <div className="w-full aspect-square relative mb-3 bg-gray-50 rounded-lg">
+                      <div className="absolute inset-0 flex items-center justify-center text-3xl opacity-20">📦</div>
+                   </div>
+                   <p className="text-sm font-bold leading-tight">Producto Seleccionado</p>
+                   <p className="text-xs mt-1 text-gray-500">Categoría</p>
+                   <p className="text-lg font-black text-[#D62828] mt-auto">
+                     ${spPrecioPromo || 999}
+                   </p>
+                 </div>
+               )}
+            </div>
+          </div>
         </div>
 
         {/* Sponsored Products List */}
