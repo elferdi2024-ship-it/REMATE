@@ -64,6 +64,7 @@ const catMap = (categoriaMapping as any).mapping || categoriaMapping;
 
 import { flyToCart } from "@/lib/flyToCart";
 import DesktopCategorySidebar from "@/components/catalogo/DesktopCategorySidebar";
+import { BrandHeroCarousel } from "@/components/ads";
 
 interface CatalogoPageClientProps {
   // In the future we can pass pre-loaded products from server
@@ -404,6 +405,10 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   // Search state for instant feedback on input, synced with URL
   const [search, setSearch] = useState(urlSearch);
   const [debouncedSearch, setDebouncedSearch] = useState(urlSearch);
+
+  const activeBrands = useMemo(() => {
+    return brands.filter(b => b.active === true && ["oro", "plata"].includes(b.tier));
+  }, [brands]);
 
   // Tienda Config
   const [tiendaConfig, setTiendaConfig] = useState<{ pedidosAbiertos: boolean; bannerMensaje: string }>({
@@ -1575,6 +1580,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       })()}
 
       <div className="page-wrapper">
+        <div className="mb-4 mt-2">
+          <BrandHeroCarousel brands={activeBrands} />
+        </div>
         <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
         {ofertasConfig?.brandBanners && (
           <BrandBannersRail banners={ofertasConfig.brandBanners} />

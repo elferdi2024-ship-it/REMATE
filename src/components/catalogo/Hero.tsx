@@ -90,7 +90,8 @@ export default function Hero({
             position: "absolute",
             inset: 0,
             background:
-              "linear-gradient(135deg, rgba(17,11,8,0.97) 0%, rgba(17,11,8,0.92) 40%, rgba(17,11,8,0.72) 75%, rgba(17,11,8,0.45) 100%)",
+              "linear-gradient(135deg, rgba(17,11,8,0.95) 0%, rgba(17,11,8,0.88) 40%, rgba(17,11,8,0.65) 75%, rgba(17,11,8,0.3) 100%)",
+            backdropFilter: "blur(4px)",
           }}
         />
       </div>
@@ -99,9 +100,10 @@ export default function Hero({
         style={{
           position: "absolute",
           inset: 0,
-          background: "radial-gradient(ellipse 55% 100% at -5% 50%, rgba(214,40,40,0.18) 0%, transparent 60%)",
+          background: "radial-gradient(ellipse 70% 100% at -5% 50%, rgba(214,40,40,0.2) 0%, transparent 60%)",
           pointerEvents: "none",
           zIndex: 1,
+          animation: "pulse 6s infinite ease-in-out"
         }}
       />
 

@@ -4,6 +4,7 @@ import type { BrandConfig } from "@/types/brands";
 import { EMOJI_POR_CATEGORIA } from "@/types";
 import Image from "next/image";
 import { useFavoritos } from "@/lib/favoritos-context";
+import { SponsorBadge } from "@/components/ads";
 
 interface ProductoCardProps {
   producto: Producto;
@@ -245,6 +246,17 @@ export default function ProductoCard({
           </span>
         )}
         
+        {sponsorBrand && (
+          <div style={{ position: "absolute", bottom: "8px", left: "8px", zIndex: 10 }}>
+            <SponsorBadge
+              brandName={sponsorBrand.name}
+              brandColor={sponsorBrand.color}
+              logoUrl={sponsorBrand.logoUrl}
+              size="sm"
+            />
+          </div>
+        )}
+
         <div className="card-floating-action" onClick={(e) => e.stopPropagation()} style={{ position: "absolute", bottom: "8px", right: "8px", zIndex: 10 }}>
           {isInCart ? (
             <div className="float-qty-ctrl" style={{ 

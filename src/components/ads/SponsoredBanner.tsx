@@ -1,4 +1,3 @@
-// filepath: src/components/ads/SponsoredBanner.tsx
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
@@ -69,13 +68,12 @@ export default function SponsoredBanner({
 
   const isCompact = variant === "compact";
   const ctaText = abVariant === "A"
-    ? (brand.ctaTextA || "ABRIR OFERTAS")
-    : (brand.ctaTextB || "VER PROMOCIONES");
-  const ctaBg = abVariant === "A" ? "rgba(255,255,255,0.2)" : "rgba(232,48,42,0.35)";
+    ? (brand.ctaTextA || "VER CATÁLOGO")
+    : (brand.ctaTextB || "ABRIR PROMOCIONES");
+  
   const chips = brand.chips && brand.chips.length > 0
     ? brand.chips
-    : ["Precio mayorista", "Stock activo", "Entrega rapida"];
-  const badgeText = brand.badgeText || "Promo activa hoy";
+    : ["Stock Activo", "Precio Mayorista"];
 
   const handleCtaClick = useCallback(() => {
     const searchTerm = brand.name || brand.headline || "";
@@ -90,8 +88,10 @@ export default function SponsoredBanner({
   const brandInitial = brand.name?.slice(0, 1).toUpperCase() || "M";
 
   const bannerHeight = isMobile
-    ? (isCompact ? "120px" : "140px")
-    : (isCompact ? "136px" : "170px");
+    ? (isCompact ? "130px" : "150px")
+    : (isCompact ? "140px" : "180px");
+    
+  const accentColor = brand.color || "#00E5FF";
 
   return (
     <div
@@ -101,307 +101,131 @@ export default function SponsoredBanner({
       aria-label={`Publicidad: ${brand.name}`}
       onClick={handleCtaClick}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCtaClick(); }}
+      className="group relative w-full overflow-hidden rounded-[20px] bg-[#0A0D14] cursor-pointer transition-all duration-500 ease-out flex flex-row items-stretch"
       style={{
-        width: "100%",
         height: bannerHeight,
-        borderRadius: "20px",
-        overflow: "hidden",
-        position: "relative",
-        background: "#070B19",
-        border: "1px solid rgba(255,255,255,0.06)",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,0.08)",
-        cursor: "pointer",
         margin: isMobile ? "16px 0" : "28px 0",
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "stretch",
+        border: "1px solid rgba(255,255,255,0.05)",
+        boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)",
         ...AD_TOKENS.fadeIn(isVisible),
-        transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease, transform 0.5s ease",
       }}
       onMouseEnter={(e) => {
         if (!isMobile) {
-          e.currentTarget.style.transform = "translateY(-2px)";
-          e.currentTarget.style.borderColor = brand.color ? `${brand.color}40` : "rgba(0, 229, 255, 0.35)";
-          e.currentTarget.style.boxShadow = `0 15px 35px ${brand.color ? `${brand.color}20` : "rgba(0, 229, 255, 0.12)"}, inset 0 1px 2px rgba(255,255,255,0.15)`;
+          e.currentTarget.style.transform = "translateY(-4px)";
+          e.currentTarget.style.borderColor = `color-mix(in srgb, ${accentColor} 30%, transparent)`;
+          e.currentTarget.style.boxShadow = `0 20px 40px -15px color-mix(in srgb, ${accentColor} 20%, rgba(0,0,0,0.5))`;
         }
       }}
       onMouseLeave={(e) => {
         if (!isMobile) {
           e.currentTarget.style.transform = "none";
-          e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
-          e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,0.08)";
+          e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
+          e.currentTarget.style.boxShadow = "0 10px 30px -10px rgba(0,0,0,0.5)";
         }
       }}
     >
-      <style>{`
-        @keyframes glowPulse {
-          0% { opacity: 0.6; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.05); }
-          100% { opacity: 0.6; transform: scale(1); }
-        }
-      `}</style>
-      
-      {/* ── TOP-LEFT PATROCINADO DISCLOSURE ── */}
-      <div
-        style={{
-          position: "absolute",
-          top: "12px",
-          left: "14px",
-          zIndex: 4,
-          fontSize: "8px",
-          fontWeight: 700,
-          textTransform: "uppercase",
-          letterSpacing: "1px",
-          color: "rgba(255,255,255,0.6)",
-          display: "flex",
-          alignItems: "center",
-          gap: "4px",
-          background: "rgba(0,0,0,0.3)",
-          padding: "3px 8px",
-          borderRadius: "6px",
-          backdropFilter: "blur(4px)",
-          border: "1px solid rgba(255,255,255,0.1)"
-        }}
-      >
-        <span style={{ fontSize: "10px" }}>📢</span> PUBLICIDAD
-      </div>
-
-      {/* ── BACKGROUND BRAND COMMERCIAL IMAGE (Layer 1) ── */}
-      <div
-        style={{
-          position: "absolute",
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: isMobile ? "68%" : "58%",
-          zIndex: 1,
-        }}
-      >
+      {/* BACKGROUND IMAGE (Right Side) */}
+      <div className="absolute top-0 right-0 bottom-0 z-0" style={{ width: isMobile ? "70%" : "60%" }}>
         {asset?.src ? (
           <Image
             src={asset.src}
             alt={asset.alt || brand.name}
             fill
-            sizes={isMobile ? "60vw" : "50vw"}
-            style={{ objectFit: "cover", objectPosition: "center" }}
+            sizes={isMobile ? "70vw" : "60vw"}
+            className="object-cover object-center transition-transform duration-[10s] ease-out group-hover:scale-105"
           />
         ) : (
-          <div style={{ 
-            width: "100%", 
-            height: "100%", 
-            background: `linear-gradient(135deg, ${brand.color || '#D62828'} 0%, #1A1410 100%)`, 
-            opacity: 0.8,
+          <div className="w-full h-full opacity-80" style={{ 
+            background: `linear-gradient(135deg, color-mix(in srgb, ${accentColor} 60%, black) 0%, #1A1410 100%)`, 
             backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px)`
           }} />
         )}
       </div>
 
-      {/* ── CINEMATIC SMOOTH GRADIENT OVERLAY (Layer 2) ── */}
-      <div
+      {/* GRADIENT OVERLAY (Blending Left to Right) */}
+      <div 
+        className="absolute inset-0 z-[1] pointer-events-none"
         style={{
-          position: "absolute",
-          inset: 0,
-          background: isMobile
-            ? "linear-gradient(90deg, #070B19 0%, #070B19 32%, rgba(7,11,25,0.92) 52%, rgba(7,11,25,0.2) 80%, rgba(7,11,25,0) 100%)"
-            : "linear-gradient(90deg, #070B19 0%, #070B19 38%, rgba(7,11,25,0.9) 58%, rgba(7,11,25,0.15) 85%, rgba(7,11,25,0) 100%)",
-          zIndex: 2,
-          pointerEvents: "none",
+          background: isMobile 
+            ? `linear-gradient(90deg, #0A0D14 0%, #0A0D14 40%, color-mix(in srgb, #0A0D14 90%, transparent) 55%, transparent 100%)`
+            : `linear-gradient(90deg, #0A0D14 0%, #0A0D14 45%, color-mix(in srgb, #0A0D14 85%, transparent) 60%, transparent 100%)`
+        }}
+      />
+      
+      {/* SUBTLE GLOW OVERLAY */}
+      <div 
+        className="absolute top-0 left-0 bottom-0 w-1/2 z-[2] pointer-events-none opacity-30 mix-blend-screen transition-opacity duration-500 group-hover:opacity-50"
+        style={{
+          background: `radial-gradient(circle at 0% 50%, ${accentColor}, transparent 70%)`
         }}
       />
 
-      {/* ── DYNAMIC BRAND COLOR GLOW (Layer 2.5) ── */}
-      <div
-        style={{
-          position: "absolute",
-          top: "-50%",
-          left: "-20%",
-          width: "70%",
-          height: "200%",
-          background: `radial-gradient(circle, ${brand.color || "#00E5FF"}25 0%, transparent 65%)`,
-          pointerEvents: "none",
-          zIndex: 2,
-          animation: "glowPulse 4s infinite ease-in-out"
-        }}
-      />
+      {/* DISCLOSURE BADGE (Top Right, modern glass style) */}
+      <div className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/40 backdrop-blur-md border border-white/10 text-[8px] lg:text-[9px] font-bold text-white/80 uppercase tracking-widest">
+        <span>PUBLICIDAD</span>
+      </div>
 
-      {/* ── LEFT PANEL CONTENT: TEXT & CTA (Layer 3) ── */}
-      <div
-        style={{
-          width: isMobile ? "55%" : "52%",
-          height: "100%",
-          padding: isMobile ? "12px 14px" : "18px 24px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          position: "relative",
-          zIndex: 3,
-        }}
-      >
+      {/* CONTENT PANEL (Left Side) */}
+      <div className="relative z-10 h-full flex flex-col justify-center px-5 md:px-10 py-4 w-full md:w-3/5">
+        
         {/* Brand Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {brand.logoUrl ? (
-            <div
-              style={{
-                height: isMobile ? 26 : 34,
-                width: isMobile ? 26 : 34,
-                borderRadius: "50%",
-                border: `2px solid ${brand.color || "#00E5FF"}`,
-                boxShadow: `0 0 10px ${brand.color || "#00E5FF"}40`,
-                background: "#fff",
-                padding: "3px",
-                position: "relative",
-                overflow: "hidden",
-                flexShrink: 0,
-              }}
-            >
-              <Image src={brand.logoUrl} alt={brand.name} fill sizes="34px" style={{ objectFit: "contain", padding: "2px" }} />
-            </div>
-          ) : (
-            <div
-              style={{
-                width: isMobile ? 26 : 34,
-                height: isMobile ? 26 : 34,
-                borderRadius: "50%",
-                background: `linear-gradient(135deg, ${brand.color || "#00E5FF"} 0%, #070B19 100%)`,
-                border: `2px solid ${brand.color || "#00E5FF"}`,
-                boxShadow: `0 0 10px ${brand.color || "#00E5FF"}40`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#fff",
-                fontSize: isMobile ? "11px" : "13px",
-                fontWeight: 900,
-                flexShrink: 0,
-              }}
-            >
-              {brandInitial}
-            </div>
-          )}
+        <div className="flex items-center gap-3 mb-3 md:mb-4">
+          <div 
+            className="flex-shrink-0 flex items-center justify-center bg-white rounded-lg p-1 overflow-hidden shadow-lg"
+            style={{ 
+              width: isMobile ? 32 : 44, 
+              height: isMobile ? 32 : 44,
+              border: `1px solid color-mix(in srgb, ${accentColor} 30%, rgba(255,255,255,0.2))`
+            }}
+          >
+            {brand.logoUrl ? (
+              <div className="relative w-full h-full">
+                <Image src={brand.logoUrl} alt={brand.name} fill className="object-contain" />
+              </div>
+            ) : (
+              <span className="font-bebas text-lg" style={{ color: accentColor }}>{brandInitial}</span>
+            )}
+          </div>
           
-          <div>
-            <span style={{ fontSize: isMobile ? "11px" : "12.5px", fontWeight: 800, color: "rgba(255,255,255,0.95)", letterSpacing: "-0.2px" }}>
-              {brand.name}
-            </span>
+          <div className="flex flex-col">
+            <h3 className="text-white font-bebas tracking-wide text-xl md:text-3xl leading-none">
+              {brand.headline || brand.name}
+            </h3>
+            {brand.tagline && (
+              <p className="text-white/60 text-[10px] md:text-xs font-medium tracking-wide mt-0.5 max-w-[200px] md:max-w-xs truncate">
+                {brand.tagline}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Headline */}
-        <div style={{ margin: isMobile ? "4px 0" : "8px 0" }}>
-          <h3
-            style={{
-              color: "#fff",
-              fontSize: isMobile ? "15px" : isCompact ? "17px" : "20px",
-              fontWeight: 800,
-              margin: 0,
-              letterSpacing: "-0.3px",
-              lineHeight: 1.1,
-              fontFamily: "var(--font-display, 'Plus Jakarta Sans'), sans-serif",
-              textShadow: "0 2px 4px rgba(0,0,0,0.3)",
-            }}
-          >
-            {brand.headline || brand.name}
-          </h3>
-          {!isMobile && brand.tagline && (
-            <p
-              style={{
-                color: "rgba(255,255,255,0.65)",
-                fontSize: "11px",
-                lineHeight: 1.3,
-                margin: "4px 0 0 0",
-                fontWeight: 500,
-                display: "-webkit-box",
-                WebkitLineClamp: 1,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
-            >
-              {brand.tagline}
-            </p>
-          )}
-        </div>
-
-        {/* Footer: CTA Button & Pills */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "2px" }}>
+        {/* Action Row: CTA + Chips */}
+        <div className="flex items-center gap-3 md:gap-4 mt-auto md:mt-2">
+          {/* CTA Button */}
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCtaClick();
-            }}
-            style={{
-              background: "#ffffff",
-              color: "#070B19",
-              border: "none",
-              fontSize: isMobile ? "9.5px" : "11px",
-              fontWeight: 900,
-              letterSpacing: "0.8px",
-              textTransform: "uppercase",
-              padding: isMobile ? "6px 14px" : "8px 18px",
-              borderRadius: "999px",
-              cursor: "pointer",
-              boxShadow: "0 4px 10px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.2)",
-              transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-              flexShrink: 0,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.03)";
-              e.currentTarget.style.boxShadow = "0 6px 15px rgba(255,255,255,0.3), 0 3px 6px rgba(0,0,0,0.3)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "none";
-              e.currentTarget.style.boxShadow = "0 4px 10px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.2)";
-            }}
+            className="flex-shrink-0 text-black font-bold text-[9px] md:text-xs uppercase tracking-[0.1em] px-4 md:px-6 py-2 md:py-2.5 rounded-full shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] group-hover:scale-105 bg-white"
           >
             {ctaText}
           </button>
 
-          {!isMobile && (
-            <div style={{ display: "flex", gap: "4px" }}>
-              {chips.slice(0, 2).map((chip) => (
-                <span
-                  key={chip}
-                  style={{
-                    fontSize: "8.5px",
-                    fontWeight: 800,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                    color: brand.color || "#00E5FF",
-                    border: `1px solid ${brand.color ? `${brand.color}35` : "rgba(0, 229, 255, 0.2)"}`,
-                    borderRadius: "999px",
-                    padding: "3px 8px",
-                    background: brand.color ? `${brand.color}08` : "rgba(0, 229, 255, 0.05)",
-                  }}
-                >
-                  {chip}
-                </span>
-              ))}
-            </div>
-          )}
+          {/* Feature Chips (hidden on very small mobile) */}
+          <div className="hidden sm:flex items-center gap-2 overflow-hidden">
+            {chips.slice(0, 2).map(chip => (
+              <div 
+                key={chip} 
+                className="whitespace-nowrap px-2.5 py-1 text-[8px] md:text-[9px] font-bold uppercase tracking-widest rounded-md border backdrop-blur-sm"
+                style={{
+                  color: `color-mix(in srgb, ${accentColor} 80%, white)`,
+                  borderColor: `color-mix(in srgb, ${accentColor} 30%, transparent)`,
+                  backgroundColor: `color-mix(in srgb, ${accentColor} 10%, transparent)`
+                }}
+              >
+                {chip}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* ── RIGHT PANEL BADGE (Layer 4 - Placed absolute on top right of the whole card) ── */}
-      <div
-        style={{
-          position: "absolute",
-          top: isMobile ? "8px" : "10px",
-          right: isMobile ? "8px" : "12px",
-          zIndex: 4,
-          fontSize: isMobile ? "7.5px" : "8.5px",
-          fontWeight: 900,
-          letterSpacing: "0.8px",
-          color: "#FFF5CC",
-          background: "rgba(255, 179, 0, 0.12)",
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
-          border: "1px solid rgba(255, 179, 0, 0.35)",
-          borderRadius: "999px",
-          padding: isMobile ? "2px 7px" : "3.5px 10px",
-          textTransform: "uppercase",
-          boxShadow: "0 4px 12px rgba(255, 179, 0, 0.08)",
-          textShadow: "0 0 4px rgba(255, 179, 0, 0.2)",
-        }}
-      >
-        {badgeText}
       </div>
     </div>
   );
