@@ -14,6 +14,9 @@ export default function SponsorBadge({
   logoUrl,
   size = "sm"
 }: SponsorBadgeProps) {
+  // Desactivado a petición del usuario
+  return null;
+  
   const isSm = size === "sm";
   const h = isSm ? "18px" : "22px";
   const p = isSm ? "0 6px" : "0 8px";
@@ -31,7 +34,7 @@ export default function SponsorBadge({
     >
       {logoUrl ? (
         <div style={{ width: isSm ? 10 : 14, height: isSm ? 10 : 14, position: "relative" }}>
-          <Image src={logoUrl} alt={brandName} fill className="object-contain" />
+          <Image src={logoUrl as string} alt={brandName} fill className="object-contain" />
         </div>
       ) : (
         <div style={{ width: 6, height: 6, borderRadius: "50%", background: brandColor }} />
