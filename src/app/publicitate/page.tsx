@@ -1,14 +1,58 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+"use client";
 
-export const metadata: Metadata = {
-  title: "El Remate Ads — Publicidad para tu Marca",
-  description: "Conectá tu marca con miles de comercios uruguayos. Publicidad nativa dentro del catálogo mayorista más usado de Canelones.",
-};
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useBrands } from "@/hooks/useBrands";
+import { getActiveBrands } from "@/lib/brands";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 const WA_LINK = "https://wa.me/59899322325?text=Hola%2C%20quiero%20info%20sobre%20El%20Remate%20Ads";
 
+function useLiveAdStats() {
+  const [stats, setStats] = useState({ impressions: 0, brands: 0, ctr: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const snap = await getDocs(collection(db, "ads_impressions"));
+        let totalImp = 0;
+        let totalClicks = 0;
+        let brandCount = 0;
+        
+        snap.forEach(doc => {
+          const d = doc.data();
+          if (d.total) {
+            totalImp += Number(d.total);
+            totalClicks += Number(d.cta_clicks || 0);
+            brandCount++;
+          }
+        });
+        
+        setStats({
+          impressions: totalImp,
+          brands: brandCount,
+          ctr: totalImp > 0 ? (totalClicks / totalImp) * 100 : 0
+        });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  return { stats, loading };
+}
+
 export default function PublicitatePage() {
+  const { brands } = useBrands();
+  const activeBrands = getActiveBrands(brands);
+  const { stats, loading } = useLiveAdStats();
+
   return (
     <div className="min-h-screen bg-[#050914] text-white selection:bg-[#00E5FF]/30 overflow-x-hidden">
       {/* Navbar */}
@@ -88,18 +132,43 @@ export default function PublicitatePage() {
         <section className="mx-auto max-w-5xl px-6 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { value: "500+", label: "Comercios activos" },
+              { value: loading ? "..." : activeBrands.length, label: "Marcas Activas" },
               { value: "2.4K", label: "Productos en catálogo" },
-              { value: "15K+", label: "Visitas mensuales" },
-              { value: "98%", label: "Tasa de retención" },
+              { value: loading ? "..." : `${(stats.impressions / 1000).toFixed(1)}K+`, label: "Impresiones" },
+              { value: loading ? "..." : `${stats.ctr.toFixed(1)}%`, label: "CTR Promedio" },
             ].map((s, i) => (
-              <div key={i} className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center backdrop-blur-sm">
-                <p className="font-bebas text-3xl tracking-wider text-[#00E5FF] md:text-4xl">{s.value}</p>
+              <div key={i} className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center backdrop-blur-sm relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#00E5FF]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <p className="font-bebas text-3xl tracking-wider text-[#00E5FF] md:text-4xl animate-in fade-in zoom-in duration-500">{s.value}</p>
                 <p className="mt-1 text-xs text-gray-500 uppercase tracking-wider">{s.label}</p>
               </div>
             ))}
           </div>
         </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            NUESTRAS MARCAS ACTIVAS
+        ═══════════════════════════════════════════════════════════════════ */}
+        {activeBrands.length > 0 && (
+          <section className="mx-auto max-w-7xl px-6 py-12 border-y border-white/5 bg-white/[0.01]">
+            <div className="text-center mb-8">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-gray-500">Nuestras Marcas Activas</p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-6 items-center">
+              {activeBrands.map(brand => (
+                <div key={brand.id} className="relative w-20 h-20 bg-white rounded-2xl p-2 grayscale hover:grayscale-0 hover:scale-110 transition-all duration-300 shadow-lg">
+                  {brand.logo ? (
+                    <Image src={brand.logo} alt={brand.name} fill className="object-contain p-2" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-3xl font-bebas text-black" style={{ color: brand.color || "#000" }}>
+                      {brand.name.charAt(0)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ═══════════════════════════════════════════════════════════════════
             BENEFICIOS — Cards with hover glow

@@ -133,6 +133,39 @@ export default function SponsoredBanner({
         }
       }}
     >
+      <style>{`
+        @keyframes glowPulse {
+          0% { opacity: 0.6; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.05); }
+          100% { opacity: 0.6; transform: scale(1); }
+        }
+      `}</style>
+      
+      {/* ── TOP-LEFT PATROCINADO DISCLOSURE ── */}
+      <div
+        style={{
+          position: "absolute",
+          top: "12px",
+          left: "14px",
+          zIndex: 4,
+          fontSize: "8px",
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: "1px",
+          color: "rgba(255,255,255,0.6)",
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
+          background: "rgba(0,0,0,0.3)",
+          padding: "3px 8px",
+          borderRadius: "6px",
+          backdropFilter: "blur(4px)",
+          border: "1px solid rgba(255,255,255,0.1)"
+        }}
+      >
+        <span style={{ fontSize: "10px" }}>📢</span> PUBLICIDAD
+      </div>
+
       {/* ── BACKGROUND BRAND COMMERCIAL IMAGE (Layer 1) ── */}
       <div
         style={{
@@ -152,7 +185,15 @@ export default function SponsoredBanner({
             sizes={isMobile ? "60vw" : "50vw"}
             style={{ objectFit: "cover", objectPosition: "center" }}
           />
-        ) : null}
+        ) : (
+          <div style={{ 
+            width: "100%", 
+            height: "100%", 
+            background: `linear-gradient(135deg, ${brand.color || '#D62828'} 0%, #1A1410 100%)`, 
+            opacity: 0.8,
+            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px)`
+          }} />
+        )}
       </div>
 
       {/* ── CINEMATIC SMOOTH GRADIENT OVERLAY (Layer 2) ── */}
@@ -176,9 +217,10 @@ export default function SponsoredBanner({
           left: "-20%",
           width: "70%",
           height: "200%",
-          background: `radial-gradient(circle, ${brand.color || "#00E5FF"}12 0%, transparent 65%)`,
+          background: `radial-gradient(circle, ${brand.color || "#00E5FF"}25 0%, transparent 65%)`,
           pointerEvents: "none",
           zIndex: 2,
+          animation: "glowPulse 4s infinite ease-in-out"
         }}
       />
 

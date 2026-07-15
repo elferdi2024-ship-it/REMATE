@@ -1,18 +1,45 @@
 // filepath: src/app/admin/publicidad/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PublicidadAdmin from "@/components/admin/PublicidadAdmin";
 import PublicidadStatsAdmin from "@/components/admin/PublicidadStatsAdmin";
 import MarketingRailAdmin from "@/components/admin/MarketingRailAdmin";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import type { BrandConfig } from "@/types/brands";
+import Link from "next/link";
 
 export default function PublicidadPage() {
-  const [activeTab, setActiveTab] = useState<"stats" | "config" | "marketing">("stats");
+  const [activeTab, setActiveTab] = useState<"stats" | "config" | "marketing" | "reportes">("stats");
+  const [brands, setBrands] = useState<BrandConfig[]>([]);
+
+  useEffect(() => {
+    // Only load params if we switch to reportes or to get it ready
+    const loadBrands = async () => {
+      const snap = await getDoc(doc(db, "configuracion", "publicidad"));
+      if(snap.exists()) {
+        setBrands(snap.data().brands || []);
+      }
+    };
+    loadBrands();
+  }, []);
+
+  // Listen to URL params for tab=reportes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("tab") === "reportes") {
+        setActiveTab("reportes");
+      }
+    }
+  }, []);
 
   const tabs = [
     { key: "stats" as const, label: "Dashboard" },
     { key: "config" as const, label: "Marcas" },
     { key: "marketing" as const, label: "Tarjetas Marketing" },
+    { key: "reportes" as const, label: "Reportes B2B" },
   ];
 
   return (
@@ -39,6 +66,31 @@ export default function PublicidadPage() {
         {activeTab === "stats" && <PublicidadStatsAdmin />}
         {activeTab === "config" && <PublicidadAdmin />}
         {activeTab === "marketing" && <MarketingRailAdmin />}
+        {activeTab === "reportes" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {brands.map(brand => (
+              <div key={brand.id} className="bg-[var(--admin-card-bg)] border border-[var(--admin-border)] rounded-xl p-6 flex flex-col gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center text-white text-xl font-bold" style={{ backgroundColor: brand.color || "#D62828" }}>
+                    {brand.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="text-[var(--admin-text-hi)] font-bebas tracking-wide text-xl">{brand.name}</h3>
+                    <span className="text-[10px] uppercase font-bold text-[var(--admin-text-lo)]">Tier {brand.tier}</span>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <Link href={`/admin/publicidad/reporte/${brand.id}`} target="_blank" className="flex-1 bg-[var(--admin-accent)]/10 text-[var(--admin-accent)] border border-[var(--admin-accent)]/20 py-2 rounded-lg text-center text-xs font-bold hover:bg-[var(--admin-accent)] hover:text-white transition-colors">
+                    Ver Reporte de Impacto
+                  </Link>
+                </div>
+              </div>
+            ))}
+            {brands.length === 0 && (
+              <div className="col-span-full py-10 text-center text-[var(--admin-text-lo)]">Cargando marcas o no hay marcas configuradas...</div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

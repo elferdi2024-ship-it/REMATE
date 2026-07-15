@@ -17,7 +17,15 @@ interface BrandShowcaseProps {
  * Auto-rotates between brands every 5 seconds.
  */
 export default function BrandShowcase({ brands }: BrandShowcaseProps) {
-  const activeBrands = useMemo(() => getActiveBrands(brands), [brands]);
+  const activeBrands = useMemo(() => {
+    const now = new Date();
+    return brands.filter((b) => {
+      if (!b.active) return false;
+      if (b.startAt && new Date(b.startAt) > now) return false;
+      if (b.expiresAt && new Date(b.expiresAt) < now) return false;
+      return true;
+    });
+  }, [brands]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -156,17 +164,21 @@ export default function BrandShowcase({ brands }: BrandShowcaseProps) {
             }}
           >
             {/* Hero image (large) */}
-            {heroImage && (
-              <div
-                style={{
-                  position: "relative",
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  gridRow: gridImages.length > 0 ? "span 2" : undefined,
-                  minHeight: "280px",
-                  background: "#1a1714",
-                }}
-              >
+            <div
+              style={{
+                position: "relative",
+                borderRadius: "16px",
+                overflow: "hidden",
+                gridRow: gridImages.length > 0 ? "span 2" : undefined,
+                minHeight: "280px",
+                background: heroImage ? "#1a1714" : `linear-gradient(135deg, ${currentBrand.color || '#D62828'} 0%, #1A1410 100%)`,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {heroImage ? (
                 <Image
                   src={heroImage.src}
                   alt={heroImage.alt}
@@ -175,7 +187,47 @@ export default function BrandShowcase({ brands }: BrandShowcaseProps) {
                   style={{ objectFit: "cover" }}
                   loading="lazy"
                 />
-                {/* Brand badge overlay */}
+              ) : (
+                <div style={{ textAlign: "center", padding: "40px", position: "relative", zIndex: 10 }}>
+                   {currentBrand.logo ? (
+                      <div style={{ position: "relative", width: "80px", height: "80px", borderRadius: "16px", background: "#fff", margin: "0 auto 16px", padding: "8px", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
+                        <Image src={currentBrand.logo} alt={currentBrand.name} fill style={{ objectFit: "contain", padding: "8px" }} />
+                      </div>
+                   ) : (
+                      <div style={{ width: "80px", height: "80px", borderRadius: "16px", background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "40px", fontWeight: "bold", margin: "0 auto 16px", border: "1px solid rgba(255,255,255,0.2)" }}>
+                        {currentBrand.name.charAt(0).toUpperCase()}
+                      </div>
+                   )}
+                   <h3 style={{ fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif", fontSize: "2.5rem", color: "#fff", letterSpacing: "2px", margin: "0 0 8px 0", lineHeight: 1, textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}>
+                     {currentBrand.headline || currentBrand.name}
+                   </h3>
+                   {currentBrand.tagline && (
+                     <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "1rem", margin: "0 0 24px 0", fontWeight: 500 }}>
+                       {currentBrand.tagline}
+                     </p>
+                   )}
+                   <a
+                     href={`/catalogo?search=${encodeURIComponent(currentBrand.name)}`}
+                     style={{
+                       background: "#fff",
+                       color: "#1A1410",
+                       border: "none",
+                       borderRadius: "30px",
+                       padding: "10px 24px",
+                       fontFamily: "var(--font-display, 'Bebas Neue'), sans-serif",
+                       fontSize: "1.1rem",
+                       letterSpacing: "1px",
+                       cursor: "pointer",
+                       transition: "transform 0.2s",
+                       display: "inline-block",
+                       textDecoration: "none",
+                     }}
+                   >
+                     VER PRODUCTOS →
+                   </a>
+                </div>
+              )}
+              {/* Brand badge overlay */}
                 <div
                   style={{
                     position: "absolute",
@@ -212,7 +264,6 @@ export default function BrandShowcase({ brands }: BrandShowcaseProps) {
                   </span>
                 </div>
               </div>
-            )}
 
             {/* Grid of smaller images */}
             {gridImages.map((img) => (

@@ -254,11 +254,26 @@ export default function PublicidadStatsAdmin() {
               </div>
 
               {/* Footer de Card */}
-              <div className="mt-6 pt-4 border-t border-[var(--admin-border)] text-[10px] text-[var(--admin-text-lo)] flex justify-between z-10">
-                <span>Último impacto:</span>
-                <span className="text-[var(--admin-text-hi)] font-medium">
-                  {s.lastSeen ? formatDistanceToNow(new Date(s.lastSeen), { addSuffix: true, locale: es }) : "Nunca"}
-                </span>
+              <div className="mt-6 pt-4 border-t border-[var(--admin-border)] flex flex-col gap-3 z-10">
+                <div className="text-[10px] text-[var(--admin-text-lo)] flex justify-between">
+                  <span>Último impacto:</span>
+                  <span className="text-[var(--admin-text-hi)] font-medium">
+                    {s.lastSeen ? formatDistanceToNow(new Date(s.lastSeen), { addSuffix: true, locale: es }) : "Nunca"}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <a href={`/admin/publicidad/reporte/${s.brandId}`} target="_blank" rel="noopener noreferrer" className="flex-1 bg-[var(--admin-accent)]/10 text-[var(--admin-accent)] border border-[var(--admin-accent)]/20 py-2 rounded-lg text-center text-xs font-bold hover:bg-[var(--admin-accent)] hover:text-white transition-colors">
+                    📤 Ver Reporte
+                  </a>
+                  <button onClick={() => {
+                    const win = window.open(`/admin/publicidad/reporte/${s.brandId}`, '_blank');
+                    if(win) {
+                       win.onload = () => { setTimeout(() => win.print(), 1000); };
+                    }
+                  }} className="flex-1 bg-[var(--admin-input-bg)] text-[var(--admin-text-hi)] border border-[var(--admin-border)] py-2 rounded-lg text-center text-xs font-bold hover:bg-[var(--admin-border)] transition-colors">
+                    🖨️ Imprimir
+                  </button>
+                </div>
               </div>
             </div>
           );
