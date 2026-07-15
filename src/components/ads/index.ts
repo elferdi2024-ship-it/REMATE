@@ -11,3 +11,4 @@ export { default as FlashDealCard } from "./FlashDealCard";
 export { default as AdSlotPlacement } from "./AdSlotPlacement";
 export { default as BrandHeroCarousel } from "./BrandHeroCarousel";
 export { default as SponsorBadge } from "./SponsorBadge";
+export { default as CustomHeroCarousel } from "./CustomHeroCarousel";

@@ -64,7 +64,7 @@ const catMap = (categoriaMapping as any).mapping || categoriaMapping;
 
 import { flyToCart } from "@/lib/flyToCart";
 import DesktopCategorySidebar from "@/components/catalogo/DesktopCategorySidebar";
-import { BrandHeroCarousel } from "@/components/ads";
+import { BrandHeroCarousel, CustomHeroCarousel } from "@/components/ads";
 
 interface CatalogoPageClientProps {
   // In the future we can pass pre-loaded products from server
@@ -1581,7 +1581,11 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
       <div className="page-wrapper">
         <div className="mb-4 mt-2">
-          <BrandHeroCarousel brands={activeBrands} />
+          {ofertasConfig?.mainCarousel && ofertasConfig.mainCarousel.filter(s => s.activo).length > 0 ? (
+            <CustomHeroCarousel slides={ofertasConfig.mainCarousel.filter(s => s.activo)} />
+          ) : (
+            <BrandHeroCarousel brands={activeBrands} />
+          )}
         </div>
         <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
         {ofertasConfig?.brandBanners && (

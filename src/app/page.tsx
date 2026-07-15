@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
-import { BrandStrip, BrandShowcase, NativeStoryCard, BrandHeroCarousel } from "@/components/ads";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { BrandStrip, BrandShowcase, NativeStoryCard, BrandHeroCarousel, CustomHeroCarousel } from "@/components/ads";
+import type { OfertaConfig } from "@/types/ofertas";
 import { useBrands } from "@/hooks/useBrands";
 import { SUCURSALES } from "@/lib/sucursales";
 import * as ls from "@/lib/ls";
@@ -53,6 +54,16 @@ export default function LandingPage() {
   const { brands } = useBrands();
   const activePremiumBrands = brands.filter(b => b.active && ["oro", "plata"].includes(b.tier));
   const { items: cartItems, clearCart, totalQty } = useCart();
+  const [ofertasConfig, setOfertasConfig] = useState<OfertaConfig | null>(null);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "configuracion", "ofertas"), (docSnap) => {
+      if (docSnap.exists()) {
+        setOfertasConfig(docSnap.data() as OfertaConfig);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   const handleSelectSucursal = (id: string) => {
     const sucursal = SUCURSALES.find(s => s.id === id);
@@ -155,11 +166,15 @@ export default function LandingPage() {
       </section>
 
       {/* Brand Hero Carousel */}
-      {activePremiumBrands.length > 0 && (
+      {ofertasConfig?.mainCarousel && ofertasConfig.mainCarousel.filter(s => s.activo).length > 0 ? (
+        <section className="pb-6 px-5 max-w-[1200px] mx-auto">
+          <CustomHeroCarousel slides={ofertasConfig.mainCarousel.filter(s => s.activo)} />
+        </section>
+      ) : activePremiumBrands.length > 0 ? (
         <section className="pb-6 px-5 max-w-[1200px] mx-auto">
           <BrandHeroCarousel brands={activePremiumBrands} />
         </section>
-      )}
+      ) : null}
 
       {/* Brand Strip (Ads) */}
       <BrandStrip brands={brands} title="Marcas que nos acompañan" dark />

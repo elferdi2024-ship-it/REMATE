@@ -17,9 +17,10 @@ import type {
   SponsoredProduct,
   CategoryOffer,
   FlashOffer,
+  CarouselSlide,
 } from "@/types/ofertas";
 import { useBrands } from "@/hooks/useBrands";
-import { BrandHeroCarousel, SponsoredBanner, SponsorBadge } from "@/components/ads";
+import { BrandHeroCarousel, SponsoredBanner, SponsorBadge, CustomHeroCarousel } from "@/components/ads";
 import { ProductoCard } from "@/components/catalogo";
 
 const DEFAULT_CONFIG: OfertaConfig = {
@@ -117,6 +118,16 @@ export default function OfertasAdmin() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const loadedRef = useRef(false);
+  // ── Main Carousel state ─────────────────────────────────────────────────
+  const [mcTitulo, setMcTitulo] = useState("");
+  const [mcSubtitulo, setMcSubtitulo] = useState("");
+  const [mcImagenDesktop, setMcImagenDesktop] = useState("");
+  const [mcImagenMobile, setMcImagenMobile] = useState("");
+  const [mcCtaTexto, setMcCtaTexto] = useState("");
+  const [mcCtaLink, setMcCtaLink] = useState("");
+  const [mcColorAccent, setMcColorAccent] = useState("#D62828");
+  const [mcUploading, setMcUploading] = useState(false);
+  const [mcUploadProgress, setMcUploadProgress] = useState(0);
 
   // ── Brand Banners state ─────────────────────────────────────────────────
   const [bbMarca, setBbMarca] = useState("");
@@ -481,6 +492,75 @@ export default function OfertasAdmin() {
         p.id === id ? { ...p, activa: !p.activa } : p
       ),
     }));
+  }, []);
+
+  // ── Main Carousel handlers ────────────────────────────────────────────────
+  const handleUploadMcImageDesktop = useCallback(
+    (file: File) => uploadGenericImage(file, "main-carousel-desktop", setMcUploadProgress, setMcImagenDesktop, setMcUploading),
+    [uploadGenericImage]
+  );
+  
+  const handleUploadMcImageMobile = useCallback(
+    (file: File) => uploadGenericImage(file, "main-carousel-mobile", setMcUploadProgress, setMcImagenMobile, setMcUploading),
+    [uploadGenericImage]
+  );
+
+  const handleAddMainCarousel = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mcImagenDesktop) {
+      toastError("Debes subir una imagen para el carrusel.");
+      return;
+    }
+    const newSlide: CarouselSlide = {
+      id: "mc_" + Date.now().toString(),
+      titulo: mcTitulo,
+      subtitulo: mcSubtitulo,
+      imagenDesktop: mcImagenDesktop,
+      imagenMobile: mcImagenMobile,
+      ctaTexto: mcCtaTexto,
+      ctaLink: mcCtaLink,
+      colorAccent: mcColorAccent,
+      activo: true,
+      orden: (config.mainCarousel?.length || 0) + 1,
+    };
+    setConfig((prev) => ({
+      ...prev,
+      mainCarousel: [...(prev.mainCarousel || []), newSlide],
+    }));
+    setMcTitulo("");
+    setMcSubtitulo("");
+    setMcImagenDesktop("");
+    setMcImagenMobile("");
+    setMcCtaTexto("");
+    setMcCtaLink("");
+  }, [mcTitulo, mcSubtitulo, mcImagenDesktop, mcImagenMobile, mcCtaTexto, mcCtaLink, mcColorAccent, config.mainCarousel, toastError]);
+
+  const handleRemoveMainCarousel = useCallback((id: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      mainCarousel: prev.mainCarousel?.filter((c) => c.id !== id),
+    }));
+  }, []);
+
+  const handleToggleMainCarousel = useCallback((id: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      mainCarousel: prev.mainCarousel?.map((c) =>
+        c.id === id ? { ...c, activo: !c.activo } : c
+      ),
+    }));
+  }, []);
+
+  const handleMoveMainCarousel = useCallback((index: number, direction: 'up' | 'down') => {
+    setConfig((prev) => {
+      const arr = [...(prev.mainCarousel || [])];
+      if (direction === 'up' && index > 0) {
+        [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+      } else if (direction === 'down' && index < arr.length - 1) {
+        [arr[index + 1], arr[index]] = [arr[index], arr[index + 1]];
+      }
+      return { ...prev, mainCarousel: arr };
+    });
   }, []);
 
   // ── Brand Banner handlers ───────────────────────────────────────────────
@@ -1102,6 +1182,191 @@ export default function OfertasAdmin() {
           </div>
         )}
       </div>
+      {/* ================================================================== */}
+      {/* SECTION -1: 🎡 CARRUSEL PRINCIPAL (CUSTOM HERO)                    */}
+      {/* ================================================================== */}
+      <CollapsibleSection
+        icon="🎡"
+        title="Carrusel Principal (Custom Hero)"
+        subtitle="Carga banners personalizados para la portada (independiente de las marcas)"
+      >
+        <div className="bg-[#f5f2ee] p-4 rounded-xl border border-dashed border-[#D62828]/30 mb-6">
+          <h3 className="font-bold text-sm text-[var(--admin-text-hi)] mb-3">Agregar Nuevo Banner al Carrusel</h3>
+          <form onSubmit={handleAddMainCarousel} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL_CLS}>Imagen Desktop (1920x600 aprox)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={mcImagenDesktop}
+                    onChange={(e) => setMcImagenDesktop(e.target.value)}
+                    placeholder="URL de imagen desktop..."
+                    className={INPUT_CLS}
+                  />
+                  <label className="bg-gray-200 px-4 py-2 rounded-xl cursor-pointer hover:bg-gray-300 flex items-center justify-center flex-shrink-0">
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files && handleUploadMcImageDesktop(e.target.files[0])} />
+                    🖼️
+                  </label>
+                </div>
+              </div>
+              
+              <div>
+                <label className={LABEL_CLS}>Imagen Mobile (1080x1080 aprox) - Opcional</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={mcImagenMobile}
+                    onChange={(e) => setMcImagenMobile(e.target.value)}
+                    placeholder="URL de imagen mobile..."
+                    className={INPUT_CLS}
+                  />
+                  <label className="bg-gray-200 px-4 py-2 rounded-xl cursor-pointer hover:bg-gray-300 flex items-center justify-center flex-shrink-0">
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files && handleUploadMcImageMobile(e.target.files[0])} />
+                    📱
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className={LABEL_CLS}>Título Principal</label>
+                <input
+                  type="text"
+                  value={mcTitulo}
+                  onChange={(e) => setMcTitulo(e.target.value)}
+                  placeholder="Gran Promoción..."
+                  className={INPUT_CLS}
+                />
+              </div>
+
+              <div>
+                <label className={LABEL_CLS}>Subtítulo / Bajada</label>
+                <input
+                  type="text"
+                  value={mcSubtitulo}
+                  onChange={(e) => setMcSubtitulo(e.target.value)}
+                  placeholder="Hasta agotar stock..."
+                  className={INPUT_CLS}
+                />
+              </div>
+
+              <div>
+                <label className={LABEL_CLS}>Texto Botón (CTA)</label>
+                <input
+                  type="text"
+                  value={mcCtaTexto}
+                  onChange={(e) => setMcCtaTexto(e.target.value)}
+                  placeholder="VER PRODUCTOS"
+                  className={INPUT_CLS}
+                />
+              </div>
+
+              <div>
+                <label className={LABEL_CLS}>Enlace Destino (URL)</label>
+                <input
+                  type="text"
+                  value={mcCtaLink}
+                  onChange={(e) => setMcCtaLink(e.target.value)}
+                  placeholder="/catalogo?search=promo"
+                  className={INPUT_CLS}
+                />
+              </div>
+
+              <div>
+                <label className={LABEL_CLS}>Color Accent (Gradiente / Botón)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={mcColorAccent}
+                    onChange={(e) => setMcColorAccent(e.target.value)}
+                    className="w-10 h-10 rounded overflow-hidden cursor-pointer shrink-0 border-0 p-0"
+                  />
+                  <input
+                    type="text"
+                    value={mcColorAccent}
+                    onChange={(e) => setMcColorAccent(e.target.value)}
+                    className={INPUT_CLS}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {mcUploading && (
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div className="bg-green-500 h-2 rounded-full transition-all" style={{ width: `${mcUploadProgress}%` }} />
+              </div>
+            )}
+
+            <button type="submit" className="w-full bg-[var(--admin-accent)] text-white font-bold py-3 rounded-xl mt-4 hover:bg-[var(--admin-accent)]/90 transition-colors">
+              ➕ AGREGAR AL CARRUSEL
+            </button>
+          </form>
+        </div>
+
+        {/* Live Preview of the single item being created */}
+        {(mcTitulo || mcImagenDesktop || mcCtaTexto) && (
+           <div className="mb-6">
+             <h4 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">Live Preview (Banner en creación)</h4>
+             <div className="pointer-events-none rounded-xl overflow-hidden border border-gray-200">
+               <CustomHeroCarousel slides={[{
+                 id: "preview",
+                 titulo: mcTitulo || "TÍTULO DE PRUEBA",
+                 subtitulo: mcSubtitulo || "Subtítulo de prueba...",
+                 imagenDesktop: mcImagenDesktop,
+                 imagenMobile: mcImagenMobile,
+                 ctaTexto: mcCtaTexto || "VER AHORA",
+                 ctaLink: mcCtaLink || "#",
+                 colorAccent: mcColorAccent,
+                 activo: true,
+                 orden: 1
+               }]} />
+             </div>
+           </div>
+        )}
+
+        {/* List of active slides */}
+        {config.mainCarousel && config.mainCarousel.length > 0 && (
+          <div className="mt-8">
+            <h4 className="text-sm font-bold text-[var(--admin-text-hi)] mb-4">Banners Cargados ({config.mainCarousel.length})</h4>
+            
+            {/* Live Preview of entire carousel */}
+            <div className="mb-6 border-4 border-gray-100 rounded-2xl overflow-hidden shadow-sm pointer-events-none relative">
+              <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded z-50">Vista Completa</div>
+              <CustomHeroCarousel slides={config.mainCarousel.filter(s => s.activo)} />
+            </div>
+
+            <div className="space-y-3">
+              {config.mainCarousel.map((slide, i) => (
+                <div key={slide.id} className={`flex items-center gap-4 bg-white p-3 rounded-xl border ${slide.activo ? 'border-gray-200' : 'border-red-100 opacity-60'}`}>
+                   <div className="flex flex-col gap-1">
+                      <button type="button" onClick={() => handleMoveMainCarousel(i, 'up')} disabled={i === 0} className="p-1 text-gray-400 hover:text-black disabled:opacity-30">▲</button>
+                      <button type="button" onClick={() => handleMoveMainCarousel(i, 'down')} disabled={i === config.mainCarousel!.length - 1} className="p-1 text-gray-400 hover:text-black disabled:opacity-30">▼</button>
+                   </div>
+                   <div className="w-24 h-16 bg-gray-100 rounded flex-shrink-0 relative overflow-hidden flex items-center justify-center">
+                     {slide.imagenDesktop ? (
+                       <img src={slide.imagenDesktop} alt="" className="object-cover w-full h-full" />
+                     ) : (
+                       <div className="w-full h-full" style={{ background: slide.colorAccent }} />
+                     )}
+                   </div>
+                   <div className="flex-1 min-w-0">
+                     <div className="font-bold text-sm truncate">{slide.titulo || "(Sin título)"}</div>
+                     <div className="text-xs text-gray-500 truncate">{slide.ctaLink || "Sin enlace"}</div>
+                   </div>
+                   <div className="flex items-center gap-2">
+                     <button type="button" onClick={() => handleToggleMainCarousel(slide.id)} className={`px-3 py-1.5 text-xs font-bold rounded-lg ${slide.activo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                       {slide.activo ? 'ACTIVO' : 'PAUSADO'}
+                     </button>
+                     <button type="button" onClick={() => handleRemoveMainCarousel(slide.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                       🗑️
+                     </button>
+                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </CollapsibleSection>
 
       {/* ================================================================== */}
       {/* SECTION 0: 🌟 BRAND HERO CAROUSEL (LIVE PREVIEW)                   */}

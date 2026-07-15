@@ -19,6 +19,19 @@ export interface PremiumPromo {
   sucursalId?: string | null;
 }
 
+export interface CarouselSlide {
+  id: string;
+  titulo: string;
+  subtitulo: string;
+  imagenDesktop: string;
+  imagenMobile: string;
+  ctaTexto: string;
+  ctaLink: string;
+  colorAccent: string;
+  activo: boolean;
+  orden: number;
+}
+
 /** Banner publicitario de marca — espacio premium full-width */
 export interface BrandBanner {
   id: string;
@@ -81,6 +94,7 @@ export interface OfertaConfig {
   titulo: string;
   subtitulo: string;
   productos: OfertaProducto[];
+  mainCarousel?: CarouselSlide[];
   premiumPromos?: PremiumPromo[];
   brandBanners?: BrandBanner[];
   sponsoredProducts?: SponsoredProduct[];
