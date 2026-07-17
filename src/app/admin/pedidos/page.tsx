@@ -23,7 +23,7 @@ export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<PedidoAdmin[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("todos");
+  const [statusFilter, setStatusFilter] = useState<string>("cargado");
   const [onlyFresh, setOnlyFresh] = useState(false);
   const [bulkUpdating, setBulkUpdating] = useState(false);
   const [deliveryFilter, setDeliveryFilter] = useState<"todos" | "envio" | "retiro">("todos");
@@ -287,7 +287,6 @@ export default function PedidosPage() {
       <div className="sticky top-0 z-20 -mx-4 overflow-x-auto bg-[var(--admin-bg)]/85 px-4 py-4 backdrop-blur-md md:static md:mx-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
         <div className="flex flex-nowrap gap-2 md:flex-wrap">
           {[
-            { id: "todos", label: "Todos", count: counts.todos, color: "gray" },
             { id: "no_leido", label: "No leídos", count: counts.no_leido, color: "red" },
             { id: "pendiente", label: "Pendientes", count: counts.pendiente, color: "yellow" },
             { id: "cargado", label: "Cargados", count: counts.cargado, color: "green" },

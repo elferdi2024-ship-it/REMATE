@@ -470,36 +470,7 @@ export default function StatsView() {
         </div>
       </div>
 
-      {/* Top Productos */}
-      <div className="rounded-3xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 sm:p-6 shadow-xl">
-        <h3 className="mb-4 font-bebas text-xl sm:text-2xl tracking-widest text-[var(--admin-text-hi)] uppercase">Top 5 Productos más Vendidos</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-[var(--admin-text-lo)] min-w-[500px]">
-            <thead className="border-b border-[var(--admin-border)] text-[9px] uppercase tracking-widest font-bold">
-              <tr>
-                <th className="pb-3">#</th>
-                <th className="pb-3">Producto</th>
-                <th className="pb-3 text-center">Unidades</th>
-                <th className="pb-3 text-right">Facturación Estimada</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--admin-border)]">
-              {metrics.topProductos.map((p, idx) => (
-                <tr key={idx} className="hover:bg-[var(--admin-input-bg)]/20 transition-colors">
-                  <td className="py-3">
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--admin-bg)] border border-[var(--admin-border)] text-[10px] font-bold text-[var(--admin-text-hi)]">
-                      {idx + 1}
-                    </span>
-                  </td>
-                  <td className="py-3 font-bold text-[var(--admin-text-hi)] uppercase text-xs">{p.nombre}</td>
-                  <td className="py-3 text-center font-bold text-[var(--admin-text-mid)]">{p.cantidad}</td>
-                  <td className="py-3 text-right font-extrabold text-green-600 dark:text-green-400">{formatCurrency(p.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+
 
       {/* Proyecciones de Crecimiento Interactivas (Esperanzadoras!) */}
       <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-[var(--admin-card-bg)] to-transparent p-5 sm:p-6 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
