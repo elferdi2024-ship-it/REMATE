@@ -131,18 +131,21 @@ export async function GET(req: NextRequest) {
       const esMayorista = i % 3 === 0;
       const cliente = esMayorista ? randomItem(CLIENTES_MAYORISTAS) : randomItem(CLIENTES_MINORISTAS);
 
-      // Priorizar Canelones asignándola al 45% de los pedidos
+      // Priorizar Canelones asignándola al 65% de los pedidos para asegurar su liderazgo indiscutido
       let sucursalId = cliente.sucursalId;
-      if (Math.random() < 0.45) {
+      if (Math.random() < 0.65) {
         sucursalId = "canelones";
       }
 
       // Armar ítems del pedido
       const items = [];
       
-      // Forzar Yerba Canarias (Top 1) en el 80% de los pedidos
-      if (Math.random() < 0.80) {
-        const cantCanarias = esMayorista ? randomInt(12, 60) : randomInt(1, 4);
+      // Forzar Yerba Canarias (Top 1) en el 85% de los pedidos
+      if (Math.random() < 0.85) {
+        let cantCanarias = esMayorista ? randomInt(12, 60) : randomInt(1, 4);
+        if (sucursalId === "canelones" && esMayorista) {
+          cantCanarias = Math.round(cantCanarias * 1.5); // Más volumen de yerba en Canelones
+        }
         items.push({
           codigo: "7730124002903",
           nombre: "Yerba Canarias Tradicional 1kg",
@@ -157,7 +160,10 @@ export async function GET(req: NextRequest) {
       const itemsElegidos = pickRandomItems(pool, cantItemsAdicionales);
 
       itemsElegidos.forEach(p => {
-        const cantidad = esMayorista ? randomInt(6, 30) : randomInt(1, 3);
+        let cantidad = esMayorista ? randomInt(6, 30) : randomInt(1, 3);
+        if (sucursalId === "canelones" && esMayorista) {
+          cantidad = Math.round(cantidad * 1.3); // Incrementar volumen de reventa en Canelones
+        }
         const precioUnitario = esMayorista ? Math.round(p.precioUnitario * 0.85) : p.precioUnitario;
         items.push({
           codigo: p.codigo,
