@@ -49,11 +49,11 @@ export default function SponsoredProductsRail({ products = [] }: SponsoredProduc
         <h3
           style={{
             margin: 0,
-            fontSize: "1.2rem",
-            fontWeight: 900,
+            fontSize: "1.15rem",
+            fontWeight: 800,
             textTransform: "uppercase",
-            letterSpacing: "1.5px",
-            color: "var(--oscuro, #ffffff)",
+            letterSpacing: "1px",
+            color: "var(--texto, #111)",
             fontFamily: "var(--font-display)",
           }}
         >
@@ -79,17 +79,21 @@ export default function SponsoredProductsRail({ products = [] }: SponsoredProduc
           return (
             <div
               key={p.id}
+              className="card hover-lift"
               style={{
                 minWidth: "170px",
                 maxWidth: "190px",
-                background: "linear-gradient(135deg, rgba(34,197,94,0.03), #1a1a1a)",
-                borderRadius: "14px",
-                border: "1px solid rgba(34,197,94,0.2)",
+                background: "var(--white, #ffffff)",
+                borderRadius: "var(--r-lg, 14px)",
+                border: "1.5px solid rgba(34, 197, 94, 0.25)",
                 padding: "14px",
                 flexShrink: 0,
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
+                boxShadow: "0 4px 12px rgba(34, 197, 94, 0.04), 0 2px 4px rgba(17, 11, 8, 0.02)",
+                cursor: "pointer",
+                transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
             >
               {/* Sponsor Badge */}
@@ -98,14 +102,16 @@ export default function SponsoredProductsRail({ products = [] }: SponsoredProduc
                   position: "absolute",
                   top: "8px",
                   right: "8px",
-                  background: "rgba(34,197,94,0.15)",
-                  border: "1px solid rgba(34,197,94,0.3)",
-                  color: "#22c55e",
+                  background: "rgba(34,197,94,0.1)",
+                  border: "1px solid rgba(34,197,94,0.25)",
+                  color: "#1A7A42",
                   padding: "2px 6px",
                   borderRadius: "6px",
-                  fontSize: "9px",
+                  fontSize: "8px",
                   fontWeight: 800,
                   textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  zIndex: 10,
                 }}
               >
                 {p.badgeTexto || "Patrocinado"}
@@ -114,37 +120,65 @@ export default function SponsoredProductsRail({ products = [] }: SponsoredProduc
               {/* Brand Name */}
               <p
                 style={{
-                  fontSize: "9px",
-                  fontWeight: 700,
-                  color: "rgba(255,255,255,0.3)",
+                  fontSize: "8px",
+                  fontWeight: 800,
+                  color: "var(--muted, #888078)",
                   textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  margin: "0 0 4px",
+                  letterSpacing: "0.8px",
+                  margin: "0 0 6px",
+                  fontFamily: "var(--font-body), sans-serif",
                 }}
               >
                 {p.marcaNombre}
               </p>
 
               {/* Product Image if available */}
-              {p.imagen && (
-                 <div style={{ width: "100%", height: "90px", position: "relative", marginBottom: "8px" }}>
-                   <Image src={p.imagen} alt={p.nombreProducto} fill sizes="(max-width: 768px) 150px, 200px" style={{ objectFit: "contain", borderRadius: "6px" }} />
+              {p.imagen ? (
+                 <div style={{ 
+                   width: "100%", 
+                   height: "100px", 
+                   position: "relative", 
+                   marginBottom: "10px",
+                   background: "linear-gradient(180deg, #ffffff 0%, #f9f8f6 100%)",
+                   borderRadius: "10px",
+                   border: "1px solid rgba(17,11,8,0.03)",
+                   display: "flex",
+                   alignItems: "center",
+                   justifyContent: "center",
+                   overflow: "hidden"
+                 }}>
+                   <Image src={p.imagen} alt={p.nombreProducto} fill sizes="(max-width: 768px) 150px, 200px" style={{ objectFit: "contain", padding: "6px" }} />
+                 </div>
+              ) : (
+                 <div style={{ 
+                   width: "100%", 
+                   height: "100px", 
+                   marginBottom: "10px",
+                   background: "linear-gradient(180deg, #ffffff 0%, #f9f8f6 100%)",
+                   borderRadius: "10px",
+                   border: "1px solid rgba(17,11,8,0.03)",
+                   display: "flex",
+                   alignItems: "center",
+                   justifyContent: "center"
+                 }}>
+                   <span style={{ fontSize: "2rem" }}>📦</span>
                  </div>
               )}
 
               {/* Product Name */}
               <h4
                 style={{
-                  fontSize: "12px",
-                  fontWeight: 800,
-                  color: "#fff",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  color: "var(--oscuro, #111)",
                   margin: "0 0 10px",
                   lineHeight: 1.3,
                   display: "-webkit-box",
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
-                  height: "32px",
+                  height: "2.6em",
+                  fontFamily: "var(--font-body), sans-serif",
                 }}
               >
                 {p.nombreProducto}
@@ -155,10 +189,11 @@ export default function SponsoredProductsRail({ products = [] }: SponsoredProduc
                 <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "12px", marginTop: "auto" }}>
                   <span
                     style={{
-                      fontSize: "18px",
-                      fontWeight: 900,
-                      color: "#22C55E",
+                      fontSize: "1.45rem",
+                      fontWeight: 800,
+                      color: "var(--rojo, #E8302A)",
                       fontFamily: "var(--font-display)",
+                      letterSpacing: "0.2px"
                     }}
                   >
                     ${finalPrice.toLocaleString("es-UY")}
@@ -166,9 +201,9 @@ export default function SponsoredProductsRail({ products = [] }: SponsoredProduc
                   {hasDiscount && (
                     <span
                       style={{
-                        fontSize: "11px",
-                        fontWeight: 600,
-                        color: "rgba(255,255,255,0.25)",
+                        fontSize: "0.85rem",
+                        fontWeight: 500,
+                        color: "var(--faint, #888078)",
                         textDecoration: "line-through",
                       }}
                     >
@@ -181,22 +216,23 @@ export default function SponsoredProductsRail({ products = [] }: SponsoredProduc
               {/* Add button */}
               {hasPrice ? (
                 <button
-                  onClick={() => handleAddToCart(p)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToCart(p);
+                  }}
                   disabled={addedMap[p.id]}
                   style={{
                     width: "100%",
-                    padding: "8px",
-                    borderRadius: "10px",
+                    padding: "9px",
+                    borderRadius: "12px",
                     border: "none",
-                    background: addedMap[p.id] ? "#22C55E" : "rgba(255,255,255,0.06)",
-                    borderStyle: addedMap[p.id] ? "none" : "solid",
-                    borderWidth: addedMap[p.id] ? 0 : "1px",
-                    borderColor: "rgba(255,255,255,0.15)",
+                    background: addedMap[p.id] ? "var(--verde, #1A7A42)" : "var(--oscuro, #1A1410)",
                     color: "#fff",
-                    fontSize: "12px",
+                    fontSize: "0.8rem",
                     fontWeight: 800,
                     cursor: "pointer",
-                    transition: "background 0.2s",
+                    transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                   }}
                 >
                   {addedMap[p.id] ? "✓ Agregado" : "Agregar"}
