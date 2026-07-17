@@ -82,9 +82,9 @@ export default function PublicidadStatsAdmin() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-[var(--admin-text-mid)]">
       {/* Header */}
-      <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+      <div className="flex flex-col items-stretch justify-between gap-6 md:flex-row md:items-center">
         <div>
-          <h1 className="font-bebas text-3xl tracking-widest text-[var(--admin-text-hi)]">
+          <h1 className="font-bebas text-2xl sm:text-3xl tracking-widest text-[var(--admin-text-hi)]">
             RENDIMIENTO DE <span className="text-[var(--admin-accent)]">PUBLICIDAD</span>
           </h1>
           <p className="text-[var(--admin-text-lo)] mt-1 text-sm">Estadísticas pro y estimaciones de retorno ROI B2B en vivo</p>
@@ -92,7 +92,7 @@ export default function PublicidadStatsAdmin() {
         
         <button
           onClick={exportCSV}
-          className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)]"
+          className="w-full md:w-auto text-center rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-[var(--admin-text-hi)] transition-all hover:bg-[var(--admin-input-bg)]"
         >
           Exportar Reporte Completo (CSV)
         </button>
@@ -100,22 +100,22 @@ export default function PublicidadStatsAdmin() {
 
       {/* Global Stats Grid */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="relative overflow-hidden rounded-[32px] border border-[var(--admin-accent)]/30 bg-gradient-to-br from-[var(--admin-accent)]/20 to-transparent p-6 transition-all hover:scale-[1.02] bg-[var(--admin-card-bg)]">
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-[32px] border border-[var(--admin-accent)]/30 bg-gradient-to-br from-[var(--admin-accent)]/20 to-transparent p-4 sm:p-6 transition-all hover:scale-[1.02] bg-[var(--admin-card-bg)]">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--admin-text-lo)] mb-1">Marcas Activas</p>
           <p className="font-bebas text-4xl leading-none text-[var(--admin-text-hi)]">{stats.length}</p>
         </div>
         
-        <div className="relative overflow-hidden rounded-[32px] border border-blue-500/30 bg-gradient-to-br from-blue-500/20 to-transparent p-6 transition-all hover:scale-[1.02] bg-[var(--admin-card-bg)]">
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-[32px] border border-blue-500/30 bg-gradient-to-br from-blue-500/20 to-transparent p-4 sm:p-6 transition-all hover:scale-[1.02] bg-[var(--admin-card-bg)]">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--admin-text-lo)] mb-1">Total Impresiones</p>
           <p className="font-bebas text-4xl leading-none text-[var(--admin-text-hi)]">{totalImpresiones.toLocaleString()}</p>
         </div>
 
-        <div className="relative overflow-hidden rounded-[32px] border border-green-500/30 bg-gradient-to-br from-green-500/20 to-transparent p-6 transition-all hover:scale-[1.02] bg-[var(--admin-card-bg)]">
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-[32px] border border-green-500/30 bg-gradient-to-br from-green-500/20 to-transparent p-4 sm:p-6 transition-all hover:scale-[1.02] bg-[var(--admin-card-bg)]">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--admin-text-lo)] mb-1">Clicks de Compra (CTA)</p>
           <p className="font-bebas text-4xl leading-none text-[var(--admin-text-hi)]">{totalClicksGlobal.toLocaleString()}</p>
         </div>
 
-        <div className="relative overflow-hidden rounded-[32px] border border-purple-500/30 bg-gradient-to-br from-purple-500/20 to-transparent p-6 transition-all hover:scale-[1.02] bg-[var(--admin-card-bg)]">
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-[32px] border border-purple-500/30 bg-gradient-to-br from-purple-500/20 to-transparent p-4 sm:p-6 transition-all hover:scale-[1.02] bg-[var(--admin-card-bg)]">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--admin-text-lo)] mb-1">CTR Promedio Global</p>
           <p className="font-bebas text-4xl leading-none text-[var(--admin-accent)]">{ctrPromedioGlobal.toFixed(2)}%</p>
         </div>
@@ -150,7 +150,7 @@ export default function PublicidadStatsAdmin() {
           const progressColor = brandCtr > 3 ? "bg-[var(--admin-accent)]" : brandCtr > 1.2 ? "bg-blue-500" : "bg-gray-400 dark:bg-gray-600";
 
           return (
-            <div key={s.brandId} className="flex flex-col rounded-3xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 shadow-xl relative overflow-hidden group">
+            <div key={s.brandId} className="flex flex-col rounded-2xl sm:rounded-3xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 sm:p-6 shadow-xl relative overflow-hidden group">
               {/* Brillo suave de fondo al hover */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
@@ -281,7 +281,7 @@ export default function PublicidadStatsAdmin() {
       </div>
 
       {/* Tabla Detallada por Meses */}
-      <div className="rounded-3xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 shadow-xl">
+      <div className="rounded-2xl sm:rounded-3xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 sm:p-6 shadow-xl">
         <h2 className="mb-6 font-bebas text-2xl tracking-widest text-[var(--admin-text-hi)]">Desglose de Impresiones Mensuales</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-[var(--admin-text-lo)]">

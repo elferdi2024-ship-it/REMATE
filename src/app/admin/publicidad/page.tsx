@@ -5,13 +5,14 @@ import { useState, useEffect } from "react";
 import PublicidadAdmin from "@/components/admin/PublicidadAdmin";
 import PublicidadStatsAdmin from "@/components/admin/PublicidadStatsAdmin";
 import MarketingRailAdmin from "@/components/admin/MarketingRailAdmin";
+import FlujoClientesLanding from "@/components/admin/FlujoClientesLanding";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import type { BrandConfig } from "@/types/brands";
 import Link from "next/link";
 
 export default function PublicidadPage() {
-  const [activeTab, setActiveTab] = useState<"stats" | "config" | "marketing" | "reportes">("stats");
+  const [activeTab, setActiveTab] = useState<"stats" | "config" | "marketing" | "reportes" | "flujo">("stats");
   const [brands, setBrands] = useState<BrandConfig[]>([]);
 
   useEffect(() => {
@@ -25,12 +26,15 @@ export default function PublicidadPage() {
     loadBrands();
   }, []);
 
-  // Listen to URL params for tab=reportes
+  // Listen to URL params for tab=reportes or tab=flujo
   useEffect(() => {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("tab") === "reportes") {
+      const tab = urlParams.get("tab");
+      if (tab === "reportes") {
         setActiveTab("reportes");
+      } else if (tab === "flujo") {
+        setActiveTab("flujo");
       }
     }
   }, []);
@@ -40,6 +44,7 @@ export default function PublicidadPage() {
     { key: "config" as const, label: "Marcas" },
     { key: "marketing" as const, label: "Tarjetas Marketing" },
     { key: "reportes" as const, label: "Reportes B2B" },
+    { key: "flujo" as const, label: "Flujo Clientes" },
   ];
 
   return (
@@ -66,6 +71,7 @@ export default function PublicidadPage() {
         {activeTab === "stats" && <PublicidadStatsAdmin />}
         {activeTab === "config" && <PublicidadAdmin />}
         {activeTab === "marketing" && <MarketingRailAdmin />}
+        {activeTab === "flujo" && <FlujoClientesLanding />}
         {activeTab === "reportes" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {brands.map(brand => (

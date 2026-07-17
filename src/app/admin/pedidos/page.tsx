@@ -226,7 +226,7 @@ export default function PedidosPage() {
     <div className="w-full max-w-full overflow-hidden space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 px-1 md:px-0 text-[var(--admin-text-mid)]">
       <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
         <div>
-          <h1 className="font-bebas text-4xl tracking-wide text-[var(--admin-text-hi)] md:text-5xl">
+          <h1 className="font-bebas text-3xl sm:text-4xl tracking-wide text-[var(--admin-text-hi)] md:text-5xl">
             PEDIDOS DE <span className="text-[var(--admin-accent)]">HOY</span>
           </h1>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
@@ -275,7 +275,7 @@ export default function PedidosPage() {
           { label: "No Leídos", value: counts.no_leido, icon: "🔴", color: "from-red-500/20 to-transparent", border: "border-red-500/30", highlight: "text-red-500 dark:text-red-400" },
           { label: "Pendientes", value: counts.pendiente, icon: "🟡", color: "from-yellow-500/20 to-transparent", border: "border-yellow-500/30", highlight: "text-yellow-600 dark:text-yellow-400" },
         ].map((s, idx) => (
-          <div key={idx} className={`relative overflow-hidden rounded-[32px] border ${s.border} bg-gradient-to-br ${s.color} p-6 transition-all hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] group bg-[var(--admin-card-bg)]`}>
+          <div key={idx} className={`relative overflow-hidden rounded-2xl sm:rounded-[32px] border ${s.border} bg-gradient-to-br ${s.color} p-4 sm:p-6 transition-all hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] group bg-[var(--admin-card-bg)]`}>
             <div className="absolute -right-2 -top-2 text-4xl opacity-10 transition-transform group-hover:scale-125 group-hover:rotate-12">{s.icon}</div>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--admin-text-lo)] mb-1">{s.label}</p>
             <p className={`font-bebas text-4xl leading-none ${s.highlight || 'text-[var(--admin-text-hi)]'}`}>{s.value}</p>
@@ -325,7 +325,7 @@ export default function PedidosPage() {
 
       {/* Swiss Watch Control Deck: Method & Branch Filters */}
       {role === "empleado" && sucursalId ? (
-        <div className="flex items-center gap-4 rounded-[32px] border border-[var(--admin-accent)]/20 bg-gradient-to-r from-[var(--admin-accent)]/5 to-transparent p-6 shadow-xl bg-[var(--admin-card-bg)]">
+        <div className="flex items-center gap-4 rounded-2xl sm:rounded-[32px] border border-[var(--admin-accent)]/20 bg-gradient-to-r from-[var(--admin-accent)]/5 to-transparent p-4 sm:p-6 shadow-xl bg-[var(--admin-card-bg)]">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--admin-accent)]/10 text-[var(--admin-text-hi)] text-2xl shadow-inner">
             🏪
           </div>
@@ -340,7 +340,7 @@ export default function PedidosPage() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-6 rounded-[32px] border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 shadow-2xl md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-6 rounded-2xl sm:rounded-[32px] border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 sm:p-6 shadow-2xl md:flex-row md:items-center md:justify-between">
           {/* Delivery Method Filter */}
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-[0.25em] text-[var(--admin-text-lo)]">MÉTODO DE ENTREGA</label>
@@ -390,26 +390,26 @@ export default function PedidosPage() {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
         <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--admin-text-lo)]">Acciones masivas:</span>
         <button
           onClick={() => handleBulkStatus("pendiente")}
           disabled={bulkUpdating || filteredPedidos.length === 0}
-          className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-yellow-600 dark:text-yellow-400 transition hover:bg-yellow-500/20 disabled:opacity-40"
+          className="w-full sm:w-auto rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-yellow-600 dark:text-yellow-400 transition hover:bg-yellow-500/20 disabled:opacity-40"
         >
           Marcar filtrados pendiente
         </button>
         <button
           onClick={() => handleBulkStatus("cargado")}
           disabled={bulkUpdating || filteredPedidos.length === 0}
-          className="rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-green-600 dark:text-green-400 transition hover:bg-green-500/20 disabled:opacity-40"
+          className="w-full sm:w-auto rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-green-600 dark:text-green-400 transition hover:bg-green-500/20 disabled:opacity-40"
         >
           Marcar filtrados cargado
         </button>
         <button
           onClick={() => handleBulkStatus("no_leido")}
           disabled={bulkUpdating || filteredPedidos.length === 0}
-          className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 transition hover:bg-red-500/20 disabled:opacity-40"
+          className="w-full sm:w-auto rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 transition hover:bg-red-500/20 disabled:opacity-40"
         >
           Marcar filtrados no leido
         </button>
@@ -430,7 +430,7 @@ export default function PedidosPage() {
       )}
 
       {/* Support Card / Tarjeta de Soporte */}
-      <div className="relative overflow-hidden rounded-[32px] border border-[var(--admin-accent)]/25 bg-gradient-to-r from-[var(--admin-accent)]/10 via-[var(--admin-card-bg)]/80 to-transparent p-6 shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-[var(--admin-accent)]/40 hover:shadow-[0_0_30px_var(--admin-accent-glow)] flex flex-col sm:flex-row items-center justify-between gap-6 bg-[var(--admin-card-bg)]">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-[32px] border border-[var(--admin-accent)]/25 bg-gradient-to-r from-[var(--admin-accent)]/10 via-[var(--admin-card-bg)]/80 to-transparent p-6 shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-[var(--admin-accent)]/40 hover:shadow-[0_0_30px_var(--admin-accent-glow)] flex flex-col sm:flex-row items-center justify-between gap-6 bg-[var(--admin-card-bg)]">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--admin-accent)]/10 text-[var(--admin-accent)] text-2xl shadow-inner animate-pulse">
             🛠️

@@ -363,7 +363,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
 
   return (
     <div
-      className={`group relative w-full overflow-hidden rounded-[24px] border transition-all duration-300 text-[var(--admin-text-mid)] ${
+      className={`group relative w-full overflow-hidden rounded-2xl sm:rounded-3xl border transition-all duration-300 text-[var(--admin-text-mid)] ${
         status === "no_leido"
           ? "border-red-500/50 bg-red-500/5 shadow-[0_8px_30px_rgba(239,68,68,0.15)] animate-[pulse_2.5s_infinite]"
           : isFresh
@@ -381,7 +381,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
       )}
 
       {/* Main Content */}
-      <div className="relative z-10 p-5 sm:p-6">
+      <div className="relative z-10 p-4 sm:p-6">
         {/* Pipeline Stepper / Header Meta */}
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--admin-border)] pb-4">
           <div className="flex flex-wrap items-center gap-2 justify-between sm:justify-start w-full sm:w-auto">
@@ -449,7 +449,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
         {/* Info Grid */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1 min-w-0 flex-1">
-            <h3 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--admin-text-hi)] truncate flex items-center gap-2" title={pedido.clienteNombre}>
+            <h3 className="font-display text-lg sm:text-xl sm:text-2xl font-bold tracking-tight text-[var(--admin-text-hi)] truncate flex items-center gap-2" title={pedido.clienteNombre}>
               {status === "no_leido" && (
                 <span className="relative flex h-3.5 w-3.5 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -494,7 +494,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           </div>
 
           <div className="shrink-0 self-end sm:self-center text-right">
-            <p className="font-display text-3xl sm:text-4xl font-bold tracking-tighter text-[var(--admin-text-hi)]">
+            <p className="font-display text-2xl sm:text-4xl font-bold tracking-tighter text-[var(--admin-text-hi)]">
               {formatCurrency(pedido.total)}
             </p>
           </div>
@@ -507,13 +507,13 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
               href={`https://wa.me/${cleanPhone(pedido.clienteTelefono)}?text=${getWhatsAppMessage()}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:flex-1 min-w-[180px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#25D366] to-[#1DA851] py-3 px-4 text-[11px] font-black tracking-widest text-white shadow-[0_4px_15px_rgba(37,211,102,0.3)] transition-all hover:shadow-[0_6px_20px_rgba(37,211,102,0.4)] active:scale-95"
+              className="w-full sm:flex-1 min-w-0 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#25D366] to-[#1DA851] py-3 px-4 text-[11px] font-black tracking-widest text-white shadow-[0_4px_15px_rgba(37,211,102,0.3)] transition-all hover:shadow-[0_6px_20px_rgba(37,211,102,0.4)] active:scale-95"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
               <span>WHATSAPP PRO</span>
             </a>
           ) : (
-            <div className="w-full sm:flex-1 min-w-[180px] flex items-center justify-center rounded-xl bg-[var(--admin-bg)] text-[var(--admin-text-lo)] border border-[var(--admin-border)] py-3 px-4 text-[11px] font-black tracking-widest">
+            <div className="w-full sm:flex-1 min-w-0 flex items-center justify-center rounded-xl bg-[var(--admin-bg)] text-[var(--admin-text-lo)] border border-[var(--admin-border)] py-3 px-4 text-[11px] font-black tracking-widest">
               SIN TELÉFONO
             </div>
           )}
@@ -544,7 +544,7 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
             <button
               onClick={handleCopiadoFacturacion}
               disabled={isUpdating}
-              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--admin-accent)] to-blue-500 text-[var(--admin-sidebar-bg)] font-black tracking-widest py-3 px-2 text-[11px] transition-all hover:shadow-[0_0_20px_var(--admin-accent-glow)] active:scale-95 disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--admin-accent)] to-blue-500 text-[var(--admin-sidebar-bg)] font-black tracking-widest py-3 px-1.5 text-[10px] sm:px-2 sm:text-[11px] transition-all hover:shadow-[0_0_20px_var(--admin-accent-glow)] active:scale-95 disabled:opacity-50"
             >
               <span className="truncate">COPIAR FACTURA</span>
             </button>
