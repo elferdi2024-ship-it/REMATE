@@ -171,8 +171,38 @@ export default function AdminLayout({
     return true;
   });
 
+  const globalPrintStyles = `
+    @media print {
+      aside, header, nav, button, footer, .print\\:hidden, #mobile-menu, [role="navigation"] {
+        display: none !important;
+      }
+      .admin-panel, main, body, html {
+        background: white !important;
+        color: black !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      main {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+      }
+      .mx-auto, .w-full, .max-w-4xl, .max-w-5xl, .max-w-[100vw] {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+    }
+  `;
+
   return (
     <div className={`flex min-h-screen admin-panel ${theme === "dark" ? "admin-dark" : ""} bg-[var(--admin-bg)] text-[var(--admin-text-mid)] selection:bg-[var(--admin-accent)] selection:text-black transition-colors duration-300`}>
+      <style dangerouslySetInnerHTML={{ __html: globalPrintStyles }} />
       {/* Sidebar (Desktop) */}
       <aside className="hidden w-72 flex-col border-r border-[var(--admin-border)] bg-[var(--admin-sidebar-bg)] md:flex transition-colors duration-300">
         <div className="flex h-20 items-center justify-center border-b border-[var(--admin-border)] px-6">
