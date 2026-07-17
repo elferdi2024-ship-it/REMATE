@@ -153,6 +153,38 @@ export default function Hero({
                 <span style={{ color: "#E8302A", fontSize: "0.6rem", fontWeight: 900 }}>· Cambiar</span>
               </button>
             )}
+
+            <Link
+              href="/tutorial"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px dashed rgba(255, 255, 255, 0.2)",
+                borderRadius: "20px",
+                padding: "4px 12px",
+                fontSize: "0.68rem",
+                fontWeight: 800,
+                textTransform: "uppercase",
+                color: "#fff",
+                textDecoration: "none",
+                transition: "all 0.2s ease-in-out",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1.5px) scale(1.02)';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.35)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+              }}
+            >
+              <span>🎤 Guía con &quot;Marti&quot; 🔨</span>
+            </Link>
           </div>
 
           <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "16px" }}>
