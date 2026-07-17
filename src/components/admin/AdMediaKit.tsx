@@ -164,10 +164,10 @@ export default function AdMediaKit() {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2 stats-grid-print">
             {[
-              { label: "Impactos Mensuales", value: "280.000+", desc: "Exposiciones de banner y spotlight" },
-              { label: "Visitas Únicas / Mes", value: "18.500+", desc: "Tráfico enfocado puramente en compras" },
-              { label: "Compradores Activos", value: "4.800+", desc: "Clientes con cuenta recurrente" },
-              { label: "Frecuencia de Compra", value: "2,4 veces", desc: "Pedidos promedio por cliente al mes" },
+              { label: "Impactos Mensuales", value: "120.000+", desc: "Exposiciones de banner y spotlight" },
+              { label: "Visitas Únicas / Mes", value: "7.500+", desc: "Tráfico enfocado puramente en compras" },
+              { label: "Compradores Activos", value: "1.200+", desc: "Clientes con cuenta recurrente" },
+              { label: "Frecuencia de Compra", value: "1,8 veces", desc: "Pedidos promedio por cliente al mes" },
             ].map((stat, idx) => (
               <div key={idx} className="bg-[var(--admin-bg)] border border-[var(--admin-border)] p-4 rounded-2xl stat-card-print">
                 <p className="text-[9px] font-bold text-[var(--admin-text-lo)] uppercase tracking-wider">{stat.label}</p>
@@ -244,10 +244,10 @@ export default function AdMediaKit() {
               </thead>
               <tbody className="divide-y divide-[var(--admin-border)]">
                 {[
-                  { segment: "Fiambrería y Embutidos", imp: "125.000+", clicks: "3.120+", ctr: "2,50%", sales: "+22%" },
-                  { segment: "Almacén y Comestibles", imp: "98.000+", clicks: "2.150+", ctr: "2,20%", sales: "+18%" },
-                  { segment: "Lácteos y Quesos", imp: "85.000+", clicks: "1.870+", ctr: "2,20%", sales: "+15%" },
-                  { segment: "Bebidas y Refrescos", imp: "74.000+", clicks: "1.550+", ctr: "2,10%", sales: "+14%" },
+                  { segment: "Fiambrería y Embutidos", imp: "45.000+", clicks: "1.035+", ctr: "2,30%", sales: "+22%" },
+                  { segment: "Almacén y Comestibles", imp: "38.000+", clicks: "836+", ctr: "2,20%", sales: "+18%" },
+                  { segment: "Lácteos y Quesos", imp: "24.000+", clicks: "504+", ctr: "2,10%", sales: "+15%" },
+                  { segment: "Bebidas y Refrescos", imp: "18.000+", clicks: "342+", ctr: "1,90%", sales: "+14%" },
                 ].map((row, idx) => (
                   <tr key={idx} className="page-break-avoid">
                     <td className="py-3.5 font-bold text-[var(--admin-text-hi)] print:text-black uppercase text-[10px]">{row.segment}</td>
