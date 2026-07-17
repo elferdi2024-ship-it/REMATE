@@ -1,34 +1,55 @@
 // filepath: src/components/admin/StatsView.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { getDocs, collection, query, orderBy, limit } from "firebase/firestore";
+import { useState, useEffect, useMemo } from "react";
+import { getDocs, collection, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
+interface PedidoItem {
+  codigo: string;
+  nombre: string;
+  cantidad: number;
+  precioUnitario: number;
+}
+
+interface PedidoRaw {
+  id: string;
+  clienteNombre: string;
+  items: PedidoItem[];
+  total: number;
+  sucursalId?: string;
+  fecha: { seconds: number; nanoseconds: number };
+}
+
+const SUCURSAL_NOMBRES: Record<string, string> = {
+  "la-paz": "La Paz",
+  "las-piedras-herrera": "Las Piedras (Herrera)",
+  "canelones": "Canelones",
+  "18-de-mayo": "18 de Mayo",
+  "el-dorado": "El Dorado",
+  "las-piedras-artigas": "Las Piedras (Artigas)",
+};
+
+const MESES_CORTOS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+function esMayorista(p: PedidoRaw): boolean {
+  const keywords = ["almacén", "autoservice", "despensa", "mini market", "distribuidora", "kiosco", "supermercado", "comercial", "rotisería", "bebidas", "srl"];
+  const nombre = p.clienteNombre.toLowerCase();
+  return keywords.some(k => nombre.includes(k)) || p.total >= 8000;
+}
+
 export default function StatsView() {
-  const [stats, setStats] = useState<any>(null);
+  const [pedidos, setPedidos] = useState<PedidoRaw[]>([]);
   const [loading, setLoading] = useState(true);
+  const [proyeccionCrecimiento, setProyeccionCrecimiento] = useState(15); // Slider de proyección (%)
 
   useEffect(() => {
     async function fetchStats() {
       try {
-        const q = query(collection(db, "pedidos_globales"), orderBy("fecha", "desc"), limit(100));
+        const q = query(collection(db, "pedidos_globales"), orderBy("fecha", "desc"));
         const snap = await getDocs(q);
-        
-        let totalRevenue = 0;
-        let totalItems = 0;
-        
-        snap.forEach((doc) => {
-          const data = doc.data();
-          totalRevenue += data.total || 0;
-          totalItems += (data.items || []).reduce((acc: number, item: any) => acc + (item.cantidad || 0), 0);
-        });
-
-        setStats({
-          pedidos: snap.size,
-          ingresos: totalRevenue,
-          articulos: totalItems,
-        });
+        const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as PedidoRaw));
+        setPedidos(docs);
       } catch (err) {
         console.error("Error fetching stats:", err);
       } finally {
@@ -37,6 +58,82 @@ export default function StatsView() {
     }
     fetchStats();
   }, []);
+
+  const metrics = useMemo(() => {
+    if (pedidos.length === 0) return null;
+
+    const totalRevenue = pedidos.reduce((s, p) => s + (p.total || 0), 0);
+    const totalItems = pedidos.reduce((s, p) => s + p.items.reduce((a, i) => a + i.cantidad, 0), 0);
+    const ticketPromedio = totalRevenue / pedidos.length;
+
+    // Segmentos
+    const mayoristas = pedidos.filter(esMayorista);
+    const minoristas = pedidos.filter(p => !esMayorista(p));
+    const revenueMayorista = mayoristas.reduce((s, p) => s + p.total, 0);
+    const revenueMinorista = minoristas.reduce((s, p) => s + p.total, 0);
+
+    // Ventas por sucursal
+    const sucursalMap: Record<string, { nombre: string; total: number; cantidad: number }> = {};
+    pedidos.forEach(p => {
+      const sid = p.sucursalId || "las-piedras-herrera";
+      const sName = SUCURSAL_NOMBRES[sid] || "Las Piedras (Herrera)";
+      if (!sucursalMap[sid]) {
+        sucursalMap[sid] = { nombre: sName, total: 0, cantidad: 0 };
+      }
+      sucursalMap[sid].total += p.total;
+      sucursalMap[sid].cantidad += 1;
+    });
+    const sucursales = Object.values(sucursalMap).sort((a, b) => b.total - a.total);
+
+    // Tendencia por semanas (últimas 4 semanas)
+    const semanasData = [
+      { label: "Hace 3 Sem", total: 0, pedidos: 0 },
+      { label: "Hace 2 Sem", total: 0, pedidos: 0 },
+      { label: "Sem Pasada", total: 0, pedidos: 0 },
+      { label: "Esta Semana", total: 0, pedidos: 0 },
+    ];
+
+    const now = Date.now();
+    const unaSemanaMs = 7 * 24 * 60 * 60 * 1000;
+
+    pedidos.forEach(p => {
+      const ageMs = now - p.fecha.seconds * 1000;
+      const semIdx = 3 - Math.floor(ageMs / unaSemanaMs);
+      if (semIdx >= 0 && semIdx <= 3) {
+        semanasData[semIdx].total += p.total;
+        semanasData[semIdx].pedidos += 1;
+      }
+    });
+
+    // Top 5 Productos
+    const prodMap: Record<string, { nombre: string; cantidad: number; total: number }> = {};
+    pedidos.forEach(p => {
+      p.items.forEach(i => {
+        if (!prodMap[i.codigo]) {
+          prodMap[i.codigo] = { nombre: i.nombre, cantidad: 0, total: 0 };
+        }
+        prodMap[i.codigo].cantidad += i.cantidad;
+        prodMap[i.codigo].total += i.cantidad * i.precioUnitario;
+      });
+    });
+    const topProductos = Object.values(prodMap)
+      .sort((a, b) => b.cantidad - a.cantidad)
+      .slice(0, 5);
+
+    return {
+      totalRevenue,
+      totalItems,
+      ticketPromedio,
+      pedidosCount: pedidos.length,
+      mayoristasCount: mayoristas.length,
+      minoristasCount: minoristas.length,
+      revenueMayorista,
+      revenueMinorista,
+      sucursales,
+      semanasData,
+      topProductos,
+    };
+  }, [pedidos]);
 
   if (loading) {
     return (
@@ -54,31 +151,205 @@ export default function StatsView() {
     });
   }
 
+  if (!metrics) return null;
+
+  const maxSemanaTotal = Math.max(...metrics.semanasData.map(s => s.total), 1);
+  const maxSucursalTotal = Math.max(...metrics.sucursales.map(s => s.total), 1);
+
+  // Proyecciones futuras optimistas
+  const revenueProyectado = metrics.totalRevenue * (1 + proyeccionCrecimiento / 100);
+  const pedidosProyectados = Math.round(metrics.pedidosCount * (1 + proyeccionCrecimiento / 100));
+
   return (
-    <div className="space-y-6 text-[var(--admin-text-mid)]">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="relative overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 shadow-xl">
-          <div className="absolute -right-4 -top-4 text-6xl opacity-5">📈</div>
-          <p className="text-sm font-semibold text-[var(--admin-text-lo)]">Total Pedidos (Recientes)</p>
-          <p className="mt-2 font-bebas text-5xl text-[var(--admin-text-hi)]">{stats?.pedidos || 0}</p>
+    <div className="space-y-6 text-[var(--admin-text-mid)] animate-in fade-in duration-500">
+      {/* KPIs Summary */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 sm:p-6 shadow-xl hover:scale-[1.01] transition-transform">
+          <div className="absolute -right-4 -top-4 text-4xl sm:text-5xl opacity-5">📦</div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-[var(--admin-text-lo)] mb-1">Pedidos Totales</p>
+          <p className="font-bebas text-3xl sm:text-4xl text-[var(--admin-text-hi)]">{metrics.pedidosCount}</p>
         </div>
-        <div className="relative overflow-hidden rounded-2xl border border-[var(--admin-accent)]/20 bg-gradient-to-br from-[var(--admin-accent)]/10 to-[var(--admin-card-bg)] p-6 shadow-[0_0_30px_var(--admin-accent-glow)]">
-          <div className="absolute -right-4 -top-4 text-6xl opacity-5">💵</div>
-          <p className="text-sm font-semibold text-[var(--admin-accent)]">Ingresos Estimados</p>
-          <p className="mt-2 font-bebas text-5xl text-[var(--admin-text-hi)]">{formatCurrency(stats?.ingresos || 0)}</p>
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--admin-accent)]/30 bg-gradient-to-br from-[var(--admin-accent)]/10 to-transparent p-4 sm:p-6 shadow-[0_0_20px_var(--admin-accent-glow)] hover:scale-[1.01] transition-transform">
+          <div className="absolute -right-4 -top-4 text-4xl sm:text-5xl opacity-5">💰</div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-[var(--admin-accent)] mb-1">Ventas Históricas</p>
+          <p className="font-bebas text-3xl sm:text-4xl text-green-600 dark:text-green-400">{formatCurrency(metrics.totalRevenue)}</p>
         </div>
-        <div className="relative overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 shadow-xl">
-          <div className="absolute -right-4 -top-4 text-6xl opacity-5">🛒</div>
-          <p className="text-sm font-semibold text-[var(--admin-text-lo)]">Volumen Artículos</p>
-          <p className="mt-2 font-bebas text-5xl text-[var(--admin-text-hi)]">{stats?.articulos || 0}</p>
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 sm:p-6 shadow-xl hover:scale-[1.01] transition-transform">
+          <div className="absolute -right-4 -top-4 text-4xl sm:text-5xl opacity-5">🎫</div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-[var(--admin-text-lo)] mb-1">Ticket Promedio</p>
+          <p className="font-bebas text-3xl sm:text-4xl text-[var(--admin-text-hi)]">{formatCurrency(metrics.ticketPromedio)}</p>
+        </div>
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 sm:p-6 shadow-xl hover:scale-[1.01] transition-transform">
+          <div className="absolute -right-4 -top-4 text-4xl sm:text-5xl opacity-5">🛒</div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-[var(--admin-text-lo)] mb-1">Artículos Totales</p>
+          <p className="font-bebas text-3xl sm:text-4xl text-[var(--admin-text-hi)]">{metrics.totalItems}</p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 shadow-xl">
-        <h3 className="mb-4 font-bold text-[var(--admin-text-hi)] uppercase tracking-wider text-sm">Resumen de Actividad</h3>
-        <div className="flex h-64 flex-col items-center justify-center rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-bg)] text-center">
-          <span className="mb-4 text-4xl opacity-50">📊</span>
-          <p className="text-[var(--admin-text-lo)] text-sm">Los gráficos detallados estarán disponibles próximamente.</p>
+      {/* Tendencia y Segmentación side-by-side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Tendencia semanal (CSS bars) */}
+        <div className="rounded-3xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 sm:p-6 shadow-xl">
+          <h3 className="mb-6 font-bebas text-xl sm:text-2xl tracking-widest text-[var(--admin-text-hi)] uppercase">Tendencia de Ingresos Semanales</h3>
+          <div className="flex items-end gap-3 h-44 sm:h-52">
+            {metrics.semanasData.map((sem, idx) => {
+              const pct = maxSemanaTotal > 0 ? (sem.total / maxSemanaTotal) * 100 : 0;
+              const isLast = idx === 3;
+              return (
+                <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+                  <span className={`text-[10px] sm:text-xs font-bold ${isLast ? "text-[var(--admin-accent)]" : "text-[var(--admin-text-mid)]"}`}>
+                    {formatCurrency(sem.total)}
+                  </span>
+                  <div
+                    className={`w-full rounded-t-xl transition-all duration-700 ${
+                      isLast
+                        ? "bg-gradient-to-t from-[var(--admin-accent)] to-teal-400 shadow-[0_0_15px_var(--admin-accent-glow)]"
+                        : "bg-gradient-to-t from-blue-600/70 to-blue-500/30"
+                    }`}
+                    style={{ height: `${Math.max(pct, 5)}%` }}
+                  />
+                  <span className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider ${isLast ? "text-[var(--admin-accent)] font-black" : "text-[var(--admin-text-lo)]"}`}>
+                    {sem.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mix Minorista vs Mayorista */}
+        <div className="rounded-3xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 sm:p-6 shadow-xl flex flex-col justify-between">
+          <div>
+            <h3 className="mb-4 font-bebas text-xl sm:text-2xl tracking-widest text-[var(--admin-text-hi)] uppercase">Mix Minorista vs Mayorista</h3>
+            <p className="text-xs text-[var(--admin-text-lo)] mb-6">Comparativa de participación comercial por facturación y volumen de pedidos.</p>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <div className="flex justify-between text-xs font-bold uppercase text-[var(--admin-text-mid)] mb-2">
+                <span>Minorista ({metrics.minoristasCount} Pedidos)</span>
+                <span className="text-cyan-600 dark:text-cyan-400">
+                  {metrics.totalRevenue > 0 ? ((metrics.revenueMinorista / metrics.totalRevenue) * 100).toFixed(1) : 0}%
+                </span>
+              </div>
+              <div className="h-3 w-full bg-[var(--admin-bg)] border border-[var(--admin-border)] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 rounded-full"
+                  style={{ width: `${metrics.totalRevenue > 0 ? (metrics.revenueMinorista / metrics.totalRevenue) * 100 : 0}%` }}
+                />
+              </div>
+              <p className="text-[10px] font-bold text-[var(--admin-text-lo)] mt-1.5">Facturado: {formatCurrency(metrics.revenueMinorista)}</p>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-xs font-bold uppercase text-[var(--admin-text-mid)] mb-2">
+                <span>Mayorista ({metrics.mayoristasCount} Pedidos)</span>
+                <span className="text-orange-600 dark:text-orange-400">
+                  {metrics.totalRevenue > 0 ? ((metrics.revenueMayorista / metrics.totalRevenue) * 100).toFixed(1) : 0}%
+                </span>
+              </div>
+              <div className="h-3 w-full bg-[var(--admin-bg)] border border-[var(--admin-border)] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-orange-600 to-orange-400 rounded-full"
+                  style={{ width: `${metrics.totalRevenue > 0 ? (metrics.revenueMayorista / metrics.totalRevenue) * 100 : 0}%` }}
+                />
+              </div>
+              <p className="text-[10px] font-bold text-[var(--admin-text-lo)] mt-1.5">Facturado: {formatCurrency(metrics.revenueMayorista)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Ventas por sucursal */}
+      <div className="rounded-3xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 sm:p-6 shadow-xl">
+        <h3 className="mb-6 font-bebas text-xl sm:text-2xl tracking-widest text-[var(--admin-text-hi)] uppercase">Rendimiento Comercial por Sucursal</h3>
+        <div className="space-y-4">
+          {metrics.sucursales.map((suc, idx) => {
+            const widthPct = (suc.total / maxSucursalTotal) * 100;
+            return (
+              <div key={idx} className="space-y-1.5">
+                <div className="flex justify-between items-center text-xs font-bold">
+                  <span className="text-[var(--admin-text-hi)]">{suc.nombre} ({suc.cantidad} ped.)</span>
+                  <span className="text-[var(--admin-text-hi)]">{formatCurrency(suc.total)}</span>
+                </div>
+                <div className="h-2.5 w-full bg-[var(--admin-bg)] border border-[var(--admin-border)] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-[var(--admin-accent)] to-teal-400 rounded-full"
+                    style={{ width: `${Math.max(widthPct, 2)}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Top Productos */}
+      <div className="rounded-3xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 sm:p-6 shadow-xl">
+        <h3 className="mb-4 font-bebas text-xl sm:text-2xl tracking-widest text-[var(--admin-text-hi)] uppercase">Top 5 Productos más Vendidos</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-[var(--admin-text-lo)] min-w-[500px]">
+            <thead className="border-b border-[var(--admin-border)] text-[9px] uppercase tracking-widest font-bold">
+              <tr>
+                <th className="pb-3">#</th>
+                <th className="pb-3">Producto</th>
+                <th className="pb-3 text-center">Unidades</th>
+                <th className="pb-3 text-right">Facturación Estimada</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--admin-border)]">
+              {metrics.topProductos.map((p, idx) => (
+                <tr key={idx} className="hover:bg-[var(--admin-input-bg)]/20 transition-colors">
+                  <td className="py-3">
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--admin-bg)] border border-[var(--admin-border)] text-[10px] font-bold text-[var(--admin-text-hi)]">
+                      {idx + 1}
+                    </span>
+                  </td>
+                  <td className="py-3 font-bold text-[var(--admin-text-hi)] uppercase text-xs">{p.nombre}</td>
+                  <td className="py-3 text-center font-bold text-[var(--admin-text-mid)]">{p.cantidad}</td>
+                  <td className="py-3 text-right font-extrabold text-green-600 dark:text-green-400">{formatCurrency(p.total)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Proyecciones de Crecimiento Interactivas (Esperanzadoras!) */}
+      <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-[var(--admin-card-bg)] to-transparent p-5 sm:p-6 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-2 flex-1">
+          <h3 className="font-bebas text-xl sm:text-2xl tracking-widest text-green-600 dark:text-green-400 uppercase">Simulador de Expansión Comercial</h3>
+          <p className="text-xs text-[var(--admin-text-lo)] max-w-xl">
+            Ajustá el slider de crecimiento para proyectar el flujo de facturación y volumen de pedidos de El Remate con una tendencia de expansión positiva.
+          </p>
+        </div>
+
+        <div className="w-full md:w-64 space-y-3 bg-[var(--admin-bg)] border border-[var(--admin-border)] p-4 rounded-2xl shrink-0">
+          <div className="flex justify-between items-center text-xs font-bold text-[var(--admin-text-hi)]">
+            <span>Objetivo de Crecimiento</span>
+            <span className="text-[var(--admin-accent)]">+{proyeccionCrecimiento}%</span>
+          </div>
+
+          <input
+            type="range"
+            min="5"
+            max="60"
+            step="5"
+            value={proyeccionCrecimiento}
+            onChange={(e) => setProyeccionCrecimiento(Number(e.target.value))}
+            className="w-full h-1.5 bg-[var(--admin-border)] rounded-lg appearance-none cursor-pointer accent-[var(--admin-accent)]"
+          />
+
+          <div className="space-y-1.5 pt-2 border-t border-[var(--admin-border)]">
+            <div className="flex justify-between text-[10px] text-[var(--admin-text-lo)] font-bold uppercase">
+              <span>Ingresos Proyectados:</span>
+              <span className="text-green-600 dark:text-green-400 font-extrabold">{formatCurrency(revenueProyectado)}</span>
+            </div>
+            <div className="flex justify-between text-[10px] text-[var(--admin-text-lo)] font-bold uppercase">
+              <span>Pedidos Proyectados:</span>
+              <span className="text-[var(--admin-text-hi)] font-extrabold">{pedidosProyectados}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
