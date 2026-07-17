@@ -18,36 +18,36 @@ export interface BrandStats {
 
 const MOCK_STATS_BASELINE: Record<string, Partial<BrandStats>> = {
   "centenario": {
-    total: 342500,
-    modalOpens: 27400,
-    ctaClicks: 8220,
-    byMonth: { "2026-05": 85600, "2026-06": 119800, "2026-07": 137100 },
-    bySlot: { "spotlight": 137000, "banner": 119875, "sponsored": 85625 },
-    byAb: { "A": 4274, "B": 3946 }
+    total: 85200,
+    modalOpens: 6810,
+    ctaClicks: 1870,
+    byMonth: { "2026-05": 21300, "2026-06": 29800, "2026-07": 34100 },
+    bySlot: { "spotlight": 34080, "banner": 29820, "sponsored": 21300 },
+    byAb: { "A": 972, "B": 898 }
   },
   "cololo": {
-    total: 218400,
-    modalOpens: 17470,
-    ctaClicks: 5240,
-    byMonth: { "2026-05": 54600, "2026-06": 76400, "2026-07": 87400 },
-    bySlot: { "spotlight": 87360, "banner": 76440, "sponsored": 54600 },
-    byAb: { "A": 2724, "B": 2516 }
+    total: 54100,
+    modalOpens: 4320,
+    ctaClicks: 980,
+    byMonth: { "2026-05": 13500, "2026-06": 18900, "2026-07": 21700 },
+    bySlot: { "spotlight": 21640, "banner": 18935, "sponsored": 13525 },
+    byAb: { "A": 510, "B": 470 }
   },
   "dona-coca": {
-    total: 256800,
-    modalOpens: 20540,
-    ctaClicks: 6160,
-    byMonth: { "2026-05": 64200, "2026-06": 89800, "2026-07": 102800 },
-    bySlot: { "spotlight": 102720, "banner": 89880, "sponsored": 64200 },
-    byAb: { "A": 3203, "B": 2957 }
+    total: 62400,
+    modalOpens: 4990,
+    ctaClicks: 1320,
+    byMonth: { "2026-05": 15600, "2026-06": 21800, "2026-07": 25000 },
+    bySlot: { "spotlight": 24960, "banner": 21840, "sponsored": 15600 },
+    byAb: { "A": 686, "B": 634 }
   },
   "la-banderita": {
-    total: 412000,
-    modalOpens: 32960,
-    ctaClicks: 9880,
-    byMonth: { "2026-05": 103000, "2026-06": 144200, "2026-07": 164800 },
-    bySlot: { "spotlight": 164800, "banner": 144200, "sponsored": 103000 },
-    byAb: { "A": 5137, "B": 4743 }
+    total: 98600,
+    modalOpens: 7880,
+    ctaClicks: 2450,
+    byMonth: { "2026-05": 24600, "2026-06": 34500, "2026-07": 39500 },
+    bySlot: { "spotlight": 39440, "banner": 34510, "sponsored": 24650 },
+    byAb: { "A": 1274, "B": 1176 }
   }
 };
 

@@ -229,14 +229,22 @@ export default function FlujoClientesLanding() {
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-600 via-green-600 to-teal-700 p-6 sm:p-8 text-white shadow-2xl">
         <div className="absolute -right-6 -top-6 text-[120px] sm:text-[180px] opacity-5 leading-none select-none">📈</div>
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 via-green-300 to-emerald-400" />
-        <div className="relative z-10">
-          <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] text-green-200 mb-2">Reporte de Flujo de Clientes</p>
-          <h1 className="font-bebas text-3xl sm:text-5xl tracking-wider leading-tight">
-            EL REMATE · <span className="text-yellow-300">GROWTH REPORT</span>
-          </h1>
-          <p className="mt-2 text-xs sm:text-sm text-green-100/80 max-w-lg">
-            Análisis completo del flujo comercial de los últimos 30 días. Tendencia positiva sostenida con crecimiento en ambos segmentos.
-          </p>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] text-green-200 mb-2">Reporte de Flujo de Clientes</p>
+            <h1 className="font-bebas text-3xl sm:text-5xl tracking-wider leading-tight">
+              EL REMATE · <span className="text-yellow-300">GROWTH REPORT</span>
+            </h1>
+            <p className="mt-2 text-xs sm:text-sm text-green-100/80 max-w-lg">
+              Análisis completo del flujo comercial de los últimos 30 días. Tendencia positiva sostenida con crecimiento en ambos segmentos.
+            </p>
+          </div>
+          <button
+            onClick={() => window.print()}
+            className="self-start sm:self-center bg-white/10 text-white border border-white/20 px-4 py-2.5 rounded-xl text-xs font-extrabold tracking-wider hover:bg-white/20 transition-all active:scale-95 shrink-0 print:hidden shadow-sm"
+          >
+            🖨️ EXPORTAR PDF
+          </button>
         </div>
       </div>
 
@@ -539,6 +547,46 @@ export default function FlujoClientesLanding() {
           </div>
         </div>
       </div>
+      <style jsx global>{`
+        @media print {
+          aside, header, nav, button, footer, .print\\:hidden {
+            display: none !important;
+          }
+          main, .admin-panel, .mx-auto, .w-full {
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+          }
+          body {
+            background: white !important;
+            color: black !important;
+          }
+          .rounded-2xl, .rounded-3xl {
+            border-radius: 8px !important;
+          }
+          .shadow-xl, .shadow-2xl {
+            box-shadow: none !important;
+          }
+          /* Asegurar que las tarjetas e histogramas se impriman bien */
+          .bg-\\[var\\(--admin-card-bg\\)\\] {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            page-break-inside: avoid;
+          }
+          .bg-gradient-to-br, .bg-gradient-to-r {
+            background: #f8fafc !important;
+            color: #0f172a !important;
+            border: 1px solid #e2e8f0 !important;
+          }
+          .text-white {
+            color: #0f172a !important;
+          }
+          .text-green-200, .text-green-100, .text-[var\\(--admin-text-lo\\)] {
+            color: #475569 !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -6,13 +6,14 @@ import PublicidadAdmin from "@/components/admin/PublicidadAdmin";
 import PublicidadStatsAdmin from "@/components/admin/PublicidadStatsAdmin";
 import MarketingRailAdmin from "@/components/admin/MarketingRailAdmin";
 import FlujoClientesLanding from "@/components/admin/FlujoClientesLanding";
+import AdMediaKit from "@/components/admin/AdMediaKit";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import type { BrandConfig } from "@/types/brands";
 import Link from "next/link";
 
 export default function PublicidadPage() {
-  const [activeTab, setActiveTab] = useState<"stats" | "config" | "marketing" | "reportes" | "flujo">("stats");
+  const [activeTab, setActiveTab] = useState<"stats" | "config" | "marketing" | "reportes" | "flujo" | "media-kit">("stats");
   const [brands, setBrands] = useState<BrandConfig[]>([]);
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function PublicidadPage() {
     loadBrands();
   }, []);
 
-  // Listen to URL params for tab=reportes or tab=flujo
+  // Listen to URL params for tab=reportes, tab=flujo or tab=media-kit
   useEffect(() => {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
@@ -35,6 +36,8 @@ export default function PublicidadPage() {
         setActiveTab("reportes");
       } else if (tab === "flujo") {
         setActiveTab("flujo");
+      } else if (tab === "media-kit") {
+        setActiveTab("media-kit");
       }
     }
   }, []);
@@ -45,12 +48,13 @@ export default function PublicidadPage() {
     { key: "marketing" as const, label: "Tarjetas Marketing" },
     { key: "reportes" as const, label: "Reportes B2B" },
     { key: "flujo" as const, label: "Flujo Clientes" },
+    { key: "media-kit" as const, label: "Media Kit B2B" },
   ];
 
   return (
     <div className="space-y-6 text-[var(--admin-text-mid)]">
       {/* Tabs */}
-      <div className="flex border-b border-[var(--admin-border)] overflow-x-auto">
+      <div className="flex border-b border-[var(--admin-border)] overflow-x-auto print:hidden">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -72,6 +76,7 @@ export default function PublicidadPage() {
         {activeTab === "config" && <PublicidadAdmin />}
         {activeTab === "marketing" && <MarketingRailAdmin />}
         {activeTab === "flujo" && <FlujoClientesLanding />}
+        {activeTab === "media-kit" && <AdMediaKit />}
         {activeTab === "reportes" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {brands.map(brand => (
