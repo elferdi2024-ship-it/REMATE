@@ -88,6 +88,33 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     info: "\u2139",
   };
 
+  const typeStyles: Record<ToastType, { border: string; shadow: string; iconColor: string; bg: string }> = {
+    success: {
+      border: "1.5px solid #2ECC71",
+      shadow: "0 10px 30px rgba(46, 204, 113, 0.22)",
+      iconColor: "#2ECC71",
+      bg: "rgba(26, 20, 16, 0.96)"
+    },
+    error: {
+      border: "1.5px solid #E53935",
+      shadow: "0 10px 30px rgba(229, 57, 53, 0.22)",
+      iconColor: "#E53935",
+      bg: "rgba(26, 20, 16, 0.96)"
+    },
+    warning: {
+      border: "1.5px solid #F59E0B",
+      shadow: "0 10px 30px rgba(245, 158, 11, 0.22)",
+      iconColor: "#F59E0B",
+      bg: "rgba(26, 20, 16, 0.96)"
+    },
+    info: {
+      border: "1.5px solid #3498DB",
+      shadow: "0 10px 30px rgba(52, 152, 219, 0.18)",
+      iconColor: "#3498DB",
+      bg: "rgba(26, 20, 16, 0.96)"
+    },
+  };
+
   const contextValue = useMemo(() => ({ showToast, success, error, warning, info }), [
     showToast,
     success,
@@ -122,51 +149,52 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         }}
         className="sm:items-end sm:left-auto sm:translate-x-0 sm:right-4"
       >
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            role="alert"
-            onClick={() => removeToast(toast.id)}
-            style={{
-              background: "var(--oscuro, #1A1410)",
-              border: "1px solid var(--rojo, #D62828)",
-              borderRadius: "12px",
-              padding: "0.75rem 1.25rem",
-              color: "#E8EAF6",
-              fontSize: "0.875rem",
-              fontFamily: "Inter, system-ui, sans-serif",
-              boxShadow: "0 4px 20px rgba(214, 40, 40, 0.15)",
-              maxWidth: "90vw",
-              width: "max-content",
-              pointerEvents: "auto",
-              cursor: "pointer",
-              animation: "toastIn 0.3s ease-out",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-            }}
-            className="sm:max-w-sm"
-          >
-            <span
+        {toasts.map((toast) => {
+          const styleConfig = typeStyles[toast.type];
+          return (
+            <div
+              key={toast.id}
+              role="alert"
+              onClick={() => removeToast(toast.id)}
               style={{
-                color:
-                  toast.type === "success"
-                    ? "#00E5FF"
-                    : toast.type === "error"
-                      ? "#FF5252"
-                      : toast.type === "warning"
-                        ? "#FFD600"
-                        : "#64B5F6",
+                background: styleConfig.bg,
+                border: styleConfig.border,
+                borderRadius: "14px",
+                padding: "0.85rem 1.4rem",
+                color: "#F5F2EE",
+                fontSize: "0.85rem",
                 fontWeight: 700,
-                fontSize: "1rem",
-                flexShrink: 0,
+                fontFamily: "var(--font-body), sans-serif",
+                boxShadow: styleConfig.shadow,
+                maxWidth: "90vw",
+                width: "max-content",
+                pointerEvents: "auto",
+                cursor: "pointer",
+                animation: "toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
+                letterSpacing: "0.2px"
               }}
+              className="sm:max-w-sm"
             >
-              {iconMap[toast.type]}
-            </span>
-            <span style={{ lineHeight: 1.4 }}>{toast.message}</span>
-          </div>
-        ))}
+              <span
+                style={{
+                  color: styleConfig.iconColor,
+                  fontWeight: 900,
+                  fontSize: "1.1rem",
+                  flexShrink: 0,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {iconMap[toast.type]}
+              </span>
+              <span style={{ lineHeight: 1.4 }}>{toast.message}</span>
+            </div>
+          );
+        })}
       </div>
     </ToastContext.Provider>
   );

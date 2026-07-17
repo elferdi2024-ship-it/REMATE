@@ -75,10 +75,11 @@ export default function DesktopCategorySidebar({
                 alignItems: "center",
                 gap: "12px",
                 width: "100%",
-                padding: "10px 12px",
-                background: isActive ? "rgba(232, 48, 42, 0.08)" : "transparent",
+                padding: "10px 12px 10px " + (isActive ? "9px" : "12px"),
+                background: isActive ? "linear-gradient(90deg, rgba(232, 48, 42, 0.08) 0%, rgba(232, 48, 42, 0.02) 100%)" : "transparent",
                 border: "none",
-                borderRadius: "12px",
+                borderLeft: isActive ? "3px solid var(--rojo)" : "3px solid transparent",
+                borderRadius: isActive ? "0 12px 12px 0" : "12px",
                 cursor: "pointer",
                 textAlign: "left",
                 transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -88,11 +89,13 @@ export default function DesktopCategorySidebar({
               onMouseEnter={(e) => {
                 if (!isActive) {
                   e.currentTarget.style.background = "rgba(0,0,0,0.03)";
+                  e.currentTarget.style.borderLeftColor = "rgba(232, 48, 42, 0.2)";
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isActive) {
                   e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.borderLeftColor = "transparent";
                 }
               }}
             >

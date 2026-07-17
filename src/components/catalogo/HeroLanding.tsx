@@ -79,32 +79,51 @@ export default function HeroLanding({ selectedSucursal }: HeroLandingProps) {
         </h1>
 
         {/* Descriptor */}
-        <div className="flex items-start gap-3 max-w-[600px] mx-auto mb-8">
+        <div className="flex items-start gap-3 max-w-[600px] mx-auto mb-6">
           <div className="w-1 min-h-[48px] bg-[#E8302A] rounded shrink-0 mt-0.5" />
           <p className="font-serif italic text-[clamp(0.95rem,2.5vw,1.15rem)] text-[#C8C3BC] leading-relaxed font-normal m-0 drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)]">
             Todo para tu negocio y tu casa: alimentos, insumos, bebidas y limpieza al mejor precio.
           </p>
         </div>
 
+        {/* Indicador de Compra Digital */}
+        <div className="mb-8 max-w-[600px] mx-auto bg-[#1C1C1A]/80 backdrop-blur-md border border-[#D62828]/35 rounded-[16px] p-4 text-left shadow-[0_8px_32px_rgba(0,0,0,0.3)] animate-border-glow">
+          <div className="flex gap-3 items-start">
+            <span className="text-[1.4rem] leading-none select-none mt-0.5 animate-bounce">💡</span>
+            <div>
+              <span className="block text-[0.72rem] font-black uppercase tracking-[2px] text-[#FF4D47] mb-0.5">
+                ¿CÓMO REALIZAR TU COMPRA?
+              </span>
+              <span className="block text-[0.85rem] text-[#C8C3BC] font-medium leading-relaxed">
+                Ingresá a nuestro <strong>Catálogo Digital</strong>, armá tu carrito agregando los productos y completá tu pedido. Las compras no se coordinan por mensaje libre; ¡usá el catálogo para armar tu surtido!
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* CTAs */}
-        <div className="cta-buttons flex gap-3 flex-wrap justify-center mb-10">
+        <div className="cta-buttons flex gap-3 flex-wrap justify-center mb-10 items-center">
           <Link
             href={selectedSucursal ? `/catalogo?sucursal=${selectedSucursal}` : "/seleccionar-sucursal"}
-            className="bg-[#E8302A] text-white rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] no-underline flex items-center gap-2 shadow-[0_4px_18px_rgba(232,48,42,0.35)] transition-all hover:bg-[#C4231E] hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(232,48,42,0.5)]"
+            className="bg-[#E8302A] text-white rounded-[14px] px-8 py-4.5 font-bebas text-[1.3rem] tracking-[2px] no-underline flex items-center gap-3 animate-pulse-glow-red transition-all hover:bg-[#C4231E] hover:-translate-y-1"
           >
-            🛒 VER CATÁLOGO {selectedSucursal ? `(${sucursalNombre.toUpperCase()})` : ""}
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+            </span>
+            🛒 INGRESAR AL CATÁLOGO {selectedSucursal ? `(${sucursalNombre.toUpperCase()})` : ""}
           </Link>
           <a
             href="https://wa.me/59899322325"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-[#1A7A42] text-white border border-white/20 rounded-[12px] px-7 py-3.5 font-body text-[1rem] font-extrabold no-underline flex items-center gap-2.5 shadow-[0_4px_20px_rgba(26,122,66,0.4),_0_0_0_1px_rgba(255,255,255,0.1)] transition-all hover:bg-[#145E33] hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(26,122,66,0.5)] tracking-[0.5px]"
+            className="bg-[#1A7A42]/10 text-[#2ECC71] border border-[#1A7A42]/60 rounded-[14px] px-7 py-4.0 font-body text-[0.95rem] font-extrabold no-underline flex items-center gap-2.5 transition-all hover:bg-[#1A7A42]/20 hover:-translate-y-0.5 tracking-[0.5px]"
           >
-            📱 WhatsApp
+            💬 Consultas WhatsApp
           </a>
           <Link
             href="/tutorial"
-            className="bg-white/5 text-white border border-dashed border-white/20 rounded-[12px] px-7 py-3.5 font-body text-[1rem] font-extrabold no-underline flex items-center gap-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all hover:bg-white/15 hover:-translate-y-0.5"
+            className="bg-white/5 text-white border border-dashed border-white/20 rounded-[14px] px-7 py-4.0 font-body text-[0.95rem] font-extrabold no-underline flex items-center gap-2.5 transition-all hover:bg-white/15 hover:-translate-y-0.5"
           >
             🎤 Guía con &quot;Marti&quot; 🔨
           </Link>

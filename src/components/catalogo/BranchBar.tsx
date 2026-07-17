@@ -10,7 +10,7 @@ interface BranchBarProps {
 
 export default function BranchBar({ sucursalName, onClick }: BranchBarProps) {
   return (
-    <button type="button" className="branch-bar-sticky" onClick={onClick}>
+    <button type="button" className={`branch-bar-sticky ${!sucursalName ? 'no-branch' : ''}`} onClick={onClick}>
       <div className="branch-bar-content">
         <span className="branch-bar-icon">🏪</span>
         <span className="branch-bar-text">

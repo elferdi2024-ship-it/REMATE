@@ -46,11 +46,11 @@ function getCatBadgeColors(cat: string): { bg: string; color: string } {
 
 function highlightText(text: string, searchTerm: string | undefined): React.ReactNode {
   if (!searchTerm || !searchTerm.trim()) return text;
-  const regex = new RegExp(`(${searchTerm.trim().replace(/[.*+?^${}()|[\\]\\]/g, "\\\\$&")})`, "gi");
+  const regex = new RegExp(`(${searchTerm.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
   const parts = text.split(regex);
   return parts.map((part, i) =>
     regex.test(part) ? (
-      <mark key={i} style={{ background: "#FEF3C7", color: "#D97706", borderRadius: "2px", padding: "0 1px" }}>{part}</mark>
+      <mark key={i} style={{ background: "rgba(232, 48, 42, 0.08)", color: "var(--rojo, #E8302A)", borderRadius: "4px", padding: "0 2px", fontWeight: 700 }}>{part}</mark>
     ) : (
       part
     )
@@ -100,30 +100,30 @@ export default function ProductoCard({
       onMouseLeave={() => setIsHovered(false)}
       className={`card${isInCart ? " in-cart" : ""} group ${isAdding ? "adding-anim" : ""}`}
       style={{
-        background: "var(--white)",
+        background: isInCart ? "var(--verde-pale, #EBF7F0)" : "var(--white)",
         border: isHovered 
-          ? "1px solid rgba(232, 48, 42, 0.3)" 
+          ? "1.5px solid rgba(232, 48, 42, 0.35)" 
           : isInCart
-            ? "1px solid var(--verde)" 
-            : "1px solid rgba(0,0,0,0.05)",
-        borderRadius: "var(--r-md)",
-        padding: "12px",
-        transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
+            ? "1.5px solid var(--verde)" 
+            : "1.5px solid rgba(17,11,8,0.06)",
+        borderRadius: "var(--r-lg)",
+        padding: "14px",
+        transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        transform: isHovered ? "translateY(-2px)" : "translateY(0)",
+        transform: isHovered ? "translateY(-5px)" : "translateY(0)",
         boxShadow: isHovered 
-          ? "0 12px 24px rgba(0,0,0,0.06)"
+          ? "0 20px 35px rgba(17,11,8,0.08)"
           : isInCart
-            ? "0 4px 12px rgba(26,122,66,0.04)"
-            : "0 2px 6px rgba(0,0,0,0.02)",
+            ? "0 6px 16px rgba(26,122,66,0.06)"
+            : "0 2px 8px rgba(17,11,8,0.03)",
         cursor: "pointer"
       } as React.CSSProperties}
     >
       <div className="card-thumb" style={{ 
         background: "linear-gradient(180deg, #ffffff 0%, #f9f8f6 100%)", 
-        borderRadius: "calc(var(--r-md) - 2px)",
+        borderRadius: "calc(var(--r-lg) - 2px)",
         aspectRatio: "1 / 1",
         height: "auto",
         marginBottom: "10px",
@@ -199,6 +199,7 @@ export default function ProductoCard({
               borderRadius: "8px",
               boxShadow: "0 2px 8px rgba(232, 48, 42, 0.3)",
               letterSpacing: "0.5px",
+              transform: "rotate(-3deg)",
             }}
           >
             -{Math.round((1 - producto.precio / producto.precioAnterior) * 100)}%
@@ -265,12 +266,12 @@ export default function ProductoCard({
               background: "#fff",
               borderRadius: "30px",
               height: "42px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-              border: "1px solid rgba(0,0,0,0.08)",
-              padding: "0 4px",
+              boxShadow: "0 6px 15px rgba(26,122,66,0.15)",
+              border: "2px solid var(--verde, #1A7A42)",
+              padding: "0 6px",
               overflow: "hidden"
             }}>
-              <button className="float-qty-btn minus" onClick={handleDec} aria-label="Disminuir cantidad">&#8722;</button>
+              <button className="float-qty-btn minus" onClick={handleDec} aria-label="Disminuir cantidad" style={{ color: "var(--verde)", fontWeight: 900 }}>&#8722;</button>
               <input 
                 type="number" 
                 value={qty || ''} 
@@ -285,7 +286,7 @@ export default function ProductoCard({
                 onFocus={(e) => e.target.select()}
                 className="float-qty-val" 
                 style={{ 
-                  fontWeight: 700, 
+                  fontWeight: 800, 
                   width: "36px", 
                   textAlign: "center",
                   background: "transparent",
@@ -294,10 +295,11 @@ export default function ProductoCard({
                   WebkitAppearance: "none",
                   MozAppearance: "textfield",
                   margin: 0,
-                  fontSize: "1rem"
+                  fontSize: "1rem",
+                  color: "var(--texto)"
                 }} 
               />
-              <button className="float-qty-btn plus" onClick={handleInc} aria-label="Aumentar cantidad">+</button>
+              <button className="float-qty-btn plus" onClick={handleInc} aria-label="Aumentar cantidad" style={{ color: "var(--verde)", fontWeight: 900 }}>+</button>
             </div>
           ) : (
             <button 
@@ -313,18 +315,18 @@ export default function ProductoCard({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 4px 10px rgba(232, 48, 42, 0.2)",
+                boxShadow: "0 6px 15px rgba(232, 48, 42, 0.3)",
                 cursor: "pointer",
                 transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
                 transform: isHovered ? "scale(1.1) translateY(-1px)" : "scale(1)",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "scale(1.15) translateY(-1px)";
-                e.currentTarget.style.boxShadow = "0 8px 20px rgba(232, 48, 42, 0.4)";
+                e.currentTarget.style.boxShadow = "0 10px 22px rgba(232, 48, 42, 0.45)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = isHovered ? "scale(1.1) translateY(-1px)" : "scale(1)";
-                e.currentTarget.style.boxShadow = "0 4px 10px rgba(232, 48, 42, 0.2)";
+                e.currentTarget.style.boxShadow = "0 6px 15px rgba(232, 48, 42, 0.3)";
               }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -424,8 +426,8 @@ export default function ProductoCard({
           )}
           <div className="card-price" style={{ 
             fontFamily: "var(--font-display)",
-            fontSize: "1.4rem", 
-            fontWeight: 700,
+            fontSize: "1.5rem", 
+            fontWeight: 800,
             color: "var(--rojo)", 
             lineHeight: "1",
             letterSpacing: "0.5px"

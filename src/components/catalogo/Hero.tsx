@@ -180,13 +180,14 @@ export default function Hero({
 
           <div
             style={{
-              background: "rgba(26,20,16,0.55)",
-              backdropFilter: "blur(8px)",
-              border: "1px solid rgba(214,40,40,0.3)",
-              borderRadius: "var(--r-sm, 8px)",
+              background: "rgba(255, 255, 255, 0.05)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              borderRadius: "12px",
               overflow: "hidden",
               width: "fit-content",
               display: "flex",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
             }}
           >
             {[
@@ -427,9 +428,9 @@ export default function Hero({
                   top: "calc(100% + 8px)",
                   left: 0,
                   right: 0,
-                  background: "var(--bg, #F5F0E8)",
-                  borderRadius: "var(--r-md, 12px)",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.05)",
+                  background: "#ffffff",
+                  borderRadius: "18px",
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.08)",
                   zIndex: 100,
                   overflow: "hidden",
                   display: "flex",
