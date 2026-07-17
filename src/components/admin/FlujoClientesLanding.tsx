@@ -248,6 +248,16 @@ export default function FlujoClientesLanding() {
         </div>
       </div>
 
+      {/* Nota de Contexto de Lanzamiento */}
+      <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4 sm:p-5 text-xs leading-relaxed text-[var(--admin-text-mid)] page-break-avoid">
+        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold mb-1.5 uppercase tracking-wider text-[10px]">
+          <span>ℹ️</span> Contexto de Lanzamiento y Transición Digital
+        </div>
+        <p className="text-[var(--admin-text-lo)] leading-relaxed">
+          Esta plataforma web cuenta con <strong>3 meses de operación activa</strong>. Durante el primer mes, realizamos pruebas piloto y testeos de usabilidad. En los siguientes 2 meses, nos hemos enfocado exclusivamente en capacitar y migrar de forma progresiva a nuestra cartera de clientes físicos existentes para que utilicen la web. Los números actuales reflejan esta adopción digital en curso. El plan comercial de captación de clientes digitales 100% nuevos aún no se ha iniciado, lo que representa una enorme oportunidad de crecimiento y expansión para marcas patrocinadoras en la siguiente etapa.
+        </p>
+      </div>
+
       {/* KPIs Grid */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {[
@@ -444,61 +454,7 @@ export default function FlujoClientesLanding() {
         </div>
       </div>
 
-      {/* Top 10 Clientes */}
-      <div className="rounded-2xl sm:rounded-3xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 sm:p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="font-bebas text-xl sm:text-2xl tracking-widest text-[var(--admin-text-hi)]">TOP CLIENTES</h2>
-            <p className="text-[10px] text-[var(--admin-text-lo)] mt-0.5">Ordenados por gasto total</p>
-          </div>
-          <span className="text-2xl">🏆</span>
-        </div>
 
-        <div className="overflow-x-auto -mx-4 sm:mx-0">
-          <table className="w-full text-left text-sm min-w-[500px]">
-            <thead className="border-b border-[var(--admin-border)] text-[9px] uppercase tracking-widest text-[var(--admin-text-lo)]">
-              <tr>
-                <th className="pb-3 pr-3 font-bold">#</th>
-                <th className="pb-3 pr-3 font-bold">Cliente</th>
-                <th className="pb-3 pr-3 font-bold text-center">Pedidos</th>
-                <th className="pb-3 pr-3 font-bold text-right">Gasto Total</th>
-                <th className="pb-3 font-bold text-right">Último Pedido</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--admin-border)]">
-              {metrics.topClientes.map((c, i) => (
-                <tr key={i} className="hover:bg-[var(--admin-input-bg)]/30 transition-colors">
-                  <td className="py-3 pr-3">
-                    <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${
-                      i === 0 ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400" :
-                      i === 1 ? "bg-gray-400/20 text-gray-500" :
-                      i === 2 ? "bg-amber-600/20 text-amber-600" :
-                      "bg-[var(--admin-bg)] text-[var(--admin-text-lo)]"
-                    }`}>
-                      {i + 1}
-                    </span>
-                  </td>
-                  <td className="py-3 pr-3">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[var(--admin-text-hi)] text-xs">{c.nombre}</span>
-                      {esMayorista({ clienteNombre: c.nombre, total: c.gasto } as PedidoRaw) && (
-                        <span className="text-[8px] font-black uppercase tracking-wider bg-orange-500/10 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 rounded border border-orange-500/20">
-                          MAYOR
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3 pr-3 text-center font-bold text-[var(--admin-text-mid)]">{c.pedidos}</td>
-                  <td className="py-3 pr-3 text-right font-bold text-green-600 dark:text-green-400">{formatCurrency(c.gasto)}</td>
-                  <td className="py-3 text-right text-[10px] text-[var(--admin-text-lo)]">
-                    {c.ultimoPedido.toLocaleDateString("es-UY")}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
       {/* Productos más vendidos */}
       <div className="rounded-2xl sm:rounded-3xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 sm:p-6 shadow-xl">
