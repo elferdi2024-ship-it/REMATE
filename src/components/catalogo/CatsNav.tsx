@@ -82,14 +82,7 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
         }} />
 
         <div className="cats-wrap" ref={scrollRef} style={{ width: "100%", overflowX: "auto", scrollbarWidth: "none" }}>
-          <div className="cats-inner-circular" style={{ 
-            gap: "24px", 
-            padding: "16px 24px",
-            display: "flex",
-            width: "max-content",
-            minWidth: "100%",
-            alignItems: "flex-start"
-          }}>
+          <div className="cats-inner-circular">
             {categorias.map((cat) => {
               const emoji = EMOJI_POR_CATEGORIA[cat] || "📦";
               const isActive = cat === activeCat || (cat === "Todos" && (activeCat === "" || activeCat === "Todos"));
@@ -99,17 +92,6 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
                   className={`cat-circle-btn${isActive ? " active" : ""}`}
                   onClick={() => onSelect(cat)}
                   aria-pressed={isActive}
-                  style={{ 
-                      width: "80px",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      border: "none",
-                      background: "transparent",
-                      cursor: "pointer",
-                      padding: 0,
-                      flexShrink: 0
-                  }}
                 >
                   <div className="cat-circle-icon">
                     {configCats[cat] ? (
@@ -169,20 +151,32 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
         .nav-arrow.left { left: 10px; }
         .nav-arrow.right { right: 10px; }
 
+        .cats-inner-circular {
+          gap: 12px;
+          padding: 12px 16px;
+          display: flex;
+          width: max-content;
+          min-width: 100%;
+          align-items: flex-start;
+        }
+
         .cat-circle-btn {
+          width: 60px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          padding: 0;
+          flex-shrink: 0;
           transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .cat-circle-btn:hover {
-          transform: translateY(-3px);
-        }
-        .cat-circle-btn:active {
-          transform: scale(0.95);
         }
 
         .cat-circle-icon {
-          width: 62px;
-          height: 62px;
-          font-size: 1.8rem;
+          width: 52px;
+          height: 52px;
+          font-size: 1.5rem;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -211,8 +205,8 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
 
         .cat-circle-label {
           font-family: var(--font-body);
-          font-size: 10px;
-          margin-top: 10px;
+          font-size: 9px;
+          margin-top: 8px;
           font-weight: 600;
           color: var(--muted);
           text-transform: uppercase;
@@ -230,6 +224,25 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
 
         .cat-circle-btn:hover .cat-circle-label {
           color: var(--text);
+        }
+
+        @media (min-width: 768px) {
+          .cats-inner-circular {
+            gap: 24px;
+            padding: 16px 24px;
+          }
+          .cat-circle-btn {
+            width: 80px;
+          }
+          .cat-circle-icon {
+            width: 62px;
+            height: 62px;
+            font-size: 1.8rem;
+          }
+          .cat-circle-label {
+            font-size: 10px;
+            margin-top: 10px;
+          }
         }
 
         @media (min-width: 1024px) {

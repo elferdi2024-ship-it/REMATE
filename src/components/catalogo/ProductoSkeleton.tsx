@@ -12,21 +12,22 @@ export function ProductoSkeleton() {
       style={{
         background: "var(--white)",
         border: "1.5px solid var(--border)",
-        borderRadius: "16px",
-        padding: "12px",
+        borderRadius: "var(--r-lg)",
+        padding: "14px",
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        height: "290px", // Altura fija garantizada para eliminar el CLS del catálogo
-        boxShadow: "var(--shadow-sm)",
+        height: "320px",
+        boxShadow: "0 2px 8px rgba(17,11,8,0.03)",
       }}
     >
       {/* Thumbnail area skeleton */}
       <div
         style={{
           ...pulseStyle,
-          borderRadius: "12px",
-          height: "120px",
+          borderRadius: "calc(var(--r-lg) - 2px)",
+          aspectRatio: "1 / 1",
+          height: "auto",
           marginBottom: "10px",
           width: "100%",
         }}
@@ -81,8 +82,8 @@ export function ProductoSkeleton() {
           position: "absolute",
           bottom: "12px",
           right: "12px",
-          width: "36px",
-          height: "36px",
+          width: "44px",
+          height: "44px",
           borderRadius: "50%",
         }}
       />

@@ -98,28 +98,16 @@ export default function ProductoCard({
       onClick={() => onQuickView?.(producto)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`card${isInCart ? " in-cart" : ""} group ${isAdding ? "adding-anim" : ""}`}
+      className={`card${isInCart ? " in-cart" : ""} group ${isAdding ? "adding-anim hover-lift" : "hover-lift"}`}
       style={{
         background: isInCart ? "var(--verde-pale, #EBF7F0)" : "var(--white)",
-        border: isHovered 
-          ? "1.5px solid rgba(232, 48, 42, 0.35)" 
-          : isInCart
-            ? "1.5px solid var(--verde)" 
-            : "1.5px solid rgba(17,11,8,0.06)",
-        borderRadius: "var(--r-lg)",
-        padding: "14px",
-        transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+        borderColor: isInCart ? "var(--verde)" : "var(--border)",
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        transform: isHovered ? "translateY(-5px)" : "translateY(0)",
-        boxShadow: isHovered 
-          ? "0 20px 35px rgba(17,11,8,0.08)"
-          : isInCart
-            ? "0 6px 16px rgba(26,122,66,0.06)"
-            : "0 2px 8px rgba(17,11,8,0.03)",
-        cursor: "pointer"
-      } as React.CSSProperties}
+        cursor: "pointer",
+        padding: "14px",
+      }}
     >
       <div className="card-thumb" style={{ 
         background: "linear-gradient(180deg, #ffffff 0%, #f9f8f6 100%)", 
@@ -182,6 +170,32 @@ export default function ProductoCard({
             <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
           </svg>
         </button>
+
+        {/* Indicador En Carrito */}
+        {isInCart && (
+          <div
+            style={{
+              position: "absolute",
+              top: "50px",
+              left: "8px",
+              zIndex: 15,
+              background: "var(--verde)",
+              color: "#fff",
+              width: "28px",
+              height: "28px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(26,122,66,0.3)",
+              fontWeight: 900,
+              fontSize: "14px",
+              animation: "cardFadeIn 0.2s ease-out",
+            }}
+          >
+            ✓
+          </div>
+        )}
 
         {/* Badge de Descuento */}
         {producto.precioAnterior && producto.precioAnterior > producto.precio && (
@@ -360,16 +374,16 @@ export default function ProductoCard({
         )}
       </div>
 
-      <div className="card-body" style={{ padding: "0 4px 48px 4px", flex: 1, display: "flex", flexDirection: "column" }}>
+      <div className="card-body" style={{ padding: "0 4px 8px 4px", flex: 1, display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "6px" }}>
           <span className="card-cat-badge" style={{ 
             background: badgeBg, 
             color: badgeColor, 
-            fontSize: "8px", 
+            fontSize: "10px", 
             fontWeight: 800, 
             textTransform: "uppercase", 
-            padding: "2px 6px", 
-            borderRadius: "4px", 
+            padding: "3px 6px", 
+            borderRadius: "6px", 
             display: "inline-block",
             letterSpacing: "0.5px",
             width: "fit-content"
@@ -378,12 +392,12 @@ export default function ProductoCard({
           </span>
           {producto.marca && (
             <span style={{ 
-              fontSize: "8px", 
+              fontSize: "10px", 
               fontWeight: 800, 
               color: "var(--muted)", 
               textTransform: "uppercase",
-              padding: "2px 6px", 
-              borderRadius: "4px", 
+              padding: "3px 6px", 
+              borderRadius: "6px", 
               background: "var(--crema-2)",
               display: "inline-block",
               letterSpacing: "0.5px",

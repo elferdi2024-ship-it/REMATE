@@ -94,7 +94,7 @@ export default function QuickViewModal({
 
         <div className="overflow-y-auto w-full h-full pb-8 md:pb-0" style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}>
           {/* Image Section */}
-          <div className="relative w-full bg-gradient-to-br from-gray-50 to-[#F8F9FA] flex items-center justify-center pt-12 pb-8 md:py-16 border-b border-gray-100" style={{ aspectRatio: "4/3" }}>
+          <div className="relative w-full bg-gradient-to-br from-[#ffffff] to-[#f9f8f6] flex items-center justify-center pt-10 pb-6 md:py-12 border-b border-gray-100" style={{ minHeight: "220px", maxHeight: "35vh" }}>
             {/* Subtle glow behind product */}
             <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
                <div className="w-3/4 h-3/4 bg-white rounded-full blur-3xl" />
@@ -201,7 +201,7 @@ export default function QuickViewModal({
                 <div className="animate-in fade-in duration-300">
                   <button 
                     onClick={() => onAdd(producto)}
-                    className="group relative overflow-hidden w-full bg-gray-900 hover:bg-black text-white font-bold text-lg py-4 md:py-5 rounded-[20px] shadow-[0_8px_30px_rgba(0,0,0,0.12)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 mb-4"
+                    className="group relative overflow-hidden w-full bg-[#E8302A] hover:bg-[#D02621] text-white font-bold text-lg py-4 md:py-5 rounded-[20px] shadow-[0_8px_30px_rgba(232,48,42,0.25)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 mb-4"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                     <span className="text-xl group-hover:scale-110 transition-transform">🛒</span> 

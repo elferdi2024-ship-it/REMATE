@@ -150,7 +150,7 @@ export default function BottomNavBar({
           <button
             key={tab.id}
             onClick={() => handleTabClick(tab.id)}
-            className={`bg-transparent border-none flex flex-col items-center justify-center gap-0.5 cursor-pointer px-2 py-1 min-w-[60px] transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            className={`bg-transparent border-none flex flex-col items-center justify-center gap-0.5 cursor-pointer px-2 py-1 min-w-[60px] transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-90 touch-manipulation rounded-xl ${
               isSelected ? "text-[#E8302A]" : "text-[#6E6864]"
             }`}
             aria-label={tab.label}
