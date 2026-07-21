@@ -40,8 +40,8 @@ export default function ResultsBar({
   onSelectSuggestion,
 }: ResultsBarProps) {
   return (
-    <div className="results-bar-wrap">
-    <div className="results-bar">
+    <div className="sticky top-[100px] z-[60] w-full bg-white/80 backdrop-blur-xl border border-zinc-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl p-3 mb-6 transition-all">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
       {ofertasCount && ofertasCount > 0 ? (
         <Link
           href="/ofertas"

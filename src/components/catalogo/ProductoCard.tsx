@@ -110,10 +110,8 @@ export default function ProductoCard({
       onClick={() => onQuickView?.(producto)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`card${isInCart ? " in-cart" : ""} group ${isAdding ? "adding-anim hover-lift" : "hover-lift"}`}
+      className={`card${isInCart ? " in-cart ring-2 ring-emerald-500" : ""} group transition-all duration-400 ease-out hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 active:scale-95 bg-white border border-zinc-100 rounded-[24px]`}
       style={{
-        background: isInCart ? "var(--verde-pale, #EBF7F0)" : "var(--white)",
-        borderColor: isInCart ? "var(--verde)" : "var(--border)",
         display: "flex",
         flexDirection: "column",
         position: "relative",

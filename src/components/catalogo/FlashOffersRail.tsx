@@ -24,32 +24,27 @@ function FlashCountdown({ expiresAt }: { expiresAt: string }) {
     return () => clearInterval(interval);
   }, [expiresAt]);
 
-  if (remaining <= 0) return <span style={{ color: "#EF4444", fontWeight: 800 }}>¡EXPIRADA!</span>;
+  if (remaining <= 0) return <span className="text-red-500 font-black">¡EXPIRADA!</span>;
 
   const h = Math.floor(remaining / 3600);
   const m = Math.floor((remaining % 3600) / 60);
   const s = remaining % 60;
 
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "6px",
-        background: "rgba(239, 68, 68, 0.2)",
-        border: "1px solid rgba(239, 68, 68, 0.4)",
-        borderRadius: "8px",
-        padding: "4px 12px",
-        fontSize: "13px",
-        fontWeight: 900,
-        color: "#EF4444",
-        fontFamily: "var(--font-display, monospace)",
-        letterSpacing: "0.5px",
-        animation: "pulse 1.5s infinite",
-      }}
-    >
-      ⚡ TERMINA EN: {String(h).padStart(2, "0")}:{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
-    </span>
+    <div className="flex items-center gap-1 font-display">
+      <span className="text-red-500 font-black mr-2 animate-pulse text-[11px] sm:text-[13px] tracking-wide">⚡ TERMINA EN</span>
+      <div className="bg-red-600 text-white rounded-md px-1.5 py-0.5 text-xs font-bold min-w-[24px] text-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
+        {String(h).padStart(2, "0")}
+      </div>
+      <span className="text-red-500 font-bold text-xs">:</span>
+      <div className="bg-red-600 text-white rounded-md px-1.5 py-0.5 text-xs font-bold min-w-[24px] text-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
+        {String(m).padStart(2, "0")}
+      </div>
+      <span className="text-red-500 font-bold text-xs">:</span>
+      <div className="bg-red-600 text-white rounded-md px-1.5 py-0.5 text-xs font-bold min-w-[24px] text-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
+        {String(s).padStart(2, "0")}
+      </div>
+    </div>
   );
 }
 

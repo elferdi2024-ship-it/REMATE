@@ -67,7 +67,7 @@ import categoriaMapping from "@/lib/categoria_mapping.json";
 const catMap = (categoriaMapping as any).mapping || categoriaMapping;
 
 import { flyToCart } from "@/lib/flyToCart";
-import DesktopCategorySidebar from "@/components/catalogo/DesktopCategorySidebar";
+import CategoryRail from "@/components/catalogo/CategoryRail";
 import { BrandHeroCarousel, CustomHeroCarousel } from "@/components/ads";
 
 interface CatalogoPageClientProps {
@@ -1479,17 +1479,40 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         );
       })()}
 
-      <div className="page-wrapper">
-        <div className="mb-4 mt-2">
-          {ofertasConfig?.mainCarousel && ofertasConfig.mainCarousel.filter(s => s.activo).length > 0 ? (
-            <CustomHeroCarousel slides={ofertasConfig.mainCarousel.filter(s => s.activo)} />
-          ) : (
-            <BrandHeroCarousel brands={activeBrands} />
-          )}
+      <div className="page-wrapper pt-2">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 mb-8">
+          {/* Main Hero (Left Bento) */}
+          <div className="h-full relative overflow-hidden rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+            {ofertasConfig?.mainCarousel && ofertasConfig.mainCarousel.filter(s => s.activo).length > 0 ? (
+              <CustomHeroCarousel slides={ofertasConfig.mainCarousel.filter(s => s.activo)} />
+            ) : (
+              <BrandHeroCarousel brands={activeBrands} />
+            )}
+          </div>
+          
+          {/* Side Stack (Right Bento) */}
+          <div className="hidden lg:flex flex-col gap-4">
+            <div className="flex-1 bg-gradient-to-br from-zinc-50 to-white border border-zinc-100 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative flex flex-col items-center justify-center p-4">
+               <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
+            </div>
+            
+            <div className="flex-1 bg-gradient-to-br from-[#E8302A] to-[#B91C1C] rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(232,48,42,0.3)] relative flex flex-col items-center justify-center p-6 text-white text-center">
+               <span className="text-3xl mb-2">🔥</span>
+               <h3 className="font-display font-black uppercase text-xl leading-tight">Flash<br/>Deals</h3>
+               <p className="text-[10px] uppercase tracking-widest mt-2 opacity-90 font-bold">Por tiempo limitado</p>
+            </div>
+          </div>
         </div>
-        <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
+
+        {/* Mobile Ads */}
+        <div className="lg:hidden mb-6 flex flex-col gap-4">
+          <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
+        </div>
+
         {ofertasConfig?.brandBanners && (
-          <BrandBannersRail banners={ofertasConfig.brandBanners} />
+          <div className="mb-8">
+            <BrandBannersRail banners={ofertasConfig.brandBanners} />
+          </div>
         )}
       </div>
 
@@ -1534,9 +1557,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         )}
 
         {categorias.length > 0 && (
-          <div className="lg:hidden">
-            <CatsNav
-              categorias={["Todos", ...categorias]}
+          <div className="w-full relative z-40 mb-6">
+            <CategoryRail
+              categorias={categorias}
               activeCat={activeCat}
               onSelect={(cat) => {
                 const params = new URLSearchParams(window.location.search);
@@ -1549,24 +1572,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           </div>
         )}
 
-        <div className="flex gap-6 relative" style={{ alignItems: "flex-start", marginTop: "16px" }}>
-          {/* Desktop Sidebar */}
-          {categorias.length > 0 && (
-            <div className="hidden lg:block">
-              <DesktopCategorySidebar
-                categorias={["Todos", ...categorias]}
-                activeCat={activeCat}
-                onSelect={(cat) => {
-                  const params = new URLSearchParams(window.location.search);
-                  if (cat === "Todos") params.delete("categoria");
-                  else params.set("categoria", cat);
-                  router.replace(`/catalogo?${params.toString()}`, { scroll: false });
-                  scrollToGrid();
-                }}
-              />
-            </div>
-          )}
-
+        <div className="flex gap-6 relative" style={{ alignItems: "flex-start" }}>
           {/* Main content */}
           <div className="flex-1 min-w-0 pb-[100px]">
             {/* Results bar */}

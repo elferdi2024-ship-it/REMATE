@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, updateDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { subscribePedidosHoy } from "@/lib/pedidos";
 import Link from "next/link";
 import { CATEGORIAS } from "@/types";
@@ -128,7 +128,7 @@ export default function AdminDashboardPage() {
   const handleSaveConfig = async (updatedFields: Partial<TiendaConfig>) => {
     setConfigSaving(true);
     try {
-      await updateDoc(doc(db, "config", "tienda"), updatedFields);
+      await setDoc(doc(db, "config", "tienda"), updatedFields, { merge: true });
     } catch (err) {
       console.error("Error al guardar configuración de la tienda:", err);
     } finally {

@@ -41,7 +41,7 @@ export default function CustomHeroCarousel({ slides }: CustomHeroCarouselProps) 
   return (
     <div 
       ref={ref}
-      className="relative w-full h-[200px] md:h-[280px] overflow-hidden bg-[#070B19] group rounded-xl md:rounded-none shadow-2xl"
+      className="relative w-full h-full min-h-[220px] md:min-h-[400px] overflow-hidden bg-zinc-950 group rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
