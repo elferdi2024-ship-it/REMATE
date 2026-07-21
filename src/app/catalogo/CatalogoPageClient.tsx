@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo, Suspense, useEffect, useRef } from "rea
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/lib/toast-context";
@@ -31,14 +32,17 @@ import { useFavoritos } from "@/lib/favoritos-context";
 import { useBrands } from "@/hooks/useBrands";
 import type { OfertaConfig } from "@/types/ofertas";
 
-import CartPanel from "@/components/carrito/CartPanel";
-import UserPanel from "@/components/usuario/UserPanel";
 import BranchBar from "@/components/catalogo/BranchBar";
-import BranchSelectModal from "@/components/catalogo/BranchSelectModal";
-import FacturaModal from "@/components/catalogo/FacturaModal";
 import OnlineBanner from "@/components/ui/OnlineBanner";
-import QuickViewModal from "@/components/catalogo/QuickViewModal";
+import EmptyState from "@/components/ui/EmptyState";
 import { AdSlotPlacement } from "@/components/ads";
+
+// Lazy-loaded components para mejorar Performance / First Load JS
+const CartPanel = dynamic(() => import("@/components/carrito/CartPanel"), { ssr: false });
+const UserPanel = dynamic(() => import("@/components/usuario/UserPanel"), { ssr: false });
+const BranchSelectModal = dynamic(() => import("@/components/catalogo/BranchSelectModal"), { ssr: false });
+const FacturaModal = dynamic(() => import("@/components/catalogo/FacturaModal"), { ssr: false });
+const QuickViewModal = dynamic(() => import("@/components/catalogo/QuickViewModal"), { ssr: false });
 import {
   armarMensajeWA,
   enviarWhatsApp,
@@ -1332,6 +1336,12 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onIgnore={handleIgnoreSharedCart}
       />
 
+      {/* Branch Selector Premium (Mobile Top / Desktop Flow) */}
+      <BranchBar
+        sucursalName={SUCURSALES.find(s => s.id === sucursalId)?.nombre || null}
+        onClick={() => setIsBranchModalOpen(true)}
+      />
+
       <div className="page-wrapper" style={{ marginTop: "16px", marginBottom: "8px" }}>
         {/* Guía Marti movida al Hero por estética y minimalismo */}
       </div>
@@ -1587,24 +1597,21 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
                 ))}
               </div>
             ) : filtrados.length === 0 ? (
-              <div style={{ padding: "32px 16px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div className="no-results" style={{ background: "var(--bg2)", padding: "48px 24px", borderRadius: "var(--r-xl)", maxWidth: "500px", margin: "0 auto 24px", boxShadow: "var(--shadow-sm)" }}>
-                  <span className="no-results-icon" style={{ fontSize: "4rem", marginBottom: "16px", display: "block" }}>&#128269;</span>
-                  <h3 style={{ fontSize: "1.4rem", fontWeight: 800, marginBottom: "8px", color: "var(--oscuro)", fontFamily: "var(--font-display), sans-serif" }}>No encontramos resultados</h3>
-                  <p style={{ color: "var(--muted)", marginBottom: "24px" }}>No hay productos que coincidan con <strong>&quot;{search}&quot;</strong>. Intentá con otro término o limpiá los filtros.</p>
-                  <button 
-                    onClick={() => {
-                      setSearchDebounced("");
-                      const params = new URLSearchParams(window.location.search);
-                      params.delete("categoria");
-                      params.delete("search");
-                      router.replace(`/catalogo?${params.toString()}`, { scroll: false });
-                    }} 
-                    style={{ background: "var(--rojo)", color: "white", fontWeight: 700, padding: "12px 24px", borderRadius: "var(--r-md)", border: "none", cursor: "pointer", boxShadow: "0 4px 12px var(--rojo-glow)" }}
-                  >
-                    Limpiar Búsqueda
-                  </button>
-                </div>
+              <div className="w-full py-12 flex flex-col items-center">
+                <EmptyState
+                  icon="🔎"
+                  title="No encontramos resultados"
+                  description={`No hay productos que coincidan con "${search}". Intentá con otro término o limpiá los filtros.`}
+                  actionText="Limpiar Búsqueda"
+                  onAction={() => {
+                    setSearchDebounced("");
+                    const params = new URLSearchParams(window.location.search);
+                    params.delete("categoria");
+                    params.delete("search");
+                    router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+                  }}
+                  minHeight="30vh"
+                />
                 <AdSlotPlacement slot="empty-search" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
               </div>
             ) : (
@@ -1780,11 +1787,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         </button>
       )}
 
-      {/* Branch Selector Premium */}
-      <BranchBar
-        sucursalName={SUCURSALES.find(s => s.id === sucursalId)?.nombre || null}
-        onClick={() => setIsBranchModalOpen(true)}
-      />
+      {/* Branch Select Modal */}
       <BranchSelectModal
         isOpen={isBranchModalOpen}
         onClose={() => setIsBranchModalOpen(false)}

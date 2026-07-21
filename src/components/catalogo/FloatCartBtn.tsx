@@ -36,7 +36,7 @@ export default function FloatCartBtn({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 150, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[90] w-[92%] max-w-sm flex flex-col gap-2 pointer-events-none"
+          className="fixed bottom-[80px] md:bottom-8 left-1/2 -translate-x-1/2 z-[90] w-[92%] max-w-sm flex flex-col gap-2 pointer-events-none"
         >
           {/* Progress Bar Flotante */}
           <div className="pointer-events-auto bg-white/95 backdrop-blur-md border border-zinc-200/50 shadow-lg rounded-2xl p-3 flex flex-col gap-2">

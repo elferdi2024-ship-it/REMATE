@@ -18,6 +18,12 @@ export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRow
   const emoji = resolveEmoji(item);
   const controls = useAnimation();
 
+  // B2B Growth Hacker: Upsell a Bulto Cerrado
+  let upsellBulto = 0;
+  if (item.cantidad >= 3 && item.cantidad <= 5) upsellBulto = 6;
+  if (item.cantidad >= 9 && item.cantidad <= 11) upsellBulto = 12;
+  const missingForBulto = upsellBulto > 0 ? upsellBulto - item.cantidad : 0;
+
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const threshold = -80; // pixels to trigger delete
     if (info.offset.x < threshold) {
@@ -54,6 +60,21 @@ export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRow
             <span className="cart-item-unit-price">${item.precio.toLocaleString('es-UY')} c/u</span>
             <span className="cart-item-subtotal">${subtotal.toLocaleString('es-UY')}</span>
           </div>
+          {upsellBulto > 0 && (
+            <motion.button
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              onClick={() => {
+                onUpdateQty(item.codigo, missingForBulto);
+                if (window.navigator && window.navigator.vibrate) {
+                  window.navigator.vibrate([20, 30, 20]);
+                }
+              }}
+              className="mt-1.5 flex items-center gap-1.5 bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-md w-fit hover:bg-blue-100 transition-colors border border-blue-200"
+            >
+              <span>📦</span> Completar bulto ({upsellBulto})
+            </motion.button>
+          )}
         </div>
         <div className="cart-item-qty">
           <button

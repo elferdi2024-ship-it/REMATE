@@ -1,5 +1,6 @@
 // filepath: src/components/catalogo/BottomNavBar.tsx
 import React from "react";
+import { haptic } from "@/lib/haptic";
 
 const getTabIcon = (id: string, isSelected: boolean, cartQty: number) => {
   switch (id) {
@@ -133,6 +134,7 @@ export default function BottomNavBar({
   ];
 
   const handleTabClick = (tabId: string) => {
+    haptic.add();
     if (tabId === "carrito") {
       onOpenCart();
     } else if (tabId === "cuenta") {

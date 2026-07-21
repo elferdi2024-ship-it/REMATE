@@ -15,6 +15,8 @@ interface ProductoRowProps {
 }
 
 import { formatPrice, getCatColorVar } from "@/lib/format";
+import { haptic } from "@/lib/haptic";
+import { toast } from "sonner";
 
 
 export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuickView, isCompact = false }: ProductoRowProps) {
@@ -25,14 +27,22 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
 
   const handleAdd = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    haptic.add();
     onAdd(producto, e);
+    toast.success(`1x ${producto.nombre} agregado`, {
+      position: 'top-center',
+      duration: 1500,
+      style: { background: 'var(--verde)', color: 'white', border: 'none', fontWeight: 'bold' }
+    });
   }, [onAdd, producto]);
 
   const handleDec = useCallback(() => {
+    haptic.remove();
     onQtyChange(producto.codigo, Math.max(0, qty - 1));
   }, [onQtyChange, producto.codigo, qty]);
 
   const handleInc = useCallback(() => {
+    haptic.add();
     onQtyChange(producto.codigo, qty + 1);
   }, [onQtyChange, producto.codigo, qty]);
 
@@ -145,13 +155,13 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
             display: "flex",
             alignItems: "center",
             background: "var(--white)",
-            borderRadius: "20px",
-            height: isCompact ? "30px" : "38px",
+            borderRadius: "24px",
+            height: isCompact ? "38px" : "44px",
             boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
             border: "1.5px solid rgba(46,125,50,0.25)",
-            padding: "0 2px"
+            padding: "0 4px"
           }}>
-            <button className="qty-btn" onClick={handleDec} aria-label="Reducir cantidad" style={{ width: isCompact ? "24px" : "30px", height: isCompact ? "24px" : "30px", fontSize: isCompact ? "1rem" : "1.1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button className="qty-btn active:scale-95 transition-transform" onClick={handleDec} aria-label="Reducir cantidad" style={{ width: isCompact ? "36px" : "44px", height: isCompact ? "36px" : "44px", fontSize: isCompact ? "1.2rem" : "1.4rem", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--oscuro)" }}>
               &#8722;
             </button>
             <input
@@ -168,34 +178,36 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
               aria-label="Cantidad"
             />
             <button
-              className="qty-btn"
+              className="qty-btn active:scale-95 transition-transform"
               onClick={handleInc}
               aria-label="Aumentar cantidad"
-              style={{ background: "var(--verde)", color: "#fff", border: "none", width: isCompact ? "24px" : "30px", height: isCompact ? "24px" : "30px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}
+              style={{ width: isCompact ? "36px" : "44px", height: isCompact ? "36px" : "44px", fontSize: isCompact ? "1.2rem" : "1.4rem", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--oscuro)" }}
             >
-              +
+              &#43;
             </button>
           </div>
         ) : (
-          <button 
-            className="btn-add" 
-            onClick={handleAdd} 
-            style={{ 
-              padding: isCompact ? "6px 12px" : "8px 16px",
-              background: "linear-gradient(135deg, var(--oscuro), #4b5563)",
+          <button
+            className="row-add active:scale-95 transition-transform"
+            onClick={handleAdd}
+            aria-label="Agregar"
+            style={{
+              background: "var(--rojo)",
               color: "white",
               border: "none",
-              borderRadius: "20px",
-              fontWeight: 700,
-              fontSize: isCompact ? "0.75rem" : "0.85rem",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+              borderRadius: "24px",
+              height: isCompact ? "38px" : "44px",
+              width: isCompact ? "38px" : "44px",
+              fontSize: "1.4rem",
+              fontWeight: 800,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 12px var(--rojo-glow)",
               cursor: "pointer",
-              transition: "all 0.2s"
             }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-            onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
           >
-            + Agregar
+            &#43;
           </button>
         )}
       </div>

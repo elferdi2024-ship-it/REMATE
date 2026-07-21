@@ -8,6 +8,7 @@ import { EMOJI_POR_CATEGORIA } from "@/types";
 import Image from "next/image";
 import { useFavoritos } from "@/lib/favoritos-context";
 import { SponsorBadge } from "@/components/ads";
+import { toast } from "sonner";
 
 interface ProductoCardProps {
   producto: Producto;
@@ -81,6 +82,11 @@ export default function ProductoCard({
     e.stopPropagation();
     haptic.add();
     onAdd(producto, e);
+    toast.success(`1x ${producto.nombre} agregado`, {
+      position: 'top-center',
+      duration: 1500,
+      style: { background: 'var(--verde)', color: 'white', border: 'none', fontWeight: 'bold' }
+    });
   }, [onAdd, producto]);
 
   const handleDec = React.useCallback((e: React.MouseEvent) => {

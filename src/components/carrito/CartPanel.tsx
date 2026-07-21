@@ -8,6 +8,7 @@ import CartItemRow from './CartItem';
 import CartFooter from './CartFooter';
 import { AdSlotPlacement } from '@/components/ads';
 import { useTiendaConfig } from '@/hooks/useTiendaConfig';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface CartPanelProps {
   isOpen: boolean;
@@ -137,11 +138,13 @@ export default function CartPanel({
           {/* Items list */}
           <div className="cart-items">
             {items.length === 0 ? (
-              <div className="cart-empty">
-                <span className="cart-empty-icon">🛒</span>
-                <strong>Todavía no agregaste nada</strong>
-                <p>Agregá productos desde el catálogo para armar tu pedido.</p>
-              </div>
+              <EmptyState 
+                icon="🛒"
+                title="Tu carrito está vacío"
+                description="Agregá productos desde el catálogo para armar tu pedido express."
+                actionText="Ver Catálogo"
+                onAction={onClose}
+              />
             ) : (
               items.map((item) => (
                 <CartItemRow
