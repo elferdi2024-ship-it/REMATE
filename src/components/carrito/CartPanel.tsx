@@ -7,6 +7,7 @@ import Image from 'next/image';
 import CartItemRow from './CartItem';
 import CartFooter from './CartFooter';
 import { AdSlotPlacement } from '@/components/ads';
+import { useTiendaConfig } from '@/hooks/useTiendaConfig';
 
 interface CartPanelProps {
   isOpen: boolean;
@@ -69,8 +70,10 @@ export default function CartPanel({
   relatedProducts = [],
   onAddProduct,
 }: CartPanelProps) {
+  const { config } = useTiendaConfig();
+  
   // Configuración de la barra de progreso de envío gratis (Fase 3: CRO & Marketing)
-  const MIN_TICKET = 3000;
+  const MIN_TICKET = config.minimoEnvioGratis;
   const progressPercent = Math.min(100, (total / MIN_TICKET) * 100);
   const isEligible = total >= MIN_TICKET;
   const missingAmount = Math.max(0, MIN_TICKET - total);

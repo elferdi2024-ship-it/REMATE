@@ -19,6 +19,7 @@ interface ProductRow {
 interface TiendaConfig {
   pedidosAbiertos: boolean;
   bannerMensaje: string;
+  minimoEnvioGratis?: number;
 }
 
 export default function AdminDashboardPage() {
@@ -26,6 +27,7 @@ export default function AdminDashboardPage() {
   const [config, setConfig] = useState<TiendaConfig>({
     pedidosAbiertos: true,
     bannerMensaje: "",
+    minimoEnvioGratis: 3000,
   });
   const [configSaving, setConfigSaving] = useState(false);
 
@@ -59,7 +61,7 @@ export default function AdminDashboardPage() {
           setConfig(snap.data() as TiendaConfig);
         } else {
           // Inicializar si no existe
-          setConfig({ pedidosAbiertos: true, bannerMensaje: "" });
+          setConfig({ pedidosAbiertos: true, bannerMensaje: "", minimoEnvioGratis: 3000 });
         }
       },
       (err) => {
@@ -262,6 +264,33 @@ export default function AdminDashboardPage() {
                   <button
                     disabled={configSaving}
                     onClick={() => handleSaveConfig({ bannerMensaje: config.bannerMensaje })}
+                    className="rounded-xl bg-[var(--admin-accent)] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--admin-sidebar-bg)] transition hover:opacity-90 disabled:opacity-50"
+                  >
+                    Establecer
+                  </button>
+                </div>
+              </div>
+
+              {/* Monto Mínimo de Envío Gratis */}
+              <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-bg)] p-5 space-y-3">
+                <div>
+                  <h3 className="font-bold text-[var(--admin-text-hi)]">🚚 Meta de Envío Gratis</h3>
+                  <p className="text-xs text-[var(--admin-text-lo)] mt-1">
+                    Establece el monto mínimo que los clientes deben alcanzar para activar el envío gratis en su carrito.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="Ej: 3000"
+                    value={config.minimoEnvioGratis || ""}
+                    onChange={(e) => setConfig({ ...config, minimoEnvioGratis: Number(e.target.value) })}
+                    className="flex-1 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-input-bg)] px-4 py-2.5 text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)] focus:border-[var(--admin-accent)]/50 focus:outline-none"
+                  />
+                  <button
+                    disabled={configSaving}
+                    onClick={() => handleSaveConfig({ minimoEnvioGratis: config.minimoEnvioGratis })}
                     className="rounded-xl bg-[var(--admin-accent)] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--admin-sidebar-bg)] transition hover:opacity-90 disabled:opacity-50"
                   >
                     Establecer
