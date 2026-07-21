@@ -11,12 +11,13 @@ interface ProductoRowProps {
   onAdd: (producto: Producto, e?: React.MouseEvent) => void;
   onQtyChange: (codigo: string, qty: number) => void;
   onQuickView?: (producto: Producto) => void;
+  isCompact?: boolean;
 }
 
 import { formatPrice, getCatColorVar } from "@/lib/format";
 
 
-export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuickView }: ProductoRowProps) {
+export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuickView, isCompact = false }: ProductoRowProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const isInCart = qty > 0;
   const emoji = EMOJI_POR_CATEGORIA[producto.categoria] || "📦";
@@ -62,8 +63,8 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
             ? "rgba(46,125,50,0.02)" 
             : "var(--white)",
         borderRadius: "12px",
-        padding: "12px 16px",
-        marginBottom: "8px",
+        padding: isCompact ? "6px 12px" : "12px 16px",
+        marginBottom: isCompact ? "4px" : "8px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -73,19 +74,21 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
         transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         transform: isHovered ? "translateX(4px)" : "translateX(0)",
         border: "1px solid rgba(17,11,8,0.06)",
+        gap: isCompact ? "8px" : "0",
       }}
     >
       {/* Thumb */}
       <div className="row-thumb" style={{
         background: "linear-gradient(135deg, #ffffff, #f5f3ef)",
-        borderRadius: "10px",
-        width: "50px",
-        height: "50px",
+        borderRadius: isCompact ? "6px" : "10px",
+        width: isCompact ? "32px" : "50px",
+        height: isCompact ? "32px" : "50px",
         display: "flex",
+        flexShrink: 0,
         alignItems: "center",
         justifyContent: "center",
-        fontSize: "1.8rem",
-        marginRight: "16px",
+        fontSize: isCompact ? "1.2rem" : "1.8rem",
+        marginRight: isCompact ? "4px" : "16px",
         border: "1px solid rgba(17,11,8,0.04)"
       }}>
         {producto.imagen ? (
@@ -95,7 +98,7 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
               alt={producto.nombre}
               fill
               sizes="50px"
-              style={{ objectFit: "contain", padding: "4px" }} 
+              style={{ objectFit: "contain", padding: isCompact ? "2px" : "4px" }} 
             />
           </div>
         ) : (
@@ -104,29 +107,34 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
       </div>
 
       {/* Info */}
-      <div className="row-info" style={{ flex: 1, marginRight: "16px" }}>
+      <div className="row-info" style={{ flex: 1, minWidth: 0, marginRight: isCompact ? "4px" : "16px" }}>
         <div className="row-name" style={{
-          fontSize: "0.95rem",
+          fontSize: isCompact ? "0.85rem" : "0.95rem",
           fontWeight: 600,
           color: "var(--oscuro)",
-          marginBottom: "4px",
+          marginBottom: isCompact ? "0px" : "4px",
           letterSpacing: "-0.01em",
-          lineHeight: "1.3"
-        }}>{producto.nombre}</div>
+          lineHeight: "1.2",
+          whiteSpace: isCompact ? "nowrap" : "normal",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }} title={producto.nombre}>{producto.nombre}</div>
         <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
           <div className="row-price" style={{
             fontFamily: "var(--font-display)",
-            fontSize: "1.25rem",
+            fontSize: isCompact ? "1.05rem" : "1.25rem",
             fontWeight: 700,
             color: "var(--rojo)"
           }}>{formatPrice(producto.precio)}</div>
-          <div className="row-price-label" style={{
-            fontSize: "9px",
-            color: "var(--muted)",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.5px"
-          }}>unidad iva incl.</div>
+          {!isCompact && (
+            <div className="row-price-label" style={{
+              fontSize: "9px",
+              color: "var(--muted)",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.5px"
+            }}>unidad iva incl.</div>
+          )}
         </div>
       </div>
 
@@ -138,12 +146,12 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
             alignItems: "center",
             background: "var(--white)",
             borderRadius: "20px",
-            height: "38px",
+            height: isCompact ? "30px" : "38px",
             boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
             border: "1.5px solid rgba(46,125,50,0.25)",
             padding: "0 2px"
           }}>
-            <button className="qty-btn" onClick={handleDec} aria-label="Reducir cantidad" style={{ width: "30px", height: "30px", fontSize: "1.1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button className="qty-btn" onClick={handleDec} aria-label="Reducir cantidad" style={{ width: isCompact ? "24px" : "30px", height: isCompact ? "24px" : "30px", fontSize: isCompact ? "1rem" : "1.1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
               &#8722;
             </button>
             <input
@@ -154,8 +162,8 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
               onChange={handleQtyInput}
               style={{
                 background: "transparent", border: "none", outline: "none",
-                textAlign: "center", fontWeight: 800, fontSize: "0.9rem",
-                color: "var(--texto, #111111)", width: "32px", padding: 0,
+                textAlign: "center", fontWeight: 800, fontSize: isCompact ? "0.85rem" : "0.9rem",
+                color: "var(--texto, #111111)", width: isCompact ? "26px" : "32px", padding: 0,
               }}
               aria-label="Cantidad"
             />
@@ -163,7 +171,7 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
               className="qty-btn"
               onClick={handleInc}
               aria-label="Aumentar cantidad"
-              style={{ background: "var(--verde)", color: "#fff", border: "none", width: "30px", height: "30px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}
+              style={{ background: "var(--verde)", color: "#fff", border: "none", width: isCompact ? "24px" : "30px", height: isCompact ? "24px" : "30px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}
             >
               +
             </button>
@@ -173,13 +181,13 @@ export default function ProductoRow({ producto, qty, onAdd, onQtyChange, onQuick
             className="btn-add" 
             onClick={handleAdd} 
             style={{ 
-              padding: "8px 16px",
+              padding: isCompact ? "6px 12px" : "8px 16px",
               background: "linear-gradient(135deg, var(--oscuro), #4b5563)",
               color: "white",
               border: "none",
               borderRadius: "20px",
               fontWeight: 700,
-              fontSize: "0.85rem",
+              fontSize: isCompact ? "0.75rem" : "0.85rem",
               boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
               cursor: "pointer",
               transition: "all 0.2s"

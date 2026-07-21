@@ -54,7 +54,7 @@ export interface Usuario {
   creadoEn: Date;
 }
 
-export type Vista = "grilla" | "lista";
+export type Vista = "grilla" | "lista" | "compacta";
 
 export const CATEGORIAS = [
   "ACEITES Y GRASAS",

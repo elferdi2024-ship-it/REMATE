@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import type { CartItem } from '@/types';
 import { EMOJI_POR_CATEGORIA } from '@/types';
+import { motion, useAnimation, PanInfo } from 'framer-motion';
 
 interface CartItemRowProps {
   item: CartItem;
@@ -15,58 +16,85 @@ export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRow
   const [showNote, setShowNote] = useState(false);
   const subtotal = item.precio * item.cantidad;
   const emoji = resolveEmoji(item);
+  const controls = useAnimation();
+
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const threshold = -80; // pixels to trigger delete
+    if (info.offset.x < threshold) {
+      controls.start({ x: -window.innerWidth, opacity: 0, transition: { duration: 0.2 } }).then(() => {
+        onRemove(item.codigo);
+      });
+    } else {
+      controls.start({ x: 0, transition: { type: 'spring', stiffness: 300, damping: 20 } });
+    }
+  };
 
   return (
-    <div className="cart-item">
-      <span className="cart-item-icon">{emoji}</span>
-      <div className="cart-item-info">
-        <div className="cart-item-name" title={item.nombre}>
-          {item.nombre}
-        </div>
-        <div className="cart-item-price-qty">
-          <span className="cart-item-unit-price">${item.precio.toLocaleString('es-UY')} c/u</span>
-          <span className="cart-item-subtotal">${subtotal.toLocaleString('es-UY')}</span>
-        </div>
+    <div className="relative w-full overflow-hidden mb-2 rounded-xl bg-red-100">
+      {/* Background Delete Action */}
+      <div className="absolute inset-0 flex items-center justify-end px-6 bg-red-500 text-white font-bold rounded-xl">
+        <span>🗑️ Eliminar</span>
       </div>
-      <div className="cart-item-qty">
-        <button
-          className="qty-btn"
-          onClick={() => {
-            if (item.cantidad <= 1) {
-              onRemove(item.codigo);
-            } else {
-              onUpdateQty(item.codigo, -1);
-            }
-          }}
-          aria-label={item.cantidad <= 1 ? 'Eliminar producto' : 'Reducir cantidad'}
-        >
-          {item.cantidad <= 1 ? '🗑' : '−'}
-        </button>
-        <input
-          type="number"
-          className="qty-val"
-          value={item.cantidad || ''}
-          onChange={(e) => {
-            if (e.target.value === '') {
-              onUpdateQty(item.codigo, -item.cantidad);
-              return;
-            }
-            const val = parseInt(e.target.value, 10);
-            if (!isNaN(val) && val >= 0) {
-              if (val === 0) onRemove(item.codigo);
-              else onUpdateQty(item.codigo, val - item.cantidad);
-            }
-          }}
-          onFocus={(e) => e.target.select()}
-        />
-        <button
-          className="qty-btn"
-          onClick={() => onUpdateQty(item.codigo, 1)}
-          aria-label="Aumentar cantidad"
-        >
-          +
-        </button>
-      </div>
+
+      {/* Draggable Row */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={{ left: 0.5, right: 0 }} // Solo permite estirar hacia la izquierda
+        onDragEnd={handleDragEnd}
+        animate={controls}
+        className="cart-item relative z-10 bg-white border-none shadow-sm touch-pan-y touch-pinch-zoom"
+      >
+        <span className="cart-item-icon">{emoji}</span>
+        <div className="cart-item-info">
+          <div className="cart-item-name" title={item.nombre}>
+            {item.nombre}
+          </div>
+          <div className="cart-item-price-qty">
+            <span className="cart-item-unit-price">${item.precio.toLocaleString('es-UY')} c/u</span>
+            <span className="cart-item-subtotal">${subtotal.toLocaleString('es-UY')}</span>
+          </div>
+        </div>
+        <div className="cart-item-qty">
+          <button
+            className="qty-btn"
+            onClick={() => {
+              if (item.cantidad <= 1) {
+                onRemove(item.codigo);
+              } else {
+                onUpdateQty(item.codigo, -1);
+              }
+            }}
+            aria-label={item.cantidad <= 1 ? 'Eliminar producto' : 'Reducir cantidad'}
+          >
+            {item.cantidad <= 1 ? '🗑' : '−'}
+          </button>
+          <input
+            type="number"
+            className="qty-val bg-transparent text-center"
+            value={item.cantidad || ''}
+            onChange={(e) => {
+              if (e.target.value === '') {
+                onUpdateQty(item.codigo, -item.cantidad);
+                return;
+              }
+              const val = parseInt(e.target.value, 10);
+              if (!isNaN(val) && val >= 0) {
+                if (val === 0) onRemove(item.codigo);
+                else onUpdateQty(item.codigo, val - item.cantidad);
+              }
+            }}
+            onFocus={(e) => e.target.select()}
+          />
+          <button
+            className="qty-btn"
+            onClick={() => onUpdateQty(item.codigo, 1)}
+            aria-label="Aumentar cantidad"
+          >
+            +
+          </button>
+        </div>
+      </motion.div>
     </div>
   );
 }

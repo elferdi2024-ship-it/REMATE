@@ -57,39 +57,39 @@ export function armarMensajeWA(
   const total = items.reduce((s, i) => s + i.precio * i.cantidad, 0);
   const lines: string[] = [];
 
-  lines.push(`🧾 *PEDIDO #${num}*`);
+  lines.push(`🧾 *PEDIDO MAYORISTA #${num}*`);
   lines.push(`📅 ${fecha}`);
-  lines.push(`━━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
 
-  lines.push(`*CLIENTE*`);
-  lines.push(`👤 ${nombre.trim() || "Cliente"}`);
-  lines.push(`📱 ${telefono.trim() || "No proporcionado"}`);
+  lines.push(`*DATOS DEL CLIENTE*`);
+  lines.push(`👤 *Nombre:* ${nombre.trim() || "Cliente"}`);
+  lines.push(`📱 *Tel:* ${telefono.trim() || "No proporcionado"}`);
   if (direccion?.trim()) {
-    lines.push(`📍 ${direccion.trim()}`);
+    lines.push(`📍 *Entrega:* ${direccion.trim()}`);
   }
-  lines.push(`━━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
 
-  lines.push(`*PRODUCTOS*`);
+  lines.push(`*🛒 DETALLE DEL PEDIDO*`);
+  lines.push(``);
   for (const item of items) {
     const subtotal = item.precio * item.cantidad;
-    lines.push(``);
-    lines.push(`▸ *${item.nombre}*`);
-    lines.push(
-      `   \`${item.codigo}\` · ${item.cantidad} u. × ${formatPrecio(item.precio)} = *${formatPrecio(subtotal)}*`
-    );
+    // Formato tabular legible
+    lines.push(`📦 *${item.nombre}*`);
+    lines.push(`   ↳ \`${item.codigo}\` | ${item.cantidad} x ${formatPrecio(item.precio)} = *${formatPrecio(subtotal)}*`);
   }
 
   lines.push(``);
-  lines.push(`━━━━━━━━━━━━━━━━━━━━━`);
-  lines.push(`💰 *TOTAL ESTIMADO: ${formatPrecio(total)}*`);
+  lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`💰 *TOTAL A PAGAR: ${formatPrecio(total)}*`);
 
   if (notas?.trim()) {
-    lines.push(`━━━━━━━━━━━━━━━━━━━━━`);
-    lines.push(`📝 *Obs:* ${notas.trim()}`);
+    lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
+    lines.push(`📝 *NOTAS AL VENDEDOR:*`);
+    lines.push(`_${notas.trim()}_`);
   }
 
-  lines.push(`━━━━━━━━━━━━━━━━━━━━━`);
-  lines.push(`_Precios sujetos a confirmación_`);
+  lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`⚡ _Pedido generado desde Catálogo Web_`);
 
   return lines.join("\n");
 }

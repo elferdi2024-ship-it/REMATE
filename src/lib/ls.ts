@@ -1,3 +1,5 @@
+import type { Vista } from "@/types";
+
 // localStorage helpers con tipos seguros
 const LS_ALIAS = "elremate_alias";
 const LS_TEL = "elremate_tel";
@@ -51,12 +53,12 @@ export function setHistory(arr: any[]): void {
   localStorage.setItem(LS_HISTORY, JSON.stringify(arr.slice(0, 10)));
 }
 
-export function getVista(): "grilla" | "lista" {
+export function getVista(): Vista {
   if (typeof window === "undefined") return "grilla";
-  return (localStorage.getItem(LS_VISTA) as "grilla" | "lista") || "grilla";
+  return (localStorage.getItem(LS_VISTA) as Vista) || "grilla";
 }
 
-export function setVista(v: "grilla" | "lista"): void {
+export function setVista(v: Vista): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(LS_VISTA, v);
 }

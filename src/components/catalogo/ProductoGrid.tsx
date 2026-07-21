@@ -127,9 +127,10 @@ function CategoryCarousel({
     if (scrollRef.current) scrollRef.current.scrollLeft = 0;
   };
 
-  if (vista === "lista") {
+  if (vista === "lista" || vista === "compacta") {
+    const isCompact = vista === "compacta";
     return (
-      <div className="product-list">
+      <div className={`product-list ${isCompact ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" : ""}`}>
         {catProds.map((p) => (
           <ProductoRow
             key={p.codigo}
@@ -138,6 +139,7 @@ function CategoryCarousel({
             onAdd={onAdd}
             onQtyChange={onQtyChange}
             onQuickView={onQuickView}
+            isCompact={isCompact}
           />
         ))}
       </div>

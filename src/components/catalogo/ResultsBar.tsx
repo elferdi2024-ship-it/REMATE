@@ -193,6 +193,13 @@ export default function ResultsBar({
           >
             &#9776; Lista
           </button>
+          <button
+            className={vista === "compacta" ? "active" : ""}
+            onClick={() => onToggleVista("compacta")}
+            aria-pressed={vista === "compacta"}
+          >
+            &#9776; Compacta
+          </button>
         </div>
       </div>
     </div>

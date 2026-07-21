@@ -25,7 +25,7 @@ import {
   SponsoredProductsRail,
   BottomNavBar,
   FilterSheet,
-  ReorderRail,
+  SmartReorder,
 } from "@/components/catalogo";
 import { useFavoritos } from "@/lib/favoritos-context";
 import { useBrands } from "@/hooks/useBrands";
@@ -1504,7 +1504,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       {/* Contenido del catálogo — max-width desktop */}
       <div className="page-wrapper">
         {/* Tus Compras Frecuentes / Reorder Express */}
-        <ReorderRail
+        <SmartReorder
           productos={productos}
           pedidos={pedidos}
           qtyMap={qtyMap}

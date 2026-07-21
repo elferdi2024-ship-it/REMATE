@@ -1,4 +1,7 @@
+"use client";
 import React, { useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { haptic } from "@/lib/haptic";
 import type { Producto } from "@/types";
 import type { BrandConfig } from "@/types/brands";
 import { EMOJI_POR_CATEGORIA } from "@/types";
@@ -76,16 +79,19 @@ export default function ProductoCard({
 
   const handleAdd = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    haptic.add();
     onAdd(producto, e);
   }, [onAdd, producto]);
 
   const handleDec = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    haptic.remove();
     onQtyChange(producto.codigo, Math.max(0, qty - 1));
   }, [onQtyChange, producto.codigo, qty]);
 
   const handleInc = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    haptic.add();
     onQtyChange(producto.codigo, qty + 1);
   }, [onQtyChange, producto.codigo, qty]);
 
@@ -272,82 +278,87 @@ export default function ProductoCard({
           </div>
         )}
 
-        <div className="card-floating-action" onClick={(e) => e.stopPropagation()} style={{ position: "absolute", bottom: "8px", right: "8px", zIndex: 10 }}>
-          {isInCart ? (
-            <div className="float-qty-ctrl" style={{ 
-              display: "flex",
-              alignItems: "center",
-              background: "#fff",
-              borderRadius: "30px",
-              height: "42px",
-              boxShadow: "0 6px 15px rgba(26,122,66,0.15)",
-              border: "2px solid var(--verde, #1A7A42)",
-              padding: "0 6px",
-              overflow: "hidden"
-            }}>
-              <button className="float-qty-btn minus" onClick={handleDec} aria-label="Disminuir cantidad" style={{ color: "var(--verde)", fontWeight: 900 }}>&#8722;</button>
-              <input 
-                type="number" 
-                value={qty || ''} 
-                onChange={(e) => {
-                  const val = parseInt(e.target.value);
-                  if (!isNaN(val) && val >= 0) {
-                    onQtyChange(producto.codigo, val);
-                  } else if (e.target.value === '') {
-                    onQtyChange(producto.codigo, 0);
-                  }
-                }}
-                onFocus={(e) => e.target.select()}
-                className="float-qty-val" 
-                style={{ 
-                  fontWeight: 800, 
-                  width: "36px", 
-                  textAlign: "center",
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  WebkitAppearance: "none",
-                  MozAppearance: "textfield",
-                  margin: 0,
-                  fontSize: "1rem",
-                  color: "var(--texto)"
-                }} 
-              />
-              <button className="float-qty-btn plus" onClick={handleInc} aria-label="Aumentar cantidad" style={{ color: "var(--verde)", fontWeight: 900 }}>+</button>
-            </div>
-          ) : (
-            <button 
-              className="btn-float-add" 
-              onClick={handleAdd} 
-              style={{
-                background: "var(--rojo)",
-                color: "white",
-                border: "none",
-                borderRadius: "50%",
-                width: "44px",
-                height: "44px",
+        <div className="card-floating-action" onClick={(e) => e.stopPropagation()} style={{ position: "absolute", bottom: "8px", right: "8px", zIndex: 10, display: "flex", alignItems: "flex-end", justifyContent: "flex-end", height: "44px" }}>
+          <AnimatePresence mode="wait">
+            {isInCart ? (
+              <motion.div 
+                key="qty-ctrl"
+                initial={{ opacity: 0, scale: 0.8, width: 44 }}
+                animate={{ opacity: 1, scale: 1, width: 100 }}
+                exit={{ opacity: 0, scale: 0.8, width: 44 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                className="float-qty-ctrl" style={{ 
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 6px 15px rgba(232, 48, 42, 0.3)",
-                cursor: "pointer",
-                transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-                transform: isHovered ? "scale(1.1) translateY(-1px)" : "scale(1)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.15) translateY(-1px)";
-                e.currentTarget.style.boxShadow = "0 10px 22px rgba(232, 48, 42, 0.45)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = isHovered ? "scale(1.1) translateY(-1px)" : "scale(1)";
-                e.currentTarget.style.boxShadow = "0 6px 15px rgba(232, 48, 42, 0.3)";
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-            </button>
-          )}
+                background: "#fff",
+                borderRadius: "30px",
+                height: "44px",
+                boxShadow: "0 6px 15px rgba(26,122,66,0.15)",
+                border: "2px solid var(--verde, #1A7A42)",
+                padding: "0 6px",
+                overflow: "hidden"
+              }}>
+                <button className="float-qty-btn minus" onClick={handleDec} aria-label="Disminuir cantidad" style={{ color: "var(--verde)", fontWeight: 900 }}>&#8722;</button>
+                <input 
+                  type="number" 
+                  value={qty || ''} 
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (!isNaN(val) && val >= 0) {
+                      onQtyChange(producto.codigo, val);
+                    } else if (e.target.value === '') {
+                      onQtyChange(producto.codigo, 0);
+                    }
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  className="float-qty-val" 
+                  style={{ 
+                    fontWeight: 800, 
+                    width: "36px", 
+                    textAlign: "center",
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    WebkitAppearance: "none",
+                    MozAppearance: "textfield",
+                    margin: 0,
+                    fontSize: "1rem",
+                    color: "var(--texto)"
+                  }} 
+                />
+                <button className="float-qty-btn plus" onClick={handleInc} aria-label="Aumentar cantidad" style={{ color: "var(--verde)", fontWeight: 900 }}>+</button>
+              </motion.div>
+            ) : (
+              <motion.button 
+                key="add-btn"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                whileHover={{ scale: 1.15, y: -1, boxShadow: "0 10px 22px rgba(232, 48, 42, 0.45)" }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                className="btn-float-add" 
+                onClick={handleAdd} 
+                style={{
+                  background: "var(--rojo)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "44px",
+                  height: "44px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 6px 15px rgba(232, 48, 42, 0.3)",
+                  cursor: "pointer",
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </motion.button>
+            )}
+          </AnimatePresence>
         </div>
         
         {sponsorBrand?.logoUrl && (
