@@ -1,3 +1,4 @@
+// filepath: src/components/catalogo/HeroLanding.tsx
 "use client";
 
 import React from "react";
@@ -7,9 +8,10 @@ import { SUCURSALES } from "@/lib/sucursales";
 
 interface HeroLandingProps {
   selectedSucursal: string;
+  onOpenSucursalModal?: () => void;
 }
 
-export default function HeroLanding({ selectedSucursal }: HeroLandingProps) {
+export default function HeroLanding({ selectedSucursal, onOpenSucursalModal }: HeroLandingProps) {
   const sucursalNombre = SUCURSALES.find(s => s.id === selectedSucursal)?.nombre || "";
 
   return (
@@ -60,14 +62,22 @@ export default function HeroLanding({ selectedSucursal }: HeroLandingProps) {
           />
         </div>
 
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 mb-6">
+        {/* Badge Sucursal Selector */}
+        <div className="inline-flex flex-wrap items-center justify-center gap-2 mb-6">
           <span className="bg-[#D62828] text-white text-[0.65rem] font-bold tracking-[2.5px] uppercase px-3 py-1 rounded shadow-[0_2px_8px_rgba(214,40,40,0.4)]">
             Mayorista
           </span>
           <span className="text-[0.7rem] font-semibold tracking-[3px] uppercase text-[#D62828] opacity-90">
             Distribuidora · Canelones
           </span>
+          {selectedSucursal && (
+            <button
+              onClick={onOpenSucursalModal}
+              className="bg-[#1A7A42]/30 border border-[#1A7A42]/60 hover:bg-[#1A7A42]/50 text-white text-[0.7rem] font-bold tracking-[1.5px] uppercase px-3 py-1 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ml-1"
+            >
+              <span>🏪</span> CATÁLOGO {sucursalNombre.toUpperCase()} ✎
+            </button>
+          )}
         </div>
 
         {/* Título */}
@@ -95,7 +105,7 @@ export default function HeroLanding({ selectedSucursal }: HeroLandingProps) {
                 ¿CÓMO REALIZAR TU COMPRA?
               </span>
               <span className="block text-[0.85rem] text-[#C8C3BC] font-medium leading-relaxed">
-                Ingresá a nuestro <strong>Catálogo Digital</strong>, armá tu carrito agregando los productos y completá tu pedido. Las compras no se coordinan por mensaje libre; ¡usá el catálogo para armar tu surtido!
+                Seleccioná tu sucursal cercana, ingresá a su <strong>Catálogo Digital</strong>, armá tu carrito agregando los productos y completá tu pedido. ¡Precios variados por zona!
               </span>
             </div>
           </div>
@@ -103,16 +113,30 @@ export default function HeroLanding({ selectedSucursal }: HeroLandingProps) {
 
         {/* CTAs */}
         <div className="cta-buttons flex gap-3 flex-wrap justify-center mb-10 items-center">
-          <Link
-            href={selectedSucursal ? `/catalogo?sucursal=${selectedSucursal}` : "/seleccionar-sucursal"}
-            className="bg-[#E8302A] text-white rounded-[14px] px-8 py-4.5 font-bebas text-[1.3rem] tracking-[2px] no-underline flex items-center gap-3 animate-pulse-glow-red transition-all hover:bg-[#C4231E] hover:-translate-y-1"
-          >
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-            </span>
-            🛒 INGRESAR AL CATÁLOGO {selectedSucursal ? `(${sucursalNombre.toUpperCase()})` : ""}
-          </Link>
+          {selectedSucursal ? (
+            <Link
+              href={`/catalogo?sucursal=${selectedSucursal}`}
+              className="bg-[#E8302A] text-white rounded-[14px] px-8 py-4.5 font-bebas text-[1.3rem] tracking-[2px] no-underline flex items-center gap-3 animate-pulse-glow-red transition-all hover:bg-[#C4231E] hover:-translate-y-1"
+            >
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+              </span>
+              🛒 INGRESAR AL CATÁLOGO DE {sucursalNombre.toUpperCase()}
+            </Link>
+          ) : (
+            <button
+              onClick={onOpenSucursalModal}
+              className="bg-[#E8302A] text-white rounded-[14px] px-8 py-4.5 font-bebas text-[1.3rem] tracking-[2px] cursor-pointer flex items-center gap-3 animate-pulse-glow-red transition-all hover:bg-[#C4231E] hover:-translate-y-1 border-0"
+            >
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+              </span>
+              🏪 SELECCIONAR SUCURSAL Y INGRESAR AL CATÁLOGO
+            </button>
+          )}
+
           <a
             href="https://wa.me/59899322325"
             target="_blank"

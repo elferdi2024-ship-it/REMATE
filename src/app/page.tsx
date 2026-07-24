@@ -1,3 +1,4 @@
+// filepath: src/app/page.tsx
 "use client";
 
 import Image from "next/image";
@@ -14,13 +15,14 @@ import * as ls from "@/lib/ls";
 import { useToast } from "@/lib/toast-context";
 import { useCart } from "@/lib/cart-context";
 
-// Subcomponentes extraídos
+// Subcomponentes
 import HeroLanding from "@/components/catalogo/HeroLanding";
 import TickerMarquee from "@/components/catalogo/TickerMarquee";
 import FeatureCards from "@/components/catalogo/FeatureCards";
 import StepProcess from "@/components/catalogo/StepProcess";
 import BranchSection from "@/components/catalogo/BranchSection";
 import BottomNavBar from "@/components/catalogo/BottomNavBar";
+import SucursalSelectorModal from "@/components/catalogo/SucursalSelectorModal";
 
 const CATEGORIAS = [
   { icono: "🫗", nombre: "ACEITES Y GRASAS", titulo: "Aceites y Grasas" },
@@ -51,6 +53,9 @@ export default function LandingPage() {
   const toast = useToast();
   const [configCats, setConfigCats] = useState<Record<string, string>>({});
   const [selectedSucursal, setSelectedSucursal] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [pendingCategory, setPendingCategory] = useState<string>("");
+
   const { brands } = useBrands();
   const activePremiumBrands = brands.filter(b => b.active && ["oro", "plata"].includes(b.tier));
   const { items: cartItems, clearCart, totalQty } = useCart();
@@ -66,32 +71,14 @@ export default function LandingPage() {
   }, []);
 
   const handleSelectSucursal = (id: string) => {
-    const sucursal = SUCURSALES.find(s => s.id === id);
-    const nombre = sucursal ? sucursal.nombre : "";
-
-    if (id === selectedSucursal) {
-      handleEnterCatalog(id);
-      return;
-    }
-
-    if (cartItems.length > 0) {
-      const confirmacion = confirm(
-        "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
-      );
-      if (!confirmacion) return;
-      clearCart();
-    }
-
-    ls.setSelectedSucursal(id);
-    setSelectedSucursal(id);
-    toast.success(`🏪 Seleccionada: ${nombre}. Ahora podés navegar por categorías o ingresar al catálogo.`);
+    handleEnterCatalog(id);
   };
 
-  const handleEnterCatalog = (id: string) => {
+  const handleEnterCatalog = (id: string, targetCategory?: string) => {
     const sucursal = SUCURSALES.find(s => s.id === id);
     const nombre = sucursal ? sucursal.nombre : "";
 
-    if (cartItems.length > 0 && id !== selectedSucursal) {
+    if (cartItems.length > 0 && selectedSucursal && id !== selectedSucursal) {
       const confirmacion = confirm(
         "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
       );
@@ -102,7 +89,21 @@ export default function LandingPage() {
     ls.setSelectedSucursal(id);
     setSelectedSucursal(id);
     toast.success(`🏪 Cargando catálogo de ${nombre}...`);
-    router.push(`/catalogo?sucursal=${id}`);
+    
+    const cat = targetCategory || pendingCategory;
+    if (cat) {
+      router.push(`/catalogo?sucursal=${id}&categoria=${encodeURIComponent(cat)}`);
+    } else {
+      router.push(`/catalogo?sucursal=${id}`);
+    }
+  };
+
+  const handleCategoryClick = (e: React.MouseEvent, catNombre: string) => {
+    if (!selectedSucursal) {
+      e.preventDefault();
+      setPendingCategory(catNombre);
+      setIsModalOpen(true);
+    }
   };
 
   useEffect(() => {
@@ -124,7 +125,13 @@ export default function LandingPage() {
   return (
     <div className="font-body text-[#111111] bg-[#F5F2EE]">
       {/* Hero Landing Section */}
-      <HeroLanding selectedSucursal={selectedSucursal} />
+      <HeroLanding 
+        selectedSucursal={selectedSucursal} 
+        onOpenSucursalModal={() => {
+          setPendingCategory("");
+          setIsModalOpen(true);
+        }}
+      />
 
       {/* Marquee Ticker */}
       <TickerMarquee />
@@ -202,7 +209,14 @@ export default function LandingPage() {
                 <NativeStoryCard
                   key={brand.id}
                   brand={brand}
-                  onBrandFilter={(brandName) => router.push(`/catalogo?search=${encodeURIComponent(brandName)}`)}
+                  onBrandFilter={(brandName) => {
+                    if (selectedSucursal) {
+                      router.push(`/catalogo?sucursal=${selectedSucursal}&search=${encodeURIComponent(brandName)}`);
+                    } else {
+                      setPendingCategory("");
+                      setIsModalOpen(true);
+                    }
+                  }}
                 />
               ))}
             </div>
@@ -232,9 +246,10 @@ export default function LandingPage() {
                 href={
                   selectedSucursal
                     ? `/catalogo?categoria=${encodeURIComponent(cat.nombre)}&sucursal=${selectedSucursal}`
-                    : `/catalogo?categoria=${encodeURIComponent(cat.nombre)}`
+                    : "#"
                 }
-                className="bg-white rounded-[12px] border border-[#DDD8D0] hover:border-[#C8C2B8] p-6 md:p-3 text-center no-underline transition-all duration-150 flex flex-col items-center gap-2.5 shadow-[0_1px_3px_rgba(17,11,8,0.08)] hover:-translate-y-1 hover:shadow-[0_4px_16px_rgba(17,11,8,0.12)]"
+                onClick={(e) => handleCategoryClick(e, cat.nombre)}
+                className="bg-white rounded-[12px] border border-[#DDD8D0] hover:border-[#C8C2B8] p-6 md:p-3 text-center no-underline transition-all duration-150 flex flex-col items-center gap-2.5 shadow-[0_1px_3px_rgba(17,11,8,0.08)] hover:-translate-y-1 hover:shadow-[0_4px_16px_rgba(17,11,8,0.12)] cursor-pointer"
               >
                 <div className="relative w-[45px] h-[45px] flex items-center justify-center">
                   {configCats[cat.nombre] ? (
@@ -256,12 +271,24 @@ export default function LandingPage() {
           </div>
 
           <div className="text-center mt-10">
-            <Link
-              href={selectedSucursal ? `/catalogo?sucursal=${selectedSucursal}` : "/catalogo"}
-              className="inline-flex items-center gap-2 bg-[#1A1410] text-white rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] no-underline transition-all duration-150 hover:bg-[#2C2318]"
-            >
-              VER CATÁLOGO COMPLETO →
-            </Link>
+            {selectedSucursal ? (
+              <Link
+                href={`/catalogo?sucursal=${selectedSucursal}`}
+                className="inline-flex items-center gap-2 bg-[#1A1410] text-white rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] no-underline transition-all duration-150 hover:bg-[#2C2318]"
+              >
+                VER CATÁLOGO COMPLETO →
+              </Link>
+            ) : (
+              <button
+                onClick={() => {
+                  setPendingCategory("");
+                  setIsModalOpen(true);
+                }}
+                className="inline-flex items-center gap-2 bg-[#E8302A] text-white border-0 rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] transition-all duration-150 hover:bg-[#C4231E] cursor-pointer shadow-[0_4px_14px_rgba(232,48,42,0.3)]"
+              >
+                SELECCIONAR SUCURSAL Y VER CATÁLOGO →
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -329,16 +356,39 @@ export default function LandingPage() {
         activeTab="inicio"
         onTabSelect={(tab: string) => {
           if (tab === "buscar") {
-            router.push("/catalogo?focusSearch=true");
+            if (selectedSucursal) {
+              router.push(`/catalogo?sucursal=${selectedSucursal}&focusSearch=true`);
+            } else {
+              setIsModalOpen(true);
+            }
           } else if (tab === "favoritos") {
-            router.push("/catalogo?tab=favoritos");
+            if (selectedSucursal) {
+              router.push(`/catalogo?sucursal=${selectedSucursal}&tab=favoritos`);
+            } else {
+              setIsModalOpen(true);
+            }
           } else if (tab === "inicio") {
             router.push("/");
           }
         }}
         cartQty={totalQty}
-        onOpenCart={() => router.push("/catalogo?openCart=true")}
+        onOpenCart={() => {
+          if (selectedSucursal) {
+            router.push(`/catalogo?sucursal=${selectedSucursal}&openCart=true`);
+          } else {
+            setIsModalOpen(true);
+          }
+        }}
         onOpenUser={() => router.push("/cuenta")}
+      />
+
+      {/* Modal de Selección de Sucursal */}
+      <SucursalSelectorModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelectSucursal={(id) => handleEnterCatalog(id)}
+        selectedSucursal={selectedSucursal}
+        categoryName={pendingCategory}
       />
     </div>
   );
