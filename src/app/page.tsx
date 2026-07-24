@@ -342,6 +342,11 @@ export default function LandingPage() {
               className="object-contain opacity-60 mx-auto"
             />
           </div>
+          <div className="mb-3 flex justify-center gap-4 text-[0.75rem] text-white/50">
+            <Link href="/politica-de-privacidad" className="hover:text-white underline transition-colors">
+              Política de Privacidad
+            </Link>
+          </div>
           <p className="text-[0.75rem] text-white/35 mb-1.5">
             Copyright © {new Date().getFullYear()} Distribuidora El Remate. Todos los derechos reservados.
           </p>
@@ -350,6 +355,7 @@ export default function LandingPage() {
           </p>
         </div>
       </footer>
+
 
       {/* Navigation Bar (Mobile) */}
       <BottomNavBar

@@ -1,6 +1,7 @@
 // filepath: src/components/carrito/CartFooter.tsx
 'use client';
 
+import Link from 'next/link';
 import DeliveryMethodSelector from './DeliveryMethodSelector';
 import type { MetodoEntrega } from '@/lib/sucursales';
 
@@ -132,6 +133,19 @@ export default function CartFooter({
           </div>
         )}
 
+        {/* Aviso Legal de Privacidad en el Formulario de la Tienda */}
+        <div style={{ marginTop: '12px', fontSize: '0.7rem', color: 'var(--muted)', textAlign: 'center', lineHeight: '1.4' }}>
+          Al realizar el pedido, aceptás nuestra{' '}
+          <Link
+            href="/politica-de-privacidad"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'var(--accent)', textDecoration: 'underline', fontWeight: 600 }}
+          >
+            Política de Privacidad
+          </Link>.
+        </div>
+
         {/* Fila de acciones: compartir + vaciar */}
         <div className="cart-actions-row">
           <button className="cart-action-btn" onClick={onShare} type="button">
@@ -175,6 +189,7 @@ export default function CartFooter({
     </>
   );
 }
+
 
 function WhatsAppIcon() {
   return (
