@@ -147,6 +147,13 @@ export default function CartFooter({
         </div>
 
         {/* Fila de acciones: compartir + vaciar */}
+        <div style={{ fontSize: '10px', color: 'var(--muted)', textAlign: 'center', marginTop: '12px', marginBottom: '8px' }}>
+          Al enviar tu pedido aceptas nuestra{' '}
+          <Link href="/politica-de-privacidad" style={{ textDecoration: 'underline', color: 'var(--text)' }}>
+            Política de Privacidad
+          </Link>.
+        </div>
+
         <div className="cart-actions-row">
           <button className="cart-action-btn" onClick={onShare} type="button">
             🔗 Compartir

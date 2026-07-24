@@ -108,10 +108,13 @@ export default function PoliticaDePrivacidadPage() {
 
             <section>
               <h2 className="font-bebas text-xl tracking-wider text-[#1A1410] mb-2 flex items-center gap-2">
-                <span>✍️ 6. Tus Derechos y Cancelación</span>
+                <span>✍️ 6. Solicitud de Eliminación de Cuenta y Datos Personales</span>
               </h2>
-              <p>
-                Tenés derecho a consultar, actualizar o solicitar la eliminación total de tus datos personales de nuestros registros en cualquier momento. Para ejercer estos derechos, simplemente contactanos vía WhatsApp al <strong>099 322 325</strong> o por nuestros canales oficiales de contacto.
+              <p className="mb-2">
+                En cumplimiento con las directivas de protección de datos y las políticas de la tienda de aplicaciones (Google Play), tenés derecho a solicitar en cualquier momento la <strong>eliminación total y definitiva</strong> de tu cuenta, historial de pedidos y datos personales de nuestros sistemas.
+              </p>
+              <p className="text-xs md:text-sm text-[#444444]">
+                Para solicitar la eliminación inmediata de tus datos, podés comunicarte enviando un mensaje a nuestro WhatsApp oficial (<strong>+598 99 322 325</strong>) o por correo electrónico indicando tu número de teléfono registrado. El proceso de eliminación se completará en un plazo máximo de 48 horas hábiles.
               </p>
             </section>
 

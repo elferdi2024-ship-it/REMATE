@@ -8,6 +8,7 @@ interface DeliveryMethodSelectorProps {
   onMetodoChange: (m: MetodoEntrega) => void;
   sucursalId: string | null;
   onSucursalChange: (id: string) => void;
+  cartLength?: number;
 }
 
 export default function DeliveryMethodSelector({
@@ -15,8 +16,20 @@ export default function DeliveryMethodSelector({
   onMetodoChange,
   sucursalId,
   onSucursalChange,
+  cartLength = 0,
 }: DeliveryMethodSelectorProps) {
   const selectedSucursal = SUCURSALES.find((s) => s.id === sucursalId) ?? null;
+
+  const handleBranchChange = (newId: string) => {
+    if (!newId || newId === sucursalId) return;
+    if (cartLength > 0) {
+      const confirmacion = window.confirm(
+        "Al cambiar de sucursal los precios y disponibilidad varían por zona. ¿Deseas cambiar de sucursal?"
+      );
+      if (!confirmacion) return;
+    }
+    onSucursalChange(newId);
+  };
 
   return (
     <div className="delivery-method-wrapper">
@@ -29,7 +42,7 @@ export default function DeliveryMethodSelector({
           id="branchSelect"
           className="branch-select"
           value={sucursalId || ''}
-          onChange={(e) => onSucursalChange(e.target.value)}
+          onChange={(e) => handleBranchChange(e.target.value)}
         >
           <option value="" disabled>
             Elegí tu sucursal...

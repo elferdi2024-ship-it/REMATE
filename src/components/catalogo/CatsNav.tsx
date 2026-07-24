@@ -226,6 +226,45 @@ export default function CatsNav({ categorias, activeCat, onSelect }: CatsNavProp
           color: var(--text);
         }
 
+        @media (max-width: 767px) {
+          .cats-inner-circular {
+            gap: 8px;
+            padding: 6px 12px;
+          }
+          .cat-circle-btn {
+            width: auto;
+            flex-direction: row;
+            align-items: center;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 4px 10px;
+            height: 34px;
+          }
+          .cat-circle-btn.active {
+            background: var(--rojo);
+            border-color: var(--rojo);
+          }
+          .cat-circle-icon {
+            width: 22px;
+            height: 22px;
+            font-size: 0.9rem;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+          }
+          .cat-circle-label {
+            font-size: 11px;
+            margin-top: 0;
+            margin-left: 6px;
+            color: var(--text);
+            white-space: nowrap;
+          }
+          .cat-circle-btn.active .cat-circle-label {
+            color: #ffffff;
+          }
+        }
+
         @media (min-width: 768px) {
           .cats-inner-circular {
             gap: 24px;

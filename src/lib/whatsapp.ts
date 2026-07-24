@@ -149,36 +149,67 @@ export async function enviarFacturaWhatsApp(
     return;
   }
 
-  // Descarga automática de la factura (tanto en móvil como en PC)
-  if (blob) {
-    try {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `pedido-${numFinal}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      // Si falla la descarga, continuar igual con el mensaje
-    }
+  // 1. Copiar siempre mensaje al portapapeles como respaldo silencioso
+  const mensaje = armarMensajeWA(nombre, telefono, items, notas, numFinal, direccion);
+  if (typeof navigator !== "undefined" && navigator.clipboard) {
+    navigator.clipboard.writeText(mensaje).catch(() => {});
   }
 
-  // Abrir WhatsApp directo al chat de la sucursal
-  const mensaje = armarMensajeWA(nombre, telefono, items, notas, numFinal, direccion);
+  // 2. Abrir WhatsApp directo al chat de la sucursal (camino principal)
   const encoded = encodeURIComponent(mensaje);
-  const url = `https://wa.me/${phone}?text=${encoded}`;
-  window.open(url, "_blank");
+  const isMob = isMobile();
+  const primaryUrl = isMob
+    ? `whatsapp://send?phone=${phone}&text=${encoded}`
+    : `https://wa.me/${phone}?text=${encoded}`;
+
+  const win = window.open(primaryUrl, "_blank");
+
+  // 3. FALLBACK DE ÚLTIMO RECURSO (solo si la ventana fue bloqueada o no abrió)
+  setTimeout(() => {
+    if (!win || win.closed || typeof win.closed === "undefined") {
+      const webUrl = `https://web.whatsapp.com/send?phone=${phone}&text=${encoded}`;
+      const winWeb = window.open(webUrl, "_blank");
+
+      // Si tampoco se pudo abrir WhatsApp Web, descargar el PNG como último recurso
+      setTimeout(() => {
+        if ((!winWeb || winWeb.closed || typeof winWeb.closed === "undefined") && blob) {
+          try {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `pedido-${numFinal}.png`;
+            a.click();
+            URL.revokeObjectURL(url);
+          } catch (e) {
+            console.error("Error en descarga fallback:", e);
+          }
+        }
+      }, 500);
+    }
+  }, 800);
 }
 
 // ── Función de compatibilidad (mantiene la API anterior) ─────────────────────
 
 /**
- * @deprecated Usar `enviarFacturaWhatsApp` para incluir la imagen.
- * Se conserva para no romper integraciones existentes.
+ * Usar para enviar cualquier mensaje genérico por WhatsApp con fallback.
  */
 export function enviarWhatsApp(numero: string, mensaje: string): void {
   const phone = numero || process.env.NEXT_PUBLIC_WA_NUMBER || "";
+  if (typeof navigator !== "undefined" && navigator.clipboard) {
+    navigator.clipboard.writeText(mensaje).catch(() => {});
+  }
   const encoded = encodeURIComponent(mensaje);
-  const url = `https://wa.me/${phone}?text=${encoded}`;
-  window.open(url, "_blank");
+  const primaryUrl = isMobile()
+    ? `whatsapp://send?phone=${phone}&text=${encoded}`
+    : `https://wa.me/${phone}?text=${encoded}`;
+
+  const win = window.open(primaryUrl, "_blank");
+
+  setTimeout(() => {
+    if (!win || win.closed || typeof win.closed === "undefined") {
+      const webUrl = `https://web.whatsapp.com/send?phone=${phone}&text=${encoded}`;
+      window.open(webUrl, "_blank");
+    }
+  }, 800);
 }

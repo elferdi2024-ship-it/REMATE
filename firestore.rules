@@ -20,6 +20,20 @@ service cloud.firestore {
              get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role in ['admin', 'owner'];
     }
 
+    // Función para validar que el payload de creación de pedido sea legítimo (Guest-First seguro)
+    function isValidOrder() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['items', 'total']) &&
+             data.total is number &&
+             data.total > 0 &&
+             data.items is list &&
+             data.items.size() > 0 &&
+             data.items.size() <= 100 &&
+             (!('clienteNombre' in data) || data.clienteNombre is string) &&
+             (!('sucursalId' in data) || data.sucursalId is string) &&
+             (!('estado' in data) || data.estado in ['pendiente', 'nuevo', 'En Preparación']);
+    }
+
     // Catálogo: Cualquiera lee, solo admin escribe
     match /catalogo_activo/{document=**} {
       allow read: if true;
@@ -34,14 +48,14 @@ service cloud.firestore {
 
     // Pedidos: Clientes crean, personal administrativo gestiona (lee/edita/borra)
     match /pedidos/{pedidoId} {
-      allow create: if true;
+      allow create: if isValidOrder();
       allow read, update: if isStaff();
       allow delete: if isManager();
     }
     
     // Pedidos Globales: Permitido crear a cualquiera. Leer/actualizar a Admin, Owner y Empleado. Borrado solo Admin/Owner.
     match /pedidos_globales/{document=**} {
-      allow create: if true;
+      allow create: if isValidOrder();
       allow read, update: if isStaff();
       allow delete: if isManager();
     }

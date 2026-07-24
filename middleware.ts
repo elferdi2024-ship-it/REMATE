@@ -1,17 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify, createRemoteJWKSet } from "jose";
 
-export function middleware(req: NextRequest) {
+const FIREBASE_PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "distribuidora-elremate";
+const GOOGLE_JWKS = createRemoteJWKSet(
+  new URL("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com")
+);
+
+async function isValidJWT(token: string): Promise<boolean> {
+  try {
+    const { payload } = await jwtVerify(token, GOOGLE_JWKS, {
+      issuer: `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`,
+      audience: FIREBASE_PROJECT_ID,
+    });
+    return !!payload && typeof payload.exp === "number" && payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const session = req.cookies.get("session");
 
   // /admin/* routes
   if (pathname.startsWith("/admin")) {
-    // Allow access to login page
     if (pathname === "/admin/login") {
       return NextResponse.next();
     }
-    // All other admin routes require session
-    if (!session) {
+    if (!session?.value || !(await isValidJWT(session.value))) {
       return NextResponse.redirect(new URL("/admin/login", req.url));
     }
     return NextResponse.next();
@@ -19,7 +35,7 @@ export function middleware(req: NextRequest) {
 
   // /listas/* routes require session
   if (pathname.startsWith("/listas")) {
-    if (!session) {
+    if (!session?.value || !(await isValidJWT(session.value))) {
       return NextResponse.redirect(new URL("/cuenta", req.url));
     }
     return NextResponse.next();

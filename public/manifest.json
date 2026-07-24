@@ -1,22 +1,34 @@
-﻿{
-  "name": "El Remate Distribuidora",
+{
+  "name": "Distribuidora El Remate",
   "short_name": "El Remate",
-  "description": "Catalogo mayorista de El Remate Canelones",
+  "description": "Catálogo mayorista en línea de Distribuidora El Remate (Canelones, Uruguay)",
   "id": "/",
   "scope": "/",
-  "start_url": "/",
+  "start_url": "/catalogo",
   "lang": "es-UY",
   "dir": "ltr",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#B42125",
-  "categories": ["shopping", "business", "productivity"],
+  "background_color": "#1A1410",
+  "theme_color": "#E8302A",
+  "categories": ["shopping", "business", "food"],
   "shortcuts": [
     {
-      "name": "Catalogo",
-      "short_name": "Catalogo",
+      "name": "Catálogo Mayorista",
+      "short_name": "Catálogo",
       "url": "/catalogo",
+      "icons": [
+        {
+          "src": "/icon-512x512.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Ofertas Especiales",
+      "short_name": "Ofertas",
+      "url": "/ofertas",
       "icons": [
         {
           "src": "/icon-512x512.png",
@@ -29,15 +41,37 @@
   "icons": [
     {
       "src": "/icon-512x512.png",
-      "sizes": "512x512",
+      "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512x512.png",
-      "sizes": "192x192",
+      "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/catalogo-hero.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Catálogo Mayorista El Remate Mobile"
+    },
+    {
+      "src": "/catalogo-hero.jpg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Catálogo Mayorista El Remate Desktop"
     }
   ]
 }
