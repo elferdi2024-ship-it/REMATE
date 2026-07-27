@@ -7,7 +7,15 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
-import { BrandStrip, BrandShowcase, NativeStoryCard, BrandHeroCarousel, CustomHeroCarousel } from "@/components/ads";
+import { 
+  BrandStrip, 
+  BrandShowcase, 
+  NativeStoryCard, 
+  BrandHeroCarousel, 
+  CustomHeroCarousel, 
+  MarketingBannerBar,
+  LeadCaptureWidget 
+} from "@/components/ads";
 import type { OfertaConfig } from "@/types/ofertas";
 import { useBrands } from "@/hooks/useBrands";
 import { SUCURSALES } from "@/lib/sucursales";
@@ -60,6 +68,8 @@ export default function LandingPage() {
   const activePremiumBrands = brands.filter(b => b.active && ["oro", "plata"].includes(b.tier));
   const { items: cartItems, clearCart, totalQty } = useCart();
   const [ofertasConfig, setOfertasConfig] = useState<OfertaConfig | null>(null);
+
+  const sucursalNombre = SUCURSALES.find(s => s.id === selectedSucursal)?.nombre || "";
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "configuracion", "ofertas"), (docSnap) => {
@@ -124,6 +134,12 @@ export default function LandingPage() {
 
   return (
     <div className="font-body text-[#111111] bg-[#F5F2EE]">
+      {/* Dynamic Marketing Top Bar */}
+      <MarketingBannerBar 
+        selectedSucursal={selectedSucursal} 
+        selectedSucursalNombre={sucursalNombre} 
+      />
+
       {/* Hero Landing Section */}
       <HeroLanding 
         selectedSucursal={selectedSucursal} 
@@ -155,7 +171,7 @@ export default function LandingPage() {
 
           <div className="relative z-20 p-8 md:p-12 flex flex-col justify-center h-full min-h-[220px]">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#E53935] text-white text-[10px] md:text-xs font-bold tracking-[2px] uppercase rounded-full w-max mb-4 shadow-[0_0_15px_rgba(229,57,53,0.5)]">
-              <span className="animate-pulse">🔥</span> NUEVO
+              <span className="animate-pulse">🔥</span> PROMO EVENTOS
             </span>
             <h2 className="font-bebas text-[clamp(2.5rem,5vw,4rem)] leading-[0.85] tracking-[1px] mb-3">
               ARMÁ TU CUMPLEAÑOS <br /> 
@@ -167,7 +183,7 @@ export default function LandingPage() {
               Combos explosivos de hamburguesas, bebidas frías y hielo. La mejor fiesta sin fundirte.
             </p>
             <div className="flex items-center gap-3 font-bebas text-xl md:text-2xl text-white group-hover:text-[#FFB300] transition-colors w-max bg-white/10 px-5 py-2.5 rounded-xl border border-white/10 backdrop-blur-sm">
-              VER OFERTAS <span className="text-2xl leading-none">→</span>
+              VER COMBOS MAYORISTAS <span className="text-2xl leading-none">→</span>
             </div>
           </div>
         </Link>
@@ -185,7 +201,7 @@ export default function LandingPage() {
       ) : null}
 
       {/* Brand Strip (Ads) */}
-      <BrandStrip brands={brands} title="Marcas que nos acompañan" dark />
+      <BrandStrip brands={brands} title="Marcas asociadas" dark />
 
       {/* Feature Cards (Comprá Fácil) */}
       <FeatureCards />
@@ -199,7 +215,7 @@ export default function LandingPage() {
           <div className="max-w-[800px] mx-auto">
             <div className="text-center mb-8">
               <span className="text-[10px] font-bold tracking-[4px] uppercase text-[#9C8570] block mb-2">
-                Retail Media · Novedades
+                Novedades de la Distribuidora
               </span>
               <h2 className="font-bebas text-[clamp(1.8rem,5vw,2.8rem)] text-[#1A1410] tracking-[3px] margin-0">
                 HISTORIAS DE <span className="text-[#D62828]">NUESTRAS MARCAS</span>
@@ -230,13 +246,13 @@ export default function LandingPage() {
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-[48px]">
             <span className="text-[11px] font-bold tracking-[4px] uppercase text-[#9C8570] block mb-2">
-              Catálogo
+              Catálogo Completo
             </span>
             <h2 className="font-bebas text-[clamp(2rem,5vw,3rem)] text-[#1A1410] tracking-[2px] mb-2">
-              VARIEDAD DE PRODUCTOS
+              EXPLORÁ NUESTRAS CATEGORÍAS
             </h2>
             <p className="font-serif italic text-[1.1rem] text-[#5C4A35]">
-              Todo lo que necesitás en un solo lugar
+              Seleccioná un rubro para ver ofertas y disponibilidad directa
             </p>
           </div>
 
@@ -247,7 +263,7 @@ export default function LandingPage() {
                 href={
                   selectedSucursal
                     ? `/catalogo?categoria=${encodeURIComponent(cat.nombre)}&sucursal=${selectedSucursal}`
-                    : "#"
+                    : `/catalogo?categoria=${encodeURIComponent(cat.nombre)}`
                 }
                 onClick={(e) => handleCategoryClick(e, cat.nombre)}
                 className="bg-white rounded-[12px] border border-[#DDD8D0] hover:border-[#C8C2B8] p-6 md:p-3 text-center no-underline transition-all duration-150 flex flex-col items-center gap-2.5 shadow-[0_1px_3px_rgba(17,11,8,0.08)] hover:-translate-y-1 hover:shadow-[0_4px_16px_rgba(17,11,8,0.12)] cursor-pointer"
@@ -275,20 +291,17 @@ export default function LandingPage() {
             {selectedSucursal ? (
               <Link
                 href={`/catalogo?sucursal=${selectedSucursal}`}
-                className="inline-flex items-center gap-2 bg-[#1A1410] text-white rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] no-underline transition-all duration-150 hover:bg-[#2C2318]"
+                className="inline-flex items-center gap-2 bg-[#1A1410] text-white rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] no-underline transition-all duration-150 hover:bg-[#2C2318] shadow-md"
               >
-                VER CATÁLOGO COMPLETO →
+                VER CATÁLOGO COMPLETO DE {sucursalNombre.toUpperCase()} →
               </Link>
             ) : (
-              <button
-                onClick={() => {
-                  setPendingCategory("");
-                  setIsModalOpen(true);
-                }}
-                className="inline-flex items-center gap-2 bg-[#E8302A] text-white border-0 rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] transition-all duration-150 hover:bg-[#C4231E] cursor-pointer shadow-[0_4px_14px_rgba(232,48,42,0.3)]"
+              <Link
+                href="/catalogo"
+                className="inline-flex items-center gap-2 bg-[#E8302A] text-white border-0 rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] transition-all duration-150 hover:bg-[#C4231E] cursor-pointer shadow-[0_4px_14px_rgba(232,48,42,0.3)] no-underline"
               >
-                SELECCIONAR SUCURSAL Y VER CATÁLOGO →
-              </button>
+                EXPLORAR CATÁLOGO COMPLETO MAYORISTA →
+              </Link>
             )}
           </div>
         </div>
@@ -296,6 +309,9 @@ export default function LandingPage() {
 
       {/* Step Process */}
       <StepProcess selectedSucursal={selectedSucursal} />
+
+      {/* Lead Capture Widget (WhatsApp Semanal) */}
+      <LeadCaptureWidget />
 
       {/* Branch Section */}
       <BranchSection
@@ -315,10 +331,10 @@ export default function LandingPage() {
         />
         <div className="max-w-[600px] mx-auto relative z-10">
           <h2 className="font-bebas text-[clamp(2rem,5vw,3rem)] text-white tracking-[2px] mb-4 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] leading-tight">
-            ¿TENÉS DUDAS O QUERÉS HACER UN PEDIDO?
+            ¿TENÉS DUDAS O QUERÉS HACER UN PEDIDO ESPECIAL?
           </h2>
           <p className="text-[1.05rem] text-[#C8C3BC] mb-8 font-semibold drop-shadow-[0_1px_6px_rgba(0,0,0,0.5)]">
-            Contactanos por WhatsApp y te respondemos al instante
+            Atención directa para comercios y particulares por WhatsApp
           </p>
           <a
             href="https://wa.me/59899322325"
@@ -326,7 +342,7 @@ export default function LandingPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 bg-[#1A7A42] text-white rounded-[12px] px-9 py-4.5 font-bebas text-[1.4rem] tracking-[2px] no-underline shadow-[0_6px_24px_rgba(26,122,66,0.5),_0_0_0_2px_rgba(255,255,255,0.15)] transition-all hover:bg-[#145E33] hover:-translate-y-1 hover:scale-[1.02] border border-white/20"
           >
-            📱 099 322 325
+            📱 WhatsApp Directo: 099 322 325
           </a>
         </div>
       </section>
@@ -356,7 +372,6 @@ export default function LandingPage() {
           </p>
         </div>
       </footer>
-
 
       {/* Navigation Bar (Mobile) */}
       <BottomNavBar

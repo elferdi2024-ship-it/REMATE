@@ -12,3 +12,5 @@ export { default as AdSlotPlacement } from "./AdSlotPlacement";
 export { default as BrandHeroCarousel } from "./BrandHeroCarousel";
 export { default as SponsorBadge } from "./SponsorBadge";
 export { default as CustomHeroCarousel } from "./CustomHeroCarousel";
+export { default as MarketingBannerBar } from "./MarketingBannerBar";
+export { default as LeadCaptureWidget } from "./LeadCaptureWidget";
