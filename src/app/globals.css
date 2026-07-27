@@ -144,6 +144,17 @@
   50% { border-color: rgba(232, 48, 42, 0.5); box-shadow: 0 8px 24px rgba(232, 48, 42, 0.2); }
 }
 
+@keyframes shimmerWave {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(250, 249, 246, 0.6) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmerWave 2s infinite linear;
+}
+
 .animate-soft-pulse {
   animation: softPulse 2.5s ease-in-out infinite;
 }

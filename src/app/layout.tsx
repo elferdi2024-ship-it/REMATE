@@ -11,16 +11,14 @@ const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
-  weight: ["300", "400", "500", "600", "700", "800"],
-  style: ["normal", "italic"],
+  weight: ["400", "600", "700", "800"],
 });
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
-  style: ["normal", "italic"],
+  weight: ["600", "700", "800"],
 });
 
 const bebasNeue = Bebas_Neue({
@@ -35,7 +33,6 @@ const dmSerifDisplay = DM_Serif_Display({
   subsets: ["latin"],
   variable: "--font-serif",
   display: "swap",
-  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {

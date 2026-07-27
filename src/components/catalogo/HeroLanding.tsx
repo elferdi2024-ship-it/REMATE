@@ -9,9 +9,14 @@ import { SUCURSALES } from "@/lib/sucursales";
 interface HeroLandingProps {
   selectedSucursal: string;
   onOpenSucursalModal?: () => void;
+  onSelectSucursal?: (id: string) => void;
 }
 
-export default function HeroLanding({ selectedSucursal, onOpenSucursalModal }: HeroLandingProps) {
+export default function HeroLanding({ 
+  selectedSucursal, 
+  onOpenSucursalModal,
+  onSelectSucursal 
+}: HeroLandingProps) {
   const sucursalNombre = SUCURSALES.find(s => s.id === selectedSucursal)?.nombre || "";
 
   return (
@@ -96,18 +101,40 @@ export default function HeroLanding({ selectedSucursal, onOpenSucursalModal }: H
           </p>
         </div>
 
-        {/* Indicador de Compra Digital */}
-        <div className="mb-8 max-w-[600px] mx-auto bg-[#1C1C1A]/80 backdrop-blur-md border border-[#D62828]/35 rounded-[16px] p-4 text-left shadow-[0_8px_32px_rgba(0,0,0,0.3)] animate-border-glow">
-          <div className="flex gap-3 items-start">
-            <span className="text-[1.4rem] leading-none select-none mt-0.5 animate-bounce">💡</span>
-            <div>
-              <span className="block text-[0.72rem] font-black uppercase tracking-[2px] text-[#FF4D47] mb-0.5">
-                ¿CÓMO REALIZAR TU COMPRA?
-              </span>
-              <span className="block text-[0.85rem] text-[#C8C3BC] font-medium leading-relaxed">
-                Seleccioná tu sucursal cercana, ingresá a su <strong>Catálogo Digital</strong>, armá tu carrito agregando los productos y completá tu pedido. ¡Precios variados por zona!
-              </span>
-            </div>
+        {/* Selección Rápida de Sucursal & Catálogo en el Hero */}
+        <div className="mb-8 max-w-[850px] mx-auto bg-[#1C1C1A]/90 backdrop-blur-md border border-[#D62828]/40 rounded-[20px] p-5 text-center shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <span className="text-[1.2rem]">🏪</span>
+            <span className="text-xs md:text-sm font-bold uppercase tracking-[2px] text-[#FF4D47]">
+              TOCÁ TU SUCURSAL PARA ENTRAR A SU CATÁLOGO DIGITAL:
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            {SUCURSALES.map((sucursal) => {
+              const isSelected = selectedSucursal === sucursal.id;
+              return (
+                <button
+                  key={sucursal.id}
+                  type="button"
+                  onClick={() => onSelectSucursal?.(sucursal.id)}
+                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 group active:scale-95 ${
+                    isSelected
+                      ? "bg-[#E8302A] border-[#E8302A] text-white shadow-[0_4px_16px_rgba(232,48,42,0.4)]"
+                      : "bg-white/5 border-white/15 text-white hover:bg-[#E8302A]/20 hover:border-[#E8302A] hover:text-white"
+                  }`}
+                >
+                  <span className="text-xs font-bold tracking-wide truncate w-full group-hover:scale-105 transition-transform">
+                    {sucursal.nombre}
+                  </span>
+                  <span className={`text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full ${
+                    isSelected ? "bg-white text-[#E8302A]" : "text-gray-300 group-hover:text-white"
+                  }`}>
+                    {isSelected ? "ACTIVO ⚡" : "VER CATÁLOGO →"}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -187,3 +214,4 @@ export default function HeroLanding({ selectedSucursal, onOpenSucursalModal }: H
     </section>
   );
 }
+

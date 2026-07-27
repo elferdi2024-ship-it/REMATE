@@ -4,21 +4,8 @@ import React from "react";
 export function ProductoSkeleton() {
   return (
     <div className="relative flex flex-col bg-white border border-stone-100 rounded-2xl p-3.5 h-[320px] shadow-sm overflow-hidden">
-      {/* Fondo de Shimmer (Animación de gradiente que se mueve a través del componente) */}
-      <div 
-        className="absolute inset-0 z-0 pointer-events-none"
-        style={{
-          background: "linear-gradient(90deg, transparent 0%, rgba(250, 249, 246, 0.6) 50%, transparent 100%)",
-          backgroundSize: "200% 100%",
-          animation: "shimmerWave 2s infinite linear",
-        }}
-      />
-      <style>{`
-        @keyframes shimmerWave {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-      `}</style>
+      {/* Fondo de Shimmer */}
+      <div className="absolute inset-0 z-0 pointer-events-none skeleton-shimmer" />
       
       {/* Elementos internos z-10 para quedar sobre el shimmer */}
       <div className="relative z-10 flex flex-col h-full">
@@ -41,3 +28,4 @@ export function ProductoSkeleton() {
     </div>
   );
 }
+

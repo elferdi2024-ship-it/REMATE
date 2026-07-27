@@ -331,7 +331,7 @@ export default function Hero({
           )}
 
           <div 
-            className="hero-search-wrap animate-pulse-glow" 
+            className="hero-search-wrap" 
             ref={searchContainerRef} 
             style={{ 
               position: "relative",
@@ -371,7 +371,7 @@ export default function Hero({
             </span>
             <input
               type="text"
-              placeholder="¿Qué estás buscando? (ej. mayonesa, refresco, hamburguesa...)"
+              placeholder="Buscá por nombre, marca o categoría..."
               value={inputValue}
               onChange={handleChange}
               onFocus={() => setIsSearchFocused(true)}
@@ -637,21 +637,23 @@ export default function Hero({
 
           <div className="hero-actions">
             <button className="btn-hero-cart" onClick={onOpenCart} aria-label="Abrir carrito">
-              <span style={{ fontWeight: 900 }}>C</span>
-              <span>VER PEDIDO</span>
-              <span
-                style={{
-                  background: "rgba(0,0,0,0.25)",
-                  borderRadius: "5px",
-                  padding: "2px 10px",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "0.85rem",
-                  fontWeight: 800,
-                  marginLeft: "2px",
-                }}
-              >
-                {formatPrice(cartTotal)}
-              </span>
+              <span style={{ fontWeight: 900 }}>🛒</span>
+              <span>{cartQty > 0 ? "VER PEDIDO" : "EMPEZAR PEDIDO"}</span>
+              {cartQty > 0 && (
+                <span
+                  style={{
+                    background: "rgba(0,0,0,0.25)",
+                    borderRadius: "5px",
+                    padding: "2px 10px",
+                    fontFamily: "var(--font-body)",
+                    fontSize: "0.85rem",
+                    fontWeight: 800,
+                    marginLeft: "2px",
+                  }}
+                >
+                  {formatPrice(cartTotal)}
+                </span>
+              )}
               {cartQty > 0 && <span className="cart-badge">{cartQty}</span>}
             </button>
 

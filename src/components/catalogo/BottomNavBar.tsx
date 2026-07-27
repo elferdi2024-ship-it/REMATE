@@ -152,13 +152,13 @@ export default function BottomNavBar({
           <button
             key={tab.id}
             onClick={() => handleTabClick(tab.id)}
-            className={`bg-transparent border-none flex flex-col items-center justify-center gap-0.5 cursor-pointer px-2 py-1 min-w-[60px] transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-90 touch-manipulation rounded-xl ${
+            className={`bg-transparent border-none flex flex-col items-center justify-center gap-0.5 cursor-pointer px-2 py-1 min-w-[60px] min-h-[44px] transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-90 touch-manipulation rounded-xl ${
               isSelected ? "text-[#E8302A]" : "text-[#6E6864]"
             }`}
             aria-label={tab.label}
           >
             <div
-              className={`flex items-center justify-center w-11 h-[30px] rounded-[15px] transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+              className={`flex items-center justify-center w-11 h-[32px] rounded-[16px] transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
                 isSelected
                   ? "bg-[#E8302A]/[0.08] scale-105"
                   : "bg-transparent scale-100"

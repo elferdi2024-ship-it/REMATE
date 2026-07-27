@@ -131,6 +131,7 @@ export default function LandingPage() {
           setPendingCategory("");
           setIsModalOpen(true);
         }}
+        onSelectSucursal={handleSelectSucursal}
       />
 
       {/* Marquee Ticker */}

@@ -1479,63 +1479,11 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         );
       })()}
 
-      <div className="page-wrapper pt-2">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 mb-8">
-          {/* Main Hero (Left Bento) */}
-          <div className="h-full relative overflow-hidden rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-            {ofertasConfig?.mainCarousel && ofertasConfig.mainCarousel.filter(s => s.activo).length > 0 ? (
-              <CustomHeroCarousel slides={ofertasConfig.mainCarousel.filter(s => s.activo)} />
-            ) : (
-              <BrandHeroCarousel brands={activeBrands} />
-            )}
-          </div>
-          
-          {/* Side Stack (Right Bento) */}
-          <div className="hidden lg:flex flex-col gap-4">
-            <div className="flex-1 bg-gradient-to-br from-zinc-50 to-white border border-zinc-100 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative flex flex-col items-center justify-center p-4">
-               <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
-            </div>
-            
-            <div className="flex-1 bg-gradient-to-br from-[#E8302A] to-[#B91C1C] rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(232,48,42,0.3)] relative flex flex-col items-center justify-center p-6 text-white text-center">
-               <span className="text-3xl mb-2">🔥</span>
-               <h3 className="font-display font-black uppercase text-xl leading-tight">Flash<br/>Deals</h3>
-               <p className="text-[10px] uppercase tracking-widest mt-2 opacity-90 font-bold">Por tiempo limitado</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Ads */}
-        <div className="lg:hidden mb-6 flex flex-col gap-4">
-          <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
-        </div>
-
-        {ofertasConfig?.brandBanners && (
-          <div className="mb-8">
-            <BrandBannersRail banners={ofertasConfig.brandBanners} />
-          </div>
-        )}
-      </div>
-
-
-      {/* Ticker */}
+      {/* Ticker único */}
       <Ticker />
 
-      <div className="page-wrapper">
-        <OfertasDestacadasRail />
-        {ofertasConfig?.flashOffers && (
-          <div style={{ marginTop: "16px" }}>
-            <FlashOffersRail flashOffers={ofertasConfig.flashOffers} />
-          </div>
-        )}
-        {ofertasConfig?.sponsoredProducts && (
-          <div style={{ marginTop: "16px" }}>
-            <SponsoredProductsRail products={ofertasConfig.sponsoredProducts} />
-          </div>
-        )}
-      </div>
-
       {/* Contenido del catálogo — max-width desktop */}
-      <div className="page-wrapper">
+      <div className="page-wrapper pt-4">
         {/* Tus Compras Frecuentes / Reorder Express */}
         <SmartReorder
           productos={productos}
@@ -1545,19 +1493,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           onQtyChange={handleQtyChange}
         />
 
-        {/* Category nav */}
-        {ofertasConfig?.categoryOffers && (
-          <CategoryOffersRail
-            categoryOffers={ofertasConfig.categoryOffers}
-            catalogo={productos}
-            qtyMap={qtyMap}
-            onAddProduct={handleAddProduct}
-            onQtyChange={handleQtyChange}
-          />
-        )}
-
+        {/* Category nav — Prioritario arriba para filtrado rápido */}
         {categorias.length > 0 && (
-          <div className="w-full relative z-40 mb-6">
+          <div className="w-full relative z-40 mb-4">
             <CategoryRail
               categorias={categorias}
               activeCat={activeCat}
@@ -1574,7 +1512,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
         <div className="flex gap-6 relative" style={{ alignItems: "flex-start" }}>
           {/* Main content */}
-          <div className="flex-1 min-w-0 pb-[100px]">
+          <div className="flex-1 min-w-0 pb-[60px]">
             {/* Results bar */}
             <div ref={gridRef}>
               <ResultsBar
@@ -1641,7 +1579,67 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Promociones y Ofertas (Post-grid / Descubrimiento) */}
+      <div className="page-wrapper">
+        {ofertasConfig?.categoryOffers && (
+          <CategoryOffersRail
+            categoryOffers={ofertasConfig.categoryOffers}
+            catalogo={productos}
+            qtyMap={qtyMap}
+            onAddProduct={handleAddProduct}
+            onQtyChange={handleQtyChange}
+          />
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 mb-8 my-6">
+          {/* Main Hero Carousel */}
+          <div className="h-full relative overflow-hidden rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+            {ofertasConfig?.mainCarousel && ofertasConfig.mainCarousel.filter(s => s.activo).length > 0 ? (
+              <CustomHeroCarousel slides={ofertasConfig.mainCarousel.filter(s => s.activo)} />
+            ) : (
+              <BrandHeroCarousel brands={activeBrands} />
+            )}
+          </div>
+          
+          {/* Side Stack */}
+          <div className="hidden lg:flex flex-col gap-4">
+            <div className="flex-1 bg-gradient-to-br from-zinc-50 to-white border border-zinc-100 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative flex flex-col items-center justify-center p-4">
+               <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
+            </div>
+            
+            <div className="flex-1 bg-gradient-to-br from-[#E8302A] to-[#B91C1C] rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(232,48,42,0.3)] relative flex flex-col items-center justify-center p-6 text-white text-center">
+               <span className="text-3xl mb-2">🔥</span>
+               <h3 className="font-display font-black uppercase text-xl leading-tight">Flash<br/>Deals</h3>
+               <p className="text-[10px] uppercase tracking-widest mt-2 opacity-90 font-bold">Por tiempo limitado</p>
+            </div>
+          </div>
         </div>
+
+        {/* Mobile Ads */}
+        <div className="lg:hidden mb-6 flex flex-col gap-4">
+          <AdSlotPlacement slot="hero" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />
+        </div>
+
+        {ofertasConfig?.brandBanners && (
+          <div className="mb-8">
+            <BrandBannersRail banners={ofertasConfig.brandBanners} />
+          </div>
+        )}
+
+        <OfertasDestacadasRail />
+        {ofertasConfig?.flashOffers && (
+          <div style={{ marginTop: "16px" }}>
+            <FlashOffersRail flashOffers={ofertasConfig.flashOffers} />
+          </div>
+        )}
+        {ofertasConfig?.sponsoredProducts && (
+          <div style={{ marginTop: "16px", marginBottom: "32px" }}>
+            <SponsoredProductsRail products={ofertasConfig.sponsoredProducts} />
+          </div>
+        )}
+      </div>
 
 
       {/* Float cart button */}
