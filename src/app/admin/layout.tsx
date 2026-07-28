@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: "/admin/sucursales", label: "Sucursales", icon: "🏪" },
   { href: "/admin/publicidad", label: "Publicidad", icon: "📢" },
   { href: "/admin/ofertas", label: "Ofertas", icon: "🔥" },
+  { href: "/admin/cupones", label: "Cupones", icon: "🎟️" },
   { href: "/admin/stats", label: "Estadísticas", icon: "📊" },
 ];
 

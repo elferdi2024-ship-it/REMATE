@@ -5,6 +5,7 @@ import { useState } from 'react';
 import type { CartItem } from '@/types';
 import { EMOJI_POR_CATEGORIA } from '@/types';
 import { motion, useAnimation, PanInfo } from 'framer-motion';
+import ProductSubstitutionSelector from './ProductSubstitutionSelector';
 
 interface CartItemRowProps {
   item: CartItem;
@@ -75,6 +76,16 @@ export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRow
               <span>📦</span> Completar bulto ({upsellBulto})
             </motion.button>
           )}
+
+          {/* Selector de Sustitución de Faltantes (Instacart Standard) */}
+          <ProductSubstitutionSelector
+            itemCodigo={item.codigo}
+            itemNombre={item.nombre}
+            onChange={(code, policy, note) => {
+              item.substitucion = policy;
+              item.notaSubstitucion = note;
+            }}
+          />
         </div>
         <div className="cart-item-qty">
           <button

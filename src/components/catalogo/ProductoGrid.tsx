@@ -13,6 +13,7 @@ import { getActiveBrands, getBrandForCategory, getImageAtIndex, getVideoAtIndex,
 import { canShowAd } from "@/lib/adFrequency";
 import type { BrandConfig } from "@/types/brands";
 import { normalizeCategoryName, normalizeProductCategory } from "@/lib/category-normalizer";
+import { retailMediaGuard } from "@/lib/RetailMediaGuard";
 
 interface ProductoGridProps {
   productos: Producto[];

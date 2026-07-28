@@ -15,6 +15,8 @@ export interface CartItem {
   nombre: string;
   precio: number;
   cantidad: number;
+  substitucion?: string;
+  notaSubstitucion?: string;
 }
 
 export interface PedidoItem {

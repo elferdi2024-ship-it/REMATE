@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import DeliveryMethodSelector from './DeliveryMethodSelector';
+import DeliverySlotScheduler from './DeliverySlotScheduler';
 import type { MetodoEntrega } from '@/lib/sucursales';
 
 interface CartFooterProps {
@@ -66,6 +67,31 @@ export default function CartFooter({
           onMetodoChange={onMetodoEntregaChange}
           sucursalId={sucursalId}
           onSucursalChange={onSucursalChange}
+        />
+
+        {/* Reserva de Franja Horaria / Slot Scheduler (Walmart/Target Standard) */}
+        <DeliverySlotScheduler
+          slots={[
+            { id: "slot-1", date: "2026-07-28", dateLabel: "Hoy", timeRange: "10:00 - 12:00", available: true, capacityPercent: 40 },
+            { id: "slot-2", date: "2026-07-28", dateLabel: "Hoy", timeRange: "12:00 - 14:00", available: true, capacityPercent: 85 },
+            { id: "slot-3", date: "2026-07-28", dateLabel: "Hoy", timeRange: "14:00 - 16:00", available: true, capacityPercent: 60, isExpress: true },
+            { id: "slot-4", date: "2026-07-28", dateLabel: "Hoy", timeRange: "16:00 - 18:00", available: false, capacityPercent: 100 },
+            { id: "slot-5", date: "2026-07-29", dateLabel: "Mañana", timeRange: "09:00 - 11:00", available: true, capacityPercent: 20 },
+            { id: "slot-6", date: "2026-07-29", dateLabel: "Mañana", timeRange: "11:00 - 13:00", available: true, capacityPercent: 50 },
+            { id: "slot-7", date: "2026-07-29", dateLabel: "Mañana", timeRange: "15:00 - 17:00", available: true, capacityPercent: 30, isExpress: true },
+          ]}
+          selectedSlotId={null}
+          onSelectSlot={(slot) => {
+            if (onClientNotesChange) {
+              const prev = clientNotes || "";
+              const slotInfo = `[Franja Horaria: ${slot.dateLabel} ${slot.timeRange}]`;
+              if (!prev.includes("[Franja Horaria:")) {
+                onClientNotesChange(`${slotInfo} ${prev}`.trim());
+              } else {
+                onClientNotesChange(prev.replace(/\[Franja Horaria:[^\]]+\]/, slotInfo));
+              }
+            }
+          }}
         />
 
         {/* Fila nombre + teléfono */}

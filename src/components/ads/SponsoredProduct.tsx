@@ -36,21 +36,22 @@ export default function SponsoredProduct({ brand, asset, onAdd, onQuickView }: S
       {/* Efecto de destello de luz metálica */}
       <div className="sponsored-metallic-glint-overlay" />
 
-      {/* Badge "Patrocinado" — discreta pero visible */}
+      {/* Badge "PATROCINADO" — Alto contraste WCAG AAA (Retail Media Standard) */}
       <div style={{
         position: "absolute",
         top: "8px",
         left: "8px",
         zIndex: 2,
-        background: "rgba(232,48,42,0.08)",
-        border: "1px solid rgba(232,48,42,0.15)",
-        borderRadius: "4px",
-        padding: "2px 6px",
-        fontSize: "7px",
-        fontWeight: 700,
-        color: "var(--rojo)",
+        background: "#FFF1F0",
+        border: "1px solid #FFA39E",
+        borderRadius: "6px",
+        padding: "3px 8px",
+        fontSize: "10px",
+        fontWeight: 800,
+        color: "#E8302A",
         textTransform: "uppercase",
         letterSpacing: "0.8px",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
       }}>
         Patrocinado
       </div>
