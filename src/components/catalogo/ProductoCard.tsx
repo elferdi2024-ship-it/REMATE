@@ -1,5 +1,7 @@
+// filepath: src/components/catalogo/ProductoCard.tsx
 "use client";
-import React, { useRef, useCallback } from "react";
+
+import React, { memo, useCallback, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { haptic } from "@/lib/haptic";
 import type { Producto } from "@/types";
@@ -9,6 +11,7 @@ import Image from "next/image";
 import { useFavoritos } from "@/lib/favoritos-context";
 import { SponsorBadge } from "@/components/ads";
 import { toast } from "sonner";
+import { formatPrice } from "@/lib/format";
 
 interface ProductoCardProps {
   producto: Producto;
@@ -19,9 +22,6 @@ interface ProductoCardProps {
   sponsorBrand?: BrandConfig | null;
   onQuickView?: (producto: Producto) => void;
 }
-
-import { formatPrice, getCatColorVar } from "@/lib/format";
-
 
 function getCatBadgeColors(cat: string): { bg: string; color: string } {
   const map: Record<string, { bg: string; color: string }> = {
@@ -54,14 +54,14 @@ function highlightText(text: string, searchTerm: string | undefined): React.Reac
   const parts = text.split(regex);
   return parts.map((part, i) =>
     regex.test(part) ? (
-      <mark key={i} style={{ background: "rgba(232, 48, 42, 0.08)", color: "var(--rojo, #E8302A)", borderRadius: "4px", padding: "0 2px", fontWeight: 700 }}>{part}</mark>
+      <mark key={i} className="bg-red-50 text-[#E8302A] rounded px-0.5 font-extrabold">{part}</mark>
     ) : (
       part
     )
   );
 }
 
-export default function ProductoCard({
+export const ProductoCard = memo(function ProductoCard({
   producto,
   qty,
   searchTerm,
@@ -70,32 +70,29 @@ export default function ProductoCard({
   sponsorBrand,
   onQuickView,
 }: ProductoCardProps) {
-  const cardRef = React.useRef<HTMLDivElement>(null);
-  const [isAdding, setIsAdding] = React.useState(false);
-  const [isHovered, setIsHovered] = React.useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const isInCart = qty > 0;
-
   const { isFavorito, toggleFavorito } = useFavoritos();
   const favorito = isFavorito(producto.codigo);
 
-  const handleAdd = React.useCallback((e: React.MouseEvent) => {
+  const handleAdd = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     haptic.add();
     onAdd(producto, e);
-    toast.success(`1x ${producto.nombre} agregado`, {
+    toast.success(`1x ${producto.nombre} agregado al carrito`, {
       position: 'top-center',
-      duration: 1500,
-      style: { background: 'var(--verde)', color: 'white', border: 'none', fontWeight: 'bold' }
+      duration: 1400,
+      style: { background: '#1A7A42', color: 'white', border: 'none', fontWeight: 'bold' }
     });
   }, [onAdd, producto]);
 
-  const handleDec = React.useCallback((e: React.MouseEvent) => {
+  const handleDec = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     haptic.remove();
     onQtyChange(producto.codigo, Math.max(0, qty - 1));
   }, [onQtyChange, producto.codigo, qty]);
 
-  const handleInc = React.useCallback((e: React.MouseEvent) => {
+  const handleInc = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     haptic.add();
     onQtyChange(producto.codigo, qty + 1);
@@ -103,176 +100,78 @@ export default function ProductoCard({
 
   const emoji = EMOJI_POR_CATEGORIA[producto.categoria] || "📦";
   const { bg: badgeBg, color: badgeColor } = getCatBadgeColors(producto.categoria);
+  const isFresh = ["FRUTAS Y VERDURAS", "CARNES Y EMBUTIDOS", "LÁCTEOS Y HUEVOS"].includes(producto.categoria.toUpperCase());
 
   return (
-    <div
+    <article
       ref={cardRef}
       onClick={() => onQuickView?.(producto)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`card${isInCart ? " in-cart ring-2 ring-emerald-500" : ""} gpu-accelerated group transition-all duration-300 ease-out hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] hover:-translate-y-1 active:scale-95 bg-white border border-stone-200/80 rounded-[22px]`}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-        cursor: "pointer",
-        padding: "12px",
-      }}
+      className={`gpu-accelerated group relative flex flex-col bg-white border ${
+        isInCart ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-md" : "border-stone-200/80 hover:border-stone-300"
+      } rounded-[22px] p-3 transition-all duration-300 ease-out hover:shadow-[0_16px_36px_rgba(0,0,0,0.06)] hover:-translate-y-1 select-none cursor-pointer`}
+      style={{ minHeight: "285px" }}
     >
-      <div className="card-thumb" style={{ 
-        background: "linear-gradient(180deg, #ffffff 0%, #f9f8f6 100%)", 
-        borderRadius: "calc(var(--r-lg) - 2px)",
-        aspectRatio: "1 / 1",
-        height: "auto",
-        marginBottom: "10px",
-        border: "1px solid rgba(17,11,8,0.03)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        overflow: "hidden"
-      }}>
-        {/* Botón de Favorito */}
+      {/* Thumbnail Container */}
+      <div 
+        className="relative w-full rounded-2xl overflow-hidden mb-2.5 flex items-center justify-center border border-stone-100/80"
+        style={{ 
+          background: "linear-gradient(180deg, #FFFFFF 0%, #F6F4EF 100%)",
+          aspectRatio: "1 / 1"
+        }}
+      >
+        {/* Favorito Button */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             toggleFavorito(producto.codigo);
           }}
-          className="fav-btn"
-          style={{
-            position: "absolute",
-            top: "8px",
-            left: "8px",
-            zIndex: 15,
-            background: "rgba(255, 255, 255, 0.85)",
-            border: "none",
-            borderRadius: "50%",
-            width: "36px",
-            height: "36px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            transition: "all 0.2s ease",
-            color: favorito ? "var(--rojo, #E8302A)" : "#A89E94",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.1)";
-            e.currentTarget.style.background = "#fff";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.background = "rgba(255, 255, 255, 0.85)";
-          }}
+          className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center shadow-sm hover:scale-110 active:scale-95 transition-all"
           aria-label={favorito ? "Quitar de favoritos" : "Guardar en favoritos"}
         >
           <svg
-            width="20"
-            height="20"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
-            fill={favorito ? "currentColor" : "none"}
-            stroke="currentColor"
+            fill={favorito ? "#E8302A" : "none"}
+            stroke={favorito ? "#E8302A" : "#888078"}
             strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
           >
             <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
           </svg>
         </button>
 
-        {/* Indicador En Carrito */}
+        {/* Indicador Check En Carrito */}
         {isInCart && (
-          <div
-            style={{
-              position: "absolute",
-              top: "50px",
-              left: "8px",
-              zIndex: 15,
-              background: "var(--verde)",
-              color: "#fff",
-              width: "28px",
-              height: "28px",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 2px 8px rgba(26,122,66,0.3)",
-              fontWeight: 900,
-              fontSize: "14px",
-              animation: "cardFadeIn 0.2s ease-out",
-            }}
-          >
+          <div className="absolute top-11 left-2 z-20 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-black shadow-md animate-in fade-in zoom-in-75 duration-200">
             ✓
           </div>
         )}
 
-        {/* Badge de Descuento */}
+        {/* Badge Descuento OFF */}
         {producto.precioAnterior && producto.precioAnterior > producto.precio && (
-          <div
-            style={{
-              position: "absolute",
-              top: "8px",
-              right: "8px",
-              zIndex: 15,
-              background: "linear-gradient(135deg, #E8302A 0%, #B91C1C 100%)",
-              color: "#fff",
-              fontSize: "10px",
-              fontWeight: 900,
-              padding: "4px 8px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(232, 48, 42, 0.3)",
-              letterSpacing: "0.5px",
-              transform: "rotate(-3deg)",
-            }}
-          >
+          <div className="absolute top-2 right-2 z-20 bg-gradient-to-r from-[#E8302A] to-[#C4231E] text-white text-[10px] font-black px-2 py-0.5 rounded-lg shadow-sm -rotate-2">
             -{Math.round((1 - producto.precio / producto.precioAnterior) * 100)}%
           </div>
         )}
 
+        {/* Imagen del Producto */}
         {producto.imagen ? (
-          <Image 
-            src={producto.imagen} 
+          <Image
+            src={producto.imagen}
             alt={producto.nombre}
             fill
-            sizes="(max-width: 768px) 50vw, 33vw"
-            className="group-hover:scale-105"
-            style={{ 
-              objectFit: "contain", 
-              padding: "8px",
-              transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)" 
-            }} 
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = "none";
-              const parent = target.parentElement;
-              if (parent) {
-                const fallback = parent.querySelector('.fallback-emoji');
-                if (fallback) (fallback as HTMLElement).style.display = "flex";
-              }
-            }}
+            sizes="(max-width: 768px) 50vw, 20vw"
+            className="object-contain p-2 transition-transform duration-300 group-hover:scale-108"
+            loading="lazy"
           />
-        ) : null}
-        
-        {(!producto.imagen) ? (
-          <span role="img" aria-hidden="true" style={{ 
-            fontSize: "3rem", 
-            transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
-          }} className="group-hover:scale-105">
-            {emoji}
-          </span>
         ) : (
-          <span role="img" aria-hidden="true" style={{ 
-            fontSize: "3rem", 
-            transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
-            display: "none"
-          }} className="group-hover:scale-105 fallback-emoji">
-            {emoji}
-          </span>
+          <span className="text-4xl transition-transform duration-300 group-hover:scale-110">{emoji}</span>
         )}
-        
+
+        {/* Badge Marca Patrocinada */}
         {sponsorBrand && (
-          <div style={{ position: "absolute", bottom: "8px", left: "8px", zIndex: 10 }}>
+          <div className="absolute bottom-2 left-2 z-20">
             <SponsorBadge
               brandName={sponsorBrand.name}
               brandColor={sponsorBrand.color}
@@ -282,215 +181,122 @@ export default function ProductoCard({
           </div>
         )}
 
-        <div className="card-floating-action" onClick={(e) => e.stopPropagation()} style={{ position: "absolute", bottom: "8px", right: "8px", zIndex: 10, display: "flex", alignItems: "flex-end", justifyContent: "flex-end", height: "44px" }}>
+        {/* CTA Táctil Ergónomico (Min 44x44px) */}
+        <div 
+          onClick={(e) => e.stopPropagation()} 
+          className="absolute bottom-2 right-2 z-20 h-[44px] flex items-end justify-end"
+        >
           <AnimatePresence mode="wait">
             {isInCart ? (
-              <motion.div 
-                key="qty-ctrl"
+              <motion.div
+                key="qty-ctrl-bar"
                 initial={{ opacity: 0, scale: 0.8, width: 44 }}
-                animate={{ opacity: 1, scale: 1, width: 100 }}
+                animate={{ opacity: 1, scale: 1, width: 104 }}
                 exit={{ opacity: 0, scale: 0.8, width: 44 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                className="float-qty-ctrl" style={{ 
-                display: "flex",
-                alignItems: "center",
-                background: "#fff",
-                borderRadius: "30px",
-                height: "44px",
-                boxShadow: "0 6px 15px rgba(26,122,66,0.15)",
-                border: "2px solid var(--verde, #1A7A42)",
-                padding: "0 6px",
-                overflow: "hidden"
-              }}>
-                <button className="float-qty-btn minus" onClick={handleDec} aria-label="Disminuir cantidad" style={{ color: "var(--verde)", fontWeight: 900 }}>&#8722;</button>
-                <input 
-                  type="number" 
-                  value={qty || ''} 
+                className="flex items-center bg-white border-2 border-emerald-600 rounded-full h-[44px] px-1 shadow-lg"
+              >
+                <button
+                  type="button"
+                  onClick={handleDec}
+                  className="w-8 h-8 text-emerald-700 font-black text-base flex items-center justify-center active:scale-90"
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  value={qty || ""}
                   onChange={(e) => {
                     const val = parseInt(e.target.value);
-                    if (!isNaN(val) && val >= 0) {
-                      onQtyChange(producto.codigo, val);
-                    } else if (e.target.value === '') {
-                      onQtyChange(producto.codigo, 0);
-                    }
+                    if (!isNaN(val) && val >= 0) onQtyChange(producto.codigo, val);
                   }}
-                  onFocus={(e) => e.target.select()}
-                  className="float-qty-val" 
-                  style={{ 
-                    fontWeight: 800, 
-                    width: "36px", 
-                    textAlign: "center",
-                    background: "transparent",
-                    border: "none",
-                    outline: "none",
-                    WebkitAppearance: "none",
-                    MozAppearance: "textfield",
-                    margin: 0,
-                    fontSize: "1rem",
-                    color: "var(--texto)"
-                  }} 
+                  className="w-7 text-center font-black text-xs text-stone-900 bg-transparent outline-none"
                 />
-                <button className="float-qty-btn plus" onClick={handleInc} aria-label="Aumentar cantidad" style={{ color: "var(--verde)", fontWeight: 900 }}>+</button>
+                <button
+                  type="button"
+                  onClick={handleInc}
+                  className="w-8 h-8 text-emerald-700 font-black text-base flex items-center justify-center active:scale-90"
+                >
+                  +
+                </button>
               </motion.div>
             ) : (
-              <motion.button 
-                key="add-btn"
+              <motion.button
+                key="add-btn-main"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                whileHover={{ scale: 1.15, y: -1, boxShadow: "0 10px 22px rgba(232, 48, 42, 0.45)" }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                className="btn-float-add" 
-                onClick={handleAdd} 
-                style={{
-                  background: "var(--rojo)",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "44px",
-                  height: "44px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 6px 15px rgba(232, 48, 42, 0.3)",
-                  cursor: "pointer",
-                }}
+                whileHover={{ scale: 1.12 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleAdd}
+                className="w-[44px] h-[44px] bg-[#E8302A] text-white rounded-2xl flex items-center justify-center shadow-md shadow-[#E8302A]/25 hover:bg-[#c9241f] transition-all"
+                aria-label={`Agregar ${producto.nombre}`}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 5v14M5 12h14"/>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5v14M5 12h14" />
                 </svg>
               </motion.button>
             )}
           </AnimatePresence>
         </div>
-        
-        {sponsorBrand?.logoUrl && (
-          <div style={{
-            position: "absolute", bottom: 6, left: 6, zIndex: 3,
-            background: "rgba(255,255,255,0.92)",
-            borderRadius: "5px",
-            padding: "2px 5px",
-            display: "flex",
-            alignItems: "center",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
-            backdropFilter: "blur(4px)",
-            width: 50,
-            height: 16,
-          }}>
-            <Image
-              src={sponsorBrand.logoUrl}
-              alt={sponsorBrand.name}
-              fill
-              sizes="50px"
-              style={{ objectFit: "contain", opacity: 0.85, padding: "2px 5px" }}
-            />
-          </div>
-        )}
       </div>
 
-      <div className="card-body" style={{ padding: "0 4px 8px 4px", flex: 1, display: "flex", flexDirection: "column" }}>
-        <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "6px" }}>
-          <span className="card-cat-badge" style={{ 
-            background: badgeBg, 
-            color: badgeColor, 
-            fontSize: "10px", 
-            fontWeight: 800, 
-            textTransform: "uppercase", 
-            padding: "3px 6px", 
-            borderRadius: "6px", 
-            display: "inline-block",
-            letterSpacing: "0.5px",
-            width: "fit-content"
-          }}>
+      {/* Info Body */}
+      <div className="flex flex-col flex-1 pt-1">
+        {/* Badges de Categoría y Frescura */}
+        <div className="flex flex-wrap gap-1 mb-1.5 items-center">
+          <span 
+            className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider"
+            style={{ background: badgeBg, color: badgeColor }}
+          >
             {producto.categoria}
           </span>
+
           {producto.marca && (
-            <span style={{ 
-              fontSize: "10px", 
-              fontWeight: 800, 
-              color: "var(--muted)", 
-              textTransform: "uppercase",
-              padding: "3px 6px", 
-              borderRadius: "6px", 
-              background: "var(--crema-2)",
-              display: "inline-block",
-              letterSpacing: "0.5px",
-              width: "fit-content"
-            }}>
+            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-stone-100 text-stone-600 tracking-wider">
               {producto.marca}
             </span>
           )}
-          {["FRUTAS Y VERDURAS", "CARNES Y EMBUTIDOS", "LÁCTEOS Y HUEVOS"].includes(producto.categoria.toUpperCase()) && (
-            <span style={{
-              fontSize: "9px",
-              fontWeight: 900,
-              color: "#15803D",
-              background: "#DCFCE7",
-              border: "1px solid #86EFAC",
-              padding: "2px 5px",
-              borderRadius: "5px",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "2px",
-              textTransform: "uppercase",
-            }}>
+
+          {isFresh && (
+            <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300">
               🥬 Frescura
             </span>
           )}
         </div>
 
-        <h3 className="card-name" style={{ 
-          fontSize: "0.85rem", 
-          fontWeight: 600, 
-          color: "var(--oscuro)", 
-          lineHeight: "1.2", 
-          height: "2.4em",
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-          marginBottom: "12px", 
-          letterSpacing: "-0.01em"
-        }}>
+        {/* Nombre del Producto */}
+        <h3 className="text-xs font-bold text-stone-900 leading-snug line-clamp-2 mb-2 group-hover:text-[#E8302A] transition-colors" style={{ height: "2.4em" }}>
           {highlightText(producto.nombre, searchTerm)}
         </h3>
 
-        <div style={{ marginTop: "auto" }}>
+        {/* Pie: Precios y Unidad */}
+        <div className="mt-auto pt-1 border-t border-stone-100">
           {producto.precioAnterior && producto.precioAnterior > producto.precio && (
-            <div className="card-price-old" style={{ 
-              fontFamily: "var(--font-display)",
-              fontSize: "0.9rem", 
-              fontWeight: 500,
-              color: "var(--faint, #888078)", 
-              textDecoration: "line-through",
-              marginBottom: "2px",
-              lineHeight: "1"
-            }}>
+            <span className="block text-[11px] text-stone-400 font-semibold line-through leading-none mb-0.5">
               {formatPrice(producto.precioAnterior)}
-            </div>
+            </span>
           )}
-          <div className="card-price" style={{ 
-            fontFamily: "var(--font-display)",
-            fontSize: "1.5rem", 
-            fontWeight: 800,
-            color: "var(--rojo)", 
-            lineHeight: "1",
-            letterSpacing: "0.5px"
-          }}>
-            {formatPrice(producto.precio)}
+          
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-2xl font-black text-[#E8302A] leading-none tracking-wide font-price">
+              {formatPrice(producto.precio)}
+            </span>
           </div>
-          <div style={{ fontSize: "10px", color: "var(--muted)", fontWeight: 700, textTransform: "uppercase", marginTop: "4px", letterSpacing: "0.5px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4px" }}>
+
+          <div className="text-[9px] font-bold text-stone-500 uppercase tracking-wider mt-1 flex items-center gap-1.5">
             <span>Unidad IVA Incl.</span>
             {producto.contenido && (
               <>
-                <span style={{ color: "var(--border-2, #C8C2B8)" }}>•</span>
-                <span style={{ color: "var(--verde, #1A7A42)" }}>{producto.contenido}</span>
+                <span className="text-stone-300">•</span>
+                <span className="text-emerald-700 font-extrabold">{producto.contenido}</span>
               </>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
-}
+});
+
+export default ProductoCard;
