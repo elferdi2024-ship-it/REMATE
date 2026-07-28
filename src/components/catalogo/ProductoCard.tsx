@@ -110,13 +110,13 @@ export default function ProductoCard({
       onClick={() => onQuickView?.(producto)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`card${isInCart ? " in-cart ring-2 ring-emerald-500" : ""} group transition-all duration-400 ease-out hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 active:scale-95 bg-white border border-zinc-100 rounded-[24px]`}
+      className={`card${isInCart ? " in-cart ring-2 ring-emerald-500" : ""} gpu-accelerated group transition-all duration-300 ease-out hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] hover:-translate-y-1 active:scale-95 bg-white border border-stone-200/80 rounded-[22px]`}
       style={{
         display: "flex",
         flexDirection: "column",
         position: "relative",
         cursor: "pointer",
-        padding: "14px",
+        padding: "12px",
       }}
     >
       <div className="card-thumb" style={{ 
@@ -419,6 +419,23 @@ export default function ProductoCard({
               width: "fit-content"
             }}>
               {producto.marca}
+            </span>
+          )}
+          {["FRUTAS Y VERDURAS", "CARNES Y EMBUTIDOS", "LÁCTEOS Y HUEVOS"].includes(producto.categoria.toUpperCase()) && (
+            <span style={{
+              fontSize: "9px",
+              fontWeight: 900,
+              color: "#15803D",
+              background: "#DCFCE7",
+              border: "1px solid #86EFAC",
+              padding: "2px 5px",
+              borderRadius: "5px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "2px",
+              textTransform: "uppercase",
+            }}>
+              🥬 Frescura
             </span>
           )}
         </div>
