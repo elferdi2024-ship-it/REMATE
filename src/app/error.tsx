@@ -10,8 +10,22 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log the error to console or error reporting service
     console.error("Application error boundary:", error);
+
+    // Auto-recuperación de ChunkLoadError (ocurre al publicar nuevo build en Vercel mientras el cliente navega con chunks viejos en caché)
+    const isChunkError =
+      error?.name === "ChunkLoadError" ||
+      error?.message?.includes("Loading chunk") ||
+      error?.message?.includes("ChunkLoadError");
+
+    if (isChunkError && typeof window !== "undefined") {
+      const storageKey = "elremate_chunk_reload";
+      const hasReloaded = sessionStorage.getItem(storageKey);
+      if (!hasReloaded) {
+        sessionStorage.setItem(storageKey, "true");
+        window.location.reload();
+      }
+    }
   }, [error]);
 
   return (
