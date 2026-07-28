@@ -1759,33 +1759,35 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onOpenUser={() => setUserPanelOpen(true)}
       />
 
-      {/* Scroll to Top FAB */}
+      {/* Scroll to Top FAB (Evita superposición con FloatCartBtn y barra de envío gratis) */}
       {showScrollTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           className={`scroll-to-top-btn ${totalQty > 0 ? "has-cart" : ""}`}
           style={{
             position: "fixed",
-            bottom: "calc(env(safe-area-inset-bottom, 12px) + 72px)",
-            right: "20px",
+            bottom: totalQty > 0 
+              ? "calc(env(safe-area-inset-bottom, 12px) + 215px)" 
+              : "calc(env(safe-area-inset-bottom, 12px) + 72px)",
+            right: "16px",
             zIndex: 90,
             background: "var(--oscuro, #111)",
             color: "#fff",
-            border: "none",
+            border: "1px solid rgba(255,255,255,0.15)",
             borderRadius: "50%",
-            width: "44px",
-            height: "44px",
+            width: "42px",
+            height: "42px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.25)",
             cursor: "pointer",
-            transition: "bottom 0.3s ease, opacity 0.2s ease, transform 0.2s ease",
+            transition: "bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease",
             animation: "fadeIn 0.2s ease-in-out",
           }}
           aria-label="Volver arriba"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="18 15 12 9 6 15" />
           </svg>
         </button>
