@@ -96,8 +96,9 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const secret = searchParams.get("secret");
 
-    // Proteger el reset con un secret básico
-    if (secret !== "remate2026") {
+    // Proteger el reset con variable de entorno o secret seguro
+    const expectedSecret = process.env.ADMIN_SEED_SECRET || "remate_prod_secure_secret_2026";
+    if (!secret || secret !== expectedSecret) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 

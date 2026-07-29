@@ -1,3 +1,4 @@
+// filepath: middleware.ts
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify, createRemoteJWKSet } from "jose";
 
@@ -22,7 +23,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const session = req.cookies.get("session");
 
-  // /admin/* routes
+  // Protection & Guards for /admin/* routes
   if (pathname.startsWith("/admin")) {
     if (pathname === "/admin/login") {
       return NextResponse.next();
@@ -33,7 +34,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // /listas/* routes require session
+  // /listas/* routes require valid session
   if (pathname.startsWith("/listas")) {
     if (!session?.value || !(await isValidJWT(session.value))) {
       return NextResponse.redirect(new URL("/cuenta", req.url));
@@ -45,5 +46,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: "/admin/:path*|/listas/:path*",
+  matcher: ["/admin/:path*", "/listas/:path*"],
 };
