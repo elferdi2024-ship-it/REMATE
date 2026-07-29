@@ -27,7 +27,7 @@ export default function AdminDashboardPage() {
   const [config, setConfig] = useState<TiendaConfig>({
     pedidosAbiertos: true,
     bannerMensaje: "",
-    minimoEnvioGratis: 3000,
+    minimoEnvioGratis: 2500,
   });
   const [configSaving, setConfigSaving] = useState(false);
 
@@ -61,7 +61,7 @@ export default function AdminDashboardPage() {
           setConfig(snap.data() as TiendaConfig);
         } else {
           // Inicializar si no existe
-          setConfig({ pedidosAbiertos: true, bannerMensaje: "", minimoEnvioGratis: 3000 });
+          setConfig({ pedidosAbiertos: true, bannerMensaje: "", minimoEnvioGratis: 2500 });
         }
       },
       (err) => {

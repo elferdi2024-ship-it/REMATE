@@ -14,7 +14,7 @@ export function useTiendaConfig() {
   const [config, setConfig] = useState<TiendaConfig>({
     pedidosAbiertos: true,
     bannerMensaje: "",
-    minimoEnvioGratis: 3000,
+    minimoEnvioGratis: 2500,
   });
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +27,7 @@ export function useTiendaConfig() {
           setConfig({
             pedidosAbiertos: data.pedidosAbiertos ?? true,
             bannerMensaje: data.bannerMensaje ?? "",
-            minimoEnvioGratis: data.minimoEnvioGratis ?? 3000,
+            minimoEnvioGratis: data.minimoEnvioGratis ?? 2500,
           });
         }
         setLoading(false);

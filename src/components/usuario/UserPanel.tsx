@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import { exportarPedidoCSV } from "@/lib/b2b-exporter";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -213,19 +214,70 @@ function PedidoCard({
           </div>
 
           {/* Footer con totales y CTA */}
-          <div className="pedido-card-v2-footer">
+          <div className="pedido-card-v2-footer flex flex-col gap-2">
             {selectedItems.length > 0 ? (
               <>
                 <div className="pedido-selected-summary">
                   <span>{selectedItems.length} seleccionado{selectedItems.length > 1 ? "s" : ""}</span>
                   <span className="pedido-selected-total">{formatPrice(selectedTotal)}</span>
                 </div>
-                <button className="btn-add-selected" onClick={handleAddSelected}>
-                  ⚡ Agregar al pedido
-                </button>
+                <div className="flex gap-2">
+                  <button className="btn-add-selected flex-1" onClick={handleAddSelected}>
+                    ⚡ Agregar al pedido
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      exportarPedidoCSV(
+                        {
+                          fecha: pedido.fecha,
+                          id: pedido.id,
+                          items: pedido.items.map((i) => ({
+                            codigo: i.codigo,
+                            nombre: i.nombre,
+                            cantidad: i.cantidad,
+                            precioUnitario: i.precioUnitario,
+                          })),
+                          total: pedido.total,
+                          mensajeWA: "",
+                        },
+                        "Comercio"
+                      );
+                    }}
+                    className="px-3 py-2 bg-stone-100 hover:bg-emerald-50 hover:text-emerald-800 border border-stone-300 rounded-xl font-bold text-xs transition-colors shrink-0 flex items-center gap-1"
+                    title="Exportar a Excel / CSV"
+                  >
+                    📊 Excel
+                  </button>
+                </div>
               </>
             ) : (
-              <p className="pedido-select-hint">Seleccioná los productos que querés agregar</p>
+              <div className="flex items-center justify-between w-full">
+                <p className="pedido-select-hint">Seleccioná los productos que querés agregar</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    exportarPedidoCSV(
+                      {
+                        fecha: pedido.fecha,
+                        id: pedido.id,
+                        items: pedido.items.map((i) => ({
+                          codigo: i.codigo,
+                          nombre: i.nombre,
+                          cantidad: i.cantidad,
+                          precioUnitario: i.precioUnitario,
+                        })),
+                        total: pedido.total,
+                        mensajeWA: "",
+                      },
+                      "Comercio"
+                    );
+                  }}
+                  className="px-3 py-1.5 bg-stone-100 hover:bg-emerald-50 hover:text-emerald-800 border border-stone-300 rounded-xl font-bold text-[11px] transition-colors shrink-0 flex items-center gap-1"
+                >
+                  📊 Excel
+                </button>
+              </div>
             )}
           </div>
         </div>

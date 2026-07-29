@@ -7,6 +7,7 @@ import type { Producto, Vista } from "@/types";
 import { EMOJI_POR_CATEGORIA } from "@/types";
 import ProductoCard from "./ProductoCard";
 import ProductoRow from "./ProductoRow";
+import QuickOrderTable from "./QuickOrderTable";
 import { BrandSpotlight, BrandVideoCard, SponsoredBanner, SponsoredProduct, NativeStoryCard, FlashDealCard } from "@/components/ads";
 import { useBrands } from "@/hooks/useBrands";
 import { getActiveBrands, getBrandForCategory, getImageAtIndex, getVideoAtIndex, buildAdSequence, buildAdSequenceWithCooldown } from "@/lib/brands";
@@ -128,10 +129,21 @@ function CategoryCarousel({
     if (scrollRef.current) scrollRef.current.scrollLeft = 0;
   };
 
-  if (vista === "lista" || vista === "compacta") {
-    const isCompact = vista === "compacta";
+  if (vista === "lista") {
     return (
-      <div className={`product-list ${isCompact ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" : ""}`}>
+      <QuickOrderTable
+        productos={catProds}
+        qtyMap={qtyMap}
+        onAdd={onAdd}
+        onQtyChange={onQtyChange}
+        onQuickView={onQuickView}
+      />
+    );
+  }
+
+  if (vista === "compacta") {
+    return (
+      <div className="product-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
         {catProds.map((p) => (
           <ProductoRow
             key={p.codigo}
@@ -140,7 +152,7 @@ function CategoryCarousel({
             onAdd={onAdd}
             onQtyChange={onQtyChange}
             onQuickView={onQuickView}
-            isCompact={isCompact}
+            isCompact={true}
           />
         ))}
       </div>

@@ -12,6 +12,7 @@ import { useFavoritos } from "@/lib/favoritos-context";
 import { SponsorBadge } from "@/components/ads";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/format";
+import { obtenerPrecioPorUnidad } from "@/lib/search-normalizer";
 
 interface ProductoCardProps {
   producto: Producto;
@@ -270,30 +271,35 @@ export const ProductoCard = memo(function ProductoCard({
           {highlightText(producto.nombre, searchTerm)}
         </h3>
 
-        {/* Pie: Precios y Unidad */}
-        <div className="mt-auto pt-1 border-t border-stone-100">
-          {producto.precioAnterior && producto.precioAnterior > producto.precio && (
-            <span className="block text-[11px] text-stone-400 font-semibold line-through leading-none mb-0.5">
-              {formatPrice(producto.precioAnterior)}
-            </span>
-          )}
-          
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-black text-[#E8302A] leading-none tracking-wide font-price">
-              {formatPrice(producto.precio)}
-            </span>
-          </div>
+        {/* Pie: Precios y Unidad Medida ($/kg, $/L) */}
+        {(() => {
+          const { precioUnitarioTexto, packSizeTexto } = obtenerPrecioPorUnidad(producto.precio, producto.nombre);
+          return (
+            <div className="mt-auto pt-1.5 border-t border-stone-100">
+              {producto.precioAnterior && producto.precioAnterior > producto.precio && (
+                <span className="block text-[11px] text-stone-400 font-semibold line-through leading-none mb-0.5">
+                  {formatPrice(producto.precioAnterior)}
+                </span>
+              )}
+              
+              <div className="flex items-baseline justify-between gap-1">
+                <span className="text-2xl font-black text-[#E8302A] leading-none tracking-wide font-price">
+                  {formatPrice(producto.precio)}
+                </span>
+                {precioUnitarioTexto && (
+                  <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 shrink-0">
+                    {precioUnitarioTexto}
+                  </span>
+                )}
+              </div>
 
-          <div className="text-[9px] font-bold text-stone-500 uppercase tracking-wider mt-1 flex items-center gap-1.5">
-            <span>Unidad IVA Incl.</span>
-            {producto.contenido && (
-              <>
-                <span className="text-stone-300">•</span>
-                <span className="text-emerald-700 font-extrabold">{producto.contenido}</span>
-              </>
-            )}
-          </div>
-        </div>
+              <div className="text-[9px] font-bold text-stone-500 uppercase tracking-wider mt-1 flex items-center justify-between">
+                <span>Unidad IVA Incl.</span>
+                <span className="text-stone-700 font-extrabold">{packSizeTexto}</span>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </article>
   );

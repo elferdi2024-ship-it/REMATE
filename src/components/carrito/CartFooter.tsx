@@ -5,9 +5,14 @@ import Link from 'next/link';
 import DeliveryMethodSelector from './DeliveryMethodSelector';
 import DeliverySlotScheduler from './DeliverySlotScheduler';
 import type { MetodoEntrega } from '@/lib/sucursales';
+import type { ZonaEnvio } from '@/lib/envio-config';
 
 interface CartFooterProps {
   total: number;
+  subtotal?: number;
+  costoEnvio?: number;
+  zonaEnvio?: ZonaEnvio;
+  onZonaEnvioChange?: (zona: ZonaEnvio) => void;
   alias: string;
   onAliasChange: (alias: string) => void;
   onSendWA: () => void;
@@ -32,6 +37,10 @@ interface CartFooterProps {
 
 export default function CartFooter({
   total,
+  subtotal,
+  costoEnvio = 0,
+  zonaEnvio = 'canelones',
+  onZonaEnvioChange,
   alias,
   onAliasChange,
   onSendWA,
@@ -54,6 +63,7 @@ export default function CartFooter({
   isTiendaCerrada = false,
 }: CartFooterProps) {
   const isDisabled = isProcessing || isTiendaCerrada || !sucursalId;
+  const sub = subtotal ?? (total - costoEnvio);
 
   return (
     <>
@@ -61,15 +71,18 @@ export default function CartFooter({
       <div className="cart-checkout-form">
         <div className="cart-section-title">Completá tu pedido</div>
 
-        {/* Selector de método de entrega + sucursal */}
+        {/* Selector de método de entrega + sucursal + zona de envío */}
         <DeliveryMethodSelector
           metodo={metodoEntrega}
           onMetodoChange={onMetodoEntregaChange}
           sucursalId={sucursalId}
           onSucursalChange={onSucursalChange}
+          zonaEnvio={zonaEnvio}
+          onZonaEnvioChange={onZonaEnvioChange}
+          subtotal={sub}
         />
 
-        {/* Reserva de Franja Horaria / Slot Scheduler (Walmart/Target Standard) */}
+        {/* Reserva de Franja Horaria / Slot Scheduler */}
         <DeliverySlotScheduler
           slots={[
             { id: "slot-1", date: "2026-07-28", dateLabel: "Hoy", timeRange: "10:00 - 12:00", available: true, capacityPercent: 40 },
@@ -173,14 +186,7 @@ export default function CartFooter({
         </div>
 
         {/* Fila de acciones: compartir + vaciar */}
-        <div style={{ fontSize: '10px', color: 'var(--muted)', textAlign: 'center', marginTop: '12px', marginBottom: '8px' }}>
-          Al enviar tu pedido aceptas nuestra{' '}
-          <Link href="/politica-de-privacidad" style={{ textDecoration: 'underline', color: 'var(--text)' }}>
-            Política de Privacidad
-          </Link>.
-        </div>
-
-        <div className="cart-actions-row">
+        <div className="cart-actions-row" style={{ marginTop: '12px' }}>
           <button className="cart-action-btn" onClick={onShare} type="button">
             🔗 Compartir
           </button>
@@ -192,9 +198,21 @@ export default function CartFooter({
 
       {/* ── Barra inferior fija ── */}
       <div className="cart-sticky-footer">
-        <div className="cart-sticky-total">
-          <span className="cart-sticky-total-label">Total</span>
-          <span className="cart-sticky-total-amount">${total.toLocaleString('es-UY')}</span>
+        <div className="cart-sticky-total flex flex-col justify-center">
+          {metodoEntrega === 'envio' && (
+            <div className="text-[10px] text-stone-500 font-medium leading-tight">
+              Subtotal: ${sub.toLocaleString('es-UY')}
+              {costoEnvio > 0 ? (
+                <span className="text-[#E8302A] font-bold"> + Envío ${costoEnvio}</span>
+              ) : (
+                <span className="text-emerald-600 font-bold"> (Envío Gratis)</span>
+              )}
+            </div>
+          )}
+          <div className="flex items-baseline gap-1">
+            <span className="cart-sticky-total-label">Total</span>
+            <span className="cart-sticky-total-amount">${total.toLocaleString('es-UY')}</span>
+          </div>
           <span className="cart-sticky-disclaimer">* Precios estimativos</span>
         </div>
         <button
@@ -222,7 +240,6 @@ export default function CartFooter({
     </>
   );
 }
-
 
 function WhatsAppIcon() {
   return (

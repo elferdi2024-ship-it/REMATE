@@ -6,6 +6,7 @@ import Image from "next/image";
 
 import type { Producto } from "@/types";
 import { SUCURSALES } from "@/lib/sucursales";
+import { haptic } from "@/lib/haptic";
 
 interface HeroProps {
   onOpenCart: () => void;
@@ -514,7 +515,9 @@ export default function Hero({
                         {suggestedProducts.map((p) => (
                           <button
                             key={p.codigo}
+                            onMouseDown={(e) => e.preventDefault()}
                             onClick={() => {
+                              haptic.add();
                               setIsSearchFocused(false);
                               onSelectSuggestion?.(p.nombre);
                             }}

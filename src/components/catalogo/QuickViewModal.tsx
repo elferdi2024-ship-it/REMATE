@@ -20,6 +20,8 @@ interface QuickViewModalProps {
 }
 
 import { formatPrice } from "@/lib/format";
+import { obtenerPrecioPorUnidad } from "@/lib/search-normalizer";
+import ProductJsonLd from "@/components/seo/ProductJsonLd";
 
 
 export default function QuickViewModal({
@@ -62,6 +64,7 @@ export default function QuickViewModal({
 
   return (
     <>
+      <ProductJsonLd producto={producto} />
       {/* Overlay */}
       <div 
         className={`fixed inset-0 bg-[#090D1A]/40 z-[100] transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen && !isClosing ? "opacity-100 backdrop-blur-md" : "opacity-0 backdrop-blur-none pointer-events-none"}`}
@@ -125,18 +128,30 @@ export default function QuickViewModal({
               {producto.nombre}
             </h2>
             
-            <div className="flex items-end justify-between mb-8 pb-6 border-b border-gray-100">
+            <div className="flex items-end justify-between mb-6 pb-5 border-b border-gray-100">
               <div>
                 <p className="text-4xl md:text-5xl font-bebas text-red-600 leading-none bg-gradient-to-br from-red-600 to-red-500 bg-clip-text text-transparent">
                   {formatPrice(producto.precio)}
                 </p>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1.5">
-                  Unidad IVA Incl.
-                </p>
+                {(() => {
+                  const { precioUnitarioTexto, packSizeTexto } = obtenerPrecioPorUnidad(producto.precio, producto.nombre);
+                  return (
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                        Unidad IVA Incl.
+                      </span>
+                      {precioUnitarioTexto && (
+                        <span className="text-[11px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          {precioUnitarioTexto}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
               <div className="text-right">
-                 <p className="text-xs font-bold text-gray-300 uppercase tracking-widest">CÓDIGO</p>
-                 <p className="font-mono text-sm text-gray-500">{producto.codigo}</p>
+                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">CÓDIGO SKU</p>
+                 <p className="font-mono text-sm font-bold text-gray-700">{producto.codigo}</p>
               </div>
             </div>
 

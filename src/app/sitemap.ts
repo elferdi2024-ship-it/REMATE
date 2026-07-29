@@ -1,45 +1,85 @@
 // filepath: src/app/sitemap.ts
 import { MetadataRoute } from "next";
-import { CATEGORIAS } from "@/types";
+import { SUCURSALES } from "@/lib/sucursales";
+
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://elremate.com.uy";
+
+const CATEGORIAS = [
+  "ACEITES Y GRASAS",
+  "ARTÍCULOS DEL HOGAR",
+  "BEBIDAS ALCOHÓLICAS",
+  "BEBIDAS SIN ALCOHOL",
+  "CARNES Y EMBUTIDOS",
+  "CONDIMENTOS Y ESPECIAS",
+  "CONGELADOS",
+  "CONSERVAS Y ENLATADOS",
+  "DESCARTABLES Y ART. DEL HOGAR",
+  "DULCES Y MERMELADAS",
+  "FRUTAS Y VERDURAS",
+  "GOLOSINAS Y SNACKS",
+  "HARINAS, PASTAS Y CEREALES",
+  "HIGIENE PERSONAL",
+  "LÁCTEOS Y HUEVOS",
+  "LIMPIEZA DEL HOGAR",
+  "MASCOTAS",
+  "PANADERÍA Y REPOSTERÍA",
+  "SALSAS Y ADEREZOS",
+  "YERBA, TÉ Y CAFÉ",
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://distribuidoraelremate.uy";
-
-  // Páginas principales
-  const mainPages = [
+  const routes: MetadataRoute.Sitemap = [
     {
-      url: baseUrl,
+      url: BASE_URL,
       lastModified: new Date(),
-      changeFrequency: "daily" as const,
+      changeFrequency: "daily",
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/catalogo`,
+      url: `${BASE_URL}/catalogo`,
       lastModified: new Date(),
-      changeFrequency: "daily" as const,
+      changeFrequency: "hourly",
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/ofertas`,
+      url: `${BASE_URL}/fiesta`,
       lastModified: new Date(),
-      changeFrequency: "daily" as const,
+      changeFrequency: "weekly",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/publicitate`,
+      url: `${BASE_URL}/seleccionar-sucursal`,
       lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.5,
-    }
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/politica-de-privacidad`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
   ];
 
-  // Generar rutas dinámicas indexables para cada categoría
-  const categoryPages = CATEGORIAS.map((cat) => ({
-    url: `${baseUrl}/catalogo?categoria=${encodeURIComponent(cat)}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: 0.7,
-  }));
+  // Sucursales dinámicas
+  SUCURSALES.forEach((s) => {
+    routes.push({
+      url: `${BASE_URL}/catalogo?sucursal=${s.id}`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.85,
+    });
+  });
 
-  return [...mainPages, ...categoryPages];
+  // Categorías dinámicas
+  CATEGORIAS.forEach((cat) => {
+    routes.push({
+      url: `${BASE_URL}/catalogo?categoria=${encodeURIComponent(cat)}`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    });
+  });
+
+  return routes;
 }

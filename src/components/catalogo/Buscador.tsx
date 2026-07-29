@@ -1,3 +1,4 @@
+// filepath: src/components/catalogo/Buscador.tsx
 "use client";
 
 import React, {
@@ -10,6 +11,7 @@ import Image from "next/image";
 import * as ls from "@/lib/ls";
 import type { Producto } from "@/types";
 import { formatPrice } from "@/lib/format";
+import { haptic } from "@/lib/haptic";
 
 interface BuscadorProps {
   value: string;
@@ -123,22 +125,25 @@ export default function Buscador({
 
   const handleRecentClick = useCallback(
     (term: string) => {
+      haptic.add();
       setInputValue(term);
       onChange(term);
       setIsFocused(false);
+      inputRef.current?.blur();
       if (onSelectSuggestion) {
         onSelectSuggestion(term);
       }
-      inputRef.current?.focus();
     },
     [onChange, onSelectSuggestion]
   );
 
   const handleSuggestionClick = useCallback(
     (term: string) => {
+      haptic.add();
       setInputValue(term);
       onChange(term);
       setIsFocused(false);
+      inputRef.current?.blur();
       if (onSelectSuggestion) {
         onSelectSuggestion(term);
       }
@@ -152,12 +157,14 @@ export default function Buscador({
   );
 
   const handleClear = useCallback(() => {
+    haptic.add();
     setInputValue("");
     onChange("");
     inputRef.current?.focus();
   }, [onChange]);
 
   const toggleVoice = useCallback(() => {
+    haptic.add();
     if (isListening) {
       recognitionRef.current?.stop();
       setIsListening(false);
@@ -173,8 +180,13 @@ export default function Buscador({
         e.preventDefault();
         const term = inputValue.trim();
         if (term) {
+          haptic.add();
+          inputRef.current?.blur();
           if (onSearchCommit) {
             onSearchCommit(term, true);
+          }
+          if (onSelectSuggestion) {
+            onSelectSuggestion(term);
           }
           // Save to search history
           const current = ls.getBusquedas();
@@ -189,7 +201,7 @@ export default function Buscador({
         setIsFocused(false);
       }
     },
-    [inputValue, handleClear, onSearchCommit]
+    [inputValue, handleClear, onSearchCommit, onSelectSuggestion]
   );
 
   return (
@@ -235,7 +247,7 @@ export default function Buscador({
           }
           aria-hidden="true"
         >
-          &#128269;
+          🔍
         </span>
         {voiceSupported && (
           <button
@@ -261,18 +273,21 @@ export default function Buscador({
           className={
             variant === "light"
               ? "absolute top-full left-0 right-0 mt-2 bg-white border border-stone-200 rounded-2xl p-3 shadow-xl z-[999] overflow-hidden"
-              : "buscador-recent"
+              : "buscador-recent shadow-2xl border border-stone-200/80"
           }
         >
           {!inputValue.trim() ? (
             /* Búsquedas recientes */
             <>
-              <div className="buscador-recent-label">Búsquedas recientes</div>
-              <div className="buscador-chips">
+              <div className="buscador-recent-label font-black text-stone-700 text-[11px] uppercase tracking-wider mb-2">
+                🕒 Búsquedas recientes
+              </div>
+              <div className="buscador-chips flex flex-wrap gap-1.5">
                 {recentSearches.map((term) => (
                   <button
                     key={term}
-                    className="buscador-chip"
+                    className="buscador-chip cursor-pointer"
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handleRecentClick(term)}
                     type="button"
                   >
@@ -283,23 +298,26 @@ export default function Buscador({
             </>
           ) : (
             /* Sugerencias predictivas */
-            <div className="flex flex-col max-h-[300px] overflow-y-auto">
-              <div className="buscador-recent-label px-1">Sugerencias de productos</div>
+            <div className="flex flex-col max-h-[320px] overflow-y-auto">
+              <div className="buscador-recent-label font-black text-stone-500 text-[10px] uppercase tracking-wider px-1 mb-1">
+                📦 Sugerencias de productos
+              </div>
               {suggestedProducts.length > 0 ? (
                 suggestedProducts.map((p) => (
                   <button
                     key={p.codigo}
-                    className="w-full flex items-center gap-3 p-2 hover:bg-stone-100 rounded-lg transition-colors text-left border-b border-stone-50 last:border-b-0 group"
+                    className="w-full flex items-center gap-3 p-2.5 hover:bg-red-50/60 rounded-xl transition-all text-left border-b border-stone-100 last:border-b-0 group cursor-pointer active:scale-[0.99]"
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handleSuggestionClick(p.nombre)}
                     type="button"
                   >
-                    <div className="w-10 h-10 bg-white border border-stone-200 rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative shadow-sm">
+                    <div className="w-10 h-10 bg-white border border-stone-200/80 rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative shadow-sm group-hover:border-[#E8302A]/40 transition-colors">
                       {p.imagen ? (
                         <Image
                           src={p.imagen}
                           alt={p.nombre}
-                          width={36}
-                          height={36}
+                          width={38}
+                          height={38}
                           className="object-contain transition-transform duration-300 group-hover:scale-110"
                         />
                       ) : (
@@ -307,21 +325,21 @@ export default function Buscador({
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs sm:text-sm font-bold text-stone-800 truncate group-hover:text-[#E8302A] transition-colors">
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 truncate group-hover:text-[#E8302A] transition-colors">
                         {p.nombre}
                       </div>
-                      <div className="text-[10px] text-stone-500 font-semibold uppercase tracking-wider">
+                      <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">
                         {p.categoria}
                       </div>
                     </div>
-                    <div className="text-xs sm:text-sm font-black text-[#E8302A] shrink-0">
+                    <div className="text-xs sm:text-sm font-black text-[#E8302A] shrink-0 font-price bg-red-50 px-2 py-1 rounded-lg">
                       {formatPrice(p.precio)}
                     </div>
                   </button>
                 ))
               ) : (
-                <div className="p-4 text-center text-xs text-stone-500">
-                  No se encontraron sugerencias
+                <div className="p-4 text-center text-xs font-semibold text-stone-500">
+                  No encontramos productos para &quot;{inputValue}&quot;
                 </div>
               )}
             </div>

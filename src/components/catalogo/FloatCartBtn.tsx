@@ -6,6 +6,7 @@ import { formatPrice } from "@/lib/format";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTiendaConfig } from "@/hooks/useTiendaConfig";
 import { haptic } from "@/lib/haptic";
+import { UMBRAL_ENVIO_GRATIS } from "@/lib/envio-config";
 
 interface FloatCartBtnProps {
   totalQty: number;
@@ -21,7 +22,7 @@ export default function FloatCartBtn({
   const hasItems = totalQty > 0;
   const { config } = useTiendaConfig();
 
-  const MIN_TICKET = config.minimoEnvioGratis || 2500;
+  const MIN_TICKET = config.minimoEnvioGratis || UMBRAL_ENVIO_GRATIS;
   const progressPercent = Math.min(100, (total / MIN_TICKET) * 100);
   const isEligible = total >= MIN_TICKET;
   const missingAmount = Math.max(0, MIN_TICKET - total);

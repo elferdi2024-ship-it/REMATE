@@ -35,6 +35,7 @@ import type { OfertaConfig } from "@/types/ofertas";
 import BranchBar from "@/components/catalogo/BranchBar";
 import OnlineBanner from "@/components/ui/OnlineBanner";
 import EmptyState from "@/components/ui/EmptyState";
+import ScrollToTopBtn from "@/components/ui/ScrollToTopBtn";
 import { AdSlotPlacement } from "@/components/ads";
 
 // Lazy-loaded components para mejorar Performance / First Load JS
@@ -57,6 +58,7 @@ import { encodeCartToURL, decodeCartFromURL } from "@/lib/cart-share";
 import { haptic } from "@/lib/haptic";
 import * as ls from "@/lib/ls";
 import { SUCURSALES, type MetodoEntrega } from "@/lib/sucursales";
+import { ZonaEnvio, calcularCostoEnvio, COSTOS_ENVIO } from "@/lib/envio-config";
 import { getSucursalWhatsApp } from "@/lib/sucursales-config";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
@@ -403,8 +405,15 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [metodoEntrega, setMetodoEntrega] = useState<MetodoEntrega>('envio');
+  const [zonaEnvio, setZonaEnvio] = useState<ZonaEnvio>('canelones');
   const [sucursalId, setSucursalId] = useState<string | null>(null);
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
+
+  const costoEnvio = useMemo(
+    () => calcularCostoEnvio(total, metodoEntrega, zonaEnvio),
+    [total, metodoEntrega, zonaEnvio]
+  );
+  const totalConEnvio = useMemo(() => total + costoEnvio, [total, costoEnvio]);
 
   // Search state for instant feedback on input, synced with URL
   const [search, setSearch] = useState(urlSearch);
@@ -624,8 +633,12 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     ls.addBusqueda(term);
     setRecentSearches(ls.getBusquedas());
     const params = new URLSearchParams(window.location.search);
-    if (term) params.set("search", term);
-    else params.delete("search");
+    if (term) {
+      params.set("search", term);
+      params.delete("categoria"); // Limpia categoría para mostrar el producto buscado sin restricciones
+    } else {
+      params.delete("search");
+    }
     router.replace(`/catalogo?${params.toString()}`, { scroll: false });
     scrollToGrid();
   }, [router]);
@@ -749,17 +762,13 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     const searchTerms = normalize(search.trim()).split(/\s+/);
     let result = productos.filter((p) => (p.precio || 0) > 0);
     
-    if (categoria) {
-      result = result.filter((p) => p.categoria === categoria);
-    }
-    
     result = result.filter((p) => {
-      const searchableText = normalize(`${p.nombre} ${p.codigo} ${p.categoria}`);
+      const searchableText = normalize(`${p.nombre} ${p.codigo} ${p.categoria} ${p.marca || ""}`);
       return searchTerms.every((term) => searchableText.includes(term));
     });
     
-    return result.slice(0, 5);
-  }, [productos, categoria, search]);
+    return result.slice(0, 6);
+  }, [productos, search]);
 
   // Qty map for product grid
   const qtyMap = useMemo(() => {
@@ -970,10 +979,10 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       const retiroLine = `🏪 RETIRO EN SUCURSAL: ${selectedSucursal.nombre} (${selectedSucursal.direccion})`;
       deliveryNotas = deliveryNotas ? `${retiroLine}\n${deliveryNotas}` : retiroLine;
     } else {
-      if (deliveryDireccion) {
-        const envioLine = `🏠 ENVÍO A DOMICILIO: ${deliveryDireccion}`;
-        deliveryNotas = deliveryNotas ? `${envioLine}\n${deliveryNotas}` : envioLine;
-      }
+      const zonaNombre = COSTOS_ENVIO[zonaEnvio]?.nombre || zonaEnvio;
+      const costoTexto = costoEnvio === 0 ? "GRATIS ($0)" : `$${costoEnvio}`;
+      const envioLine = `🏠 ENVÍO A DOMICILIO (${zonaNombre.toUpperCase()} - Costo: ${costoTexto}): ${deliveryDireccion || "Sin dirección"}`;
+      deliveryNotas = deliveryNotas ? `${envioLine}\n${deliveryNotas}` : envioLine;
     }
 
     // 1. Guardar pedido en Firebase (Global y Local) + Incrementar Stats
@@ -997,7 +1006,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           clienteTelefono: tel,
           clienteDireccion: deliveryDireccion || undefined,
           items: pedidoItems,
-          total,
+          total: totalConEnvio,
           notas: deliveryNotas || undefined,
           status: "no_leido",
           sucursalId: sucursalId || null,
@@ -1006,8 +1015,6 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         setActiveOrderId(orderId);
       } catch (fErr) {
         console.error("❌ Firestore: Error al guardar pedido global:", fErr);
-        // No bloqueamos el flujo completo si falla el guardado global, 
-        // pero avisamos en consola. El cliente igual querr\u00e1 enviar el WA.
       }
 
       // Stats (No bloqueante)
@@ -1020,7 +1027,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       if (user) {
         guardarPedidoUsuario(user.uid, {
           items: pedidoItems,
-          total,
+          total: totalConEnvio,
           notas: deliveryNotas || undefined,
           mensajeWA: "", 
         }).catch((err) => console.error("❌ Firestore: Error al guardar pedido usuario:", err));
@@ -1028,14 +1035,13 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
       // 3. Guardar siempre en local (resiliencia total)
       try {
-        saveLocalPedido(cartItems, total, deliveryNotas || undefined);
+        saveLocalPedido(cartItems, totalConEnvio, deliveryNotas || undefined);
       } catch (lErr) {
         console.error("❌ LocalStorage: Error al guardar historial local:", lErr);
       }
 
       // 4. GENERAR Y ENVIAR POR WHATSAPP (Lo más importante)
       try {
-        // Routing dinámico: lee el teléfono WA de Firestore por sucursal, fallback a env var (Canelones)
         const telefonoWhatsApp = await getSucursalWhatsApp(sucursalId);
 
         await enviarFacturaWhatsApp(
@@ -1047,7 +1053,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           "/logo.png",
           orderId,
           deliveryDireccion,
-          false // skipRedirect = false: descarga la factura e inicia la redirección a WhatsApp para enviar el pedido
+          false
         );
       } catch (waErr) {
         console.error("❌ WhatsApp: Error al enviar factura:", waErr);
@@ -1064,7 +1070,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     } finally {
       setIsProcessing(false);
     }
-  }, [alias, telefono, direccion, metodoEntrega, sucursalId, cartItems, clientNotes, total, user, saveLocalPedido, handleFinalizado, toast]);
+  }, [alias, telefono, direccion, metodoEntrega, zonaEnvio, costoEnvio, totalConEnvio, sucursalId, cartItems, clientNotes, user, saveLocalPedido, handleFinalizado, toast]);
 
   // Send WA flow
   const handleSendWA = useCallback(() => {
@@ -1656,7 +1662,11 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         items={cartItems}
         onUpdateQty={updateQty}
         onRemove={removeItem}
-        total={total}
+        total={totalConEnvio}
+        subtotal={total}
+        costoEnvio={costoEnvio}
+        zonaEnvio={zonaEnvio}
+        onZonaEnvioChange={setZonaEnvio}
         onSendWA={handleSendWA}
         alias={alias}
         onAliasChange={handleSaveAlias}

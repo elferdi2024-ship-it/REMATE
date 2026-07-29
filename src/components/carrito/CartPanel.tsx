@@ -3,6 +3,8 @@
 
 import { CartItem, Producto } from '@/types';
 import type { MetodoEntrega } from '@/lib/sucursales';
+import type { ZonaEnvio } from '@/lib/envio-config';
+import { UMBRAL_ENVIO_GRATIS, COSTOS_ENVIO } from '@/lib/envio-config';
 import Image from 'next/image';
 import CartItemRow from './CartItem';
 import CartFooter from './CartFooter';
@@ -17,6 +19,10 @@ interface CartPanelProps {
   onUpdateQty: (codigo: string, delta: number) => void;
   onRemove: (codigo: string) => void;
   total: number;
+  subtotal?: number;
+  costoEnvio?: number;
+  zonaEnvio?: ZonaEnvio;
+  onZonaEnvioChange?: (zona: ZonaEnvio) => void;
   onSendWA: () => void;
   alias: string;
   onAliasChange: (alias: string) => void;
@@ -48,6 +54,10 @@ export default function CartPanel({
   onUpdateQty,
   onRemove,
   total,
+  subtotal,
+  costoEnvio = 0,
+  zonaEnvio = 'canelones',
+  onZonaEnvioChange,
   onSendWA,
   alias,
   onAliasChange,
@@ -73,11 +83,12 @@ export default function CartPanel({
 }: CartPanelProps) {
   const { config } = useTiendaConfig();
   
-  // Configuración de la barra de progreso de envío gratis (Fase 3: CRO & Marketing)
-  const MIN_TICKET = config.minimoEnvioGratis;
-  const progressPercent = Math.min(100, (total / MIN_TICKET) * 100);
-  const isEligible = total >= MIN_TICKET;
-  const missingAmount = Math.max(0, MIN_TICKET - total);
+  // Configuración de la barra de progreso de envío gratis
+  const baseSubtotal = subtotal ?? items.reduce((s, i) => s + i.precio * i.cantidad, 0);
+  const MIN_TICKET = config.minimoEnvioGratis || UMBRAL_ENVIO_GRATIS;
+  const progressPercent = Math.min(100, (baseSubtotal / MIN_TICKET) * 100);
+  const isEligible = baseSubtotal >= MIN_TICKET;
+  const missingAmount = Math.max(0, MIN_TICKET - baseSubtotal);
 
   return (
     <>
@@ -93,7 +104,7 @@ export default function CartPanel({
         <div className="panel-header-dark">
           <div className="panel-header-inner">
             <div className="panel-header-brand">
-              <span className="panel-eyebrow">El Remate · Canelones</span>
+              <span className="panel-eyebrow">El Remate · Distribuidora</span>
               <span className="panel-title">Tu Pedido</span>
               <span className="panel-sub">Revisá y enviá por WhatsApp</span>
             </div>
@@ -106,14 +117,14 @@ export default function CartPanel({
         {/* Scrollable Body */}
         <div className="cart-body">
           
-          {/* ── Barra de progreso dinámico del ticket mínimo (Fase 3) ── */}
+          {/* ── Barra de progreso dinámico del ticket mínimo ── */}
           {items.length > 0 && (
             <div className="cart-progress-bar">
               <div className="cart-progress-text">
                 <span>
                   {isEligible ? (
                     <span className="cart-progress-text--eligible">
-                      🚚 ¡Tus costos de envío están bonificados!
+                      🚚 ¡Tus costos de envío están bonificados! (Envío Gratis)
                     </span>
                   ) : (
                     <span>
@@ -132,6 +143,15 @@ export default function CartPanel({
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
+
+              {!isEligible && (
+                <div className="text-[11px] text-stone-500 mt-1.5 pt-1 border-t border-stone-200/60 flex justify-between font-medium">
+                  <span>Tarifas sub-umbrales:</span>
+                  <span className="font-bold text-stone-700">
+                    Canelones ${COSTOS_ENVIO.canelones.costo} · Montevideo ${COSTOS_ENVIO.montevideo.costo}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
@@ -168,7 +188,7 @@ export default function CartPanel({
             </div>
           )}
 
-          {/* ── Carrusel táctil de Up-selling Semántico (Fase 3) ── */}
+          {/* ── Carrusel táctil de Up-selling Semántico ── */}
           {items.length > 0 && relatedProducts.length > 0 && (
             <div className="cart-upsell-section">
               <div className="cart-upsell-title">
@@ -210,12 +230,16 @@ export default function CartPanel({
             </div>
           )}
 
-          {/* Footer — only show when cart has items */}
+          {/* Footer — solo cuando hay items en carrito */}
           {items.length > 0 && (
             <>
               <AdSlotPlacement slot="cart-upsell" />
               <CartFooter
                 total={total}
+                subtotal={baseSubtotal}
+                costoEnvio={costoEnvio}
+                zonaEnvio={zonaEnvio}
+                onZonaEnvioChange={onZonaEnvioChange}
                 alias={alias}
                 onAliasChange={onAliasChange}
                 onSendWA={onSendWA}
