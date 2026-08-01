@@ -200,10 +200,10 @@ export default function CartFooter({
       <div className="cart-sticky-footer">
         <div className="cart-sticky-total flex flex-col justify-center">
           {metodoEntrega === 'envio' && (
-            <div className="text-[10px] text-stone-500 font-medium leading-tight">
+            <div className="text-[10px] text-slate-500 font-medium leading-tight">
               Subtotal: ${sub.toLocaleString('es-UY')}
               {costoEnvio > 0 ? (
-                <span className="text-[#E8302A] font-bold"> + Envío ${costoEnvio}</span>
+                <span className="text-[#EF233C] font-extrabold"> + Envío ${costoEnvio}</span>
               ) : (
                 <span className="text-emerald-600 font-bold"> (Envío Gratis)</span>
               )}

@@ -46,28 +46,28 @@ export default function FloatCartBtn({
                   <span>¡Envío gratis alcanzado!</span>
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-stone-700">
+                <span className="flex items-center gap-1 text-slate-700">
                   <span className="text-sm">🚚</span>
                   <span>
                     Faltan{" "}
-                    <strong className="text-[#E8302A] font-black">
+                    <strong className="text-[#EF233C] font-extrabold">
                       ${missingAmount.toLocaleString("es-UY")}
                     </strong>{" "}
                     para envío gratis
                   </span>
                 </span>
               )}
-              <span className="text-stone-400 font-mono text-[10px] font-bold">
+              <span className="text-slate-400 font-mono text-[10px] font-bold">
                 {Math.round(progressPercent)}%
               </span>
             </div>
 
-            <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden p-0.5 border border-stone-200/60">
+            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
               <motion.div
                 className={`h-full rounded-full transition-all ${
                   isEligible
                     ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
-                    : "bg-gradient-to-r from-[#E8302A] to-amber-500"
+                    : "bg-gradient-to-r from-[#EF233C] to-amber-500"
                 }`}
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
@@ -83,18 +83,18 @@ export default function FloatCartBtn({
               haptic.add();
               onClick();
             }}
-            className="pointer-events-auto w-full bg-[#111111] hover:bg-stone-900 text-white rounded-2xl p-3.5 flex items-center justify-between shadow-[0_12px_32px_rgba(0,0,0,0.25)] active:scale-[0.97] transition-all cursor-pointer border border-stone-800"
+            className="pointer-events-auto w-full bg-[#EF233C] hover:bg-[#C01730] text-white rounded-xl p-3.5 flex items-center justify-between shadow-[0_12px_32px_rgba(239,35,60,0.3)] active:scale-[0.97] transition-all cursor-pointer border border-[#EF233C]"
           >
             <div className="flex items-center gap-3">
-              <div className="relative flex items-center justify-center w-9 h-9 bg-white/10 rounded-xl">
+              <div className="relative flex items-center justify-center w-9 h-9 bg-white/20 rounded-lg">
                 <span className="text-lg">🛒</span>
-                <span className="absolute -top-1.5 -right-2 bg-[#E8302A] text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[20px] text-center border-2 border-[#111111] shadow-sm">
+                <span className="absolute -top-1.5 -right-2 bg-[#0F172A] text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[20px] text-center border-2 border-[#EF233C] shadow-sm">
                   {totalQty}
                 </span>
               </div>
-              <span className="font-black text-xs tracking-wider uppercase">VER PEDIDO</span>
+              <span className="font-extrabold text-xs tracking-wider uppercase">VER MI PEDIDO</span>
             </div>
-            <span className="font-black text-sm bg-white/15 px-3 py-1.5 rounded-xl tracking-wide font-price">
+            <span className="font-extrabold text-sm bg-white/20 px-3 py-1.5 rounded-lg tracking-wide font-price">
               {formatPrice(total)}
             </span>
           </button>

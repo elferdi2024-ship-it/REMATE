@@ -69,26 +69,26 @@ export default function ProductSubstitutionSelector({
   return (
     <div className="w-full bg-stone-50/90 border border-stone-200/80 rounded-xl p-2.5 mt-2 text-xs">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-stone-700 font-medium truncate">
+        <div className="flex items-center gap-1.5 text-slate-700 font-medium truncate">
           <span>🔄</span>
           <span className="truncate text-[11px]">Si no hay stock:</span>
-          <span className="font-bold text-[#E8302A] text-[11px]">
+          <span className="font-extrabold text-[#EF233C] text-[11px]">
             {POLICIES.find((p) => p.id === selected)?.label}
           </span>
         </div>
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="text-[#E8302A] hover:underline font-extrabold text-[11px] shrink-0"
+          className="text-[#EF233C] hover:underline font-extrabold text-[11px] shrink-0"
         >
           {isOpen ? "Cerrar" : "Cambiar"}
         </button>
       </div>
 
       {isOpen && (
-        <div className="mt-2.5 pt-2.5 border-t border-stone-200 space-y-2">
-          <p className="text-[10px] text-stone-500 font-semibold mb-1">
-            Instrucciones para <strong className="text-stone-800">{itemNombre}</strong>:
+        <div className="mt-2.5 pt-2.5 border-t border-slate-200 space-y-2">
+          <p className="text-[10px] text-slate-500 font-semibold mb-1">
+            Instrucciones para <strong className="text-slate-800">{itemNombre}</strong>:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             {POLICIES.map((p) => {
@@ -100,14 +100,14 @@ export default function ProductSubstitutionSelector({
                   onClick={() => handleSelect(p.id)}
                   className={`flex items-start gap-2 p-2 rounded-lg border text-left transition-all ${
                     active
-                      ? "bg-white border-[#E8302A] ring-2 ring-[#E8302A]/10 shadow-sm"
-                      : "bg-white/70 border-stone-200 hover:border-stone-300"
+                      ? "bg-white border-[#EF233C] ring-2 ring-[#EF233C]/10 shadow-xs"
+                      : "bg-white/80 border-slate-200 hover:border-slate-300"
                   }`}
                 >
                   <span className="text-sm shrink-0 mt-0.5">{p.icon}</span>
                   <div>
-                    <div className="font-bold text-stone-800 text-[11px]">{p.label}</div>
-                    <div className="text-[9px] text-stone-500 leading-tight mt-0.5">{p.desc}</div>
+                    <div className="font-extrabold text-slate-800 text-[11px]">{p.label}</div>
+                    <div className="text-[9px] text-slate-500 leading-tight mt-0.5">{p.desc}</div>
                   </div>
                 </button>
               );
@@ -120,7 +120,7 @@ export default function ProductSubstitutionSelector({
               placeholder="Nota adicional ej: 'Traer de 500g si no hay de 1kg'"
               value={note}
               onChange={handleNoteChange}
-              className="w-full bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 text-[11px] text-stone-800 placeholder-stone-400 focus:outline-none focus:border-[#E8302A]"
+              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#EF233C]"
             />
           </div>
         </div>

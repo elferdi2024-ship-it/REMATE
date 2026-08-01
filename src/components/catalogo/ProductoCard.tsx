@@ -108,15 +108,15 @@ export const ProductoCard = memo(function ProductoCard({
       ref={cardRef}
       onClick={() => onQuickView?.(producto)}
       className={`gpu-accelerated group relative flex flex-col bg-white border ${
-        isInCart ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-md" : "border-stone-200/80 hover:border-stone-300"
-      } rounded-[22px] p-3 transition-all duration-300 ease-out hover:shadow-[0_16px_36px_rgba(0,0,0,0.06)] hover:-translate-y-1 select-none cursor-pointer`}
+        isInCart ? "border-[#EF233C] ring-2 ring-[#EF233C]/20 shadow-md" : "border-slate-200/90 hover:border-slate-300"
+      } rounded-[20px] p-3 transition-all duration-300 ease-out hover:shadow-[0_12px_32px_rgba(15,23,42,0.1)] hover:-translate-y-1 select-none cursor-pointer`}
       style={{ minHeight: "285px" }}
     >
       {/* Thumbnail Container */}
       <div 
-        className="relative w-full rounded-2xl overflow-hidden mb-2.5 flex items-center justify-center border border-stone-100/80"
+        className="relative w-full rounded-xl overflow-hidden mb-2.5 flex items-center justify-center border border-slate-100"
         style={{ 
-          background: "linear-gradient(180deg, #FFFFFF 0%, #F6F4EF 100%)",
+          background: "linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)",
           aspectRatio: "1 / 1"
         }}
       >
@@ -127,16 +127,16 @@ export const ProductoCard = memo(function ProductoCard({
             e.stopPropagation();
             toggleFavorito(producto.codigo);
           }}
-          className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center shadow-sm hover:scale-110 active:scale-95 transition-all"
+          className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center shadow-sm hover:scale-110 active:scale-95 transition-all border border-slate-100"
           aria-label={favorito ? "Quitar de favoritos" : "Guardar en favoritos"}
         >
           <svg
             width="16"
             height="16"
             viewBox="0 0 24 24"
-            fill={favorito ? "#E8302A" : "none"}
-            stroke={favorito ? "#E8302A" : "#888078"}
-            strokeWidth="2.5"
+            fill={favorito ? "#EF233C" : "none"}
+            stroke={favorito ? "#EF233C" : "#64748B"}
+            strokeWidth="2.2"
           >
             <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
           </svg>
@@ -144,14 +144,14 @@ export const ProductoCard = memo(function ProductoCard({
 
         {/* Indicador Check En Carrito */}
         {isInCart && (
-          <div className="absolute top-11 left-2 z-20 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-black shadow-md animate-in fade-in zoom-in-75 duration-200">
+          <div className="absolute top-11 left-2 z-20 w-6 h-6 bg-[#EF233C] text-white rounded-full flex items-center justify-center text-xs font-black shadow-md animate-in fade-in zoom-in-75 duration-200">
             ✓
           </div>
         )}
 
-        {/* Badge Descuento OFF */}
+        {/* Badge Descuento OFF (En Ámbar/Dorado para no colisionar con el Rojo de la Marca) */}
         {producto.precioAnterior && producto.precioAnterior > producto.precio && (
-          <div className="absolute top-2 right-2 z-20 bg-gradient-to-r from-[#E8302A] to-[#C4231E] text-white text-[10px] font-black px-2 py-0.5 rounded-lg shadow-sm -rotate-2">
+          <div className="absolute top-2 right-2 z-20 bg-amber-500 text-slate-950 text-[11px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
             -{Math.round((1 - producto.precio / producto.precioAnterior) * 100)}%
           </div>
         )}
@@ -163,7 +163,7 @@ export const ProductoCard = memo(function ProductoCard({
             alt={producto.nombre}
             fill
             sizes="(max-width: 768px) 50vw, 20vw"
-            className="object-contain p-2 transition-transform duration-300 group-hover:scale-108"
+            className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
         ) : (
@@ -195,12 +195,12 @@ export const ProductoCard = memo(function ProductoCard({
                 animate={{ opacity: 1, scale: 1, width: 104 }}
                 exit={{ opacity: 0, scale: 0.8, width: 44 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                className="flex items-center bg-white border-2 border-emerald-600 rounded-full h-[44px] px-1 shadow-lg"
+                className="flex items-center bg-white border-2 border-[#EF233C] rounded-full h-[44px] px-1 shadow-lg"
               >
                 <button
                   type="button"
                   onClick={handleDec}
-                  className="w-8 h-8 text-emerald-700 font-black text-base flex items-center justify-center active:scale-90"
+                  className="w-8 h-8 text-[#EF233C] font-black text-base flex items-center justify-center active:scale-90"
                 >
                   −
                 </button>
@@ -211,12 +211,12 @@ export const ProductoCard = memo(function ProductoCard({
                     const val = parseInt(e.target.value);
                     if (!isNaN(val) && val >= 0) onQtyChange(producto.codigo, val);
                   }}
-                  className="w-7 text-center font-black text-xs text-stone-900 bg-transparent outline-none"
+                  className="w-7 text-center font-black text-xs text-slate-900 bg-transparent outline-none"
                 />
                 <button
                   type="button"
                   onClick={handleInc}
-                  className="w-8 h-8 text-emerald-700 font-black text-base flex items-center justify-center active:scale-90"
+                  className="w-8 h-8 text-[#EF233C] font-black text-base flex items-center justify-center active:scale-90"
                 >
                   +
                 </button>
@@ -227,13 +227,13 @@ export const ProductoCard = memo(function ProductoCard({
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                whileHover={{ scale: 1.12 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
                 onClick={handleAdd}
-                className="w-[44px] h-[44px] bg-[#E8302A] text-white rounded-2xl flex items-center justify-center shadow-md shadow-[#E8302A]/25 hover:bg-[#c9241f] transition-all"
+                className="w-[44px] h-[44px] bg-[#EF233C] text-white rounded-xl flex items-center justify-center shadow-md shadow-[#EF233C]/25 hover:bg-[#C01730] transition-all"
                 aria-label={`Agregar ${producto.nombre}`}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 5v14M5 12h14" />
                 </svg>
               </motion.button>
@@ -247,27 +247,27 @@ export const ProductoCard = memo(function ProductoCard({
         {/* Badges de Categoría y Frescura */}
         <div className="flex flex-wrap gap-1 mb-1.5 items-center">
           <span 
-            className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider"
+            className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md tracking-wider"
             style={{ background: badgeBg, color: badgeColor }}
           >
             {producto.categoria}
           </span>
 
           {producto.marca && (
-            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-stone-100 text-stone-600 tracking-wider">
+            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 tracking-wider">
               {producto.marca}
             </span>
           )}
 
           {isFresh && (
-            <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300">
-              🥬 Frescura
+            <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+              🥬 Fresco
             </span>
           )}
         </div>
 
         {/* Nombre del Producto */}
-        <h3 className="text-xs font-bold text-stone-900 leading-snug line-clamp-2 mb-2 group-hover:text-[#E8302A] transition-colors" style={{ height: "2.4em" }}>
+        <h3 className="text-xs font-semibold text-slate-900 leading-snug line-clamp-2 mb-2 group-hover:text-[#EF233C] transition-colors" style={{ height: "2.4em" }}>
           {highlightText(producto.nombre, searchTerm)}
         </h3>
 
@@ -275,27 +275,27 @@ export const ProductoCard = memo(function ProductoCard({
         {(() => {
           const { precioUnitarioTexto, packSizeTexto } = obtenerPrecioPorUnidad(producto.precio, producto.nombre);
           return (
-            <div className="mt-auto pt-1.5 border-t border-stone-100">
+            <div className="mt-auto pt-1.5 border-t border-slate-100">
               {producto.precioAnterior && producto.precioAnterior > producto.precio && (
-                <span className="block text-[11px] text-stone-400 font-semibold line-through leading-none mb-0.5">
+                <span className="block text-[11px] text-slate-400 font-semibold line-through leading-none mb-0.5">
                   {formatPrice(producto.precioAnterior)}
                 </span>
               )}
               
               <div className="flex items-baseline justify-between gap-1">
-                <span className="text-2xl font-black text-[#E8302A] leading-none tracking-wide font-price">
+                <span className="text-2xl font-extrabold text-slate-900 leading-none tracking-tight">
                   {formatPrice(producto.precio)}
                 </span>
                 {precioUnitarioTexto && (
-                  <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 shrink-0">
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 shrink-0">
                     {precioUnitarioTexto}
                   </span>
                 )}
               </div>
 
-              <div className="text-[9px] font-bold text-stone-500 uppercase tracking-wider mt-1 flex items-center justify-between">
+              <div className="text-[9px] font-medium text-slate-500 uppercase tracking-wider mt-1 flex items-center justify-between">
                 <span>Unidad IVA Incl.</span>
-                <span className="text-stone-700 font-extrabold">{packSizeTexto}</span>
+                <span className="text-slate-700 font-bold">{packSizeTexto}</span>
               </div>
             </div>
           );

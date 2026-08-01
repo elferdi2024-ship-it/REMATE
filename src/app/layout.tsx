@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, DM_Sans, DM_Serif_Display, Bebas_Neue } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter, Bebas_Neue } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import { CartProvider } from "@/lib/cart-context";
 import { ToastProvider } from "@/lib/toast-context";
@@ -7,31 +7,24 @@ import { FavoritosProvider } from "@/lib/favoritos-context";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
-  weight: ["400", "600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
-  weight: ["600", "700", "800"],
+  weight: ["500", "600", "700", "800"],
 });
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-bebas",
-  display: "swap",
-});
-
-const dmSerifDisplay = DM_Serif_Display({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-serif",
   display: "swap",
 });
 
@@ -90,7 +83,7 @@ export const metadata: Metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#E8302A",
+  themeColor: "#EF233C",
 };
 
 export default function RootLayout({
@@ -99,7 +92,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={`${dmSans.variable} ${plusJakarta.variable} ${bebasNeue.variable} ${dmSerifDisplay.variable}`}>
+    <html lang="es" className={`${inter.variable} ${plusJakarta.variable} ${bebasNeue.variable}`}>
       <body style={{ margin: 0, minHeight: "100vh" }}>
         <script
           type="application/ld+json"

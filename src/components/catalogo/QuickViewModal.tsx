@@ -128,20 +128,20 @@ export default function QuickViewModal({
               {producto.nombre}
             </h2>
             
-            <div className="flex items-end justify-between mb-6 pb-5 border-b border-gray-100">
+            <div className="flex items-end justify-between mb-6 pb-5 border-b border-slate-100">
               <div>
-                <p className="text-4xl md:text-5xl font-bebas text-red-600 leading-none bg-gradient-to-br from-red-600 to-red-500 bg-clip-text text-transparent">
+                <p className="text-3xl md:text-4xl font-display font-extrabold text-[#EF233C] leading-none tracking-tight">
                   {formatPrice(producto.precio)}
                 </p>
                 {(() => {
-                  const { precioUnitarioTexto, packSizeTexto } = obtenerPrecioPorUnidad(producto.precio, producto.nombre);
+                  const { precioUnitarioTexto } = obtenerPrecioPorUnidad(producto.precio, producto.nombre);
                   return (
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
                         Unidad IVA Incl.
                       </span>
                       {precioUnitarioTexto && (
-                        <span className="text-[11px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                           {precioUnitarioTexto}
                         </span>
                       )}
@@ -150,8 +150,8 @@ export default function QuickViewModal({
                 })()}
               </div>
               <div className="text-right">
-                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">CÓDIGO SKU</p>
-                 <p className="font-mono text-sm font-bold text-gray-700">{producto.codigo}</p>
+                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">CÓDIGO SKU</p>
+                 <p className="font-mono text-sm font-bold text-slate-700">{producto.codigo}</p>
               </div>
             </div>
 
@@ -159,15 +159,15 @@ export default function QuickViewModal({
             <div className="flex flex-col gap-4">
               {isInCart ? (
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="flex items-center justify-between bg-gray-50/50 border border-gray-200/60 rounded-[20px] p-2.5 mb-4 shadow-sm">
+                  <div className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-[20px] p-2.5 mb-4 shadow-xs">
                     <button 
                       onClick={() => onQtyChange(producto.codigo, Math.max(0, qty - 1))}
-                      className="w-14 h-14 flex items-center justify-center bg-white border border-gray-100 rounded-2xl shadow-sm text-2xl font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:scale-95 transition-all"
+                      className="w-14 h-14 flex items-center justify-center bg-white border border-slate-200 rounded-2xl shadow-xs text-2xl font-bold text-slate-600 hover:text-slate-900 active:scale-95 transition-all"
                     >
                       −
                     </button>
                     <div className="flex flex-col items-center flex-1 mx-4 relative group">
-                      <span className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-1.5 transition-colors group-focus-within:text-red-500">EN CARRITO</span>
+                      <span className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-1.5 transition-colors group-focus-within:text-[#EF233C]">EN CARRITO</span>
                       <input
                         type="number"
                         min="0"
@@ -181,13 +181,13 @@ export default function QuickViewModal({
                           }
                         }}
                         onFocus={(e) => e.target.select()}
-                        className="w-24 text-center font-display font-bold text-4xl text-gray-900 bg-transparent outline-none pb-1 transition-all"
+                        className="w-24 text-center font-display font-extrabold text-4xl text-slate-900 bg-transparent outline-none pb-1 transition-all"
                       />
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-gray-200 rounded-full group-focus-within:bg-red-500 group-focus-within:w-full transition-all" />
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-slate-200 rounded-full group-focus-within:bg-[#EF233C] group-focus-within:w-full transition-all" />
                     </div>
                     <button 
                       onClick={() => onQtyChange(producto.codigo, qty + 1)}
-                      className="w-14 h-14 flex items-center justify-center bg-red-50 border border-red-100 rounded-2xl shadow-sm text-2xl font-bold text-red-600 hover:bg-red-100 active:scale-95 transition-all"
+                      className="w-14 h-14 flex items-center justify-center bg-[#EF233C] text-white rounded-2xl shadow-sm text-2xl font-extrabold hover:bg-[#C01730] active:scale-95 transition-all"
                     >
                       +
                     </button>

@@ -7,52 +7,61 @@
    v2.0 — Auditoría de contraste + jerarquía tipográfica
    ══════════════════════════════════════════════════════════ */
 :root {
-  /* ── Core Brand ── */
-  --rojo: #E8302A;
-  --rojo-dark: #C4231E;
+  /* ── Core Brand — Rojo Remate #EF233C es el Color Primario ── */
+  --rojo: #EF233C;
+  --rojo-dark: #C01730;
   --rojo-pale: #FEF2F1;
-  --rojo-glow: rgba(232, 48, 42, 0.25);
+  --rojo-glow: rgba(239, 35, 60, 0.28);
+  --brand-primary: #EF233C;
+  --brand-primary-hover: #C01730;
 
-  /* ── Neutros Cálidos ── */
-  --oscuro:   #111111;
-  --oscuro-2: #1C1C1A;
-  --oscuro-3: #2C2C2A;
-  --crema:    #F5F2EE;
-  --crema-2:  #EDE9E3;
-  --crema-3:  #E3DDD5;
+  /* ── Navy Profundo — Estructura & Marcos ── */
+  --navy:       #1A1F3A;
+  --navy-deep:  #0F1225;
+  --navy-mid:   #252B4A;
+  --navy-light: #2F365A;
+
+  /* ── Neutros y Superficies ── */
+  --oscuro:   #0F172A;
+  --oscuro-2: #1E293B;
+  --oscuro-3: #334155;
+  --crema:    #F8FAFC;
+  --crema-2:  #F1F5F9;
+  --crema-3:  #E2E8F0;
   --white:    #FFFFFF;
 
   /* ── Texto — jerarquía de 4 niveles ── */
-  --texto:     #111111;   /* headings, precios    — contraste 16:1 s/ blanco */
-  --tierra:    #3A3330;   /* nombres producto     — contraste 11:1 s/ blanco */
-  --muted:     #5C5550;   /* metadata, labels     — contraste 7:1 s/ blanco  */
-  --faint:     #888078;   /* placeholder, hints   — contraste 4.6:1 s/ blanco */
+  --texto:     #0F172A;   /* headings, precios    — contraste 16:1 s/ blanco */
+  --tierra:    #334155;   /* nombres producto     — contraste 11:1 s/ blanco */
+  --muted:     #64748B;   /* metadata, labels     — contraste 7:1 s/ blanco  */
+  --faint:     #94A3B8;   /* placeholder, hints   — contraste 4.6:1 s/ blanco */
 
   /* ── Texto sobre fondos oscuros ── */
-  --on-dark-hi:  #F5F2EE;  /* títulos sobre dark   — contraste 14:1 */
-  --on-dark-mid: #C8C3BC;  /* subtítulos sobre dark — contraste 8:1  */
-  --on-dark-lo:  #888078;  /* metadata sobre dark  — contraste 4.6:1 */
+  --on-dark-hi:  #F8FAFC;  /* títulos sobre dark   — contraste 14:1 */
+  --on-dark-mid: #CBD5E1;  /* subtítulos sobre dark — contraste 8:1  */
+  --on-dark-lo:  #94A3B8;  /* metadata sobre dark  — contraste 4.6:1 */
 
   /* ── Bordes ── */
-  --border:   #DDD8D0;
-  --border-2: #C8C2B8;
+  --border:   #E2E8F0;
+  --border-2: #CBD5E1;
   --border2:  var(--border-2);
 
-  /* ── Acentos funcionales ── */
-  --verde:      #1A7A42;
-  --verde-dark: #145E33;
-  --verde-pale: #EBF7F0;
-  --ambar:      #D97706;
+  /* ── Acentos funcionales y Semánticos ── */
+  --verde:      #10B981;
+  --verde-dark: #059669;
+  --verde-pale: #D1FAE5;
+  --whatsapp:   #22C55E;
+  --ambar:      #F59E0B;
   --ambar-pale: #FEF3C7;
 
   /* ── Sombras ── */
-  --shadow-sm:    0 1px 3px rgba(17,11,8,0.10);
-  --shadow-md:    0 4px 16px rgba(17,11,8,0.12);
-  --shadow-lg:    0 12px 40px rgba(17,11,8,0.18);
-  --shadow-panel: -8px 0 48px rgba(0,0,0,0.30);
-  --shadow-3d:    0 20px 40px rgba(17,11,8,0.08), 0 1px 3px rgba(17,11,8,0.02);
-  --shadow-glow-rojo: 0 0 20px rgba(232, 48, 42, 0.25);
-  --shadow-glow-verde: 0 0 20px rgba(26, 122, 66, 0.22);
+  --shadow-sm:    0 1px 3px rgba(15, 23, 42, 0.05);
+  --shadow-md:    0 4px 16px rgba(15, 23, 42, 0.08);
+  --shadow-lg:    0 12px 32px rgba(15, 23, 42, 0.12);
+  --shadow-panel: -8px 0 48px rgba(15, 23, 42, 0.25);
+  --shadow-3d:    0 20px 40px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.02);
+  --shadow-glow-rojo: 0 0 20px rgba(239, 35, 60, 0.28);
+  --shadow-glow-verde: 0 0 20px rgba(16, 185, 129, 0.22);
 
   /* ── Radius ── */
   --r-sm: 6px;
@@ -63,8 +72,7 @@
   /* ── Tipografía ── */
   /* NOTA: Estas variables vienen inyectadas desde layout.tsx vía next/font */
   --font-display: var(--font-display, 'Plus Jakarta Sans', system-ui, sans-serif);
-  --font-serif:   var(--font-serif, 'DM Serif Display', Georgia, serif);
-  --font-body:    var(--font-body, 'DM Sans', system-ui, sans-serif);
+  --font-body:    var(--font-body, 'Inter', system-ui, -apple-system, sans-serif);
   --font-bebas:   var(--font-bebas, 'Bebas Neue', sans-serif);
 
   /* ── Escala tipográfica modular (ratio 1.25) ── */
