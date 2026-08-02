@@ -1055,7 +1055,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           "/logo.png",
           orderId,
           deliveryDireccion,
-          false
+          false,
+          costoEnvio
         );
       } catch (waErr) {
         console.error("❌ WhatsApp: Error al enviar factura:", waErr);

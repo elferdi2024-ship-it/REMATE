@@ -44,7 +44,8 @@ export function armarMensajeWA(
   items: CartItem[],
   notas?: string,
   numeroPedido?: string,
-  direccion?: string
+  direccion?: string,
+  costoEnvio: number = 0
 ): string {
   const num = numeroPedido ?? generarNumeroPedido();
   const fecha = new Date().toLocaleDateString("es-UY", {
@@ -54,42 +55,49 @@ export function armarMensajeWA(
     hour: "2-digit",
     minute: "2-digit",
   });
-  const total = items.reduce((s, i) => s + i.precio * i.cantidad, 0);
+  const subtotalItems = items.reduce((s, i) => s + i.precio * i.cantidad, 0);
+  const totalFinal = subtotalItems + costoEnvio;
   const lines: string[] = [];
 
-  lines.push(`🧾 *PEDIDO MAYORISTA #${num}*`);
+  lines.push(`🧾 *PEDIDO MAYORISTA EL REMATE #${num}*`);
   lines.push(`📅 ${fecha}`);
   lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
 
-  lines.push(`*DATOS DEL CLIENTE*`);
-  lines.push(`👤 *Nombre:* ${nombre.trim() || "Cliente"}`);
-  lines.push(`📱 *Tel:* ${telefono.trim() || "No proporcionado"}`);
+  lines.push(`*👤 DATOS DEL CLIENTE*`);
+  lines.push(`• *Nombre / Negocio:* ${nombre.trim() || "Cliente"}`);
+  lines.push(`• *Teléfono:* ${telefono.trim() || "No proporcionado"}`);
   if (direccion?.trim()) {
-    lines.push(`📍 *Entrega:* ${direccion.trim()}`);
+    lines.push(`• *Dirección:* ${direccion.trim()}`);
   }
   lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
 
-  lines.push(`*🛒 DETALLE DEL PEDIDO*`);
+  lines.push(`*🛒 PRODUCTOS DE TU PEDIDO (${items.length})*`);
   lines.push(``);
   for (const item of items) {
-    const subtotal = item.precio * item.cantidad;
-    // Formato tabular legible
+    const sub = item.precio * item.cantidad;
     lines.push(`📦 *${item.nombre}*`);
-    lines.push(`   ↳ \`${item.codigo}\` | ${item.cantidad} x ${formatPrecio(item.precio)} = *${formatPrecio(subtotal)}*`);
+    lines.push(`   ↳ SKU: \`${item.codigo}\` | Cantidad: ${item.cantidad} u. x ${formatPrecio(item.precio)} = *${formatPrecio(sub)}*`);
   }
 
   lines.push(``);
   lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
-  lines.push(`💰 *TOTAL A PAGAR: ${formatPrecio(total)}*`);
+  lines.push(`*💵 RESUMEN DE COMPRA*`);
+  lines.push(`• Subtotal Productos: *${formatPrecio(subtotalItems)}*`);
+  if (costoEnvio > 0) {
+    lines.push(`• Envío: *${formatPrecio(costoEnvio)}*`);
+  } else {
+    lines.push(`• Envío: *¡GRATIS! ($0)*`);
+  }
+  lines.push(`💰 *TOTAL A PAGAR: ${formatPrecio(totalFinal)}*`);
 
   if (notas?.trim()) {
     lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
-    lines.push(`📝 *NOTAS AL VENDEDOR:*`);
-    lines.push(`_${notas.trim()}_`);
+    lines.push(`📝 *INDICACIONES DE ENTREGA Y PREFERENCIAS:*`);
+    lines.push(`${notas.trim()}`);
   }
 
   lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
-  lines.push(`⚡ _Pedido generado desde Catálogo Web_`);
+  lines.push(`⚡ _Pedido enviado mediante El Remate Web Express_`);
 
   return lines.join("\n");
 }
@@ -111,7 +119,8 @@ export async function enviarFacturaWhatsApp(
   logoUrl?: string,
   numeroPedido?: string,
   direccion?: string,
-  skipRedirect: boolean = false
+  skipRedirect: boolean = false,
+  costoEnvio: number = 0
 ): Promise<void> {
   const phone = numero || process.env.NEXT_PUBLIC_WA_NUMBER || "";
   const numFinal = numeroPedido || generarNumeroPedido();
@@ -150,7 +159,7 @@ export async function enviarFacturaWhatsApp(
   }
 
   // 1. Copiar siempre mensaje al portapapeles como respaldo silencioso
-  const mensaje = armarMensajeWA(nombre, telefono, items, notas, numFinal, direccion);
+  const mensaje = armarMensajeWA(nombre, telefono, items, notas, numFinal, direccion, costoEnvio);
   if (typeof navigator !== "undefined" && navigator.clipboard) {
     navigator.clipboard.writeText(mensaje).catch(() => {});
   }
