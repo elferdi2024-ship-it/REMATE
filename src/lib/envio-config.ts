@@ -2,7 +2,7 @@
 
 export type ZonaEnvio = 'canelones' | 'montevideo';
 
-export const UMBRAL_ENVIO_GRATIS = 2500;
+export const UMBRAL_ENVIO_GRATIS = 1000;
 
 export const COSTOS_ENVIO: Record<ZonaEnvio, { nombre: string; costo: number }> = {
   canelones: {
@@ -18,9 +18,10 @@ export const COSTOS_ENVIO: Record<ZonaEnvio, { nombre: string; costo: number }> 
 export function calcularCostoEnvio(
   subtotal: number,
   metodo: 'envio' | 'retiro',
-  zona: ZonaEnvio
+  zona: ZonaEnvio,
+  umbralGratis: number = UMBRAL_ENVIO_GRATIS
 ): number {
   if (metodo === 'retiro') return 0;
-  if (subtotal >= UMBRAL_ENVIO_GRATIS) return 0;
+  if (subtotal >= umbralGratis) return 0;
   return COSTOS_ENVIO[zona]?.costo ?? 250;
 }

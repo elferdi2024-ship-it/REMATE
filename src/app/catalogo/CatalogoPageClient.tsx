@@ -30,6 +30,7 @@ import {
 } from "@/components/catalogo";
 import { useFavoritos } from "@/lib/favoritos-context";
 import { useBrands } from "@/hooks/useBrands";
+import { useTiendaConfig } from "@/hooks/useTiendaConfig";
 import type { OfertaConfig } from "@/types/ofertas";
 
 import BranchBar from "@/components/catalogo/BranchBar";
@@ -407,11 +408,12 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [metodoEntrega, setMetodoEntrega] = useState<MetodoEntrega>('envio');
   const [zonaEnvio, setZonaEnvio] = useState<ZonaEnvio>('canelones');
   const [sucursalId, setSucursalId] = useState<string | null>(null);
+  const { config: tiendaConfig } = useTiendaConfig();
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
 
   const costoEnvio = useMemo(
-    () => calcularCostoEnvio(total, metodoEntrega, zonaEnvio),
-    [total, metodoEntrega, zonaEnvio]
+    () => calcularCostoEnvio(total, metodoEntrega, zonaEnvio, tiendaConfig?.minimoEnvioGratis),
+    [total, metodoEntrega, zonaEnvio, tiendaConfig?.minimoEnvioGratis]
   );
   const totalConEnvio = useMemo(() => total + costoEnvio, [total, costoEnvio]);
 
@@ -424,7 +426,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   }, [brands]);
 
   // Tienda Config
-  const [tiendaConfig, setTiendaConfig] = useState<{ pedidosAbiertos: boolean; bannerMensaje: string }>({
+  const [tiendaConfigState, setTiendaConfigState] = useState<{ pedidosAbiertos: boolean; bannerMensaje: string }>({
     pedidosAbiertos: true,
     bannerMensaje: "",
   });
@@ -435,7 +437,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       doc(db, "config", "tienda"),
       (snap) => {
         if (snap.exists()) {
-          setTiendaConfig(snap.data() as any);
+          setTiendaConfigState(snap.data() as any);
         }
       },
       (err) => {
