@@ -106,7 +106,7 @@ export default function HeroLanding({
           <div className="flex items-center justify-center gap-2 mb-3">
             <span className="text-[1.2rem]">🏪</span>
             <span className="text-xs md:text-sm font-bold uppercase tracking-[2px] text-[#FF4D47]">
-              SELECCIONÁ TU SUCURSAL PARA VER PRECIOS Y STOCK REAL:
+              SELECCIONÁ TU SUCURSAL PARA INGRESAR A SU CATÁLOGO:
             </span>
           </div>
 
@@ -130,7 +130,7 @@ export default function HeroLanding({
                   <span className={`text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full ${
                     isSelected ? "bg-white text-[#E8302A]" : "text-gray-300 group-hover:text-white"
                   }`}>
-                    {isSelected ? "SELECCIONADA ⚡" : "INGRESAR →"}
+                    {isSelected ? "ACTIVO ⚡" : "VER CATÁLOGO ➡️"}
                   </span>
                 </button>
               );
@@ -145,15 +145,15 @@ export default function HeroLanding({
               href={`/catalogo?sucursal=${selectedSucursal}`}
               className="bg-[#E8302A] text-white rounded-[14px] px-8 py-4 font-bebas text-[1.3rem] tracking-[2px] no-underline flex items-center gap-3 animate-pulse-glow-red transition-all hover:bg-[#C4231E] hover:-translate-y-1 shadow-lg"
             >
-              🛒 VER CATÁLOGO COMPLETO DE {sucursalNombre.toUpperCase()} →
+              🛒 VER CATÁLOGO DE {sucursalNombre.toUpperCase()} →
             </Link>
           ) : (
-            <Link
-              href="/catalogo"
-              className="bg-[#E8302A] text-white rounded-[14px] px-8 py-4 font-bebas text-[1.3rem] tracking-[2px] no-underline flex items-center gap-3 animate-pulse-glow-red transition-all hover:bg-[#C4231E] hover:-translate-y-1 shadow-lg"
+            <button
+              onClick={onOpenSucursalModal}
+              className="bg-[#E8302A] text-white rounded-[14px] px-8 py-4 font-bebas text-[1.3rem] tracking-[2px] cursor-pointer flex items-center gap-3 animate-pulse-glow-red transition-all hover:bg-[#C4231E] hover:-translate-y-1 shadow-lg border-0"
             >
-              🛒 EXPLORAR CATÁLOGO MAYORISTA GENERAL →
-            </Link>
+              🛒 SELECCIONAR SUCURSAL Y VER CATÁLOGO →
+            </button>
           )}
 
           <a

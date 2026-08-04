@@ -36,7 +36,7 @@ export default function BranchSection({
             ELEGÍ TU <span className="text-[#E8302A]">SUCURSAL Y CATÁLOGO</span>
           </h2>
           <p className="font-serif italic text-[1.1rem] text-[#5C4A35] max-w-[680px] mx-auto leading-relaxed">
-            Cada sucursal cuenta con su propio stock, ofertas y precios mayoristas actualizados. Tocá la sucursal de tu zona para ingresar directo a su catálogo digital.
+            Cada sucursal cuenta con su propio catálogo, stock, ofertas y precios mayoristas actualizados. Tocá la sucursal de tu zona para ingresar directo a su catálogo digital.
           </p>
           {selectedSucursal && activeSucursal && (
             <div className="inline-flex items-center gap-2 bg-[#E8302A]/10 border border-[#E8302A]/40 rounded-full px-6 py-2.5 mt-5 text-[0.85rem] font-bold text-[#E8302A] shadow-[0_4px_16px_rgba(232,48,42,0.12)] animate-fade-in">
@@ -76,7 +76,7 @@ export default function BranchSection({
                       </span>
                     ) : (
                       <span className="bg-[#F5F0E8] text-[#5C4A35] text-[0.65rem] font-bold uppercase py-1 px-3 rounded-full tracking-[1px] group-hover:bg-[#E8302A]/10 group-hover:text-[#E8302A]">
-                        TOCÁ PARA SELECCIONAR
+                        TOCÁ PARA VER CATÁLOGO
                       </span>
                     )}
                   </div>
@@ -96,7 +96,7 @@ export default function BranchSection({
                       onClick={(e) => e.stopPropagation()}
                       className="text-[0.85rem] text-[#1A7A42] no-underline font-bold inline-flex items-center gap-2 py-1.5 px-3 rounded-[10px] transition-all bg-[#1A7A42]/10 hover:bg-[#1A7A42]/20 hover:text-[#145E33] w-max"
                     >
-                      📱 {sucursal.telefono}
+                      📱 WhatsApp: {sucursal.telefono}
                     </a>
                   </div>
                 </div>
@@ -114,8 +114,8 @@ export default function BranchSection({
                     }`}
                   >
                     {isActive
-                      ? "INGRESAR AL CATÁLOGO ⚡"
-                      : `SELECCIONAR CATÁLOGO DE ${sucursal.nombre.toUpperCase()} ➡️`}
+                      ? "ENTRAR AL CATÁLOGO ⚡"
+                      : `VER CATÁLOGO DE ${sucursal.nombre.toUpperCase()} ➡️`}
                   </button>
                 </div>
               </div>

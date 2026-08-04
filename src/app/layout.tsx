@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     "catalogo whatsapp el remate"
   ],
   authors: [{ name: "Distribuidora El Remate" }],
-  metadataBase: new URL("https://distribuidoraelremate.uy"),
+  metadataBase: new URL("https://remate-psi.vercel.app"),
   alternates: {
     canonical: "/",
   },
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_UY",
-    url: "https://distribuidoraelremate.uy",
+    url: "https://remate-psi.vercel.app",
     title: "El Remate Canelones — Distribuidora Mayorista",
     description: "Catálogo mayorista en línea. Más de 1900 productos activos con precios insuperables y pedido express directo por WhatsApp.",
     siteName: "Distribuidora El Remate",
@@ -94,6 +94,20 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${plusJakarta.variable} ${bebasNeue.variable}`}>
       <body style={{ margin: 0, minHeight: "100vh" }}>
+        {/* Service Worker Registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js')
+                    .then(function(reg) { console.log('[SW] Registered:', reg.scope); })
+                    .catch(function(err) { console.warn('[SW] Registration failed:', err); });
+                });
+              }
+            `,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
