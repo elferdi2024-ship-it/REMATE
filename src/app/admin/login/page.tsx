@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { SUCURSALES } from "@/lib/sucursales";
+import { normalizarEmail } from "@/lib/format";
 
 export default function AdminLoginPage() {
   const { signIn, user, loginAsAdminDios } = useAuth();
@@ -95,7 +96,8 @@ export default function AdminLoginPage() {
 
     try {
       console.log("DEBUG: Iniciando handleSubmit...");
-      await signIn(email, password);
+      const emailNormalizado = normalizarEmail(email);
+      await signIn(emailNormalizado, password);
       console.log("DEBUG: Auth exitoso. UID:", user?.uid);
     } catch (err: unknown) {
       setLoading(false);
@@ -144,21 +146,20 @@ export default function AdminLoginPage() {
               htmlFor="admin-email"
               className="mb-1 block text-xs font-semibold text-gray-400"
             >
-              Email
+              Usuario / Email
             </label>
             <input
               id="admin-email"
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              autoComplete="email"
               className="w-full rounded-lg px-3 py-2.5 text-sm text-white outline-none transition-all"
               style={{
                 background: "rgba(255,255,255,0.06)",
                 border: "1.5px solid rgba(76,201,240,0.18)",
               }}
-              placeholder="admin@elremate.com"
+              placeholder="remate1@canelones o correo"
               onFocus={(e) => {
                 e.target.style.borderColor = "rgba(76,201,240,0.5)";
                 e.target.style.boxShadow = "0 0 0 3px rgba(76,201,240,0.08)";

@@ -8,12 +8,14 @@ import { getAuth, createUserWithEmailAndPassword, signOut, sendPasswordResetEmai
 import { doc, setDoc, collection, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, firebaseConfig } from "@/lib/firebase";
 import { SUCURSALES } from "@/lib/sucursales";
+import { normalizarEmail } from "@/lib/format";
 
 interface UserData {
   id: string;
   email: string;
   role: "admin" | "empleado" | "owner";
   sucursalId?: string | null;
+  contrasena?: string;
 }
 
 export default function UsuariosPage() {
@@ -28,6 +30,8 @@ export default function UsuariosPage() {
 
   const [usersList, setUsersList] = useState<UserData[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
+  const [showFormPassword, setShowFormPassword] = useState(false);
+  const [revealedPasswords, setRevealedPasswords] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (user?.email === "rnt.atlantida@gmail.com") {
@@ -74,13 +78,15 @@ export default function UsuariosPage() {
         secondaryApp = initializeApp(firebaseConfig, appName);
       }
 
+      const emailNormalizado = normalizarEmail(email);
       const secondaryAuth = getAuth(secondaryApp);
-      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, emailNormalizado, password);
       const newUserId = userCredential.user.uid;
 
       await setDoc(doc(db, "usuarios", newUserId), {
-        email: email,
+        email: emailNormalizado,
         role: role,
+        contrasena: password,
         sucursalId: role === "empleado" ? sucursalId : null
       });
 
@@ -191,28 +197,37 @@ export default function UsuariosPage() {
               )}
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-[var(--admin-text-mid)]">Correo Electrónico</label>
+                <label className="mb-1 block text-sm font-medium text-[var(--admin-text-mid)]">Usuario / Correo Electrónico</label>
                 <input
-                  type="email"
+                  type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="ejemplo@correo.com"
+                  placeholder="remate1@canelones o correo"
                   className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-2.5 text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/55 focus:border-[var(--admin-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-accent)]"
                 />
               </div>
 
               <div>
                 <label className="mb-1 block text-sm font-medium text-[var(--admin-text-mid)]">Contraseña (mínimo 6 caracteres)</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  placeholder="••••••"
-                  className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-2.5 text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/55 focus:border-[var(--admin-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-accent)]"
-                />
+                <div className="relative">
+                  <input
+                    type={showFormPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    placeholder="••••••"
+                    className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-2.5 pr-20 text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/55 focus:border-[var(--admin-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-accent)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowFormPassword(!showFormPassword)}
+                    className="absolute right-3 top-2.5 text-xs text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)] font-bold uppercase tracking-wider"
+                  >
+                    {showFormPassword ? "Ocultar" : "Mostrar"}
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -270,7 +285,8 @@ export default function UsuariosPage() {
                 <table className="w-full text-left text-sm text-[var(--admin-text-lo)]">
                   <thead className="bg-[var(--admin-bg)] text-xs uppercase text-[var(--admin-text-lo)]">
                     <tr>
-                      <th className="px-4 py-3">Correo</th>
+                      <th className="px-4 py-3">Usuario / Correo</th>
+                      <th className="px-4 py-3">Contraseña</th>
                       <th className="px-4 py-3">Rol</th>
                       <th className="px-4 py-3">Local Asignado</th>
                       <th className="px-4 py-3 text-right">Acciones</th>
@@ -280,6 +296,29 @@ export default function UsuariosPage() {
                     {usersList.map((u) => (
                       <tr key={u.id} className="border-b border-[var(--admin-border)] hover:bg-[var(--admin-input-bg)]/30 transition-colors">
                         <td className="px-4 py-4 font-medium text-[var(--admin-text-hi)]">{u.email}</td>
+                        <td className="px-4 py-4 font-mono text-xs">
+                          {u.contrasena ? (
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-[var(--admin-text-hi)]">
+                                {revealedPasswords[u.id] ? u.contrasena : "••••••"}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setRevealedPasswords((prev) => ({
+                                    ...prev,
+                                    [u.id]: !prev[u.id],
+                                  }))
+                                }
+                                className="text-[10px] font-extrabold text-[var(--admin-accent)] uppercase hover:underline"
+                              >
+                                {revealedPasswords[u.id] ? "Ocultar" : "Mostrar"}
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-[var(--admin-text-lo)]/40 italic">No disponible</span>
+                          )}
+                        </td>
                         <td className="px-4 py-4">
                           <select
                             value={u.role}

@@ -34,10 +34,37 @@ export default function PedidosPage() {
 
   const playNotification = useCallback(() => {
     try {
-      const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
-      audio.volume = 0.5;
-      audio.play().catch(() => {}); // Autoplay might be blocked
-    } catch (e) {}
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      
+      const playTone = (freq: number, start: number, duration: number) => {
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, start);
+        
+        gainNode.gain.setValueAtTime(0, start);
+        gainNode.gain.linearRampToValueAtTime(0.12, start + 0.05); // Volumen suave y no molesto
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        osc.start(start);
+        osc.stop(start + duration);
+      };
+
+      const now = ctx.currentTime;
+      // Arpegio mayor de Do ascendente y armonioso (Do5, Mi5, Sol5, Do6)
+      playTone(523.25, now, 1.0);         // C5
+      playTone(659.25, now + 0.12, 1.0);    // E5
+      playTone(783.99, now + 0.24, 1.0);    // G5
+      playTone(1046.50, now + 0.36, 1.2);   // C6
+    } catch (e) {
+      console.warn("AudioContext error:", e);
+    }
   }, []);
 
   const handleUpdate = useCallback((docs: any[]) => {
@@ -214,6 +241,9 @@ export default function PedidosPage() {
   useEffect(() => {
     if (counts.no_leido === 0) return;
 
+    // Reproducir alerta inicial de inmediato al detectar pedidos no leídos
+    playNotification();
+
     // Reproducir alerta cada 30 segundos mientras haya pedidos no leídos
     const interval = setInterval(() => {
       playNotification();
@@ -270,15 +300,15 @@ export default function PedidosPage() {
       {/* Luxury Stats Grid */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
-          { label: "Ventas Hoy", value: formatCurrency(totalGeneral), icon: "💰", color: "from-[var(--admin-accent)]/20 to-transparent", border: "border-[var(--admin-accent)]/30" },
-          { label: "Artículos", value: totalItems, icon: "📦", color: "from-blue-500/20 to-transparent", border: "border-blue-500/30" },
-          { label: "No Leídos", value: counts.no_leido, icon: "🔴", color: "from-red-500/20 to-transparent", border: "border-red-500/30", highlight: "text-red-500 dark:text-red-400" },
-          { label: "Pendientes", value: counts.pendiente, icon: "🟡", color: "from-yellow-500/20 to-transparent", border: "border-yellow-500/30", highlight: "text-yellow-600 dark:text-yellow-400" },
+          { label: "Ventas Hoy", value: formatCurrency(totalGeneral), icon: "💰", color: "from-[var(--admin-accent)]/25 to-transparent", border: "border-[var(--admin-accent)]/40 shadow-sm" },
+          { label: "Artículos", value: totalItems, icon: "📦", color: "from-blue-500/25 to-transparent", border: "border-blue-500/40 shadow-sm" },
+          { label: "No Leídos", value: counts.no_leido, icon: "🔴", color: "from-red-500/25 to-transparent", border: "border-red-500/40 shadow-md", highlight: "text-red-600 dark:text-red-400 font-extrabold text-[2.8rem] sm:text-[3.8rem] md:text-[4.5rem]" },
+          { label: "Pendientes", value: counts.pendiente, icon: "🟡", color: "from-yellow-500/25 to-transparent", border: "border-yellow-500/40 shadow-sm", highlight: "text-yellow-600 dark:text-yellow-400 font-extrabold text-[2.8rem] sm:text-[3.8rem] md:text-[4.5rem]" },
         ].map((s, idx) => (
-          <div key={idx} className={`relative overflow-hidden rounded-2xl sm:rounded-[32px] border ${s.border} bg-gradient-to-br ${s.color} p-4 sm:p-6 transition-all hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] group bg-[var(--admin-card-bg)]`}>
-            <div className="absolute -right-2 -top-2 text-4xl opacity-10 transition-transform group-hover:scale-125 group-hover:rotate-12">{s.icon}</div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--admin-text-lo)] mb-1">{s.label}</p>
-            <p className={`font-bebas text-4xl leading-none ${s.highlight || 'text-[var(--admin-text-hi)]'}`}>{s.value}</p>
+          <div key={idx} className={`relative overflow-hidden rounded-2xl sm:rounded-[36px] border-2 ${s.border} bg-gradient-to-br ${s.color} p-5 sm:p-7 transition-all hover:scale-[1.03] hover:shadow-2xl group bg-[var(--admin-card-bg)]`}>
+            <div className="absolute -right-2 -top-2 text-5xl opacity-20 transition-transform group-hover:scale-125 group-hover:rotate-12">{s.icon}</div>
+            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-800 dark:text-slate-200 mb-1.5">{s.label}</p>
+            <p className={`font-bebas leading-none tracking-wide ${s.highlight || 'text-[var(--admin-text-hi)] text-[2.8rem] sm:text-[3.8rem] md:text-[4.5rem] font-extrabold'}`}>{s.value}</p>
           </div>
         ))}
       </div>

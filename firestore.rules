@@ -77,6 +77,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Configuración de Sucursales: Cualquiera lee, solo admin escribe
+    match /sucursales_config/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Configuración de Tienda (config/tienda): Cualquiera lee, solo admin escribe
     match /config/{document=**} {
       allow read: if true;

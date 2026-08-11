@@ -36,7 +36,7 @@ export default function BranchSection({
             ELEGÍ TU <span className="text-[#E8302A]">SUCURSAL Y CATÁLOGO</span>
           </h2>
           <p className="font-serif italic text-[1.1rem] text-[#5C4A35] max-w-[680px] mx-auto leading-relaxed">
-            Cada sucursal cuenta con su propio catálogo, stock, ofertas y precios mayoristas actualizados. Tocá la sucursal de tu zona para ingresar directo a su catálogo digital.
+            Cada sucursal cuenta con su propio catálogo digital, stock disponible y precios mayoristas. Tocá tu sucursal para ingresar inmediatamente a su catálogo de ofertas.
           </p>
           {selectedSucursal && activeSucursal && (
             <div className="inline-flex items-center gap-2 bg-[#E8302A]/10 border border-[#E8302A]/40 rounded-full px-6 py-2.5 mt-5 text-[0.85rem] font-bold text-[#E8302A] shadow-[0_4px_16px_rgba(232,48,42,0.12)] animate-fade-in">
@@ -44,7 +44,7 @@ export default function BranchSection({
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E8302A] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#E8302A]"></span>
               </span>
-              <span>CATÁLOGO ACTIVO:</span>
+              <span>CATÁLOGO SELECCIONADO:</span>
               <strong className="text-[#111111] uppercase tracking-wide">
                 SUCURSAL {activeSucursal.nombre} ({activeSucursal.direccion})
               </strong>
@@ -59,7 +59,7 @@ export default function BranchSection({
               <div
                 key={sucursal.id}
                 onClick={() => handleBranchClick(sucursal.id)}
-                className={`bg-white rounded-[20px] p-7 transition-all duration-300 cursor-pointer flex flex-col justify-between relative group active:scale-95 ${
+                className={`bg-white rounded-[20px] p-7 transition-all duration-300 cursor-pointer flex flex-col justify-between relative group active:scale-[0.98] ${
                   isActive
                     ? "border-2 border-[#E8302A] shadow-[0_8px_30px_rgba(232,48,42,0.25)] ring-2 ring-[#E8302A]/20"
                     : "border border-[#DDD8D0] shadow-[0_4px_20px_rgba(17,11,8,0.06)] hover:-translate-y-1.5 hover:shadow-[0_16px_40px_rgba(17,11,8,0.14)] hover:border-[#E8302A]"
@@ -126,3 +126,4 @@ export default function BranchSection({
     </section>
   );
 }
+

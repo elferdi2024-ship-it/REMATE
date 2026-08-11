@@ -63,3 +63,17 @@ export function formatDate(date: any): string {
   return `${d.getDate()} ${months[d.getMonth()]} · ${d.getHours().toString().padStart(2,"0")}:${d.getMinutes().toString().padStart(2,"0")}`;
 }
 
+export function normalizarEmail(input: string): string {
+  const trimmed = input.trim();
+  if (!trimmed.includes("@")) {
+    return `${trimmed}@elremate.com`;
+  }
+  const parts = trimmed.split("@");
+  const domain = parts[1];
+  if (!domain.includes(".")) {
+    return `${trimmed}.com`;
+  }
+  return trimmed;
+}
+
+

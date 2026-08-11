@@ -98,9 +98,12 @@ export default function LandingPage() {
 
     ls.setSelectedSucursal(id);
     setSelectedSucursal(id);
-    toast.success(`🏪 Cargando catálogo de ${nombre}...`);
     
     const cat = targetCategory || pendingCategory;
+    setPendingCategory("");
+
+    toast.success(`🏪 Cargando catálogo de ${nombre}...`);
+
     if (cat) {
       router.push(`/catalogo?sucursal=${id}&categoria=${encodeURIComponent(cat)}`);
     } else {
