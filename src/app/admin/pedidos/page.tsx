@@ -23,7 +23,7 @@ export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<PedidoAdmin[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("cargado");
+  const [statusFilter, setStatusFilter] = useState<string>("no_leido");
   const [onlyFresh, setOnlyFresh] = useState(false);
   const [bulkUpdating, setBulkUpdating] = useState(false);
   const [deliveryFilter, setDeliveryFilter] = useState<"todos" | "envio" | "retiro">("todos");
@@ -302,13 +302,13 @@ export default function PedidosPage() {
         {[
           { label: "Ventas Hoy", value: formatCurrency(totalGeneral), icon: "💰", color: "from-[var(--admin-accent)]/25 to-transparent", border: "border-[var(--admin-accent)]/40 shadow-sm" },
           { label: "Artículos", value: totalItems, icon: "📦", color: "from-blue-500/25 to-transparent", border: "border-blue-500/40 shadow-sm" },
-          { label: "No Leídos", value: counts.no_leido, icon: "🔴", color: "from-red-500/25 to-transparent", border: "border-red-500/40 shadow-md", highlight: "text-red-600 dark:text-red-400 font-extrabold text-[2.8rem] sm:text-[3.8rem] md:text-[4.5rem]" },
-          { label: "Pendientes", value: counts.pendiente, icon: "🟡", color: "from-yellow-500/25 to-transparent", border: "border-yellow-500/40 shadow-sm", highlight: "text-yellow-600 dark:text-yellow-400 font-extrabold text-[2.8rem] sm:text-[3.8rem] md:text-[4.5rem]" },
+          { label: "No Leídos", value: counts.no_leido, icon: "🔴", color: "from-red-500/25 to-transparent", border: "border-red-500/40 shadow-md", highlight: "text-red-600 dark:text-red-400 font-black text-2xl sm:text-3xl lg:text-4xl" },
+          { label: "Pendientes", value: counts.pendiente, icon: "🟡", color: "from-yellow-500/25 to-transparent", border: "border-yellow-500/40 shadow-sm", highlight: "text-yellow-600 dark:text-yellow-400 font-black text-2xl sm:text-3xl lg:text-4xl" },
         ].map((s, idx) => (
-          <div key={idx} className={`relative overflow-hidden rounded-2xl sm:rounded-[36px] border-2 ${s.border} bg-gradient-to-br ${s.color} p-5 sm:p-7 transition-all hover:scale-[1.03] hover:shadow-2xl group bg-[var(--admin-card-bg)]`}>
-            <div className="absolute -right-2 -top-2 text-5xl opacity-20 transition-transform group-hover:scale-125 group-hover:rotate-12">{s.icon}</div>
-            <p className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-800 dark:text-slate-200 mb-1.5">{s.label}</p>
-            <p className={`font-bebas leading-none tracking-wide ${s.highlight || 'text-[var(--admin-text-hi)] text-[2.8rem] sm:text-[3.8rem] md:text-[4.5rem] font-extrabold'}`}>{s.value}</p>
+          <div key={idx} className={`relative overflow-hidden rounded-2xl sm:rounded-[28px] border-2 ${s.border} bg-gradient-to-br ${s.color} p-4 sm:p-5 transition-all hover:scale-[1.02] hover:shadow-lg group bg-[var(--admin-card-bg)]`}>
+            <div className="absolute -right-2 -top-2 text-4xl opacity-15 transition-transform group-hover:scale-125 group-hover:rotate-12">{s.icon}</div>
+            <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200 mb-1.5">{s.label}</p>
+            <p className={`font-sans tracking-tight leading-none ${s.highlight || 'text-[var(--admin-text-hi)] text-2xl sm:text-3xl lg:text-4xl font-black'}`}>{s.value}</p>
           </div>
         ))}
       </div>

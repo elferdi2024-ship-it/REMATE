@@ -49,15 +49,13 @@ service cloud.firestore {
     // Pedidos: Clientes crean, personal administrativo gestiona (lee/edita/borra)
     match /pedidos/{pedidoId} {
       allow create: if isValidOrder();
-      allow read, update: if isStaff();
-      allow delete: if isManager();
+      allow read, update, delete: if isStaff();
     }
     
     // Pedidos Globales: Permitido crear a cualquiera. Leer/actualizar a Admin, Owner y Empleado. Borrado solo Admin/Owner.
     match /pedidos_globales/{document=**} {
       allow create: if isValidOrder();
-      allow read, update: if isStaff();
-      allow delete: if isManager();
+      allow read, update, delete: if isStaff();
     }
 
     // Usuarios: Cada uno lee lo suyo, admin y owner leen todo
