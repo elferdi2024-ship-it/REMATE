@@ -21,6 +21,7 @@ interface ResultsBarProps {
   activeFiltersCount?: number;
   suggestedProducts?: Producto[];
   onSelectSuggestion?: (term: string) => void;
+  onOpenQuickOrder?: () => void;
 }
 
 export default function ResultsBar({
@@ -38,172 +39,144 @@ export default function ResultsBar({
   activeFiltersCount = 0,
   suggestedProducts = [],
   onSelectSuggestion,
+  onOpenQuickOrder,
 }: ResultsBarProps) {
   return (
-    <div className="sticky top-[100px] z-[60] w-full bg-white/80 backdrop-blur-xl border border-zinc-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl p-3 mb-6 transition-all">
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      {ofertasCount && ofertasCount > 0 ? (
-        <Link
-          href="/ofertas"
-          className="results-market-chip active"
-          style={{
-            textDecoration: "none",
-            cursor: "pointer",
-            background: "rgba(232, 48, 42, 0.12)",
-            border: "1px solid rgba(232, 48, 42, 0.25)",
-            color: "#E8302A",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "6px 14px",
-            borderRadius: "999px",
-            fontSize: "11px",
-            fontWeight: 800,
-            letterSpacing: "1px",
-            transition: "all 0.2s ease-in-out",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(232, 48, 42, 0.18)";
-            e.currentTarget.style.transform = "translateY(-1px)";
-            e.currentTarget.style.boxShadow = "0 4px 12px rgba(232, 48, 42, 0.15)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(232, 48, 42, 0.12)";
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        >
-          <span
-            className="results-market-dot animate-pulse"
-            style={{
-              width: "6px",
-              height: "6px",
-              background: "#E8302A",
-              borderRadius: "50%",
-              boxShadow: "0 0 8px #E8302A",
-            }}
-          />
-          OFERTAS DESTACADAS ({ofertasCount})
-        </Link>
-      ) : (
-        <div className="results-market-chip">
-          <span className="results-market-dot" />
-          OFERTAS DESTACADAS
-        </div>
-      )}
-
-      {/* Buscador inline premium */}
-      {onSearchChange && (
-        <div className="results-search-wrap">
-          <Buscador
-            value={searchQuery}
-            onChange={onSearchChange}
-            placeholder="Buscar por nombre, marca o código..."
-            suggestedProducts={suggestedProducts}
-            onSelectSuggestion={onSelectSuggestion}
-            variant="light"
-          />
-        </div>
-      )}
-
-      {/* Contador + toggle vista + Ordenar + Filtros */}
-      <div className="results-bar-right" style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-        {/* Botón Filtros Avanzados (Mobile) */}
-        {onOpenFilters && (
-          <button
-            onClick={onOpenFilters}
-            className="md:hidden flex items-center gap-1.5 px-3 py-2 bg-[#F5F2EE] hover:bg-[#EDE9E3] border border-[#C8C2B8] rounded-xl text-xs font-bold text-[#3A3330] transition-colors"
-            style={{ height: "36px" }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: "2px" }}>
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-            </svg>
-            Filtros
-            {activeFiltersCount > 0 && (
-              <span className="bg-[#E8302A] text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
-                {activeFiltersCount}
-              </span>
-            )}
-          </button>
-        )}
-
-        {/* Ordenar por dropdown */}
-        {onSortChange && (
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <select
-              value={sortBy}
-              onChange={(e) => onSortChange(e.target.value)}
-              className="sort-select"
-              style={{
-                fontFamily: "var(--font-body), sans-serif",
-                fontSize: "12px",
-                fontWeight: 700,
-                color: "var(--texto, #111)",
-                padding: "6px 28px 6px 12px",
-                borderRadius: "12px",
-                border: "1.5px solid var(--border, #DDD8D0)",
-                background: "var(--bg, #fff)",
-                cursor: "pointer",
-                outline: "none",
-                appearance: "none",
-                WebkitAppearance: "none",
-                height: "36px",
-              }}
+    <div className="w-full bg-white border border-slate-200/90 rounded-2xl p-3.5 mb-6 shadow-xs transition-all">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+        {/* Left: Ofertas chip or inline search */}
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          {ofertasCount && ofertasCount > 0 ? (
+            <Link
+              href="/ofertas"
+              className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-[#EF233C] bg-red-50 hover:bg-red-100 border border-red-200/80 px-3.5 py-2 rounded-xl transition-all active:scale-95 shrink-0"
             >
-              <option value="relevancia">Relevancia</option>
-              <option value="precio-asc">Precio: Menor a Mayor</option>
-              <option value="precio-desc">Precio: Mayor a Menor</option>
-              <option value="nombre-asc">Nombre: A-Z</option>
-              <option value="oferta-desc">Ofertas Primero</option>
-            </select>
-            <span
-              style={{
-                position: "absolute",
-                right: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-                color: "var(--muted)",
-                display: "flex",
-                alignItems: "center",
-              }}
+              <span className="w-2 h-2 rounded-full bg-[#EF233C] animate-pulse" />
+              <span>Ofertas ({ofertasCount})</span>
+            </Link>
+          ) : null}
+
+          {/* Buscador inline */}
+          {onSearchChange && (
+            <div className="flex-1 min-w-0 max-w-md">
+              <Buscador
+                value={searchQuery}
+                onChange={onSearchChange}
+                placeholder="Filtrar por nombre o marca..."
+                suggestedProducts={suggestedProducts}
+                onSelectSuggestion={onSelectSuggestion}
+                variant="light"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Right: Controls (Filters, Quick Order, Sort, Count, View Mode) */}
+        <div className="flex items-center gap-2.5 flex-wrap justify-between md:justify-end">
+          {/* Botón Pedido Rápido B2B */}
+          {onOpenQuickOrder && (
+            <button
+              type="button"
+              onClick={onOpenQuickOrder}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-xs active:scale-95 shrink-0 border border-slate-800"
             >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <polyline points="6 9 12 15 18 9" />
+              <span>⚡ Pedido Rápido</span>
+            </button>
+          )}
+
+          {/* Botón Filtros Avanzados (Mobile) */}
+          {onOpenFilters && (
+            <button
+              type="button"
+              onClick={onOpenFilters}
+              className="md:hidden inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300/80 rounded-xl text-xs font-bold text-slate-800 transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
               </svg>
-            </span>
-          </div>
-        )}
+              <span>Filtros</span>
+              {activeFiltersCount > 0 && (
+                <span className="bg-[#EF233C] text-white text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+          )}
 
-        <span className="results-count" style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>
-          {total} items
-        </span>
-        <div className="view-toggle">
-          <button
-            className={vista === "grilla" ? "active" : ""}
-            onClick={() => onToggleVista("grilla")}
-            aria-pressed={vista === "grilla"}
-          >
-            &#9638; Grilla
-          </button>
-          <button
-            className={vista === "lista" ? "active" : ""}
-            onClick={() => onToggleVista("lista")}
-            aria-pressed={vista === "lista"}
-          >
-            &#9776; Lista
-          </button>
-          <button
-            className={vista === "compacta" ? "active" : ""}
-            onClick={() => onToggleVista("compacta")}
-            aria-pressed={vista === "compacta"}
-          >
-            &#9776; Compacta
-          </button>
+          {/* Ordenar por dropdown */}
+          {onSortChange && (
+            <div className="relative inline-block">
+              <select
+                value={sortBy}
+                onChange={(e) => onSortChange(e.target.value)}
+                aria-label="Ordenar productos"
+                className="appearance-none bg-slate-50 border border-slate-200/90 text-slate-800 font-bold text-xs rounded-xl pl-3 pr-8 py-2 outline-none focus:border-slate-400 cursor-pointer h-9 transition-colors"
+              >
+                <option value="relevancia">Relevancia</option>
+                <option value="precio-asc">Precio: Menor a Mayor</option>
+                <option value="precio-desc">Precio: Mayor a Menor</option>
+                <option value="nombre-asc">Nombre: A-Z</option>
+                <option value="oferta-desc">Ofertas Primero</option>
+              </select>
+              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
+            </div>
+          )}
+
+          {/* Item count */}
+          <span className="text-xs font-bold text-slate-500 hidden sm:inline-block px-1 font-mono">
+            {total} items
+          </span>
+
+          {/* View Mode Toggle */}
+          <div className="inline-flex items-center bg-slate-100 border border-slate-200/80 rounded-xl p-0.5">
+            <button
+              type="button"
+              onClick={() => onToggleVista("grilla")}
+              aria-label="Vista de cuadrícula"
+              aria-pressed={vista === "grilla"}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                vista === "grilla"
+                  ? "bg-white text-slate-950 shadow-xs"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              ⊞ Grilla
+            </button>
+            <button
+              type="button"
+              onClick={() => onToggleVista("lista")}
+              aria-label="Vista de lista"
+              aria-pressed={vista === "lista"}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                vista === "lista"
+                  ? "bg-white text-slate-950 shadow-xs"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              ≡ Lista
+            </button>
+            <button
+              type="button"
+              onClick={() => onToggleVista("compacta")}
+              aria-label="Vista compacta"
+              aria-pressed={vista === "compacta"}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                vista === "compacta"
+                  ? "bg-white text-slate-950 shadow-xs"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              ☰ Compacta
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-    {marketAd}
+
+      {marketAd && <div className="mt-3">{marketAd}</div>}
     </div>
   );
 }

@@ -7,9 +7,11 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
+import { haptic } from "@/lib/haptic";
+import { formatPrice } from "@/lib/format";
 import type { OfertaConfig, OfertaProducto } from "@/types/ofertas";
 
-// ─── Compact Countdown ────────────────────────────────────────────
+// ─── Countdown Timer ────────────────────────────────────────────
 function MiniCountdown({ expiresAt }: { expiresAt: string }) {
   const [remaining, setRemaining] = useState(() =>
     Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000))
@@ -33,28 +35,18 @@ function MiniCountdown({ expiresAt }: { expiresAt: string }) {
 
   return (
     <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "4px",
-        background: isUrgent ? "rgba(239,68,68,0.15)" : "rgba(248,150,30,0.12)",
-        border: `1px solid ${isUrgent ? "rgba(239,68,68,0.3)" : "rgba(248,150,30,0.25)"}`,
-        borderRadius: "8px",
-        padding: "3px 10px",
-        fontSize: "11px",
-        fontWeight: 800,
-        color: isUrgent ? "#EF4444" : "#F59E0B",
-        letterSpacing: "0.5px",
-        fontFamily: "var(--font-display, monospace)",
-        flexShrink: 0,
-      }}
+      className={`inline-flex items-center gap-1 text-xs font-mono font-black tracking-wider px-2.5 py-1 rounded-md border shrink-0 ${
+        isUrgent
+          ? "bg-red-50 text-[#EF233C] border-red-200 animate-pulse"
+          : "bg-amber-50 text-amber-700 border-amber-200"
+      }`}
     >
       ⏱ {String(h).padStart(2, "0")}:{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
     </span>
   );
 }
 
-// ─── Compact Offer Card ──────────────────────────────────────────
+// ─── Offer Card ──────────────────────────────────────────
 function OfertaMiniCard({
   producto,
   onAdd,
@@ -67,149 +59,60 @@ function OfertaMiniCard({
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    haptic.add();
     onAdd();
     setAdded(true);
     setTimeout(() => setAdded(false), 1200);
   };
 
   return (
-    <div
-      style={{
-        minWidth: "180px",
-        maxWidth: "200px",
-        background: producto.destacado
-          ? "linear-gradient(135deg, rgba(212,168,83,0.06), #1a1a1a)"
-          : "#1a1a1a",
-        borderRadius: "14px",
-        border: producto.destacado
-          ? "1.5px solid rgba(212,168,83,0.25)"
-          : "1px solid rgba(255,255,255,0.06)",
-        padding: "14px",
-        flexShrink: 0,
-        position: "relative",
-        transition: "transform 0.15s, box-shadow 0.15s",
-        cursor: "pointer",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-2px)";
-        e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.3)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "none";
-        e.currentTarget.style.boxShadow = "none";
-      }}
-    >
-      {/* Discount badge */}
-      <div
-        className="animate-soft-pulse"
-        style={{
-          position: "absolute",
-          top: "8px",
-          right: "8px",
-          background: producto.descuento >= 20 ? "#DC2626" : "#F59E0B",
-          color: "#fff",
-          padding: "2px 7px",
-          borderRadius: "6px",
-          fontSize: "10px",
-          fontWeight: 900,
-          letterSpacing: "0.3px",
-        }}
-      >
-        {producto.descuento}%
+    <div className="relative min-w-[200px] max-w-[220px] bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-3.5 flex flex-col justify-between shrink-0 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 select-none">
+      {/* Discount Badge */}
+      <div className="absolute top-2.5 right-2.5 z-10 bg-[#EF233C] text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
+        -{producto.descuento}% OFF
       </div>
 
-      {/* Destacado */}
+      {/* Featured Star */}
       {producto.destacado && (
-        <span
-          style={{
-            position: "absolute",
-            top: "8px",
-            left: "8px",
-            fontSize: "10px",
-            color: "#D4A853",
-          }}
-        >
-          ⭐
-        </span>
+        <span className="absolute top-2.5 left-2.5 text-xs">⭐</span>
       )}
 
-      {/* Category */}
-      <p
-        style={{
-          fontSize: "9px",
-          fontWeight: 700,
-          color: "rgba(255,255,255,0.3)",
-          textTransform: "uppercase",
-          letterSpacing: "1px",
-          marginBottom: "6px",
-          marginTop: producto.destacado ? "4px" : 0,
-        }}
-      >
-        {producto.categoria}
-      </p>
+      {/* Top Details */}
+      <div className="mt-4 mb-2">
+        <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1 truncate">
+          {producto.categoria}
+        </p>
 
-      {/* Name */}
-      <h4
-        style={{
-          fontSize: "13px",
-          fontWeight: 800,
-          color: "#fff",
-          margin: "0 0 8px",
-          lineHeight: 1.3,
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-        }}
-      >
-        {producto.nombre}
-      </h4>
-
-      {/* Price */}
-      <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "10px" }}>
-        <span
-          style={{
-            fontSize: "18px",
-            fontWeight: 900,
-            color: "#22C55E",
-            fontFamily: "var(--font-display)",
-          }}
-        >
-          ${producto.precioOferta.toLocaleString("es-UY")}
-        </span>
-        <span
-          style={{
-            fontSize: "11px",
-            fontWeight: 600,
-            color: "rgba(255,255,255,0.25)",
-            textDecoration: "line-through",
-          }}
-        >
-          ${producto.precioOriginal.toLocaleString("es-UY")}
-        </span>
+        <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug line-clamp-2 min-h-[2.4em]">
+          {producto.nombre}
+        </h4>
       </div>
 
-      {/* Add button */}
+      {/* Prices */}
+      <div className="mt-auto pt-2 border-t border-slate-100 mb-3">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-lg sm:text-xl font-black text-slate-950 font-mono tracking-tight leading-none">
+            {formatPrice(producto.precioOferta)}
+          </span>
+          <span className="text-xs font-semibold text-slate-400 line-through leading-none">
+            {formatPrice(producto.precioOriginal)}
+          </span>
+        </div>
+      </div>
+
+      {/* Action Button */}
       <button
+        type="button"
         onClick={handleAdd}
         disabled={added}
-        style={{
-          width: "100%",
-          padding: "8px",
-          borderRadius: "10px",
-          border: "none",
-          background: added
-            ? "#22C55E"
-            : "linear-gradient(135deg, #E8302A, #D62828)",
-          color: "#fff",
-          fontSize: "11px",
-          fontWeight: 800,
-          cursor: added ? "default" : "pointer",
-          transition: "all 0.15s",
-          letterSpacing: "0.3px",
-        }}
+        aria-label={`Agregar ${producto.nombre}`}
+        className={`w-full py-2 px-3 rounded-xl font-extrabold text-xs tracking-wider uppercase transition-all shadow-xs active:scale-95 flex items-center justify-center gap-1.5 ${
+          added
+            ? "bg-emerald-600 text-white shadow-emerald-500/20"
+            : "bg-[#EF233C] hover:bg-[#C01730] text-white shadow-[#EF233C]/20"
+        }`}
       >
-        {added ? "✓ Listo" : "Agregar"}
+        <span>{added ? "✓ Agregado" : "+ Agregar"}</span>
       </button>
     </div>
   );
@@ -250,7 +153,7 @@ export default function OfertasDestacadasRail() {
 
   const scroll = (dir: "left" | "right") => {
     if (!scrollRef.current) return;
-    const amount = 220;
+    const amount = 240;
     scrollRef.current.scrollBy({
       left: dir === "left" ? -amount : amount,
       behavior: "smooth",
@@ -268,149 +171,44 @@ export default function OfertasDestacadasRail() {
   });
 
   return (
-    <section
-      style={{
-        background: "linear-gradient(180deg, rgba(232,48,42,0.04) 0%, transparent 100%)",
-        borderRadius: "16px",
-        border: "1px solid rgba(255,255,255,0.04)",
-        padding: "20px 0 20px",
-        marginBottom: "12px",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
+    <section className="w-full bg-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 my-4 shadow-xs">
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 20px",
-          marginBottom: "16px",
-          flexWrap: "wrap",
-          gap: "8px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-          <h3
-            style={{
-              fontSize: "14px",
-              fontWeight: 900,
-              color: "#fff",
-              margin: 0,
-              letterSpacing: "0.5px",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            <span
-              style={{
-                background: "rgba(232,48,42,0.15)",
-                border: "1px solid rgba(232,48,42,0.3)",
-                borderRadius: "6px",
-                padding: "2px 8px",
-                fontSize: "10px",
-                fontWeight: 800,
-                color: "#E8302A",
-                textTransform: "uppercase",
-                letterSpacing: "1.5px",
-              }}
-            >
-              🔥 Ofertas
-            </span>
-            <span>{config.titulo}</span>
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <span className="bg-[#EF233C] text-white text-[10px] font-black tracking-widest uppercase px-2.5 py-1 rounded-md shadow-xs">
+            🔥 OFERTAS DIRECTAS
+          </span>
+          <h3 className="text-base sm:text-lg font-extrabold text-slate-900 font-display uppercase tracking-wide m-0">
+            {config.titulo || "Súper Precios de la Semana"}
           </h3>
           {config.expiresAt && <MiniCountdown expiresAt={config.expiresAt} />}
-          <span
-            style={{
-              fontSize: "11px",
-              color: "rgba(255,255,255,0.3)",
-              fontWeight: 600,
-            }}
-          >
-            {config.productos.length} producto{config.productos.length !== 1 ? "s" : ""}
+          <span className="text-xs font-bold text-slate-500 font-mono">
+            ({config.productos.length} items)
           </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="flex items-center gap-2">
           {/* Scroll arrows */}
           <button
+            type="button"
             onClick={() => scroll("left")}
-            style={{
-              width: "28px",
-              height: "28px",
-              borderRadius: "8px",
-              border: "1px solid rgba(255,255,255,0.1)",
-              background: "rgba(255,255,255,0.04)",
-              color: "rgba(255,255,255,0.5)",
-              fontSize: "12px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.15s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.1)";
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-              e.currentTarget.style.color = "rgba(255,255,255,0.5)";
-            }}
+            aria-label="Desplazar a la izquierda"
+            className="w-8 h-8 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors shadow-xs"
           >
             ←
           </button>
           <button
+            type="button"
             onClick={() => scroll("right")}
-            style={{
-              width: "28px",
-              height: "28px",
-              borderRadius: "8px",
-              border: "1px solid rgba(255,255,255,0.1)",
-              background: "rgba(255,255,255,0.04)",
-              color: "rgba(255,255,255,0.5)",
-              fontSize: "12px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.15s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.1)";
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-              e.currentTarget.style.color = "rgba(255,255,255,0.5)";
-            }}
+            aria-label="Desplazar a la derecha"
+            className="w-8 h-8 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors shadow-xs"
           >
             →
           </button>
 
           <Link
             href="/ofertas"
-            style={{
-              fontSize: "11px",
-              fontWeight: 800,
-              color: "#E8302A",
-              textDecoration: "none",
-              padding: "5px 12px",
-              borderRadius: "8px",
-              border: "1px solid rgba(232,48,42,0.25)",
-              background: "rgba(232,48,42,0.08)",
-              transition: "all 0.15s",
-              letterSpacing: "0.3px",
-              whiteSpace: "nowrap",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(232,48,42,0.15)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(232,48,42,0.08)";
-            }}
+            className="text-xs font-extrabold text-[#EF233C] hover:text-[#C01730] bg-red-50 hover:bg-red-100 border border-red-200/80 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap uppercase tracking-wider ml-1"
           >
             Ver todas →
           </Link>
@@ -420,14 +218,7 @@ export default function OfertasDestacadasRail() {
       {/* Scrollable cards */}
       <div
         ref={scrollRef}
-        style={{
-          display: "flex",
-          gap: "12px",
-          overflowX: "auto",
-          padding: "0 20px 8px",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
+        className="flex gap-3 overflow-x-auto no-scrollbar pb-1 snap-x snap-mandatory"
       >
         {sorted.map((p) => (
           <OfertaMiniCard
@@ -440,53 +231,14 @@ export default function OfertasDestacadasRail() {
         {/* View all CTA card */}
         <Link
           href="/ofertas"
-          style={{
-            minWidth: "140px",
-            borderRadius: "14px",
-            border: "1.5px dashed rgba(232,48,42,0.25)",
-            background: "rgba(232,48,42,0.04)",
-            padding: "14px",
-            flexShrink: 0,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            textDecoration: "none",
-            transition: "all 0.15s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(232,48,42,0.1)";
-            e.currentTarget.style.borderColor = "rgba(232,48,42,0.4)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(232,48,42,0.04)";
-            e.currentTarget.style.borderColor = "rgba(232,48,42,0.25)";
-          }}
+          className="min-w-[160px] rounded-2xl border-2 border-dashed border-red-200 bg-red-50/50 hover:bg-red-50 p-4 shrink-0 flex flex-col items-center justify-center gap-2 text-center transition-all group"
         >
-          <span style={{ fontSize: "28px" }}>🏷️</span>
-          <span
-            style={{
-              fontSize: "12px",
-              fontWeight: 800,
-              color: "#E8302A",
-              textAlign: "center",
-              letterSpacing: "0.3px",
-            }}
-          >
-            Ver todas
-            <br />
-            las ofertas
+          <span className="text-3xl transition-transform group-hover:scale-110">🏷️</span>
+          <span className="text-xs font-extrabold text-[#EF233C] uppercase tracking-wider leading-tight">
+            Ver todas las ofertas
           </span>
         </Link>
       </div>
-
-      {/* Hide scrollbar */}
-      <style>{`
-        div[style*="overflowX: auto"]::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </section>
   );
 }

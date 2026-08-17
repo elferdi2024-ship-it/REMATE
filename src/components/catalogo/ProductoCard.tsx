@@ -1,7 +1,7 @@
 // filepath: src/components/catalogo/ProductoCard.tsx
 "use client";
 
-import React, { memo, useCallback, useState, useRef } from "react";
+import React, { memo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { haptic } from "@/lib/haptic";
 import type { Producto } from "@/types";
@@ -46,7 +46,7 @@ function getCatBadgeColors(cat: string): { bg: string; color: string } {
     "Panadería":                      { bg: "#DCFCE7", color: "#2A6B3E" },
     "Papel e Higiene":               { bg: "#F8FAFC", color: "#374151" },
   };
-  return map[cat] || { bg: "#F3F4F6", color: "#374151" };
+  return map[cat] || { bg: "#F1F5F9", color: "#334155" };
 }
 
 function highlightText(text: string, searchTerm: string | undefined): React.ReactNode {
@@ -55,7 +55,7 @@ function highlightText(text: string, searchTerm: string | undefined): React.Reac
   const parts = text.split(regex);
   return parts.map((part, i) =>
     regex.test(part) ? (
-      <mark key={i} className="bg-red-50 text-[#E8302A] rounded px-0.5 font-extrabold">{part}</mark>
+      <mark key={i} className="bg-red-100 text-[#EF233C] rounded px-0.5 font-black">{part}</mark>
     ) : (
       part
     )
@@ -80,10 +80,10 @@ export const ProductoCard = memo(function ProductoCard({
     e.stopPropagation();
     haptic.add();
     onAdd(producto, e);
-    toast.success(`1x ${producto.nombre} agregado al carrito`, {
+    toast.success(`1x ${producto.nombre} agregado`, {
       position: 'top-center',
       duration: 1400,
-      style: { background: '#1A7A42', color: 'white', border: 'none', fontWeight: 'bold' }
+      style: { background: '#0F172A', color: 'white', border: '1px solid #334155', fontWeight: 'bold' }
     });
   }, [onAdd, producto]);
 
@@ -107,18 +107,15 @@ export const ProductoCard = memo(function ProductoCard({
     <article
       ref={cardRef}
       onClick={() => onQuickView?.(producto)}
-      className={`gpu-accelerated group relative flex flex-col bg-white border ${
+      className={`group relative flex flex-col bg-white border ${
         isInCart ? "border-[#EF233C] ring-2 ring-[#EF233C]/20 shadow-md" : "border-slate-200/90 hover:border-slate-300"
-      } rounded-[20px] p-3 transition-all duration-300 ease-out hover:shadow-[0_12px_32px_rgba(15,23,42,0.1)] hover:-translate-y-1 select-none cursor-pointer`}
+      } rounded-2xl p-3 transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-0.5 select-none cursor-pointer`}
       style={{ minHeight: "285px" }}
     >
       {/* Thumbnail Container */}
       <div 
-        className="relative w-full rounded-xl overflow-hidden mb-2.5 flex items-center justify-center border border-slate-100"
-        style={{ 
-          background: "linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)",
-          aspectRatio: "1 / 1"
-        }}
+        className="relative w-full rounded-xl overflow-hidden mb-2.5 flex items-center justify-center border border-slate-100 bg-slate-50/50"
+        style={{ aspectRatio: "1 / 1" }}
       >
         {/* Favorito Button */}
         <button
@@ -127,12 +124,12 @@ export const ProductoCard = memo(function ProductoCard({
             e.stopPropagation();
             toggleFavorito(producto.codigo);
           }}
-          className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center shadow-sm hover:scale-110 active:scale-95 transition-all border border-slate-100"
+          className="absolute top-2 left-2 z-20 w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center shadow-xs hover:scale-110 active:scale-95 transition-all border border-slate-200/80"
           aria-label={favorito ? "Quitar de favoritos" : "Guardar en favoritos"}
         >
           <svg
-            width="16"
-            height="16"
+            width="15"
+            height="15"
             viewBox="0 0 24 24"
             fill={favorito ? "#EF233C" : "none"}
             stroke={favorito ? "#EF233C" : "#64748B"}
@@ -144,14 +141,14 @@ export const ProductoCard = memo(function ProductoCard({
 
         {/* Indicador Check En Carrito */}
         {isInCart && (
-          <div className="absolute top-11 left-2 z-20 w-6 h-6 bg-[#EF233C] text-white rounded-full flex items-center justify-center text-xs font-black shadow-md animate-in fade-in zoom-in-75 duration-200">
+          <div className="absolute top-11 left-2 z-20 w-6 h-6 bg-[#EF233C] text-white rounded-full flex items-center justify-center text-xs font-black shadow-xs">
             ✓
           </div>
         )}
 
-        {/* Badge Descuento OFF (En Ámbar/Dorado para no colisionar con el Rojo de la Marca) */}
+        {/* Badge Descuento OFF */}
         {producto.precioAnterior && producto.precioAnterior > producto.precio && (
-          <div className="absolute top-2 right-2 z-20 bg-amber-500 text-slate-950 text-[11px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
+          <div className="absolute top-2 right-2 z-20 bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
             -{Math.round((1 - producto.precio / producto.precioAnterior) * 100)}%
           </div>
         )}
@@ -182,61 +179,99 @@ export const ProductoCard = memo(function ProductoCard({
           </div>
         )}
 
-        {/* CTA Táctil Ergónomico (Min 44x44px) */}
+        {/* CTA Táctil Ergónomico (Min 44x44px) + Atajos Mayoristas */}
         <div 
           onClick={(e) => e.stopPropagation()} 
-          className="absolute bottom-2 right-2 z-20 h-[44px] flex items-end justify-end"
+          className="absolute bottom-2 right-2 z-20 flex flex-col items-end gap-1.5"
         >
           <AnimatePresence mode="wait">
             {isInCart ? (
               <motion.div
                 key="qty-ctrl-bar"
-                initial={{ opacity: 0, scale: 0.8, width: 44 }}
-                animate={{ opacity: 1, scale: 1, width: 104 }}
-                exit={{ opacity: 0, scale: 0.8, width: 44 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                className="flex items-center bg-white border-2 border-[#EF233C] rounded-full h-[44px] px-1 shadow-lg"
-              >
-                <button
-                  type="button"
-                  onClick={handleDec}
-                  className="w-8 h-8 text-[#EF233C] font-black text-base flex items-center justify-center active:scale-90"
-                >
-                  −
-                </button>
-                <input
-                  type="number"
-                  value={qty || ""}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value);
-                    if (!isNaN(val) && val >= 0) onQtyChange(producto.codigo, val);
-                  }}
-                  className="w-7 text-center font-black text-xs text-slate-900 bg-transparent outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleInc}
-                  className="w-8 h-8 text-[#EF233C] font-black text-base flex items-center justify-center active:scale-90"
-                >
-                  +
-                </button>
-              </motion.div>
-            ) : (
-              <motion.button
-                key="add-btn-main"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                onClick={handleAdd}
-                className="w-[44px] h-[44px] bg-[#EF233C] text-white rounded-xl flex items-center justify-center shadow-md shadow-[#EF233C]/25 hover:bg-[#C01730] transition-all"
-                aria-label={`Agregar ${producto.nombre}`}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                className="flex flex-col items-end gap-1"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              </motion.button>
+                {/* Stepper Principal */}
+                <div className="flex items-center bg-white border-2 border-[#EF233C] rounded-full h-[40px] px-1 shadow-md">
+                  <button
+                    type="button"
+                    onClick={handleDec}
+                    aria-label="Disminuir cantidad"
+                    className="w-7 h-7 text-[#EF233C] font-black text-base flex items-center justify-center active:scale-90 hover:bg-red-50 rounded-full transition-colors"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    value={qty || ""}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      if (!isNaN(val) && val >= 0) onQtyChange(producto.codigo, val);
+                    }}
+                    aria-label="Cantidad"
+                    className="w-8 text-center font-black text-xs text-slate-900 bg-transparent outline-none font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleInc}
+                    aria-label="Aumentar cantidad"
+                    className="w-7 h-7 text-[#EF233C] font-black text-base flex items-center justify-center active:scale-90 hover:bg-red-50 rounded-full transition-colors"
+                  >
+                    +
+                  </button>
+                </div>
+
+                {/* Atajos Rápidos por Bulto */}
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      haptic.add();
+                      onQtyChange(producto.codigo, qty + 6);
+                      toast.success(`+6x ${producto.nombre} agregados`, { duration: 1200 });
+                    }}
+                    title="Sumar 6 unidades (Medio Bulto)"
+                    className="text-[10px] font-black bg-slate-900 hover:bg-slate-800 text-white px-2 py-0.5 rounded-md shadow-xs active:scale-95 transition-all"
+                  >
+                    +6
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      haptic.add();
+                      onQtyChange(producto.codigo, qty + 12);
+                      toast.success(`+12x ${producto.nombre} agregados`, { duration: 1200 });
+                    }}
+                    title="Sumar 12 unidades (Caja Cerrada)"
+                    className="text-[10px] font-black bg-[#EF233C] hover:bg-[#C01730] text-white px-2 py-0.5 rounded-md shadow-xs active:scale-95 transition-all"
+                  >
+                    +12
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              <div className="flex items-center gap-1">
+                <motion.button
+                  key="add-btn-main"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.94 }}
+                  onClick={handleAdd}
+                  className="w-[42px] h-[42px] bg-[#EF233C] text-white rounded-xl flex items-center justify-center shadow-md shadow-[#EF233C]/20 hover:bg-[#C01730] transition-all"
+                  aria-label={`Agregar ${producto.nombre}`}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </motion.button>
+              </div>
             )}
           </AnimatePresence>
         </div>
@@ -283,7 +318,7 @@ export const ProductoCard = memo(function ProductoCard({
               )}
               
               <div className="flex items-baseline justify-between gap-1">
-                <span className="text-2xl font-extrabold text-slate-900 leading-none tracking-tight">
+                <span className="text-2xl font-extrabold text-slate-900 leading-none tracking-tight font-mono">
                   {formatPrice(producto.precio)}
                 </span>
                 {precioUnitarioTexto && (
@@ -294,7 +329,7 @@ export const ProductoCard = memo(function ProductoCard({
               </div>
 
               <div className="text-[9px] font-medium text-slate-500 uppercase tracking-wider mt-1 flex items-center justify-between">
-                <span>Unidad IVA Incl.</span>
+                <span>Precio Mayorista</span>
                 <span className="text-slate-700 font-bold">{packSizeTexto}</span>
               </div>
             </div>

@@ -7,6 +7,7 @@ import Image from "next/image";
 import type { Producto } from "@/types";
 import { SUCURSALES } from "@/lib/sucursales";
 import { haptic } from "@/lib/haptic";
+import { formatPrice } from "@/lib/format";
 
 interface HeroProps {
   onOpenCart: () => void;
@@ -26,8 +27,14 @@ interface HeroProps {
   onChangeBranch?: () => void;
 }
 
-import { formatPrice } from "@/lib/format";
-
+const POPULAR_TAGS = [
+  { label: "Mayonesa", query: "mayonesa" },
+  { label: "Refrescos", query: "refresco" },
+  { label: "Hamburguesas", query: "hamburguesa" },
+  { label: "Helados", query: "helado" },
+  { label: "Cerveza", query: "cerveza" },
+  { label: "Aceites", query: "aceite" },
+];
 
 export default function Hero({
   onOpenCart,
@@ -47,10 +54,11 @@ export default function Hero({
   onChangeBranch,
 }: HeroProps) {
   const sucursalObj = SUCURSALES.find((s) => s.id === sucursalId);
-  const trustItems = ["Precios mayoristas reales", "Pedido en minutos", "Atencion por WhatsApp"];
   const [inputValue, setInputValue] = useState(searchQuery || "");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  // Sync with parent query changes (e.g. from banner or popular tags)
+  // Sincronizar input cuando cambie la query externa
   useEffect(() => {
     setInputValue(searchQuery || "");
   }, [searchQuery]);
@@ -61,10 +69,7 @@ export default function Hero({
     onSearchChange?.(val);
   };
 
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
+  // Cerrar dropdown al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -75,598 +80,323 @@ export default function Hero({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleSearchCommit = (term: string) => {
+    setIsSearchFocused(false);
+    onSearchChange?.(term);
+    if (onSearchSubmit) onSearchSubmit(term);
+  };
+
   return (
-    <section className="hero hero-compact">
-      <div style={{ position: "absolute", inset: 0, zIndex: 0, background: "var(--oscuro, #111111)", overflow: "hidden" }}>
+    <section className="relative w-full bg-gradient-to-b from-[#7F1D1D] via-[#450A0A] to-[#1F0404] text-white overflow-hidden border-b border-red-900/60 shadow-xl">
+      {/* Background Image con mayor visibilidad y tinte rojo de marca */}
+      <div className="absolute inset-0 z-0">
         <Image
           src="/catalogo-hero.jpg"
-          alt=""
-          aria-hidden="true"
+          alt="Catálogo Mayorista El Remate"
           fill
           priority
-          style={{ objectFit: "cover", objectPosition: "center" }}
+          sizes="100vw"
+          className="object-cover object-center opacity-75"
         />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(135deg, rgba(17,11,8,0.95) 0%, rgba(17,11,8,0.88) 40%, rgba(17,11,8,0.65) 75%, rgba(17,11,8,0.3) 100%)",
-            backdropFilter: "blur(4px)",
-          }}
-        />
+        {/* Overlays de gradiente rojo cálido para contraste y atmósfera de marca */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#450A0A]/90 via-[#7F1D1D]/75 to-[#1F0404]/80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1F0404] via-transparent to-[#450A0A]/70" />
       </div>
 
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "radial-gradient(ellipse 70% 100% at -5% 50%, rgba(214,40,40,0.2) 0%, transparent 60%)",
-          pointerEvents: "none",
-          zIndex: 1,
-          animation: "pulse 6s infinite ease-in-out"
-        }}
-      />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 flex flex-col gap-4">
+        {/* Top Contextual Bar */}
+        <div className="flex items-center justify-between gap-3 flex-wrap pb-3 border-b border-white/15">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 text-xs font-bold text-slate-300 hover:text-white transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              <span>Inicio</span>
+            </Link>
 
-      <div className="hero-inner hero-inner-v2" style={{ position: "relative", zIndex: 2 }}>
-        <div className="hero-brand">
-          <Link href="/" className="hero-back-link">
-            Inicio
-          </Link>
+            <span className="text-slate-600">/</span>
 
-          <div style={{ marginBottom: "10px", display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
-            <span className="hero-eyebrow-badge">MAYORISTA · DISTRIBUIDORA · CANELONES</span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-black tracking-wider uppercase text-white bg-[#EF233C]/20 border border-[#EF233C]/40 px-2.5 py-0.5 rounded-full shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#EF233C] animate-pulse" />
+              Mayorista Canelones
+            </span>
+
             {sucursalObj && (
               <button
                 type="button"
                 onClick={onChangeBranch}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  background: "rgba(232, 48, 42, 0.12)",
-                  border: "1px solid rgba(232, 48, 42, 0.3)",
-                  borderRadius: "20px",
-                  padding: "4px 12px",
-                  fontSize: "0.68rem",
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  color: "#fff",
-                  textDecoration: "none",
-                  boxShadow: "0 2px 10px rgba(232,48,42,0.1)",
-                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-1px) scale(1.03)';
-                  e.currentTarget.style.borderColor = 'rgba(232, 48, 42, 0.6)';
-                  e.currentTarget.style.background = 'rgba(232, 48, 42, 0.18)';
-                  e.currentTarget.style.boxShadow = '0 4px 14px rgba(232,48,42,0.2)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.borderColor = 'rgba(232, 48, 42, 0.3)';
-                  e.currentTarget.style.background = 'rgba(232, 48, 42, 0.12)';
-                  e.currentTarget.style.boxShadow = '0 2px 10px rgba(232,48,42,0.1)';
-                }}
+                className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-white bg-slate-900/90 hover:bg-slate-800 border border-slate-700 px-3 py-1 rounded-full transition-all active:scale-95 shadow-xs"
               >
                 <span>🏪 {sucursalObj.nombre}</span>
-                <span style={{ color: "#E8302A", fontSize: "0.6rem", fontWeight: 900 }}>· Cambiar</span>
+                <span className="text-[#EF233C] text-[10px] font-black">· Cambiar</span>
               </button>
             )}
+          </div>
 
+          <div className="flex items-center gap-2">
             <Link
               href="/tutorial"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                background: "rgba(255, 255, 255, 0.06)",
-                border: "1px dashed rgba(255, 255, 255, 0.2)",
-                borderRadius: "20px",
-                padding: "4px 12px",
-                fontSize: "0.68rem",
-                fontWeight: 800,
-                textTransform: "uppercase",
-                color: "#fff",
-                textDecoration: "none",
-                transition: "all 0.2s ease-in-out",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-1.5px) scale(1.02)';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.35)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-              }}
+              className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-slate-300 hover:text-white bg-slate-900/80 border border-slate-800 px-3 py-1 rounded-full transition-all"
             >
-              <span>🎤 Guía con &quot;Marti&quot; 🔨</span>
+              <span>🎙️ Guía Marti</span>
             </Link>
-          </div>
 
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "16px" }}>
-            <div
-              style={{ width: "3px", minHeight: "36px", background: "var(--rojo)", borderRadius: "2px", flexShrink: 0, marginTop: "2px" }}
-            />
-            <p
-              style={{
-                fontFamily: "var(--font-display, 'Arial Black', sans-serif)",
-                fontStyle: "normal",
-                fontSize: "clamp(0.95rem, 2vw, 1.15rem)",
-                color: "#fff",
-                lineHeight: 1.35,
-                fontWeight: 700,
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                margin: 0,
-              }}
-            >
-              Pedi tu surtido
-              <br />
-              <span style={{ color: "var(--rojo, #D62828)" }}>y olvidate del resto</span>
-            </p>
-          </div>
-
-          <div
-            style={{
-              background: "rgba(255, 255, 255, 0.05)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(255, 255, 255, 0.12)",
-              borderRadius: "12px",
-              overflow: "hidden",
-              width: "fit-content",
-              display: "flex",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            }}
-          >
-            {[
-              { val: "1900+", lbl: "Productos" },
-              { val: "21", lbl: "Categorias" },
-              { val: "wa", lbl: "Express" },
-            ].map((stat, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "8px 16px",
-                  textAlign: "center",
-                  borderRight: i < 2 ? "1px solid rgba(214,40,40,0.15)" : "none",
-                }}
+            {onOpenUser && (
+              <button
+                onClick={onOpenUser}
+                className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border transition-all ${
+                  isLoggedIn
+                    ? "bg-emerald-950/80 text-emerald-400 border-emerald-500/30 hover:bg-emerald-900/60"
+                    : "bg-slate-900/80 text-slate-300 border-slate-700 hover:text-white hover:bg-slate-800"
+                }`}
               >
-                <div
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "1rem",
-                    color: "var(--rojo, #D62828)",
-                    letterSpacing: "-0.5px",
-                    lineHeight: 1,
-                    fontWeight: 800,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {stat.val === "wa" ? (
-                    <Image src="/whatsapp-icon.png" alt="WhatsApp" width={24} height={24} style={{ objectFit: "contain" }} />
-                  ) : (
-                    stat.val
-                  )}
-                </div>
-                <div
-                  style={{
-                    fontSize: "0.62rem",
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: "1.5px",
-                    color: "var(--on-dark-mid, #C8C3BC)",
-                    marginTop: "2px",
-                  }}
-                >
-                  {stat.lbl}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "10px" }}>
-            {trustItems.map((item) => (
-              <span
-                key={item}
-                style={{
-                  fontSize: "0.66rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.9px",
-                  textTransform: "uppercase",
-                  color: "var(--on-dark-mid, #C8C3BC)",
-                  border: "1px solid rgba(255,255,255,0.18)",
-                  borderRadius: "999px",
-                  padding: "5px 10px",
-                  background: "rgba(255,255,255,0.06)",
-                }}
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="hero-logo-center" style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "20px 0" }}>
-          <Link href="/">
-            <Image
-              src="/logo.png"
-              alt="El Remate Logo"
-              width={280}
-              height={150}
-              priority
-              style={{
-                width: "100%",
-                maxWidth: "280px",
-                height: "auto",
-                objectFit: "contain",
-                filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.6)) drop-shadow(0 0 15px rgba(214,40,40,0.25))",
-                cursor: "pointer",
-              }}
-            />
-          </Link>
-        </div>
-
-        <div className="hero-controls-v2">
-          {onOpenUser && (
-            <button
-              className={`btn-hero-user-v2${isLoggedIn ? " logged-in" : ""}`}
-              onClick={onOpenUser}
-              aria-label={isLoggedIn ? "Mi cuenta" : "Iniciar sesion"}
-            >
-              <div className="btn-hero-user-icon">{isLoggedIn ? "OK" : "ID"}</div>
-              <div className="btn-hero-user-text">
-                <span className="btn-hero-user-label">{isLoggedIn ? "MI CUENTA" : "INICIAR SESION"}</span>
-                <span className="btn-hero-user-sub">
-                  {isLoggedIn ? userDisplayName || "Mi perfil y pedidos" : "Ver historial y repetir pedidos"}
+                <span className="w-2 h-2 rounded-full bg-current" />
+                <span className="truncate max-w-[140px]">
+                  {isLoggedIn ? userDisplayName || "Mi Cuenta" : "Iniciar Sesión"}
                 </span>
-              </div>
-              <span className="btn-hero-user-arrow">›</span>
-            </button>
-          )}
+              </button>
+            )}
+          </div>
+        </div>
 
-          <div 
-            className="hero-search-wrap" 
-            ref={searchContainerRef} 
-            style={{ 
-              position: "relative",
-              width: "100%",
-              maxWidth: "650px",
-              margin: "0 auto",
-            }}
-          >
-            <span 
-              className="hero-search-icon" 
-              style={{ 
-                position: "absolute",
-                left: "20px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: isSearchFocused ? "var(--rojo, #E8302A)" : "#8E8880",
-                zIndex: 2,
-                transition: "color 0.2s ease-in-out",
-              }}
+        {/* Hero Main Header: Prominent Logo + Identity + Cart Quick Status */}
+        <div className="flex flex-col md:flex-row items-center md:items-center justify-between gap-5">
+          {/* Logo & Headline */}
+          <div className="flex items-center gap-4 sm:gap-6 text-left w-full md:w-auto">
+            <Link href="/" className="shrink-0 transition-transform duration-200 hover:scale-105 focus:outline-none">
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center">
+                <Image
+                  src="/logo.png"
+                  alt="El Remate Mayorista"
+                  width={112}
+                  height={112}
+                  priority
+                  className="object-contain w-full h-full drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)]"
+                />
+              </div>
+            </Link>
+
+            <div className="flex flex-col">
+              <span className="text-[11px] font-black uppercase tracking-widest text-[#EF233C] leading-none mb-1">
+                Distribuidora Mayorista
+              </span>
+              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white font-display leading-tight">
+                El Remate <span className="text-slate-400 font-normal">Canelones</span>
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 font-medium mt-0.5 line-clamp-1">
+                Precios directos de fábrica por bulto y unidad. Envío rápido o retiro.
+              </p>
+            </div>
+          </div>
+
+          {/* Cart CTA button */}
+          <div className="flex items-center gap-2 self-stretch md:self-auto justify-end">
+            <button
+              onClick={onOpenCart}
+              className={`flex-1 md:flex-initial inline-flex items-center justify-center gap-2.5 px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95 ${
+                cartQty > 0
+                  ? "bg-[#EF233C] hover:bg-[#C01730] text-white shadow-[#EF233C]/30"
+                  : "bg-slate-900 hover:bg-slate-800 text-white border border-slate-700"
+              }`}
             >
-              <svg 
-                width="20" 
-                height="20" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2.5" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="8" cy="21" r="1" />
+                <circle cx="19" cy="21" r="1" />
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
               </svg>
-            </span>
+              <span>{cartQty > 0 ? "Ver Mi Pedido" : "Empezar Pedido"}</span>
+              {cartQty > 0 && (
+                <>
+                  <span className="bg-white/25 px-2 py-0.5 rounded-full text-[11px] font-mono font-black">
+                    {cartQty}
+                  </span>
+                  <span className="font-mono font-black text-sm ml-0.5">
+                    {formatPrice(cartTotal)}
+                  </span>
+                </>
+              )}
+            </button>
+
+            {onShareCart && cartQty > 0 && (
+              <button
+                onClick={onShareCart}
+                title="Compartir pedido actual"
+                className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition-all active:scale-95 shadow-sm"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                  <polyline points="16 6 12 2 8 6" />
+                  <line x1="12" y1="2" x2="12" y2="15" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Predictive Search Bar with Glow Focuser */}
+        <div className="relative w-full max-w-4xl mx-auto mt-1" ref={searchContainerRef}>
+          <div
+            className={`relative flex items-center bg-slate-900/95 backdrop-blur-md border rounded-2xl transition-all shadow-xl ${
+              isSearchFocused
+                ? "border-[#EF233C] ring-2 ring-[#EF233C]/25 bg-slate-950"
+                : "border-slate-700/80 hover:border-slate-600"
+            }`}
+          >
+            <div className="pl-4 pr-2 text-slate-400 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </div>
+
             <input
               type="text"
-              placeholder="Buscá por nombre, marca o categoría..."
+              placeholder="Buscá entre 1900+ productos por nombre, marca o categoría..."
               value={inputValue}
               onChange={handleChange}
               onFocus={() => setIsSearchFocused(true)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  setIsSearchFocused(false);
-                  onSearchChange?.(inputValue);
-                  if (onSearchSubmit) onSearchSubmit(inputValue);
+                  handleSearchCommit(inputValue);
                 }
               }}
-              aria-label="Buscar producto"
-              className="hero-search-input-premium"
+              aria-label="Buscar producto en el catálogo"
+              className="w-full bg-transparent py-3.5 px-2 text-sm sm:text-base text-white placeholder-slate-400 font-semibold outline-none"
             />
+
             {inputValue && (
               <button
-                className="hero-search-clear-btn"
+                type="button"
                 onClick={() => {
                   setInputValue("");
                   onSearchChange?.("");
                 }}
-                aria-label="Limpiar busqueda"
+                className="p-2 text-slate-400 hover:text-white transition-colors"
+                aria-label="Limpiar búsqueda"
               >
-                ✕
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
               </button>
             )}
 
             <button
-              onClick={() => {
-                setIsSearchFocused(false);
-                onSearchChange?.(inputValue);
-                if (onSearchSubmit) onSearchSubmit(inputValue);
-              }}
-              style={{
-                position: "absolute",
-                right: "6px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "linear-gradient(135deg, var(--rojo, #D62828) 0%, #E8302A 100%)",
-                color: "#fff",
-                border: "none",
-                borderRadius: "24px",
-                padding: "10px 24px",
-                fontSize: "0.85rem",
-                fontWeight: 800,
-                cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(232, 48, 42, 0.3)",
-                transition: "all 0.2s ease-in-out",
-                letterSpacing: "1.5px",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                zIndex: 3,
-              }}
-              className="hidden-mobile"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-50%) scale(1.03)";
-                e.currentTarget.style.boxShadow = "0 6px 16px rgba(232, 48, 42, 0.4)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(-50%) scale(1)";
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(232, 48, 42, 0.3)";
-              }}
+              type="button"
+              onClick={() => handleSearchCommit(inputValue)}
+              className="hidden sm:inline-flex items-center gap-1.5 mr-2 px-5 py-2.5 bg-[#EF233C] hover:bg-[#C01730] text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95"
             >
-              <span>BUSCAR</span>
-              <svg 
-                width="14" 
-                height="14" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="3" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
+              <span>Buscar</span>
             </button>
+          </div>
 
-            {/* Predictive Search Dropdown */}
-            {isSearchFocused && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "calc(100% + 8px)",
-                  left: 0,
-                  right: 0,
-                  background: "#ffffff",
-                  borderRadius: "18px",
-                  boxShadow: "0 20px 40px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.08)",
-                  zIndex: 100,
-                  overflow: "hidden",
-                  display: "flex",
-                  flexDirection: "column",
-                  maxHeight: "350px",
-                }}
-              >
-                {!searchQuery.trim() ? (
-                  /* Sin texto: Mostrar historial o top búsquedas */
-                  <div style={{ padding: "12px" }}>
-                    <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px", paddingLeft: "4px" }}>
-                      Búsquedas Recientes
+          {/* Predictive Search Dropdown */}
+          {isSearchFocused && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white text-slate-900 rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150">
+              {!searchQuery.trim() ? (
+                <div className="p-4">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                    Búsquedas Recientes
+                  </div>
+                  {recentSearches.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {recentSearches.map((term, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            haptic.add();
+                            setInputValue(term);
+                            handleSearchCommit(term);
+                          }}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 hover:text-slate-950 px-3 py-1.5 rounded-full transition-colors"
+                        >
+                          <span className="opacity-50">🕒</span> {term}
+                        </button>
+                      ))}
                     </div>
-                    {recentSearches.length > 0 ? (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                        {recentSearches.map((term, i) => (
-                          <button
-                            key={i}
-                            onClick={() => {
-                              setIsSearchFocused(false);
-                              onSelectSuggestion?.(term);
-                            }}
-                            style={{
-                              background: "rgba(0,0,0,0.05)",
-                              border: "1px solid rgba(0,0,0,0.05)",
-                              borderRadius: "999px",
-                              padding: "6px 12px",
-                              fontSize: "0.85rem",
-                              color: "var(--texto)",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                            }}
-                          >
-                            <span style={{ opacity: 0.5 }}>🕒</span> {term}
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <div style={{ padding: "8px 4px", fontSize: "0.85rem", color: "var(--muted)" }}>No hay búsquedas recientes</div>
-                    )}
-                  </div>
-                ) : (
-                  /* Con texto: Mostrar sugerencias predictivas */
-                  <div style={{ overflowY: "auto", flex: 1 }}>
-                    {suggestedProducts.length > 0 ? (
-                      <div style={{ padding: "8px 0" }}>
-                        {suggestedProducts.map((p) => (
-                          <button
-                            key={p.codigo}
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={() => {
-                              haptic.add();
-                              setIsSearchFocused(false);
-                              onSelectSuggestion?.(p.nombre);
-                            }}
-                            style={{
-                              width: "100%",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "12px",
-                              padding: "10px 16px",
-                              background: "transparent",
-                              border: "none",
-                              borderBottom: "1px solid rgba(0,0,0,0.04)",
-                              cursor: "pointer",
-                              textAlign: "left",
-                            }}
-                            onMouseOver={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.03)")}
-                            onMouseOut={(e) => (e.currentTarget.style.background = "transparent")}
-                          >
-                            <div
-                              style={{
-                                width: "40px",
-                                height: "40px",
-                                borderRadius: "6px",
-                                background: "white",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flexShrink: 0,
-                                boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-                              }}
-                            >
-                              {p.imagen ? (
-                                <Image src={p.imagen} alt={p.nombre} width={32} height={32} style={{ objectFit: "contain" }} />
-                              ) : (
-                                <span style={{ fontSize: "1.2rem" }}>📦</span>
-                              )}
+                  ) : (
+                    <p className="text-xs text-slate-500 py-1">
+                      Escribí para buscar productos o marcas en tiempo real.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="max-h-[360px] overflow-y-auto divide-y divide-slate-100">
+                  {suggestedProducts.length > 0 ? (
+                    suggestedProducts.map((p) => (
+                      <button
+                        key={p.codigo}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          haptic.add();
+                          setInputValue(p.nombre);
+                          handleSearchCommit(p.nombre);
+                        }}
+                        className="w-full flex items-center justify-between gap-3 p-3 hover:bg-slate-50 text-left transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200/80 flex items-center justify-center shrink-0 overflow-hidden p-1">
+                            {p.imagen ? (
+                              <Image
+                                src={p.imagen}
+                                alt={p.nombre}
+                                width={32}
+                                height={32}
+                                className="object-contain"
+                              />
+                            ) : (
+                              <span className="text-base">📦</span>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                              {p.nombre}
                             </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--texto)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                {p.nombre}
-                              </div>
-                              <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>
-                                {p.categoria}
-                              </div>
+                            <div className="text-[10px] uppercase font-semibold text-slate-500">
+                              {p.categoria}
                             </div>
-                            <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "var(--rojo)" }}>
-                              {formatPrice(p.precio)}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <div style={{ padding: "24px 16px", textAlign: "center", color: "var(--muted)", fontSize: "0.9rem" }}>
-                        No se encontraron sugerencias
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+                          </div>
+                        </div>
 
-          <div
-            className="hero-search-tags"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              marginTop: "16px",
-              flexWrap: "wrap",
-              fontSize: "0.82rem",
-              fontWeight: 600,
-              color: "#C8C3BC",
-              width: "100%",
-            }}
-          >
-            <span style={{ opacity: 0.85 }}>Búsquedas sugeridas:</span>
-            {[
-              { label: "Mayonesa", query: "mayonesa" },
-              { label: "Refrescos", query: "refresco" },
-              { label: "Hamburguesas", query: "hamburguesa" },
-              { label: "Helados", query: "helado" },
-              { label: "Cerveza", query: "cerveza" }
-            ].map((tag) => (
-              <button
-                key={tag.query}
-                onClick={() => {
-                  setInputValue(tag.label);
-                  onSearchChange?.(tag.query);
-                }}
-                style={{
-                  background: "rgba(255, 255, 255, 0.08)",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  borderRadius: "16px",
-                  padding: "5px 14px",
-                  color: "#ffffff",
-                  cursor: "pointer",
-                  fontWeight: 700,
-                  transition: "all 0.2s ease-in-out",
-                  fontFamily: "var(--font-body), sans-serif",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "var(--rojo, #D62828)";
-                  e.currentTarget.style.borderColor = "var(--rojo, #D62828)";
-                  e.currentTarget.style.transform = "translateY(-1.5px)";
-                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(214, 40, 40, 0.3)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
-                {tag.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="hero-actions">
-            <button className="btn-hero-cart" onClick={onOpenCart} aria-label="Abrir carrito">
-              <span style={{ fontWeight: 900 }}>🛒</span>
-              <span>{cartQty > 0 ? "VER PEDIDO" : "EMPEZAR PEDIDO"}</span>
-              {cartQty > 0 && (
-                <span
-                  style={{
-                    background: "rgba(0,0,0,0.25)",
-                    borderRadius: "5px",
-                    padding: "2px 10px",
-                    fontFamily: "var(--font-body)",
-                    fontSize: "0.85rem",
-                    fontWeight: 800,
-                    marginLeft: "2px",
-                  }}
-                >
-                  {formatPrice(cartTotal)}
-                </span>
+                        <div className="text-sm font-extrabold text-[#EF233C] font-mono shrink-0">
+                          {formatPrice(p.precio)}
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="p-6 text-center text-xs text-slate-500">
+                      No encontramos sugerencias exactas para &quot;{searchQuery}&quot;. Presioná Enter para buscar en todo el catálogo.
+                    </div>
+                  )}
+                </div>
               )}
-              {cartQty > 0 && <span className="cart-badge">{cartQty}</span>}
-            </button>
+            </div>
+          )}
+        </div>
 
-            {onShareCart && cartQty > 0 && (
-              <button className="btn-hero-share" onClick={onShareCart} aria-label="Compartir carrito">
-                C
-                <span className="share-tooltip">Compartir carrito</span>
-              </button>
-            )}
-          </div>
+        {/* Quick Suggestion Tags */}
+        <div className="flex items-center justify-center gap-2 flex-wrap text-xs text-slate-400 pt-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">
+            Recomendados:
+          </span>
+          {POPULAR_TAGS.map((tag) => (
+            <button
+              key={tag.query}
+              type="button"
+              onClick={() => {
+                haptic.add();
+                setInputValue(tag.label);
+                handleSearchCommit(tag.query);
+              }}
+              className="text-xs font-semibold text-slate-200 bg-slate-900/80 hover:bg-slate-800 hover:text-white border border-slate-700/80 px-3 py-1 rounded-full transition-all active:scale-95 shadow-xs"
+            >
+              {tag.label}
+            </button>
+          ))}
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
+// filepath: src/components/catalogo/CategoryRail.tsx
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import { EMOJI_POR_CATEGORIA } from "@/types";
 import { haptic } from "@/lib/haptic";
@@ -13,40 +14,47 @@ interface CategoryRailProps {
 
 export default function CategoryRail({ categorias, activeCat, onSelect }: CategoryRailProps) {
   const allCategories = ["Todos", ...categorias];
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="sticky top-[44px] z-[70] w-full bg-white/70 backdrop-blur-xl border-b border-zinc-200/50 shadow-[0_4px_30px_rgba(0,0,0,0.03)] transition-all overflow-hidden py-3">
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-1 items-center snap-x snap-mandatory">
+    <nav
+      aria-label="Navegación de categorías"
+      className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-2.5 transition-all"
+    >
+      <div
+        ref={scrollContainerRef}
+        className="flex gap-2 overflow-x-auto no-scrollbar px-4 sm:px-6 items-center snap-x snap-mandatory"
+      >
         {allCategories.map((cat, idx) => {
-          const isActive = activeCat === cat || (cat === "Todos" && activeCat === "");
+          const isActive = activeCat === cat || (cat === "Todos" && (activeCat === "" || !activeCat));
           const emoji = cat === "Todos" ? "✨" : (EMOJI_POR_CATEGORIA[cat] || "🏷️");
           return (
             <button
               key={idx}
+              type="button"
               onClick={() => {
                 haptic.add();
                 onSelect(cat);
               }}
-              className={`relative shrink-0 snap-start flex items-center gap-2 px-4 py-2 rounded-full font-bold text-[13px] transition-all duration-300 active:scale-95 ${
+              className={`relative shrink-0 snap-start flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-xs sm:text-[13px] transition-all duration-200 active:scale-95 select-none ${
                 isActive
-                  ? "bg-gradient-to-r from-[#E8302A] to-[#B91C1C] text-white shadow-[0_4px_12px_rgba(232,48,42,0.3)]"
-                  : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 hover:shadow-sm"
+                  ? "bg-[#EF233C] text-white shadow-sm shadow-[#EF233C]/25"
+                  : "bg-slate-50 border border-slate-200/90 text-slate-700 hover:bg-slate-100 hover:text-slate-950 hover:border-slate-300"
               }`}
             >
-              <span>{emoji}</span>
-              <span className="whitespace-nowrap tracking-wide">{cat}</span>
+              <span className="text-sm leading-none">{emoji}</span>
+              <span className="whitespace-nowrap tracking-tight">{cat}</span>
               {isActive && (
                 <motion.div
-                  layoutId="activeCategory"
-                  className="absolute inset-0 border-2 border-red-500 rounded-full"
-                  style={{ pointerEvents: "none", mixBlendMode: "overlay" }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  layoutId="activeCategoryIndicator"
+                  className="absolute inset-0 rounded-full ring-2 ring-[#EF233C]/30"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
             </button>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }

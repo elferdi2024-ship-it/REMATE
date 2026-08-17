@@ -45,6 +45,8 @@ const UserPanel = dynamic(() => import("@/components/usuario/UserPanel"), { ssr:
 const BranchSelectModal = dynamic(() => import("@/components/catalogo/BranchSelectModal"), { ssr: false });
 const FacturaModal = dynamic(() => import("@/components/catalogo/FacturaModal"), { ssr: false });
 const QuickViewModal = dynamic(() => import("@/components/catalogo/QuickViewModal"), { ssr: false });
+const ShippingThresholdBar = dynamic(() => import("@/components/catalogo/ShippingThresholdBar"), { ssr: false });
+const QuickOrderModal = dynamic(() => import("@/components/catalogo/QuickOrderModal"), { ssr: false });
 import {
   armarMensajeWA,
   enviarWhatsApp,
@@ -373,6 +375,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [cartOpen, setCartOpen] = useState(false);
   const [userPanelOpen, setUserPanelOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Producto | null>(null);
+  const [quickOrderOpen, setQuickOrderOpen] = useState(false);
   const [vista, setVista] = useState<Vista>("grilla");
   const [alias, setAlias] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -1373,6 +1376,13 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onChangeBranch={() => setIsBranchModalOpen(true)}
       />
 
+      {/* Barra de despacho mayorista y cálculo de ahorro en vivo */}
+      <ShippingThresholdBar
+        currentTotal={total}
+        sucursalName={SUCURSALES.find(s => s.id === sucursalId)?.nombre || null}
+        onOpenCart={() => setCartOpen(true)}
+      />
+
       {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS) ── */}
       {(() => {
         const promosVisibles = (ofertasConfig?.premiumPromos || [])
@@ -1382,66 +1392,55 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         if (promosVisibles.length === 0) return null;
 
         return (
-          <div className="page-wrapper" style={{ marginTop: "16px", marginBottom: "20px" }}>
-            {/* Ocultar barra de scroll para el carrusel de móvil */}
-            <style>{`
-              .no-scrollbar::-webkit-scrollbar {
-                display: none;
-              }
-              .no-scrollbar {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-              }
-            `}</style>
-
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", width: "100%", flexWrap: "wrap", gap: "8px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "20px" }}>⭐</span>
-                <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "1.5px", color: "var(--oscuro, #1A1410)", fontFamily: "var(--font-display)" }}>
-                  Ofertas Súper Destacadas Premium
+          <div className="page-wrapper my-4">
+            <div className="flex items-center justify-between mb-3.5 w-full flex-wrap gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-lg">⭐</span>
+                <h3 className="text-base sm:text-lg font-extrabold uppercase tracking-wider text-slate-950 font-display">
+                  Ofertas Destacadas
                 </h3>
                 {ofertasConfig?.expiresAt && <PremiumCountdown expiresAt={ofertasConfig.expiresAt} />}
               </div>
-              <span className="md:hidden text-[9px] font-black text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full uppercase tracking-widest animate-pulse flex items-center gap-1 shrink-0">
+              <span className="md:hidden text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shrink-0">
                 Deslizar ➔
               </span>
             </div>
 
-            {/* Carrusel flexible en móvil (snap-start y ancho 76vw para que asome la siguiente), grilla en desktop */}
-            <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto md:overflow-x-visible pb-4 md:pb-0 no-scrollbar snap-x snap-mandatory">
+            {/* Carrusel flexible en móvil (snap-start y ancho 76vw), grilla en desktop */}
+            <div className="flex md:grid md:grid-cols-3 gap-4 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 no-scrollbar snap-x snap-mandatory">
               {promosVisibles.map((promo) => {
                 const inCartQty = qtyMap[`PROMO-${promo.id}`] || 0;
                 const hasPrice = promo.precio !== null && promo.precio !== undefined && promo.precio > 0;
                 return (
                   <div
                     key={promo.id}
-                    className="flex-shrink-0 w-[76vw] sm:w-[48vw] md:w-auto snap-start rounded-2xl overflow-hidden border border-amber-500/20 bg-white dark:bg-zinc-900 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-amber-500/40 relative aspect-square flex flex-col group"
+                    className="flex-shrink-0 w-[76vw] sm:w-[48vw] md:w-auto snap-start rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-xs transition-all duration-200 hover:shadow-md relative aspect-square flex flex-col group"
                   >
-                    {/* Badge de Oferta Premium */}
-                    <div className="absolute top-3 left-3 z-20 bg-gradient-to-r from-red-600 to-amber-500 text-white text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-lg shadow-md animate-pulse">
-                      {hasPrice ? "🔥 SUPER OFERTA" : "⭐ DESTACADO"}
+                    {/* Badge de Oferta */}
+                    <div className="absolute top-3 left-3 z-20 bg-[#EF233C] text-white text-[10px] font-black tracking-wider uppercase px-2.5 py-1 rounded-md shadow-xs">
+                      {hasPrice ? "🔥 Oferta Especial" : "⭐ Destacado"}
                     </div>
 
-                    {/* Imagen 1:1 Completa con Zoom al Hover */}
-                    <div className="relative w-full h-full overflow-hidden bg-white">
+                    {/* Imagen 1:1 Completa con Zoom suave al Hover */}
+                    <div className="relative w-full h-full overflow-hidden bg-slate-50">
                       <Image
                         src={promo.imagen}
                         alt={promo.titulo}
                         fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     </div>
 
-                    {/* Barra de control flotante inferior traslúcida */}
-                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent p-4 pt-12 flex items-center justify-between z-10">
+                    {/* Barra de control inferior traslúcida */}
+                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-950/90 via-slate-950/70 to-transparent p-3.5 pt-8 flex items-center justify-between z-10">
                       <div className="flex flex-col min-w-0 pr-2">
                         {hasPrice && (
-                          <span className="text-white font-black text-xl tracking-tight leading-none">
+                          <span className="text-white font-mono font-black text-lg sm:text-xl tracking-tight leading-none">
                             ${promo.precio!.toLocaleString("es-UY")}
                           </span>
                         )}
-                        <span className="text-[10px] text-zinc-300 font-bold uppercase tracking-wider mt-1 truncate max-w-[150px] sm:max-w-none">
+                        <span className="text-[11px] text-slate-200 font-bold uppercase tracking-wide mt-1 truncate max-w-[150px] sm:max-w-none">
                           {promo.titulo}
                         </span>
                       </div>
@@ -1449,23 +1448,28 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
                       {/* Botón de compra / Control de cantidad */}
                       {hasPrice && (
                         inCartQty > 0 ? (
-                          <div className="flex items-center gap-3.5 bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-3 py-2 text-white font-bold shrink-0 shadow-lg">
+                          <div className="flex items-center gap-3 bg-slate-900/90 border border-slate-700 rounded-xl px-2.5 py-1.5 text-white font-bold shrink-0 shadow-xs">
                             <button
+                              type="button"
                               onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty - 1)}
-                              className="hover:text-red-500 text-sm font-black px-1.5 transition-colors"
+                              aria-label="Disminuir cantidad"
+                              className="hover:text-[#EF233C] text-sm font-black px-1.5 transition-colors"
                             >
                               -
                             </button>
-                            <span className="text-xs tracking-tight font-black">{inCartQty}</span>
+                            <span className="text-xs font-mono font-black">{inCartQty}</span>
                             <button
+                              type="button"
                               onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty + 1)}
-                              className="hover:text-green-500 text-sm font-black px-1.5 transition-colors"
+                              aria-label="Aumentar cantidad"
+                              className="hover:text-emerald-400 text-sm font-black px-1.5 transition-colors"
                             >
                               +
                             </button>
                           </div>
                         ) : (
                           <button
+                            type="button"
                             onClick={(e) => handleAddProduct({
                               codigo: `PROMO-${promo.id}`,
                               nombre: promo.titulo,
@@ -1473,9 +1477,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
                               categoria: "OFERTAS PREMIUM",
                               imagen: promo.imagen,
                             }, e)}
-                            className="bg-gradient-to-r from-[#E8302A] to-[#B91C1C] hover:from-[#FF4D47] hover:to-[#D32F2F] text-white font-extrabold text-[10px] px-4 py-2.5 rounded-xl shadow-[0_4px_12px_rgba(232,48,42,0.35)] transition-all hover:scale-105 active:scale-95 uppercase tracking-wider shrink-0"
+                            className="bg-[#EF233C] hover:bg-[#C01730] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition-all active:scale-95 uppercase tracking-wider shrink-0"
                           >
-                            Llevar
+                            Agregar
                           </button>
                         )
                       )}
@@ -1539,6 +1543,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
                 activeFiltersCount={activeFiltersCount}
                 suggestedProducts={instantSuggestions}
                 onSelectSuggestion={handleSelectSuggestion}
+                onOpenQuickOrder={() => setQuickOrderOpen(true)}
               />
             </div>
 
@@ -1812,6 +1817,15 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onClose={() => setIsBranchModalOpen(false)}
         currentSucursalId={sucursalId}
         onSelect={handleSucursalChange}
+      />
+
+      {/* Quick Order Modal (Pedido Rápido Mayorista) */}
+      <QuickOrderModal
+        isOpen={quickOrderOpen}
+        onClose={() => setQuickOrderOpen(false)}
+        productos={productos}
+        qtyMap={qtyMap}
+        onQtyChange={handleQtyChange}
       />
     </div>
   );
