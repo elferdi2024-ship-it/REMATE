@@ -7,6 +7,8 @@ import { EMOJI_POR_CATEGORIA } from '@/types';
 import { motion, useAnimation, PanInfo } from 'framer-motion';
 import ProductSubstitutionSelector from './ProductSubstitutionSelector';
 
+import { calcularPrecioConEscala } from '@/lib/pricing';
+
 interface CartItemRowProps {
   item: CartItem;
   onUpdateQty: (codigo: string, delta: number) => void;
@@ -15,9 +17,12 @@ interface CartItemRowProps {
 
 export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRowProps) {
   const [showNote, setShowNote] = useState(false);
-  const subtotal = item.precio * item.cantidad;
   const emoji = resolveEmoji(item);
   const controls = useAnimation();
+
+  const precioBase = item.precioBase ?? item.precio;
+  const pricing = calcularPrecioConEscala(precioBase, item.cantidad, item.escalaPrecios);
+  const subtotal = pricing.subtotal;
 
   // B2B Growth Hacker: Upsell a Bulto Cerrado
   let upsellBulto = 0;
@@ -58,10 +63,36 @@ export default function CartItemRow({ item, onUpdateQty, onRemove }: CartItemRow
             {item.nombre}
           </div>
           <div className="cart-item-price-qty">
-            <span className="cart-item-unit-price">${item.precio.toLocaleString('es-UY')} c/u</span>
+            {pricing.tierAplicado ? (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-slate-400 line-through">${precioBase.toLocaleString('es-UY')}</span>
+                <span className="cart-item-unit-price text-emerald-700 font-extrabold">${pricing.precioUnitario.toLocaleString('es-UY')} c/u</span>
+              </div>
+            ) : (
+              <span className="cart-item-unit-price">${pricing.precioUnitario.toLocaleString('es-UY')} c/u</span>
+            )}
             <span className="cart-item-subtotal">${subtotal.toLocaleString('es-UY')}</span>
           </div>
-          {upsellBulto > 0 && (
+
+          {/* Badge de Ahorro por Escala Aplicada */}
+          {pricing.tierAplicado && pricing.ahorroTotal > 0 && (
+            <div className="mt-1 inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-200">
+              <span>✨</span> {pricing.tierAplicado.etiqueta || 'Precio Mayorista'} (Ahorrás ${pricing.ahorroTotal.toLocaleString('es-UY')})
+            </div>
+          )}
+
+          {/* Prompt para alcanzar siguiente escala por volumen */}
+          {pricing.siguienteTier && (
+            <button
+              type="button"
+              onClick={() => onUpdateQty(item.codigo, pricing.faltanParaSiguiente)}
+              className="mt-1.5 flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-1 rounded-md w-fit transition-colors border border-amber-200"
+            >
+              <span>📦</span> Sumá {pricing.faltanParaSiguiente} más y pagá ${pricing.siguienteTier.precioUnitario} c/u ({pricing.siguienteTier.etiqueta || 'Precio Caja'})
+            </button>
+          )}
+
+          {!pricing.siguienteTier && upsellBulto > 0 && (
             <motion.button
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}

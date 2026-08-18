@@ -31,6 +31,7 @@ import StepProcess from "@/components/catalogo/StepProcess";
 import BranchSection from "@/components/catalogo/BranchSection";
 import BottomNavBar from "@/components/catalogo/BottomNavBar";
 import SucursalSelectorModal from "@/components/catalogo/SucursalSelectorModal";
+import OfertasDestacadasShowcase from "@/components/catalogo/OfertasDestacadasShowcase";
 
 const CATEGORIAS = [
   { icono: "🫗", nombre: "ACEITES Y GRASAS", titulo: "Aceites y Grasas" },
@@ -192,6 +193,15 @@ export default function LandingPage() {
         </Link>
       </section>
 
+      {/* Sección de Ofertas Destacadas Semanales */}
+      <OfertasDestacadasShowcase 
+        sucursalId={selectedSucursal} 
+        onOpenSucursalModal={() => {
+          setPendingCategory("");
+          setIsModalOpen(true);
+        }}
+      />
+
       {/* Brand Hero Carousel */}
       {ofertasConfig?.mainCarousel && ofertasConfig.mainCarousel.filter(s => s.activo).length > 0 ? (
         <section className="pb-6 px-5 max-w-[1200px] mx-auto">
@@ -299,12 +309,16 @@ export default function LandingPage() {
                 VER CATÁLOGO COMPLETO DE {sucursalNombre.toUpperCase()} →
               </Link>
             ) : (
-              <Link
-                href="/catalogo"
-                className="inline-flex items-center gap-2 bg-[#E8302A] text-white border-0 rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] transition-all duration-150 hover:bg-[#C4231E] cursor-pointer shadow-[0_4px_14px_rgba(232,48,42,0.3)] no-underline"
+              <button
+                type="button"
+                onClick={() => {
+                  setPendingCategory("");
+                  setIsModalOpen(true);
+                }}
+                className="inline-flex items-center gap-2 bg-[#E8302A] text-white border-0 rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] transition-all duration-150 hover:bg-[#C4231E] cursor-pointer shadow-[0_4px_14px_rgba(232,48,42,0.3)]"
               >
                 EXPLORAR CATÁLOGO COMPLETO MAYORISTA →
-              </Link>
+              </button>
             )}
           </div>
         </div>

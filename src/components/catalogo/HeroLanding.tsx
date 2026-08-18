@@ -107,6 +107,9 @@ export default function HeroLanding({
                   <span className="text-xs font-bold tracking-tight truncate w-full">
                     {sucursal.nombre}
                   </span>
+                  <span className="text-[10px] text-slate-400 font-normal truncate w-full">
+                    {sucursal.direccion}
+                  </span>
                   <span className={`text-[9px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md ${
                     isSelected ? "bg-white text-[#EF233C]" : "bg-slate-800 text-slate-400"
                   }`}>

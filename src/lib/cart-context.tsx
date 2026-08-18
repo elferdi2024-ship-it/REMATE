@@ -35,9 +35,26 @@ function saveCartToSession(items: CartItem[]): void {
   }
 }
 
+import { calcularPrecioConEscala } from "./pricing";
+import type { BulkPriceTier } from "@/types";
+
 interface CartContextValue {
   items: CartItem[];
-  addItem: (producto: { codigo: string; nombre: string; precio: number }) => void;
+  addItem: (producto: {
+    codigo: string;
+    nombre: string;
+    precio: number;
+    escalaPrecios?: BulkPriceTier[];
+  }) => void;
+  setItemQty: (
+    producto: {
+      codigo: string;
+      nombre: string;
+      precio: number;
+      escalaPrecios?: BulkPriceTier[];
+    },
+    cantidad: number
+  ) => void;
   removeItem: (codigo: string) => void;
   updateQty: (codigo: string, delta: number) => void;
   clearCart: () => void;
@@ -56,15 +73,99 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   const addItem = useCallback(
-    (producto: { codigo: string; nombre: string; precio: number }) => {
+    (producto: {
+      codigo: string;
+      nombre: string;
+      precio: number;
+      escalaPrecios?: BulkPriceTier[];
+    }) => {
       setItems((prev) => {
         const existing = prev.find((i) => i.codigo === producto.codigo);
         if (existing) {
+          const nextQty = existing.cantidad + 1;
+          const escala = producto.escalaPrecios || existing.escalaPrecios;
+          const precioBase = existing.precioBase ?? existing.precio;
+          const { precioUnitario } = calcularPrecioConEscala(precioBase, nextQty, escala);
+
           return prev.map((i) =>
-            i.codigo === producto.codigo ? { ...i, cantidad: i.cantidad + 1 } : i
+            i.codigo === producto.codigo
+              ? {
+                  ...i,
+                  cantidad: nextQty,
+                  precio: precioUnitario,
+                  precioBase,
+                  escalaPrecios: escala,
+                }
+              : i
           );
         }
-        return [...prev, { codigo: producto.codigo, nombre: producto.nombre, precio: producto.precio, cantidad: 1 }];
+
+        const { precioUnitario } = calcularPrecioConEscala(
+          producto.precio,
+          1,
+          producto.escalaPrecios
+        );
+
+        return [
+          ...prev,
+          {
+            codigo: producto.codigo,
+            nombre: producto.nombre,
+            precio: precioUnitario,
+            precioBase: producto.precio,
+            cantidad: 1,
+            escalaPrecios: producto.escalaPrecios,
+          },
+        ];
+      });
+    },
+    []
+  );
+
+  const setItemQty = useCallback(
+    (
+      producto: {
+        codigo: string;
+        nombre: string;
+        precio: number;
+        escalaPrecios?: BulkPriceTier[];
+      },
+      cantidad: number
+    ) => {
+      setItems((prev) => {
+        if (cantidad <= 0) {
+          return prev.filter((i) => i.codigo !== producto.codigo);
+        }
+        const existing = prev.find((i) => i.codigo === producto.codigo);
+        const escala = producto.escalaPrecios || existing?.escalaPrecios;
+        const precioBase = existing?.precioBase ?? producto.precio;
+        const { precioUnitario } = calcularPrecioConEscala(precioBase, cantidad, escala);
+
+        if (existing) {
+          return prev.map((i) =>
+            i.codigo === producto.codigo
+              ? {
+                  ...i,
+                  cantidad,
+                  precio: precioUnitario,
+                  precioBase,
+                  escalaPrecios: escala,
+                }
+              : i
+          );
+        }
+
+        return [
+          ...prev,
+          {
+            codigo: producto.codigo,
+            nombre: producto.nombre,
+            precio: precioUnitario,
+            precioBase: producto.precio,
+            cantidad,
+            escalaPrecios: escala,
+          },
+        ];
       });
     },
     []
@@ -77,10 +178,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const updateQty = useCallback((codigo: string, delta: number) => {
     setItems((prev) => {
       return prev
-        .map((i) =>
-          i.codigo === codigo ? { ...i, cantidad: i.cantidad + delta } : i
-        )
-        .filter((i) => i.cantidad > 0);
+        .map((i) => {
+          if (i.codigo !== codigo) return i;
+          const nextQty = i.cantidad + delta;
+          if (nextQty <= 0) return null;
+          const precioBase = i.precioBase ?? i.precio;
+          const { precioUnitario } = calcularPrecioConEscala(
+            precioBase,
+            nextQty,
+            i.escalaPrecios
+          );
+          return {
+            ...i,
+            cantidad: nextQty,
+            precio: precioUnitario,
+            precioBase,
+          };
+        })
+        .filter((i): i is CartItem => i !== null);
     });
   }, []);
 
@@ -88,12 +203,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
   }, []);
 
-  const total = items.reduce((sum, i) => sum + i.precio * i.cantidad, 0);
+  const total = items.reduce((sum, i) => {
+    const precioBase = i.precioBase ?? i.precio;
+    const { subtotal } = calcularPrecioConEscala(precioBase, i.cantidad, i.escalaPrecios);
+    return sum + subtotal;
+  }, 0);
   const totalQty = items.reduce((sum, i) => sum + i.cantidad, 0);
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQty, clearCart, total, totalQty }}
+      value={{ items, addItem, setItemQty, removeItem, updateQty, clearCart, total, totalQty }}
     >
       {children}
     </CartContext.Provider>

@@ -14,7 +14,9 @@ import {
   FlashOffersRail,
   CategoryOffersRail,
   SponsoredProductsRail,
+  OfertasDestacadasShowcase,
 } from "@/components/catalogo";
+import { DEFAULT_OFERTAS_CONFIG } from "@/lib/constants/ofertas";
 
 // ─── Countdown Hook ────────────────────────────────────────────────────────
 
@@ -308,7 +310,11 @@ export default function OfertasPageClient() {
         if (snap.exists()) {
           const data = snap.data() as OfertaConfig;
           if (data.activa) {
-            setConfig(data);
+            setConfig({
+              ...DEFAULT_OFERTAS_CONFIG,
+              ...data,
+              premiumPromos: data.premiumPromos && data.premiumPromos.length > 0 ? data.premiumPromos : DEFAULT_OFERTAS_CONFIG.premiumPromos,
+            });
 
             // Fetch catalog if category offers exist to resolve product codes
             if (data.categoryOffers && data.categoryOffers.length > 0) {
@@ -326,10 +332,15 @@ export default function OfertasPageClient() {
                 console.error("Error loading catalog for category offers:", err);
               }
             }
+          } else {
+            setConfig(DEFAULT_OFERTAS_CONFIG);
           }
+        } else {
+          setConfig(DEFAULT_OFERTAS_CONFIG);
         }
       } catch (e) {
         console.error("Error loading ofertas:", e);
+        setConfig(DEFAULT_OFERTAS_CONFIG);
       } finally {
         setLoading(false);
       }
@@ -519,6 +530,9 @@ export default function OfertasPageClient() {
           gap: "32px",
         }}
       >
+        {/* 0. Promos Especiales Destacadas (Banners 1:1) */}
+        <OfertasDestacadasShowcase showViewAll={false} />
+
         {/* 1. Custom Brand Banners */}
         {config.brandBanners && config.brandBanners.length > 0 && (
           <BrandBannersRail banners={config.brandBanners} />

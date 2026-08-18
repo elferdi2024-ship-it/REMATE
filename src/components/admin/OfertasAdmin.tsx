@@ -23,12 +23,14 @@ import { useBrands } from "@/hooks/useBrands";
 import { BrandHeroCarousel, SponsoredBanner, SponsorBadge, CustomHeroCarousel } from "@/components/ads";
 import { ProductoCard } from "@/components/catalogo";
 
+import { DEFAULT_PREMIUM_PROMOS } from "@/lib/constants/ofertas";
+
 const DEFAULT_CONFIG: OfertaConfig = {
-  activa: false,
+  activa: true,
   titulo: "Ofertas de la Semana",
   subtitulo: "Aprovechá precios únicos por tiempo limitado",
   productos: [],
-  premiumPromos: [],
+  premiumPromos: DEFAULT_PREMIUM_PROMOS,
   brandBanners: [],
   sponsoredProducts: [],
   categoryOffers: [],

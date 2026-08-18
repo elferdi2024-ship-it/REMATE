@@ -19,3 +19,4 @@ export { default as SponsoredProductsRail } from "./SponsoredProductsRail";
 export { default as BottomNavBar } from "./BottomNavBar";
 export { default as FilterSheet } from "./FilterSheet";
 export { default as SmartReorder } from "./SmartReorder";
+export { default as OfertasDestacadasShowcase } from "./OfertasDestacadasShowcase";

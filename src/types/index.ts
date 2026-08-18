@@ -1,3 +1,9 @@
+export interface BulkPriceTier {
+  minCantidad: number;       // Ej: 8 (para caja)
+  precioUnitario: number;    // Ej: 236
+  etiqueta?: string;         // Ej: "Caja x 8 u." o "Mayorista"
+}
+
 export interface Producto {
   codigo: string;
   nombre: string;
@@ -8,6 +14,8 @@ export interface Producto {
   deshabilitado?: boolean;
   precioAnterior?: number;
   contenido?: string;
+  destacado?: boolean;
+  escalaPrecios?: BulkPriceTier[];
 }
 
 export interface CartItem {
@@ -17,6 +25,8 @@ export interface CartItem {
   cantidad: number;
   substitucion?: string;
   notaSubstitucion?: string;
+  escalaPrecios?: BulkPriceTier[];
+  precioBase?: number;
 }
 
 export interface PedidoItem {

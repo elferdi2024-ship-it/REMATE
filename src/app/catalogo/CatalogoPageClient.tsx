@@ -32,6 +32,8 @@ import { useFavoritos } from "@/lib/favoritos-context";
 import { useBrands } from "@/hooks/useBrands";
 import { useTiendaConfig } from "@/hooks/useTiendaConfig";
 import type { OfertaConfig } from "@/types/ofertas";
+import { DEFAULT_PREMIUM_PROMOS, DEFAULT_OFERTAS_CONFIG } from "@/lib/constants/ofertas";
+import CardFanPromoCarousel from "@/components/catalogo/CardFanPromoCarousel";
 
 import BranchBar from "@/components/catalogo/BranchBar";
 import OnlineBanner from "@/components/ui/OnlineBanner";
@@ -65,7 +67,7 @@ import { ZonaEnvio, calcularCostoEnvio, COSTOS_ENVIO } from "@/lib/envio-config"
 import { getSucursalWhatsApp } from "@/lib/sucursales-config";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
-import type { Vista, CartItem, Producto } from "@/types";
+import type { Vista, CartItem, Producto, BulkPriceTier } from "@/types";
 import { CATEGORIAS, EMOJI_POR_CATEGORIA } from "@/types";
 import categoriaMapping from "@/lib/categoria_mapping.json";
 
@@ -360,7 +362,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const urlMaxPrecio = Number(searchParams?.get("maxPrecio")) || 0;
   const urlSoloOfertas = searchParams?.get("ofertas") === "true";
 
-  const { items: cartItems, addItem, removeItem, updateQty, clearCart, total, totalQty } = useCart();
+  const { items: cartItems, addItem, setItemQty, removeItem, updateQty, clearCart, total, totalQty } = useCart();
   const { brands } = useBrands();
 
   const { user, signOut } = useAuth();
@@ -413,6 +415,16 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [sucursalId, setSucursalId] = useState<string | null>(null);
   const { config: tiendaConfig } = useTiendaConfig();
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
+  const promoScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollPromos = useCallback((dir: "left" | "right") => {
+    if (!promoScrollRef.current) return;
+    const amount = 220;
+    promoScrollRef.current.scrollBy({
+      left: dir === "left" ? -amount : amount,
+      behavior: "smooth",
+    });
+  }, []);
 
   const costoEnvio = useMemo(
     () => calcularCostoEnvio(total, metodoEntrega, zonaEnvio, tiendaConfig?.minimoEnvioGratis),
@@ -433,7 +445,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     pedidosAbiertos: true,
     bannerMensaje: "",
   });
-  const [ofertasConfig, setOfertasConfig] = useState<OfertaConfig | null>(null);
+  const [ofertasConfig, setOfertasConfig] = useState<OfertaConfig | null>(DEFAULT_OFERTAS_CONFIG);
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -797,35 +809,32 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   const handleQtyChange = useCallback(
     (codigo: string, qty: number) => {
-      if (qty <= 0) {
-        removeItem(codigo);
+      let nombre = "";
+      let precio = 0;
+      let escalaPrecios: BulkPriceTier[] | undefined = undefined;
+      if (codigo.startsWith("PROMO-")) {
+        const promoId = codigo.replace("PROMO-", "");
+        const allPromos = (ofertasConfig?.premiumPromos && ofertasConfig.premiumPromos.length > 0)
+          ? ofertasConfig.premiumPromos
+          : DEFAULT_PREMIUM_PROMOS;
+        const promo = allPromos.find((p) => p.id === promoId);
+        if (promo) {
+          nombre = promo.titulo;
+          precio = promo.precio ?? 0;
+          escalaPrecios = promo.escalaPrecios;
+        }
       } else {
-        const current = qtyMap[codigo] || 0;
-        const delta = qty - current;
-        if (delta > 0) {
-          let nombre = "";
-          let precio = 0;
-          if (codigo.startsWith("PROMO-")) {
-            const promoId = codigo.replace("PROMO-", "");
-            const promo = ofertasConfig?.premiumPromos?.find((p) => p.id === promoId);
-            if (promo) {
-              nombre = promo.titulo;
-              precio = promo.precio ?? 0;
-            }
-          } else {
-            const prod = productos.find((p) => p.codigo === codigo);
-            if (prod) {
-              nombre = prod.nombre;
-              precio = prod.precio;
-            }
-          }
-          for (let i = 0; i < delta; i++) addItem({ codigo, nombre, precio });
-        } else {
-          for (let i = 0; i < -delta; i++) updateQty(codigo, -1);
+        const prod = productos.find((p) => p.codigo === codigo);
+        if (prod) {
+          nombre = prod.nombre;
+          precio = prod.precio;
+          escalaPrecios = prod.escalaPrecios;
         }
       }
+
+      setItemQty({ codigo, nombre, precio, escalaPrecios }, Math.max(0, qty));
     },
-    [qtyMap, addItem, removeItem, updateQty, ofertasConfig, productos]
+    [setItemQty, ofertasConfig, productos]
   );
 
 
@@ -1383,110 +1392,39 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onOpenCart={() => setCartOpen(true)}
       />
 
-      {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS) ── */}
+      {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS 1:1) ── */}
       {(() => {
-        const promosVisibles = (ofertasConfig?.premiumPromos || [])
+        const firestorePromos = ofertasConfig?.premiumPromos || [];
+        // Filtrar promos obsoletas de prueba (WhatsApp Image 2026-06-05) y garantizar las 6 nuevas ofertas de ofertas/PROMO
+        const validCustomPromos = firestorePromos.filter(p => !p.imagen?.includes("WhatsApp Image 2026-06-05"));
+        const rawPromos = DEFAULT_PREMIUM_PROMOS.map(defaultPromo => {
+          const custom = validCustomPromos.find(p => p.id === defaultPromo.id);
+          return custom || defaultPromo;
+        });
+
+        // Agregar otras promociones activas válidas que no sean las 6 base
+        validCustomPromos.forEach(fp => {
+          if (!rawPromos.some(rp => rp.id === fp.id)) {
+            rawPromos.push(fp);
+          }
+        });
+
+        const promosVisibles = rawPromos
           .filter(p => p.activa)
           .filter(p => !p.sucursalId || p.sucursalId === sucursalId);
 
         if (promosVisibles.length === 0) return null;
 
         return (
-          <div className="page-wrapper my-4">
-            <div className="flex items-center justify-between mb-3.5 w-full flex-wrap gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-lg">⭐</span>
-                <h3 className="text-base sm:text-lg font-extrabold uppercase tracking-wider text-slate-950 font-display">
-                  Ofertas Destacadas
-                </h3>
-                {ofertasConfig?.expiresAt && <PremiumCountdown expiresAt={ofertasConfig.expiresAt} />}
-              </div>
-              <span className="md:hidden text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shrink-0">
-                Deslizar ➔
-              </span>
-            </div>
-
-            {/* Carrusel flexible en móvil (snap-start y ancho 76vw), grilla en desktop */}
-            <div className="flex md:grid md:grid-cols-3 gap-4 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 no-scrollbar snap-x snap-mandatory">
-              {promosVisibles.map((promo) => {
-                const inCartQty = qtyMap[`PROMO-${promo.id}`] || 0;
-                const hasPrice = promo.precio !== null && promo.precio !== undefined && promo.precio > 0;
-                return (
-                  <div
-                    key={promo.id}
-                    className="flex-shrink-0 w-[76vw] sm:w-[48vw] md:w-auto snap-start rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-xs transition-all duration-200 hover:shadow-md relative aspect-square flex flex-col group"
-                  >
-                    {/* Badge de Oferta */}
-                    <div className="absolute top-3 left-3 z-20 bg-[#EF233C] text-white text-[10px] font-black tracking-wider uppercase px-2.5 py-1 rounded-md shadow-xs">
-                      {hasPrice ? "🔥 Oferta Especial" : "⭐ Destacado"}
-                    </div>
-
-                    {/* Imagen 1:1 Completa con Zoom suave al Hover */}
-                    <div className="relative w-full h-full overflow-hidden bg-slate-50">
-                      <Image
-                        src={promo.imagen}
-                        alt={promo.titulo}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    </div>
-
-                    {/* Barra de control inferior traslúcida */}
-                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-950/90 via-slate-950/70 to-transparent p-3.5 pt-8 flex items-center justify-between z-10">
-                      <div className="flex flex-col min-w-0 pr-2">
-                        {hasPrice && (
-                          <span className="text-white font-mono font-black text-lg sm:text-xl tracking-tight leading-none">
-                            ${promo.precio!.toLocaleString("es-UY")}
-                          </span>
-                        )}
-                        <span className="text-[11px] text-slate-200 font-bold uppercase tracking-wide mt-1 truncate max-w-[150px] sm:max-w-none">
-                          {promo.titulo}
-                        </span>
-                      </div>
-
-                      {/* Botón de compra / Control de cantidad */}
-                      {hasPrice && (
-                        inCartQty > 0 ? (
-                          <div className="flex items-center gap-3 bg-slate-900/90 border border-slate-700 rounded-xl px-2.5 py-1.5 text-white font-bold shrink-0 shadow-xs">
-                            <button
-                              type="button"
-                              onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty - 1)}
-                              aria-label="Disminuir cantidad"
-                              className="hover:text-[#EF233C] text-sm font-black px-1.5 transition-colors"
-                            >
-                              -
-                            </button>
-                            <span className="text-xs font-mono font-black">{inCartQty}</span>
-                            <button
-                              type="button"
-                              onClick={() => handleQtyChange(`PROMO-${promo.id}`, inCartQty + 1)}
-                              aria-label="Aumentar cantidad"
-                              className="hover:text-emerald-400 text-sm font-black px-1.5 transition-colors"
-                            >
-                              +
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={(e) => handleAddProduct({
-                              codigo: `PROMO-${promo.id}`,
-                              nombre: promo.titulo,
-                              precio: promo.precio!,
-                              categoria: "OFERTAS PREMIUM",
-                              imagen: promo.imagen,
-                            }, e)}
-                            className="bg-[#EF233C] hover:bg-[#C01730] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition-all active:scale-95 uppercase tracking-wider shrink-0"
-                          >
-                            Agregar
-                          </button>
-                        )
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+          <div className="w-full bg-[#0A0D18] my-2 sm:my-3">
+            <div className="page-wrapper px-0 sm:px-4">
+              <CardFanPromoCarousel
+                promos={promosVisibles}
+                onSelectPromo={(prod) => setQuickViewProduct(prod)}
+                onAddPromo={(prod, e) => handleAddProduct(prod, e)}
+                onQtyChange={handleQtyChange}
+                qtyMap={qtyMap}
+              />
             </div>
           </div>
         );

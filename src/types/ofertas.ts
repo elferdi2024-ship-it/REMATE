@@ -1,3 +1,5 @@
+import type { BulkPriceTier } from "@/types";
+
 export interface OfertaProducto {
   codigo: string;
   nombre: string;
@@ -7,6 +9,7 @@ export interface OfertaProducto {
   imagen?: string;
   categoria: string;
   destacado: boolean;
+  escalaPrecios?: BulkPriceTier[];
 }
 
 export interface PremiumPromo {
@@ -17,6 +20,7 @@ export interface PremiumPromo {
   imagen: string;
   activa: boolean;
   sucursalId?: string | null;
+  escalaPrecios?: BulkPriceTier[];
 }
 
 export interface CarouselSlide {
