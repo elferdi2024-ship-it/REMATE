@@ -7,6 +7,7 @@ import * as XLSX from "xlsx";
 import { db } from "@/lib/firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import categoryData from "@/lib/categoria_mapping.json";
+import { SUCURSALES } from "@/lib/sucursales";
 
 const RAW_MAPPING = categoryData as unknown as Record<string, string>;
 // Normalizar mapping para búsqueda rápida e insensible a espacios/casos
@@ -26,6 +27,7 @@ export default function PreciosUploader() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<ProductRow[]>([]);
   const [parsed, setParsed] = useState<ProductRow[]>([]);
+  const [targetSucursal, setTargetSucursal] = useState<string>("global");
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -170,25 +172,36 @@ export default function PreciosUploader() {
     setError(null);
 
     try {
-      const snap = await getDoc(doc(db, "catalogo_activo", "productos"));
-      const currentData = snap.exists() ? snap.data().items || {} : {};
+      // 1. Fetch master catalog for images and fallbacks
+      const masterSnap = await getDoc(doc(db, "catalogo_activo", "productos"));
+      const masterData = masterSnap.exists() ? masterSnap.data().items || {} : {};
+
+      // 2. If targeting specific branch, also fetch current branch data
+      let existingBranchData: Record<string, any> = {};
+      if (targetSucursal !== "global") {
+        const branchSnap = await getDoc(doc(db, "sucursales_catalogos", targetSucursal));
+        if (branchSnap.exists()) {
+          existingBranchData = branchSnap.data().items || {};
+        }
+      }
 
       const batchSize = 50;
-      const catalogoActivo: Record<string, ProductRow & { imagen?: string }> = {};
+      const catalogoActivo: Record<string, ProductRow & { imagen?: string; deshabilitado?: boolean }> = {};
       for (let i = 0; i < parsed.length; i++) {
         const codigo = parsed[i].codigo;
-        const currentProd = currentData[codigo];
+        const masterProd = masterData[codigo];
+        const branchProd = existingBranchData[codigo];
         
         let precioFinal = parsed[i].precio;
-        if (currentProd && currentProd.precio <= 0) {
-          // Si ya estaba desactivado (precio <= 0), no activarlo (mantener su precio actual)
-          precioFinal = currentProd.precio;
+        if (targetSucursal === "global" && masterProd && masterProd.precio <= 0) {
+          precioFinal = masterProd.precio;
         }
 
         catalogoActivo[codigo] = {
           ...parsed[i],
           precio: precioFinal,
-          ...(currentProd?.imagen ? { imagen: currentProd.imagen } : {})
+          ...(masterProd?.imagen ? { imagen: masterProd.imagen } : branchProd?.imagen ? { imagen: branchProd.imagen } : {}),
+          ...(branchProd?.deshabilitado !== undefined ? { deshabilitado: branchProd.deshabilitado } : {})
         };
         if ((i + 1) % batchSize === 0) {
           setUploadProgress(Math.round(((i + 1) / parsed.length) * 100));
@@ -196,11 +209,20 @@ export default function PreciosUploader() {
         }
       }
       setUploadProgress(100);
-      await setDoc(doc(db, "catalogo_activo", "productos"), {
-        items: catalogoActivo,
-        actualizadoEn: new Date().toISOString(),
-        totalProductos: parsed.length,
-      });
+
+      if (targetSucursal === "global") {
+        await setDoc(doc(db, "catalogo_activo", "productos"), {
+          items: catalogoActivo,
+          actualizadoEn: new Date().toISOString(),
+          totalProductos: parsed.length,
+        });
+      } else {
+        await setDoc(doc(db, "sucursales_catalogos", targetSucursal), {
+          items: catalogoActivo,
+          updatedAt: new Date().toISOString(),
+          totalProductos: parsed.length,
+        });
+      }
 
       setSuccess(true);
       setTimeout(() => {
@@ -211,7 +233,8 @@ export default function PreciosUploader() {
         setUploadProgress(0);
         if (fileInputRef.current) fileInputRef.current.value = "";
       }, 3000);
-    } catch {
+    } catch (err: any) {
+      console.error("Error al actualizar catálogo:", err);
       setError("Error al actualizar los precios en la base de datos.");
     } finally {
       setUploading(false);
@@ -226,8 +249,46 @@ export default function PreciosUploader() {
     });
   }
 
+  const targetNombre = targetSucursal === "global" 
+    ? "Catálogo General (Todas las sucursales por defecto)" 
+    : `Sucursal ${SUCURSALES.find(s => s.id === targetSucursal)?.nombre || targetSucursal}`;
+
   return (
     <div className="space-y-6 text-[var(--admin-text-mid)]">
+      {/* Selector de Destino de la Carga */}
+      <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 space-y-3 shadow-md">
+        <label className="text-xs font-bold uppercase tracking-wider text-[var(--admin-text-lo)] flex items-center gap-2">
+          <span>🏪</span> Destino del Catálogo a Actualizar
+        </label>
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <select
+            value={targetSucursal}
+            onChange={(e) => setTargetSucursal(e.target.value)}
+            disabled={uploading}
+            className="w-full sm:w-auto flex-1 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-2.5 text-sm font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none"
+          >
+            <option value="global" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
+              🌐 Catálogo Maestro General (Global / Fallback)
+            </option>
+            <optgroup label="── Catálogos por Sucursal ──">
+              {SUCURSALES.map((s) => (
+                <option key={s.id} value={s.id} className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
+                  🏪 Sucursal {s.nombre} ({s.direccion})
+                </option>
+              ))}
+            </optgroup>
+          </select>
+
+          <span className={`text-xs font-bold px-3 py-1.5 rounded-lg shrink-0 ${
+            targetSucursal === "global" 
+              ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" 
+              : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+          }`}>
+            {targetSucursal === "global" ? "Impacto: Global" : `Impacto: Solo ${SUCURSALES.find(s => s.id === targetSucursal)?.nombre}`}
+          </span>
+        </div>
+      </div>
+
       {!file && (
         <div
           onDrop={(e) => {
@@ -257,8 +318,11 @@ export default function PreciosUploader() {
             <span className="mb-6 rounded-2xl bg-[var(--admin-bg)] border border-[var(--admin-border)] p-4 text-5xl shadow-xl transition-transform duration-300 group-hover:-translate-y-2 group-hover:scale-110">
               📊
             </span>
-            <h3 className="text-xl font-bold text-[var(--admin-text-hi)]">Arrastrá el archivo aquí</h3>
+            <h3 className="text-xl font-bold text-[var(--admin-text-hi)]">Arrastrá el archivo Excel aquí</h3>
             <p className="mt-2 text-sm text-[var(--admin-text-lo)]">o hacé click para explorar tus carpetas</p>
+            <p className="mt-1 text-xs font-semibold text-[var(--admin-accent)]">
+              Se importará para: {targetNombre}
+            </p>
           </div>
           <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} className="hidden" />
         </div>
@@ -360,11 +424,11 @@ export default function PreciosUploader() {
       {parsed.length > 0 && !uploading && !success && (
         <button
           onClick={handleConfirm}
-          className="group relative w-full overflow-hidden rounded-xl bg-[var(--admin-accent)] p-[1px] font-bold uppercase tracking-widest text-[var(--admin-sidebar-bg)] transition-transform hover:scale-[1.02] active:scale-95"
+          className="group relative w-full overflow-hidden rounded-xl bg-[var(--admin-accent)] p-[1px] font-bold uppercase tracking-widest text-[var(--admin-sidebar-bg)] transition-transform hover:scale-[1.02] active:scale-95 shadow-xl"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--admin-accent)] via-blue-500 to-[var(--admin-accent)] opacity-100 transition-opacity duration-300 group-hover:opacity-80" />
           <div className="relative flex items-center justify-center gap-2 bg-[var(--admin-accent)] text-[var(--admin-sidebar-bg)] px-8 py-4 text-sm font-black tracking-widest">
-            Confirmar Importación <span>→</span>
+            Confirmar Importación para {targetNombre} <span>→</span>
           </div>
         </button>
       )}

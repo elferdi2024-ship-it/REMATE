@@ -42,7 +42,7 @@ export default function ResultsBar({
   onOpenQuickOrder,
 }: ResultsBarProps) {
   return (
-    <div className="w-full bg-white border border-slate-200/90 rounded-2xl p-3.5 mb-6 shadow-xs transition-all">
+    <div className="w-full bg-white border border-slate-200/90 rounded-2xl p-3.5 mb-6 shadow-xs transition-all relative z-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3.5">
         {/* Left: Ofertas chip or inline search */}
         <div className="flex items-center gap-3 flex-1 min-w-0">

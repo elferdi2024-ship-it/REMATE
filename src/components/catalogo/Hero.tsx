@@ -87,9 +87,11 @@ export default function Hero({
   };
 
   return (
-    <section className="relative w-full bg-gradient-to-b from-[#7F1D1D] via-[#450A0A] to-[#1F0404] text-white overflow-hidden border-b border-red-900/60 shadow-xl">
-      {/* Background Image con mayor visibilidad y tinte rojo de marca */}
-      <div className="absolute inset-0 z-0">
+    <section className={`relative w-full bg-gradient-to-b from-[#7F1D1D] via-[#450A0A] to-[#1F0404] text-white border-b border-red-900/60 shadow-xl transition-all ${
+      isSearchFocused ? "z-40" : "z-20"
+    }`}>
+      {/* Background Image con contenedor overflow-hidden para no cortar el dropdown */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <Image
           src="/catalogo-hero.jpg"
           alt="Catálogo Mayorista El Remate"
@@ -237,7 +239,7 @@ export default function Hero({
         </div>
 
         {/* Predictive Search Bar with Glow Focuser */}
-        <div className="relative w-full max-w-4xl mx-auto mt-1" ref={searchContainerRef}>
+        <div className="relative w-full max-w-4xl mx-auto mt-1 z-30" ref={searchContainerRef}>
           <div
             className={`relative flex items-center bg-slate-900/95 backdrop-blur-md border rounded-2xl transition-all shadow-xl ${
               isSearchFocused
