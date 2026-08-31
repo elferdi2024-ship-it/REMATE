@@ -122,7 +122,7 @@ export async function enviarFacturaWhatsApp(
   skipRedirect: boolean = false,
   costoEnvio: number = 0
 ): Promise<void> {
-  const phone = numero || process.env.NEXT_PUBLIC_WA_NUMBER || "";
+  const phone = (numero || process.env.NEXT_PUBLIC_WA_NUMBER || "").replace(/\D/g, "");
   const numFinal = numeroPedido || generarNumeroPedido();
 
   // 1. Generar imagen de la factura
@@ -171,13 +171,13 @@ export async function enviarFacturaWhatsApp(
     ? `whatsapp://send?phone=${phone}&text=${encoded}`
     : `https://wa.me/${phone}?text=${encoded}`;
 
-  const win = window.open(primaryUrl, "_blank");
+  const win = window.open(primaryUrl, "_blank", "noopener,noreferrer");
 
   // 3. FALLBACK DE ÚLTIMO RECURSO (solo si la ventana fue bloqueada o no abrió)
   setTimeout(() => {
     if (!win || win.closed || typeof win.closed === "undefined") {
       const webUrl = `https://web.whatsapp.com/send?phone=${phone}&text=${encoded}`;
-      const winWeb = window.open(webUrl, "_blank");
+      const winWeb = window.open(webUrl, "_blank", "noopener,noreferrer");
 
       // Si tampoco se pudo abrir WhatsApp Web, descargar el PNG como último recurso
       setTimeout(() => {
@@ -204,7 +204,7 @@ export async function enviarFacturaWhatsApp(
  * Usar para enviar cualquier mensaje genérico por WhatsApp con fallback.
  */
 export function enviarWhatsApp(numero: string, mensaje: string): void {
-  const phone = numero || process.env.NEXT_PUBLIC_WA_NUMBER || "";
+  const phone = (numero || process.env.NEXT_PUBLIC_WA_NUMBER || "").replace(/\D/g, "");
   if (typeof navigator !== "undefined" && navigator.clipboard) {
     navigator.clipboard.writeText(mensaje).catch(() => {});
   }
@@ -213,12 +213,12 @@ export function enviarWhatsApp(numero: string, mensaje: string): void {
     ? `whatsapp://send?phone=${phone}&text=${encoded}`
     : `https://wa.me/${phone}?text=${encoded}`;
 
-  const win = window.open(primaryUrl, "_blank");
+  const win = window.open(primaryUrl, "_blank", "noopener,noreferrer");
 
   setTimeout(() => {
     if (!win || win.closed || typeof win.closed === "undefined") {
       const webUrl = `https://web.whatsapp.com/send?phone=${phone}&text=${encoded}`;
-      window.open(webUrl, "_blank");
+      window.open(webUrl, "_blank", "noopener,noreferrer");
     }
   }, 800);
 }

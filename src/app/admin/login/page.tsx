@@ -58,7 +58,9 @@ export default function AdminLoginPage() {
         } catch (e) {
            console.warn("Silent failure setting up superadmin record:", e);
         }
-        document.cookie = "session=true; path=/; max-age=86400";
+        const idToken = await user.getIdToken();
+        const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+        document.cookie = `session=${idToken}; path=/; max-age=86400; SameSite=Lax; ${isHttps ? "Secure;" : ""}`;
         router.replace("/admin/pedidos");
         return;
       }
@@ -66,14 +68,10 @@ export default function AdminLoginPage() {
       try {
         const snap = await getDoc(doc(db, "usuarios", user.uid));
         
-        console.log("DEBUG DATA DE FIRESTORE:", {
-          buscando_uid: user.uid,
-          documento_existe: snap.exists(),
-          data_recibida: snap.exists() ? snap.data() : "DOCUMENTO NO ENCONTRADO"
-        });
-        
         if (snap.exists() && (snap.data().role === "admin" || snap.data().role === "empleado" || snap.data().role === "owner")) {
-          document.cookie = "session=true; path=/; max-age=86400";
+          const idToken = await user.getIdToken();
+          const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+          document.cookie = `session=${idToken}; path=/; max-age=86400; SameSite=Lax; ${isHttps ? "Secure;" : ""}`;
           router.replace("/admin/pedidos");
         } else {
           setError("Acceso denegado. No tenés permisos de administrador.");

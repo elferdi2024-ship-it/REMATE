@@ -85,9 +85,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setRole(null);
           setSucursalId(null);
         }
+
+        try {
+          const idToken = await firebaseUser.getIdToken();
+          const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+          document.cookie = `session=${idToken}; path=/; max-age=86400; SameSite=Lax; ${isHttps ? "Secure;" : ""}`;
+        } catch (tokenErr) {
+          console.error("Error setting session token:", tokenErr);
+        }
       } else {
         setRole(null);
         setSucursalId(null);
+        if (typeof document !== "undefined") {
+          document.cookie = "session=; path=/; max-age=0; SameSite=Lax";
+        }
       }
       setUser(firebaseUser);
       setLoading(false);
@@ -98,13 +109,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     if (!auth) throw new Error("Firebase Auth not initialized");
-    await signInWithEmailAndPassword(auth, email, password);
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const idToken = await cred.user.getIdToken();
+    const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+    document.cookie = `session=${idToken}; path=/; max-age=86400; SameSite=Lax; ${isHttps ? "Secure;" : ""}`;
   };
 
   const signUp = async (email: string, password: string, nombre: string) => {
     if (!auth) throw new Error("Firebase Auth not initialized");
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: nombre });
+    const idToken = await cred.user.getIdToken();
+    const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+    document.cookie = `session=${idToken}; path=/; max-age=86400; SameSite=Lax; ${isHttps ? "Secure;" : ""}`;
   };
 
   const loginAsAdminDios = () => {
@@ -113,7 +130,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
     ) {
       sessionStorage.setItem("bypass_admin_dios", "true");
-      document.cookie = "session=true; path=/; max-age=86400";
       setRole("admin");
       setSucursalId(null);
       setUser({
@@ -128,7 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     if (typeof window !== "undefined") {
       sessionStorage.removeItem("bypass_admin_dios");
-      document.cookie = "session=; path=/; max-age=0";
+      document.cookie = "session=; path=/; max-age=0; SameSite=Lax";
     }
     setRole(null);
     setSucursalId(null);

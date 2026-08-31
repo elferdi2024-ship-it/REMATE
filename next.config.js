@@ -1,4 +1,19 @@
 /** @type {import('next').NextConfig} */
+const ContentSecurityPolicy = `
+  default-src 'self';
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://*.firebaseapp.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  img-src 'self' data: blob: https://firebasestorage.googleapis.com https://*.googleusercontent.com;
+  font-src 'self' https://fonts.gstatic.com data:;
+  connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com;
+  frame-src 'self' https://*.firebaseapp.com;
+  frame-ancestors 'none';
+  form-action 'self' https://wa.me https://api.whatsapp.com;
+  base-uri 'self';
+  object-src 'none';
+  upgrade-insecure-requests;
+`.replace(/\s{2,}/g, ' ').trim();
+
 const nextConfig = {
   images: {
     unoptimized: true,
@@ -17,8 +32,8 @@ const nextConfig = {
         source: '/:path*',
         headers: [
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
+            key: 'Content-Security-Policy',
+            value: ContentSecurityPolicy,
           },
           {
             key: 'Strict-Transport-Security',
@@ -26,7 +41,7 @@ const nextConfig = {
           },
           {
             key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            value: 'DENY',
           },
           {
             key: 'X-Content-Type-Options',
@@ -34,11 +49,15 @@ const nextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            value: 'strict-origin-when-cross-origin',
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(self), payment=()',
+            value: 'camera=(), microphone=(), geolocation=(), payment=()',
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
           },
         ],
       },

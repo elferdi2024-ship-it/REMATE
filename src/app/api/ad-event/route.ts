@@ -1,27 +1,50 @@
-﻿// filepath: src/app/api/ad-event/route.ts
+// filepath: src/app/api/ad-event/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 
+const SAFE_ID_REGEX = /^[a-zA-Z0-9_-]{1,64}$/;
+const VALID_TYPES = new Set(["impression", "modal_open", "cta_click"]);
+
 export async function POST(req: NextRequest) {
   try {
+    const contentLength = req.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > 4096) {
+      return NextResponse.json({ ok: false, error: "Payload Too Large" }, { status: 413 });
+    }
+
     const body = await req.json();
     const { brandId, assetId, type = "impression", slot, abVariant } = body;
 
-    if (!brandId || typeof brandId !== "string") {
-      return NextResponse.json({ ok: false }, { status: 400 });
+    // Validación estricta de formato (evita NoSQL key injection)
+    if (!brandId || typeof brandId !== "string" || !SAFE_ID_REGEX.test(brandId)) {
+      return NextResponse.json({ ok: false, error: "Parámetros inválidos" }, { status: 400 });
+    }
+
+    if (!VALID_TYPES.has(type)) {
+      return NextResponse.json({ ok: false, error: "Tipo de evento inválido" }, { status: 400 });
+    }
+
+    if (assetId && (typeof assetId !== "string" || !SAFE_ID_REGEX.test(assetId))) {
+      return NextResponse.json({ ok: false, error: "Asset inválido" }, { status: 400 });
+    }
+
+    if (slot && (typeof slot !== "string" || !SAFE_ID_REGEX.test(slot))) {
+      return NextResponse.json({ ok: false, error: "Slot inválido" }, { status: 400 });
+    }
+
+    if (abVariant && (typeof abVariant !== "string" || !SAFE_ID_REGEX.test(abVariant))) {
+      return NextResponse.json({ ok: false, error: "Variant inválido" }, { status: 400 });
     }
 
     const db = getAdminDb();
     if (!db) {
-      // Keep UX working even without server credentials.
       return NextResponse.json({ ok: false, skipped: true }, { status: 200 });
     }
 
     const month = new Date().toISOString().slice(0, 7);
-
     const updates: Record<string, unknown> = {
       lastSeen: new Date().toISOString(),
     };
@@ -47,7 +70,8 @@ export async function POST(req: NextRequest) {
     await db.collection("ads_impressions").doc(brandId).set(updates, { merge: true });
 
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ ok: false }, { status: 200 });
+  } catch (err: unknown) {
+    console.error("[AD_EVENT_SECURITY]", err instanceof Error ? err.message : "Error procesando evento");
+    return NextResponse.json({ ok: false }, { status: 400 });
   }
 }
