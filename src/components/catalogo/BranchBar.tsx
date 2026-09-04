@@ -13,7 +13,7 @@ export default function BranchBar({ sucursalName, onClick }: BranchBarProps) {
     <button 
       type="button" 
       onClick={onClick}
-      className={`sticky top-0 z-[80] w-full h-11 flex items-center justify-between px-4 transition-all duration-300 shadow-sm
+      className={`relative z-10 w-full h-11 flex items-center justify-between px-4 transition-all duration-300 shadow-sm
         ${sucursalName 
           ? 'bg-gradient-to-r from-red-600 to-red-500 text-white' 
           : 'bg-zinc-800 text-zinc-100'}
@@ -21,9 +21,9 @@ export default function BranchBar({ sucursalName, onClick }: BranchBarProps) {
     >
       <div className="flex items-center gap-2 overflow-hidden">
         <span className="text-lg">🏪</span>
-        <span className="text-[11px] sm:text-xs font-medium truncate tracking-wide">
+        <span suppressHydrationWarning className="text-[11px] sm:text-xs font-medium truncate tracking-wide">
           {sucursalName ? (
-            <>Comprando en: <strong className="font-black ml-1">{sucursalName}</strong></>
+            <>Comprando en: <strong suppressHydrationWarning className="font-black ml-1">{sucursalName}</strong></>
           ) : (
             <>Seleccioná tu sucursal para ver precios</>
           )}

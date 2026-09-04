@@ -34,16 +34,16 @@ service cloud.firestore {
              (!('estado' in data) || data.estado in ['pendiente', 'nuevo', 'En Preparación']);
     }
 
-    // Catálogo: Cualquiera lee, solo admin escribe
+    // Catálogo: Cualquiera lee, staff escribe
     match /catalogo_activo/{document=**} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isStaff();
     }
 
-    // Catálogos por Sucursal: Cualquiera lee, solo admin escribe
+    // Catálogos por Sucursal: Cualquiera lee, staff escribe
     match /sucursales_catalogos/{document=**} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isStaff();
     }
 
     // Pedidos: Clientes crean, personal administrativo gestiona (lee/edita/borra)
@@ -85,6 +85,18 @@ service cloud.firestore {
     match /config/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // Campañas de Marketing y Banners por Sucursal: Cualquiera lee, staff escribe
+    match /campanas/{document=**} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    // Marcas destacadas y convenios: Cualquiera lee, staff escribe
+    match /marcas/{document=**} {
+      allow read: if true;
+      allow write: if isStaff();
     }
   }
 }

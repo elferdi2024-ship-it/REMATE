@@ -123,7 +123,7 @@ export default function Hero({
 
             <span className="inline-flex items-center gap-1.5 text-[11px] font-black tracking-wider uppercase text-white bg-[#EF233C]/20 border border-[#EF233C]/40 px-2.5 py-0.5 rounded-full shadow-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-[#EF233C] animate-pulse" />
-              Mayorista Canelones
+              Mayorista {sucursalObj ? sucursalObj.nombre : "Canelones"}
             </span>
 
             {sucursalObj && (
@@ -186,7 +186,10 @@ export default function Hero({
                 Distribuidora Mayorista
               </span>
               <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white font-display leading-tight">
-                El Remate <span className="text-slate-400 font-normal">Canelones</span>
+                El Remate{" "}
+                <span className="text-[#EF233C] font-extrabold">
+                  {sucursalObj ? sucursalObj.nombre : "Canelones"}
+                </span>
               </h1>
               <p className="text-xs sm:text-sm text-slate-300 font-medium mt-0.5 line-clamp-1">
                 Precios directos de fábrica por bulto y unidad. Envío rápido o retiro.
@@ -238,8 +241,8 @@ export default function Hero({
           </div>
         </div>
 
-        {/* Predictive Search Bar with Glow Focuser */}
-        <div className="relative w-full max-w-4xl mx-auto mt-1 z-30" ref={searchContainerRef}>
+        {/* Predictive Search Bar with Glow Focuser (solo visible en escritorio, móvil usa TopHeaderNav) */}
+        <div className="relative w-full max-w-4xl mx-auto mt-1 z-30 hidden md:block" ref={searchContainerRef}>
           <div
             className={`relative flex items-center bg-slate-900/95 backdrop-blur-md border rounded-2xl transition-all shadow-xl ${
               isSearchFocused

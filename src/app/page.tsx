@@ -60,6 +60,7 @@ const CATEGORIAS = [
 export default function LandingPage() {
   const router = useRouter();
   const toast = useToast();
+  const [mounted, setMounted] = useState(false);
   const [configCats, setConfigCats] = useState<Record<string, string>>({});
   const [selectedSucursal, setSelectedSucursal] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -70,19 +71,61 @@ export default function LandingPage() {
   const { items: cartItems, clearCart, totalQty } = useCart();
   const [ofertasConfig, setOfertasConfig] = useState<OfertaConfig | null>(null);
 
-  const sucursalNombre = SUCURSALES.find(s => s.id === selectedSucursal)?.nombre || "";
+  const activeSucursalId = mounted ? selectedSucursal : "";
+  const sucursalNombre = SUCURSALES.find(s => s.id === activeSucursalId)?.nombre || "";
 
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, "configuracion", "ofertas"), (docSnap) => {
-      if (docSnap.exists()) {
-        setOfertasConfig(docSnap.data() as OfertaConfig);
+    setMounted(true);
+    const sp = new URLSearchParams(window.location.search);
+    const urlS = sp.get("sucursal");
+    const saved = ls.getSelectedSucursal();
+    const effective = (urlS && SUCURSALES.some((s) => s.id === urlS)) ? urlS : (saved && SUCURSALES.some((s) => s.id === saved)) ? saved : "";
+    if (effective) {
+      setSelectedSucursal(effective);
+      if (urlS && urlS !== saved) {
+        ls.setSelectedSucursal(urlS);
       }
-    });
+    }
+  }, []);
+
+  useEffect(() => {
+    const unsub = onSnapshot(
+      doc(db, "configuracion", "ofertas"), 
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setOfertasConfig(docSnap.data() as OfertaConfig);
+        }
+      },
+      (err) => {
+        console.warn("Snapshot configuracion/ofertas omitido:", err);
+      }
+    );
     return () => unsub();
   }, []);
 
   const handleSelectSucursal = (id: string) => {
-    handleEnterCatalog(id);
+    const sucursal = SUCURSALES.find(s => s.id === id);
+    const nombre = sucursal ? sucursal.nombre : "";
+
+    if (cartItems.length > 0 && selectedSucursal && id !== selectedSucursal) {
+      const confirmacion = confirm(
+        "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
+      );
+      if (!confirmacion) return;
+      clearCart();
+    }
+
+    ls.setSelectedSucursal(id);
+    setSelectedSucursal(id);
+
+    // URL como SSOT: reflejar ?sucursal= en la URL sin recargar
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("sucursal", id);
+      window.history.replaceState(null, "", url.toString());
+    }
+
+    toast.success(`🏪 Catálogo de ${nombre} seleccionado`);
   };
 
   const handleEnterCatalog = (id: string, targetCategory?: string) => {
@@ -103,7 +146,7 @@ export default function LandingPage() {
     const cat = targetCategory || pendingCategory;
     setPendingCategory("");
 
-    toast.success(`🏪 Cargando catálogo de ${nombre}...`);
+    toast.success(`🏪 Entrando al catálogo de ${nombre}...`);
 
     if (cat) {
       router.push(`/catalogo?sucursal=${id}&categoria=${encodeURIComponent(cat)}`);
@@ -121,8 +164,6 @@ export default function LandingPage() {
   };
 
   useEffect(() => {
-    setSelectedSucursal(ls.getSelectedSucursal());
-
     async function load() {
       try {
         const snap = await getDoc(doc(db, "configuracion", "categorias"));
@@ -140,18 +181,19 @@ export default function LandingPage() {
     <div className="font-body text-[#111111] bg-[#F5F2EE]">
       {/* Dynamic Marketing Top Bar */}
       <MarketingBannerBar 
-        selectedSucursal={selectedSucursal} 
+        selectedSucursal={activeSucursalId} 
         selectedSucursalNombre={sucursalNombre} 
       />
 
       {/* Hero Landing Section */}
       <HeroLanding 
-        selectedSucursal={selectedSucursal} 
+        selectedSucursal={activeSucursalId} 
         onOpenSucursalModal={() => {
           setPendingCategory("");
           setIsModalOpen(true);
         }}
         onSelectSucursal={handleSelectSucursal}
+        onEnterCatalog={handleEnterCatalog}
       />
 
       {/* Marquee Ticker */}
@@ -325,14 +367,14 @@ export default function LandingPage() {
       </section>
 
       {/* Step Process */}
-      <StepProcess selectedSucursal={selectedSucursal} />
+      <StepProcess selectedSucursal={activeSucursalId} />
 
       {/* Lead Capture Widget (WhatsApp Semanal) */}
       <LeadCaptureWidget />
 
       {/* Branch Section */}
       <BranchSection
-        selectedSucursal={selectedSucursal}
+        selectedSucursal={activeSucursalId}
         onSelectSucursal={handleSelectSucursal}
         onEnterCatalog={handleEnterCatalog}
       />

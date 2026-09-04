@@ -59,3 +59,7 @@ Thumbs.db
 *.sw?
 
 .vercel
+.agents/
+.claude/
+agent/
+skills-lock.json

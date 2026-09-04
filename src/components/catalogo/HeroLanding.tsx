@@ -10,12 +10,14 @@ interface HeroLandingProps {
   selectedSucursal: string;
   onOpenSucursalModal?: () => void;
   onSelectSucursal?: (id: string) => void;
+  onEnterCatalog?: (id: string) => void;
 }
 
 export default function HeroLanding({ 
   selectedSucursal, 
   onOpenSucursalModal,
-  onSelectSucursal 
+  onSelectSucursal,
+  onEnterCatalog
 }: HeroLandingProps) {
   const sucursalNombre = SUCURSALES.find(s => s.id === selectedSucursal)?.nombre || "";
 
@@ -97,7 +99,13 @@ export default function HeroLanding({
                 <button
                   key={sucursal.id}
                   type="button"
-                  onClick={() => onSelectSucursal?.(sucursal.id)}
+                  onClick={() => {
+                    if (isSelected && onEnterCatalog) {
+                      onEnterCatalog(sucursal.id);
+                    } else if (onSelectSucursal) {
+                      onSelectSucursal(sucursal.id);
+                    }
+                  }}
                   className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 select-none active:scale-95 ${
                     isSelected
                       ? "bg-[#EF233C] border-[#EF233C] text-white shadow-md shadow-[#EF233C]/30 ring-2 ring-white/20"
@@ -110,10 +118,10 @@ export default function HeroLanding({
                   <span className="text-[10px] text-slate-400 font-normal truncate w-full">
                     {sucursal.direccion}
                   </span>
-                  <span className={`text-[9px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md ${
-                    isSelected ? "bg-white text-[#EF233C]" : "bg-slate-800 text-slate-400"
+                  <span className={`text-[9px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md transition-all ${
+                    isSelected ? "bg-white text-[#EF233C] font-extrabold shadow-xs" : "bg-slate-800 text-slate-400"
                   }`}>
-                    {isSelected ? "Activo ✓" : "Ver Catálogo"}
+                    {isSelected ? "Catálogo Activo ✓" : "Seleccionar"}
                   </span>
                 </button>
               );
@@ -128,7 +136,7 @@ export default function HeroLanding({
               href={`/catalogo?sucursal=${selectedSucursal}`}
               className="bg-[#EF233C] hover:bg-[#C01730] text-white rounded-xl px-7 py-3.5 font-bold text-sm sm:text-base tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-[#EF233C]/25 transition-all hover:-translate-y-0.5 active:scale-95"
             >
-              <span>🛒 Ver Catálogo de {sucursalNombre}</span>
+              <span>🛒 Entrar al Catálogo de {sucursalNombre}</span>
               <span>→</span>
             </Link>
           ) : (

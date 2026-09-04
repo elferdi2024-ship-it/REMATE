@@ -18,7 +18,7 @@ export const SUCURSALES: Sucursal[] = [
   },
   {
     id: 'las-piedras-herrera',
-    nombre: 'Las Piedras',
+    nombre: 'Las Piedras (Herrera)',
     direccion: 'Luis Alberto de Herrera 487',
     telefono: '092 202 019',
   },
@@ -30,7 +30,7 @@ export const SUCURSALES: Sucursal[] = [
   },
   {
     id: 'las-piedras-artigas',
-    nombre: 'Las Piedras',
+    nombre: 'Las Piedras (Artigas)',
     direccion: 'Avenida Artigas 750',
     telefono: '099 013 272',
   },

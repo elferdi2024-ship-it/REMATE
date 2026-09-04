@@ -85,12 +85,15 @@ export function addBusqueda(q: string): void {
   setBusquedas(filtered.slice(0, 10));
 }
 
+const LS_SUCURSAL_ALT = "remate_sucursalId";
+
 export function getSelectedSucursal(): string {
   if (typeof window === "undefined") return "";
-  return localStorage.getItem(LS_SUCURSAL) || "";
+  return localStorage.getItem(LS_SUCURSAL) || localStorage.getItem(LS_SUCURSAL_ALT) || "";
 }
 
 export function setSelectedSucursal(v: string): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(LS_SUCURSAL, v);
+  localStorage.setItem(LS_SUCURSAL_ALT, v);
 }

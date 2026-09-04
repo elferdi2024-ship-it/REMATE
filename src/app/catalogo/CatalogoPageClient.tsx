@@ -36,6 +36,8 @@ import { DEFAULT_PREMIUM_PROMOS, DEFAULT_OFERTAS_CONFIG } from "@/lib/constants/
 import CardFanPromoCarousel from "@/components/catalogo/CardFanPromoCarousel";
 
 import BranchBar from "@/components/catalogo/BranchBar";
+import TopHeaderNav from "@/components/catalogo/TopHeaderNav";
+import HamburgerMenuDrawer from "@/components/catalogo/HamburgerMenuDrawer";
 import OnlineBanner from "@/components/ui/OnlineBanner";
 import EmptyState from "@/components/ui/EmptyState";
 import ScrollToTopBtn from "@/components/ui/ScrollToTopBtn";
@@ -412,9 +414,12 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [metodoEntrega, setMetodoEntrega] = useState<MetodoEntrega>('envio');
   const [zonaEnvio, setZonaEnvio] = useState<ZonaEnvio>('canelones');
-  const [sucursalId, setSucursalId] = useState<string | null>(null);
+  const [sucursalId, setSucursalId] = useState<string | null>(() => {
+    return searchParams?.get("sucursal") || null;
+  });
   const { config: tiendaConfig } = useTiendaConfig();
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const promoScrollRef = useRef<HTMLDivElement>(null);
 
   const scrollPromos = useCallback((dir: "left" | "right") => {
@@ -1075,9 +1080,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         throw new Error("No se pudo descargar el comprobante del pedido.");
       }
 
-      // Reset delivery state after success
+      // Reset delivery state after success (preserve selected sucursal)
       setMetodoEntrega('envio');
-      setSucursalId(null);
       handleFinalizado();
     } catch (err: any) {
       console.error("🚨 Error crítico en flujo de pedido:", err);
@@ -1238,6 +1242,26 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     return (
       <div className="catalogo-page pb-24 md:pb-0" style={{ fontFamily: "var(--font-body, sans-serif)" }}>
         <OnlineBanner />
+        <TopHeaderNav
+          onOpenMenu={() => {}}
+          onOpenCart={() => {}}
+          cartQty={0}
+          searchQuery=""
+          onSearchChange={() => {}}
+          onSearchSubmit={() => {}}
+          suggestedProducts={[]}
+          onSelectSuggestion={() => {}}
+          activeCat="Todos"
+          onSelectCategory={() => {}}
+          isOfertasActive={false}
+          onToggleOfertas={() => {}}
+          isFavoritosActive={false}
+          onToggleFavoritos={() => {}}
+          favoritosCount={0}
+          sucursalId={sucursalId}
+          onOpenBranchModal={() => {}}
+          categorias={CATEGORIAS}
+        />
         <Suspense fallback={null}>
           <SharedCartWatcher onLoadCart={() => {}} />
         </Suspense>
@@ -1357,10 +1381,74 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onIgnore={handleIgnoreSharedCart}
       />
 
-      {/* Branch Selector Premium (Mobile Top / Desktop Flow) */}
+      {/* Branch Selector Premium (Top Banner) */}
       <BranchBar
         sucursalName={SUCURSALES.find(s => s.id === sucursalId)?.nombre || null}
         onClick={() => setIsBranchModalOpen(true)}
+      />
+
+      {/* TopHeaderNav Accesible (Estilo Mercado Atlántida) */}
+      <TopHeaderNav
+        onOpenMenu={() => setIsMenuOpen(true)}
+        onOpenCart={() => setCartOpen(true)}
+        cartQty={totalQty}
+        searchQuery={search}
+        onSearchChange={setSearchDebounced}
+        onSearchSubmit={handleSelectSuggestion}
+        suggestedProducts={instantSuggestions}
+        onSelectSuggestion={handleSelectSuggestion}
+        onQuickAddToCart={(prod) => addItem({ codigo: prod.codigo, nombre: prod.nombre, precio: prod.precio })}
+        activeCat={activeCat}
+        onSelectCategory={(cat) => {
+          const params = new URLSearchParams(window.location.search);
+          if (cat === "Todos" || !cat) params.delete("categoria");
+          else params.set("categoria", cat);
+          router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+          scrollToGrid();
+        }}
+        isOfertasActive={activeTab === "ofertas" || urlSoloOfertas}
+        onToggleOfertas={() => {
+          if (activeTab === "ofertas" || urlSoloOfertas) {
+            setActiveTab("catalogo");
+            handleSoloOfertasChange(false);
+          } else {
+            setActiveTab("ofertas");
+            handleSoloOfertasChange(true);
+          }
+        }}
+        isFavoritosActive={activeTab === "favoritos"}
+        onToggleFavoritos={() => {
+          setActiveTab(prev => prev === "favoritos" ? "catalogo" : "favoritos");
+        }}
+        favoritosCount={favoritos.length}
+        sucursalId={sucursalId}
+        onOpenBranchModal={() => setIsBranchModalOpen(true)}
+        categorias={CATEGORIAS}
+      />
+
+      {/* Drawer Menú Hamburguesa */}
+      <HamburgerMenuDrawer
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        sucursalId={sucursalId}
+        onOpenBranchModal={() => setIsBranchModalOpen(true)}
+        onSelectCategory={(cat) => {
+          const params = new URLSearchParams(window.location.search);
+          if (cat === "Todos" || !cat) params.delete("categoria");
+          else params.set("categoria", cat);
+          router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+          scrollToGrid();
+        }}
+        activeCat={activeCat}
+        onToggleOfertas={() => {
+          setActiveTab(prev => prev === "ofertas" ? "catalogo" : "ofertas");
+          handleSoloOfertasChange(activeTab !== "ofertas");
+        }}
+        onToggleFavoritos={() => {
+          setActiveTab(prev => prev === "favoritos" ? "catalogo" : "favoritos");
+        }}
+        pedidosAbiertos={tiendaConfig.pedidosAbiertos}
+        categorias={CATEGORIAS}
       />
 
       <div className="page-wrapper" style={{ marginTop: "16px", marginBottom: "8px" }}>

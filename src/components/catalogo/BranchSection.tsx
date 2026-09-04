@@ -18,7 +18,7 @@ export default function BranchSection({
   const activeSucursal = SUCURSALES.find(s => s.id === selectedSucursal);
 
   const handleBranchClick = (id: string) => {
-    if (onEnterCatalog) {
+    if (selectedSucursal === id && onEnterCatalog) {
       onEnterCatalog(id);
     } else {
       onSelectSucursal(id);
@@ -76,7 +76,7 @@ export default function BranchSection({
                       </span>
                     ) : (
                       <span className="bg-[#F5F0E8] text-[#5C4A35] text-[0.65rem] font-bold uppercase py-1 px-3 rounded-full tracking-[1px] group-hover:bg-[#E8302A]/10 group-hover:text-[#E8302A]">
-                        TOCÁ PARA VER CATÁLOGO
+                        TOCÁ PARA ELEGIR CATÁLOGO
                       </span>
                     )}
                   </div>
@@ -105,7 +105,11 @@ export default function BranchSection({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleBranchClick(sucursal.id);
+                      if (onEnterCatalog) {
+                        onEnterCatalog(sucursal.id);
+                      } else {
+                        onSelectSucursal(sucursal.id);
+                      }
                     }}
                     className={`w-full border-0 rounded-[12px] py-3.5 px-4 font-bebas text-[1.15rem] tracking-[1.5px] cursor-pointer transition-all flex items-center justify-center gap-2 text-white ${
                       isActive
