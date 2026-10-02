@@ -1,6 +1,7 @@
 // filepath: src/components/carrito/CartFooter.tsx
 'use client';
 
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import DeliveryMethodSelector from './DeliveryMethodSelector';
 import DeliverySlotScheduler from './DeliverySlotScheduler';
@@ -64,6 +65,27 @@ export default function CartFooter({
 }: CartFooterProps) {
   const isDisabled = isProcessing || isTiendaCerrada || !sucursalId;
   const sub = subtotal ?? (total - costoEnvio);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>("slot-1");
+
+  const deliverySlots = useMemo(() => {
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    const toDateKey = (d: Date) => d.toISOString().split("T")[0];
+    const todayKey = toDateKey(today);
+    const tomorrowKey = toDateKey(tomorrow);
+
+    return [
+      { id: "slot-1", date: todayKey, dateLabel: "Hoy", timeRange: "10:00 - 12:00", available: true, capacityPercent: 40 },
+      { id: "slot-2", date: todayKey, dateLabel: "Hoy", timeRange: "12:00 - 14:00", available: true, capacityPercent: 85 },
+      { id: "slot-3", date: todayKey, dateLabel: "Hoy", timeRange: "14:00 - 16:00", available: true, capacityPercent: 60, isExpress: true },
+      { id: "slot-4", date: todayKey, dateLabel: "Hoy", timeRange: "16:00 - 18:00", available: false, capacityPercent: 100 },
+      { id: "slot-5", date: tomorrowKey, dateLabel: "Mañana", timeRange: "09:00 - 11:00", available: true, capacityPercent: 20 },
+      { id: "slot-6", date: tomorrowKey, dateLabel: "Mañana", timeRange: "11:00 - 13:00", available: true, capacityPercent: 50 },
+      { id: "slot-7", date: tomorrowKey, dateLabel: "Mañana", timeRange: "15:00 - 17:00", available: true, capacityPercent: 30, isExpress: true },
+    ];
+  }, []);
 
   return (
     <>
@@ -84,20 +106,14 @@ export default function CartFooter({
 
         {/* Reserva de Franja Horaria / Slot Scheduler */}
         <DeliverySlotScheduler
-          slots={[
-            { id: "slot-1", date: "2026-07-28", dateLabel: "Hoy", timeRange: "10:00 - 12:00", available: true, capacityPercent: 40 },
-            { id: "slot-2", date: "2026-07-28", dateLabel: "Hoy", timeRange: "12:00 - 14:00", available: true, capacityPercent: 85 },
-            { id: "slot-3", date: "2026-07-28", dateLabel: "Hoy", timeRange: "14:00 - 16:00", available: true, capacityPercent: 60, isExpress: true },
-            { id: "slot-4", date: "2026-07-28", dateLabel: "Hoy", timeRange: "16:00 - 18:00", available: false, capacityPercent: 100 },
-            { id: "slot-5", date: "2026-07-29", dateLabel: "Mañana", timeRange: "09:00 - 11:00", available: true, capacityPercent: 20 },
-            { id: "slot-6", date: "2026-07-29", dateLabel: "Mañana", timeRange: "11:00 - 13:00", available: true, capacityPercent: 50 },
-            { id: "slot-7", date: "2026-07-29", dateLabel: "Mañana", timeRange: "15:00 - 17:00", available: true, capacityPercent: 30, isExpress: true },
-          ]}
-          selectedSlotId={null}
+          slots={deliverySlots}
+          selectedSlotId={selectedSlotId}
+          tipoEntrega={metodoEntrega}
           onSelectSlot={(slot) => {
+            setSelectedSlotId(slot.id);
             if (onClientNotesChange) {
               const prev = clientNotes || "";
-              const slotInfo = `[Franja Horaria: ${slot.dateLabel} ${slot.timeRange}]`;
+              const slotInfo = `[Franja Horaria: ${slot.dateLabel} ${slot.timeRange} hs]`;
               if (!prev.includes("[Franja Horaria:")) {
                 onClientNotesChange(`${slotInfo} ${prev}`.trim());
               } else {
