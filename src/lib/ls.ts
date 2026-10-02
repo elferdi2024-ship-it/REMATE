@@ -96,4 +96,7 @@ export function setSelectedSucursal(v: string): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(LS_SUCURSAL, v);
   localStorage.setItem(LS_SUCURSAL_ALT, v);
+  try {
+    document.cookie = `${LS_SUCURSAL}=${encodeURIComponent(v)}; path=/; max-age=2592000; SameSite=Lax`;
+  } catch {}
 }

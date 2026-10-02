@@ -42,13 +42,21 @@ export default function OfertasDestacadasShowcase({
         if (snap.exists()) {
           const data = snap.data() as OfertaConfig;
           if (data.premiumPromos && data.premiumPromos.length > 0) {
-            const validCustomPromos = data.premiumPromos.filter(p => !p.imagen?.includes("WhatsApp Image 2026-06-05"));
+            const expiredIds = ["PREMIUM-1782923459129", "PREMIUM-1784116773499"];
+            const validCustomPromos = data.premiumPromos.filter(p => 
+              !expiredIds.includes(p.id) &&
+              !p.imagen?.includes("WhatsApp Image 2026-06-05") &&
+              !p.titulo?.toLowerCase().includes("pizza") &&
+              !p.titulo?.toLowerCase().includes("banderita")
+            );
             const merged = DEFAULT_PREMIUM_PROMOS.map(dp => {
               const custom = validCustomPromos.find(p => p.id === dp.id);
               return custom || dp;
             });
             validCustomPromos.forEach(fp => {
-              if (!merged.some(m => m.id === fp.id)) merged.push(fp);
+              if (!merged.some(m => m.id === fp.id) && !expiredIds.includes(fp.id)) {
+                merged.push(fp);
+              }
             });
             setPromos(merged);
           }

@@ -202,9 +202,14 @@ function CategoryCarousel({
             return <React.Fragment key={p.codigo}>{items}</React.Fragment>;
           })}
         </div>
-        <div className="cat-section-controls">
-          <button className="btn-show-less" onClick={handleShowLess}>
-            MOSTRAR MENOS ↑
+        <div className="flex items-center justify-center pt-3 pb-5">
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-colors"
+            onClick={handleShowLess}
+          >
+            <span>Mostrar menos</span>
+            <span>↑</span>
           </button>
         </div>
       </>
@@ -298,9 +303,14 @@ function CategoryCarousel({
       </div>
 
       {hasMore && (
-        <div className="cat-section-controls">
-          <button className="btn-show-all" onClick={handleShowAll}>
-            MOSTRAR TODO ({total})
+        <div className="flex items-center justify-center pt-2 pb-4">
+          <button
+            type="button"
+            onClick={handleShowAll}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 hover:bg-red-50 text-slate-700 hover:text-[#EF233C] border border-slate-200/80 hover:border-red-200 text-xs font-bold transition-all active:scale-95 shadow-2xs"
+          >
+            <span>Ver los {total} productos de {cat.toLowerCase()}</span>
+            <span className="text-[#EF233C] font-black">↓</span>
           </button>
         </div>
       )}
@@ -517,10 +527,13 @@ function LazySection({
   adBrand?: BrandConfig | null;
   onSelectBrand?: (brandName: string) => void;
 }) {
-  const [isVisible, setIsVisible] = useState(false);
+  // Las primeras 3 categorías se renderizan de inmediato sin skeleton ni lag de IntersectionObserver
+  const [isVisible, setIsVisible] = useState(index < 3);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (isVisible) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -528,12 +541,12 @@ function LazySection({
           observer.disconnect();
         }
       },
-      { rootMargin: "400px" }
+      { rootMargin: "800px" }
     );
 
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
-  }, []);
+  }, [isVisible]);
 
   return (
     <div ref={ref} className="lazy-section-wrapper" style={{ minHeight: isVisible ? "auto" : "300px" }}>

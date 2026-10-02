@@ -17,10 +17,19 @@ export default function BranchSection({
 }: BranchSectionProps) {
   const activeSucursal = SUCURSALES.find(s => s.id === selectedSucursal);
 
-  const handleBranchClick = (id: string) => {
-    if (selectedSucursal === id && onEnterCatalog) {
+  const handleCardClick = (id: string) => {
+    if (onEnterCatalog) {
       onEnterCatalog(id);
-    } else {
+    } else if (onSelectSucursal) {
+      onSelectSucursal(id);
+    }
+  };
+
+  const handleButtonClick = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEnterCatalog) {
+      onEnterCatalog(id);
+    } else if (onSelectSucursal) {
       onSelectSucursal(id);
     }
   };
@@ -58,7 +67,7 @@ export default function BranchSection({
             return (
               <div
                 key={sucursal.id}
-                onClick={() => handleBranchClick(sucursal.id)}
+                onClick={() => handleCardClick(sucursal.id)}
                 className={`bg-white rounded-[20px] p-7 transition-all duration-300 cursor-pointer flex flex-col justify-between relative group active:scale-[0.98] ${
                   isActive
                     ? "border-2 border-[#E8302A] shadow-[0_8px_30px_rgba(232,48,42,0.25)] ring-2 ring-[#E8302A]/20"
@@ -71,12 +80,12 @@ export default function BranchSection({
                       🏪
                     </div>
                     {isActive ? (
-                      <span className="bg-[#E8302A] text-white text-[0.65rem] font-black uppercase py-1 px-3 rounded-full tracking-[1.5px] shadow-[0_2px_8px_rgba(232,48,42,0.3)]">
+                      <span className="bg-[#E8302A] text-white text-[0.65rem] font-black uppercase py-1 px-3 rounded-full tracking-[1.5px] shadow-[0_2px_8px_rgba(232,48,42,0.3)] animate-pulse">
                         ✓ CATÁLOGO SELECCIONADO
                       </span>
                     ) : (
-                      <span className="bg-[#F5F0E8] text-[#5C4A35] text-[0.65rem] font-bold uppercase py-1 px-3 rounded-full tracking-[1px] group-hover:bg-[#E8302A]/10 group-hover:text-[#E8302A]">
-                        TOCÁ PARA ELEGIR CATÁLOGO
+                      <span className="bg-[#F5F0E8] text-[#5C4A35] text-[0.65rem] font-bold uppercase py-1 px-3 rounded-full tracking-[1px] group-hover:bg-[#E8302A] group-hover:text-white transition-colors">
+                        TOCÁ PARA VER CATÁLOGO ⚡
                       </span>
                     )}
                   </div>
@@ -103,14 +112,7 @@ export default function BranchSection({
 
                 <div className="mt-6 border-t border-[#DDD8D0] pt-4">
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onEnterCatalog) {
-                        onEnterCatalog(sucursal.id);
-                      } else {
-                        onSelectSucursal(sucursal.id);
-                      }
-                    }}
+                    onClick={(e) => handleButtonClick(sucursal.id, e)}
                     className={`w-full border-0 rounded-[12px] py-3.5 px-4 font-bebas text-[1.15rem] tracking-[1.5px] cursor-pointer transition-all flex items-center justify-center gap-2 text-white ${
                       isActive
                         ? "bg-[#1A7A42] hover:bg-[#145E33] shadow-[0_4px_14px_rgba(26,122,66,0.3)]"
@@ -118,7 +120,7 @@ export default function BranchSection({
                     }`}
                   >
                     {isActive
-                      ? "ENTRAR AL CATÁLOGO ⚡"
+                      ? `ENTRAR AL CATÁLOGO DE ${sucursal.nombre.toUpperCase()} ⚡`
                       : `VER CATÁLOGO DE ${sucursal.nombre.toUpperCase()} ➡️`}
                   </button>
                 </div>

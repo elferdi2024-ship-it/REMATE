@@ -23,13 +23,14 @@ import { useBrands } from "@/hooks/useBrands";
 import { BrandHeroCarousel, SponsoredBanner, SponsorBadge, CustomHeroCarousel } from "@/components/ads";
 import { ProductoCard } from "@/components/catalogo";
 
-import { DEFAULT_PREMIUM_PROMOS } from "@/lib/constants/ofertas";
+import { DEFAULT_PREMIUM_PROMOS, DEFAULT_CAROUSEL_SLIDES } from "@/lib/constants/ofertas";
 
 const DEFAULT_CONFIG: OfertaConfig = {
   activa: true,
   titulo: "Ofertas de la Semana",
   subtitulo: "Aprovechá precios únicos por tiempo limitado",
   productos: [],
+  mainCarousel: DEFAULT_CAROUSEL_SLIDES,
   premiumPromos: DEFAULT_PREMIUM_PROMOS,
   brandBanners: [],
   sponsoredProducts: [],
@@ -187,7 +188,12 @@ export default function OfertasAdmin() {
         const configSnap = await getDoc(doc(db, "configuracion", "ofertas"));
         if (configSnap.exists()) {
           const data = configSnap.data() as OfertaConfig;
-          setConfig({ ...DEFAULT_CONFIG, ...data });
+          setConfig({
+            ...DEFAULT_CONFIG,
+            ...data,
+            mainCarousel: data.mainCarousel && data.mainCarousel.length > 0 ? data.mainCarousel : DEFAULT_CAROUSEL_SLIDES,
+            premiumPromos: data.premiumPromos && data.premiumPromos.length > 0 ? data.premiumPromos : DEFAULT_PREMIUM_PROMOS,
+          });
         }
 
         // Load catalogo for product selector
@@ -496,6 +502,14 @@ export default function OfertasAdmin() {
     }));
   }, []);
 
+  const handleResetPremiumPromosToDefaults = useCallback(() => {
+    setConfig((prev) => ({
+      ...prev,
+      premiumPromos: DEFAULT_PREMIUM_PROMOS,
+    }));
+    toast.success("Promociones restablecidas a las 4 ofertas oficiales actuales. Recuerda guardar cambios.");
+  }, [toast]);
+
   // ── Main Carousel handlers ────────────────────────────────────────────────
   const handleUploadMcImageDesktop = useCallback(
     (file: File) => uploadGenericImage(file, "main-carousel-desktop", setMcUploadProgress, setMcImagenDesktop, setMcUploading),
@@ -564,6 +578,14 @@ export default function OfertasAdmin() {
       return { ...prev, mainCarousel: arr };
     });
   }, []);
+
+  const handleResetMainCarouselToDefaults = useCallback(() => {
+    setConfig((prev) => ({
+      ...prev,
+      mainCarousel: DEFAULT_CAROUSEL_SLIDES,
+    }));
+    toast.success("Banners del carrusel restablecidos a las 4 ofertas oficiales actuales. Recuerda guardar cambios.");
+  }, [toast]);
 
   // ── Brand Banner handlers ───────────────────────────────────────────────
   const handleUploadBbImage = useCallback(
@@ -1104,13 +1126,23 @@ export default function OfertasAdmin() {
               </span>
             </div>
 
-            <button
-              type="button"
-              onClick={(e) => handleAddPremiumPromo(e)}
-              className="rounded-xl bg-[var(--admin-accent)] px-5 py-2.5 text-xs font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 shrink-0"
-            >
-              ＋ Agregar Promoción Premium
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleResetPremiumPromosToDefaults}
+                className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3.5 py-2.5 text-xs font-bold text-[var(--admin-text-hi)] hover:bg-[var(--admin-input-bg)] transition-all shrink-0"
+                title="Restablece las 4 promociones oficiales actuales"
+              >
+                🔄 Cargar 4 Promos Oficiales
+              </button>
+              <button
+                type="button"
+                onClick={(e) => handleAddPremiumPromo(e)}
+                className="rounded-xl bg-[var(--admin-accent)] px-5 py-2.5 text-xs font-bold text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 shrink-0"
+              >
+                ＋ Agregar Promoción Premium
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1299,9 +1331,22 @@ export default function OfertasAdmin() {
               </div>
             )}
 
-            <button type="submit" className="w-full bg-[var(--admin-accent)] text-white font-bold py-3 rounded-xl mt-4 hover:bg-[var(--admin-accent)]/90 transition-colors">
-              ➕ AGREGAR AL CARRUSEL
-            </button>
+            <p className="text-[11px] text-[var(--admin-text-lo)]/80 bg-white/70 p-2.5 rounded-lg border border-[var(--admin-border)]">
+              💡 <b>Flyers y Banners completos:</b> Si la imagen ya tiene texto, precios y diseño integrado, deja el <b>Título</b> y <b>Texto Botón</b> vacíos para que la imagen se luzca a pantalla completa sin elementos superpuestos.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 mt-4">
+              <button
+                type="button"
+                onClick={handleResetMainCarouselToDefaults}
+                className="w-full sm:w-auto px-4 py-3 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] font-bold text-xs text-[var(--admin-text-hi)] hover:bg-[var(--admin-input-bg)] transition-colors shrink-0"
+              >
+                🔄 Cargar 4 Banners Oficiales
+              </button>
+              <button type="submit" className="flex-1 bg-[var(--admin-accent)] text-white font-bold py-3 rounded-xl hover:bg-[var(--admin-accent)]/90 transition-colors">
+                ➕ AGREGAR AL CARRUSEL
+              </button>
+            </div>
           </form>
         </div>
 

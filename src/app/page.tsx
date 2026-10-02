@@ -22,6 +22,7 @@ import { SUCURSALES } from "@/lib/sucursales";
 import * as ls from "@/lib/ls";
 import { useToast } from "@/lib/toast-context";
 import { useCart } from "@/lib/cart-context";
+import { DEFAULT_CAROUSEL_SLIDES } from "@/lib/constants/ofertas";
 
 // Subcomponentes
 import HeroLanding from "@/components/catalogo/HeroLanding";
@@ -104,28 +105,7 @@ export default function LandingPage() {
   }, []);
 
   const handleSelectSucursal = (id: string) => {
-    const sucursal = SUCURSALES.find(s => s.id === id);
-    const nombre = sucursal ? sucursal.nombre : "";
-
-    if (cartItems.length > 0 && selectedSucursal && id !== selectedSucursal) {
-      const confirmacion = confirm(
-        "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
-      );
-      if (!confirmacion) return;
-      clearCart();
-    }
-
-    ls.setSelectedSucursal(id);
-    setSelectedSucursal(id);
-
-    // URL como SSOT: reflejar ?sucursal= en la URL sin recargar
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.set("sucursal", id);
-      window.history.replaceState(null, "", url.toString());
-    }
-
-    toast.success(`🏪 Catálogo de ${nombre} seleccionado`);
+    handleEnterCatalog(id);
   };
 
   const handleEnterCatalog = (id: string, targetCategory?: string) => {
@@ -237,23 +217,23 @@ export default function LandingPage() {
 
       {/* Sección de Ofertas Destacadas Semanales */}
       <OfertasDestacadasShowcase 
-        sucursalId={selectedSucursal} 
+        sucursalId={activeSucursalId} 
         onOpenSucursalModal={() => {
           setPendingCategory("");
           setIsModalOpen(true);
         }}
       />
 
-      {/* Brand Hero Carousel */}
-      {ofertasConfig?.mainCarousel && ofertasConfig.mainCarousel.filter(s => s.activo).length > 0 ? (
-        <section className="pb-6 px-5 max-w-[1200px] mx-auto">
-          <CustomHeroCarousel slides={ofertasConfig.mainCarousel.filter(s => s.activo)} />
-        </section>
-      ) : activePremiumBrands.length > 0 ? (
-        <section className="pb-6 px-5 max-w-[1200px] mx-auto">
-          <BrandHeroCarousel brands={activePremiumBrands} />
-        </section>
-      ) : null}
+      {/* Promo Carousel */}
+      {(() => {
+        const carouselSlides = ofertasConfig?.mainCarousel?.filter(s => s.activo) ?? [];
+        const slidesToShow = carouselSlides.length > 0 ? carouselSlides : DEFAULT_CAROUSEL_SLIDES;
+        return (
+          <section className="pb-6 px-5 max-w-[1200px] mx-auto">
+            <CustomHeroCarousel slides={slidesToShow} />
+          </section>
+        );
+      })()}
 
       {/* Brand Strip (Ads) */}
       <BrandStrip brands={brands} title="Marcas asociadas" dark />
@@ -463,11 +443,60 @@ export default function LandingPage() {
         onOpenUser={() => router.push("/cuenta")}
       />
 
+      {/* Floating Selected Branch Bar */}
+      {activeSucursalId && (
+        <div className="fixed bottom-[68px] md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-40 bg-[#110D0A]/95 backdrop-blur-md border border-[#E8302A]/50 rounded-2xl p-3 sm:p-3.5 shadow-[0_12px_32px_rgba(0,0,0,0.6)] flex items-center justify-between gap-3 text-white animate-fade-in ring-1 ring-white/10">
+          <div className="flex items-center gap-3 overflow-hidden min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-[#E8302A]/20 border border-[#E8302A]/40 flex items-center justify-center text-xl shrink-0">
+              🏪
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E8302A] animate-pulse" />
+                <span className="text-[10px] font-black uppercase text-[#E8302A] tracking-wider truncate">
+                  Catálogo Activo
+                </span>
+              </div>
+              <div className="text-xs sm:text-sm font-bold text-white truncate">
+                Sucursal {sucursalNombre}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setPendingCategory("");
+                setIsModalOpen(true);
+              }}
+              className="text-[11px] text-slate-300 hover:text-white underline font-semibold px-2 py-1 transition-colors cursor-pointer"
+            >
+              Cambiar
+            </button>
+            <button
+              type="button"
+              onClick={() => handleEnterCatalog(activeSucursalId)}
+              className="bg-[#E8302A] hover:bg-[#C4231E] text-white font-bebas text-sm sm:text-base tracking-wider px-3.5 py-1.5 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Ver Catálogo</span>
+              <span>⚡</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Modal de Selección de Sucursal */}
       <SucursalSelectorModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSelectSucursal={(id) => handleEnterCatalog(id)}
+        onSelectSucursal={(id) => {
+          if (pendingCategory) {
+            handleEnterCatalog(id, pendingCategory);
+          } else {
+            handleSelectSucursal(id);
+          }
+          setIsModalOpen(false);
+        }}
         selectedSucursal={selectedSucursal}
         categoryName={pendingCategory}
       />

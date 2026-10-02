@@ -76,7 +76,6 @@ import categoriaMapping from "@/lib/categoria_mapping.json";
 const catMap = (categoriaMapping as any).mapping || categoriaMapping;
 
 import { flyToCart } from "@/lib/flyToCart";
-import CategoryRail from "@/components/catalogo/CategoryRail";
 import { BrandHeroCarousel, CustomHeroCarousel } from "@/components/ads";
 
 interface CatalogoPageClientProps {
@@ -503,7 +502,15 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         if (savedSucursal !== urlSucursal) ls.setSelectedSucursal(urlSucursal);
       }
     } else if (savedSucursal) {
-      setSucursalId(savedSucursal);
+      const valid = SUCURSALES.some((s) => s.id === savedSucursal);
+      if (valid) {
+        setSucursalId(savedSucursal);
+        const params = new URLSearchParams(window.location.search);
+        params.set("sucursal", savedSucursal);
+        router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+      }
+    } else {
+      setIsBranchModalOpen(true);
     }
   }, [mounted, searchParams, router]);
 
@@ -696,9 +703,10 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       result = result.filter((p) => favoritos.includes(p.codigo));
     }
 
-    // 2. Filtrar por categoría (URL)
+    // 2. Filtrar por categoría (URL - tolerante a mayúsculas y minúsculas)
     if (categoria) {
-      result = result.filter((p) => p.categoria === categoria);
+      const catNorm = categoria.trim().toUpperCase();
+      result = result.filter((p) => (p.categoria || "").trim().toUpperCase() === catNorm);
     }
 
     // 3. Filtrar por marcas seleccionadas (Filtros Avanzados)
@@ -1381,11 +1389,13 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onIgnore={handleIgnoreSharedCart}
       />
 
-      {/* Branch Selector Premium (Top Banner) */}
-      <BranchBar
-        sucursalName={SUCURSALES.find(s => s.id === sucursalId)?.nombre || null}
-        onClick={() => setIsBranchModalOpen(true)}
-      />
+      {/* Branch Selector Premium (Top Banner - solo si aún no hay sucursal elegida) */}
+      {!sucursalId && (
+        <BranchBar
+          sucursalName={SUCURSALES.find(s => s.id === sucursalId)?.nombre || null}
+          onClick={() => setIsBranchModalOpen(true)}
+        />
+      )}
 
       {/* TopHeaderNav Accesible (Estilo Mercado Atlántida) */}
       <TopHeaderNav
@@ -1451,27 +1461,73 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         categorias={CATEGORIAS}
       />
 
-      <div className="page-wrapper" style={{ marginTop: "16px", marginBottom: "8px" }}>
-        {/* Guía Marti movida al Hero por estética y minimalismo */}
-      </div>
+      {/* Cuando el usuario busca o filtra categorías, ocultamos las secciones de marketing para llevarlo directo a los productos */}
+      {!search.trim() && (!activeCat || activeCat === "Todos") && activeTab === "inicio" && !urlSoloOfertas && (
+        <>
+          <Hero
+            onOpenCart={() => setCartOpen(true)}
+            cartQty={totalQty}
+            cartTotal={total}
+            onOpenUser={() => setUserPanelOpen(true)}
+            onShareCart={cartItems.length > 0 ? handleShareCart : undefined}
+            isLoggedIn={!!user}
+            userDisplayName={user?.displayName || alias || undefined}
+            searchQuery={search}
+            onSearchChange={setSearchDebounced}
+            onSearchSubmit={handleSelectSuggestion}
+            suggestedProducts={instantSuggestions}
+            recentSearches={recentSearches}
+            onSelectSuggestion={handleSelectSuggestion}
+            sucursalId={sucursalId}
+            onChangeBranch={() => setIsBranchModalOpen(true)}
+          />
 
-      <Hero
-        onOpenCart={() => setCartOpen(true)}
-        cartQty={totalQty}
-        cartTotal={total}
-        onOpenUser={() => setUserPanelOpen(true)}
-        onShareCart={cartItems.length > 0 ? handleShareCart : undefined}
-        isLoggedIn={!!user}
-        userDisplayName={user?.displayName || alias || undefined}
-        searchQuery={search}
-        onSearchChange={setSearchDebounced}
-        onSearchSubmit={handleSelectSuggestion}
-        suggestedProducts={instantSuggestions}
-        recentSearches={recentSearches}
-        onSelectSuggestion={handleSelectSuggestion}
-        sucursalId={sucursalId}
-        onChangeBranch={() => setIsBranchModalOpen(true)}
-      />
+          {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS 1:1) ── */}
+          {(() => {
+            const firestorePromos = ofertasConfig?.premiumPromos || [];
+            // Filtrar promos obsoletas/vencidas (caja para pizza, la banderita, etc.)
+            const expiredIds = ["PREMIUM-1782923459129", "PREMIUM-1784116773499"];
+            const validCustomPromos = firestorePromos.filter(p => 
+              !expiredIds.includes(p.id) &&
+              !p.imagen?.includes("WhatsApp Image 2026-06-05") &&
+              !p.titulo?.toLowerCase().includes("pizza") &&
+              !p.titulo?.toLowerCase().includes("banderita")
+            );
+            const rawPromos = DEFAULT_PREMIUM_PROMOS.map(defaultPromo => {
+              const custom = validCustomPromos.find(p => p.id === defaultPromo.id);
+              return custom || defaultPromo;
+            });
+
+            // Solo agregar otras promociones no vencidas
+            validCustomPromos.forEach(fp => {
+              if (!rawPromos.some(rp => rp.id === fp.id) && !expiredIds.includes(fp.id)) {
+                rawPromos.push(fp);
+              }
+            });
+
+            const promosVisibles = rawPromos
+              .filter(p => p.activa)
+              .filter(p => !p.sucursalId || p.sucursalId === sucursalId);
+
+            if (promosVisibles.length === 0) return null;
+
+            return (
+              <div className="page-wrapper px-0 sm:px-4 my-2 sm:my-3">
+                <CardFanPromoCarousel
+                  promos={promosVisibles}
+                  onSelectPromo={(prod) => setQuickViewProduct(prod)}
+                  onAddPromo={(prod, e) => handleAddProduct(prod, e)}
+                  onQtyChange={handleQtyChange}
+                  qtyMap={qtyMap}
+                />
+              </div>
+            );
+          })()}
+
+          {/* Ticker único */}
+          <Ticker />
+        </>
+      )}
 
       {/* Barra de despacho mayorista y cálculo de ahorro en vivo */}
       <ShippingThresholdBar
@@ -1480,73 +1536,17 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onOpenCart={() => setCartOpen(true)}
       />
 
-      {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS 1:1) ── */}
-      {(() => {
-        const firestorePromos = ofertasConfig?.premiumPromos || [];
-        // Filtrar promos obsoletas de prueba (WhatsApp Image 2026-06-05) y garantizar las 6 nuevas ofertas de ofertas/PROMO
-        const validCustomPromos = firestorePromos.filter(p => !p.imagen?.includes("WhatsApp Image 2026-06-05"));
-        const rawPromos = DEFAULT_PREMIUM_PROMOS.map(defaultPromo => {
-          const custom = validCustomPromos.find(p => p.id === defaultPromo.id);
-          return custom || defaultPromo;
-        });
-
-        // Agregar otras promociones activas válidas que no sean las 6 base
-        validCustomPromos.forEach(fp => {
-          if (!rawPromos.some(rp => rp.id === fp.id)) {
-            rawPromos.push(fp);
-          }
-        });
-
-        const promosVisibles = rawPromos
-          .filter(p => p.activa)
-          .filter(p => !p.sucursalId || p.sucursalId === sucursalId);
-
-        if (promosVisibles.length === 0) return null;
-
-        return (
-          <div className="w-full bg-[#0A0D18] my-2 sm:my-3">
-            <div className="page-wrapper px-0 sm:px-4">
-              <CardFanPromoCarousel
-                promos={promosVisibles}
-                onSelectPromo={(prod) => setQuickViewProduct(prod)}
-                onAddPromo={(prod, e) => handleAddProduct(prod, e)}
-                onQtyChange={handleQtyChange}
-                qtyMap={qtyMap}
-              />
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Ticker único */}
-      <Ticker />
-
       {/* Contenido del catálogo — max-width desktop */}
-      <div className="page-wrapper pt-4">
+      <div className="page-wrapper pt-3 sm:pt-4">
         {/* Tus Compras Frecuentes / Reorder Express */}
-        <SmartReorder
-          productos={productos}
-          pedidos={pedidos}
-          qtyMap={qtyMap}
-          onAddProduct={handleAddProduct}
-          onQtyChange={handleQtyChange}
-        />
-
-        {/* Category nav — Prioritario arriba para filtrado rápido */}
-        {categorias.length > 0 && (
-          <div className="w-full relative z-40 mb-4">
-            <CategoryRail
-              categorias={categorias}
-              activeCat={activeCat}
-              onSelect={(cat) => {
-                const params = new URLSearchParams(window.location.search);
-                if (cat === "Todos") params.delete("categoria");
-                else params.set("categoria", cat);
-                router.replace(`/catalogo?${params.toString()}`, { scroll: false });
-                scrollToGrid();
-              }}
-            />
-          </div>
+        {!search.trim() && (!activeCat || activeCat === "Todos") && (
+          <SmartReorder
+            productos={productos}
+            pedidos={pedidos}
+            qtyMap={qtyMap}
+            onAddProduct={handleAddProduct}
+            onQtyChange={handleQtyChange}
+          />
         )}
 
         <div className="flex gap-6 relative" style={{ alignItems: "flex-start" }}>
@@ -1561,7 +1561,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
                 onToggleVista={handleToggleVista}
                 searchQuery={search}
                 onSearchChange={setSearchDebounced}
-                marketAd={<AdSlotPlacement slot="results" category={activeCat === "Todos" ? undefined : activeCat} onBrandFilter={handleBrandFilter} />}
+                marketAd={null}
                 ofertasCount={ofertasConfig?.activa && ofertasConfig.productos ? ofertasConfig.productos.length : 0}
                 sortBy={urlSort}
                 onSortChange={handleSortChange}
@@ -1776,16 +1776,15 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onTabSelect={(tab: string) => {
           setActiveTab(tab);
           if (tab === "buscar") {
-            const searchInput = document.querySelector(".results-search-input") as HTMLInputElement;
+            const searchInput = (document.getElementById("header-search-input") || document.querySelector("input[placeholder*='buscando']")) as HTMLInputElement;
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
             if (searchInput) {
-              const rect = searchInput.getBoundingClientRect();
-              const scrollTop = window.scrollY || document.documentElement.scrollTop;
-              const targetY = rect.top + scrollTop - (window.innerHeight / 2) + (rect.height / 2);
-              window.scrollTo({
-                top: Math.max(0, targetY),
-                behavior: "smooth"
-              });
-              searchInput.focus();
+              setTimeout(() => {
+                searchInput.focus();
+              }, 250);
             }
           } else if (tab === "inicio") {
             const params = new URLSearchParams(window.location.search);

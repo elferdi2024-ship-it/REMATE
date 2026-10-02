@@ -211,6 +211,7 @@ export default function TopHeaderNav({
               </span>
 
               <input
+                id="header-search-input"
                 type="text"
                 value={inputValue}
                 onChange={handleInputChange}

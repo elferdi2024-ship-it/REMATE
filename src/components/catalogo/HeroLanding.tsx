@@ -88,7 +88,7 @@ export default function HeroLanding({
           <div className="flex items-center justify-center gap-2 mb-3.5">
             <span className="text-sm">🏪</span>
             <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              SELECCIONÁ TU SUCURSAL MÁS CERCANA:
+              ELEGÍ TU SUCURSAL PARA ENTRAR A SU CATÁLOGO:
             </span>
           </div>
 
@@ -100,16 +100,16 @@ export default function HeroLanding({
                   key={sucursal.id}
                   type="button"
                   onClick={() => {
-                    if (isSelected && onEnterCatalog) {
+                    if (onEnterCatalog) {
                       onEnterCatalog(sucursal.id);
                     } else if (onSelectSucursal) {
                       onSelectSucursal(sucursal.id);
                     }
                   }}
-                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 select-none active:scale-95 ${
+                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 select-none active:scale-95 group ${
                     isSelected
-                      ? "bg-[#EF233C] border-[#EF233C] text-white shadow-md shadow-[#EF233C]/30 ring-2 ring-white/20"
-                      : "bg-slate-950/80 border-slate-800 text-slate-300 hover:border-slate-600 hover:text-white"
+                      ? "bg-[#EF233C] border-[#EF233C] text-white shadow-md shadow-[#EF233C]/30 ring-2 ring-white/20 scale-[1.02]"
+                      : "bg-slate-950/80 border-slate-800 text-slate-300 hover:border-[#EF233C] hover:bg-slate-900 hover:text-white"
                   }`}
                 >
                   <span className="text-xs font-bold tracking-tight truncate w-full">
@@ -119,9 +119,9 @@ export default function HeroLanding({
                     {sucursal.direccion}
                   </span>
                   <span className={`text-[9px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md transition-all ${
-                    isSelected ? "bg-white text-[#EF233C] font-extrabold shadow-xs" : "bg-slate-800 text-slate-400"
+                    isSelected ? "bg-white text-[#EF233C] font-extrabold shadow-xs" : "bg-slate-800 text-slate-400 group-hover:bg-[#EF233C] group-hover:text-white"
                   }`}>
-                    {isSelected ? "Catálogo Activo ✓" : "Seleccionar"}
+                    {isSelected ? "Catálogo Activo ⚡" : "Ver Catálogo ⚡"}
                   </span>
                 </button>
               );
@@ -132,13 +132,18 @@ export default function HeroLanding({
         {/* Primary Action Buttons */}
         <div className="flex gap-3.5 flex-wrap justify-center mb-10 items-center">
           {selectedSucursal ? (
-            <Link
-              href={`/catalogo?sucursal=${selectedSucursal}`}
-              className="bg-[#EF233C] hover:bg-[#C01730] text-white rounded-xl px-7 py-3.5 font-bold text-sm sm:text-base tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-[#EF233C]/25 transition-all hover:-translate-y-0.5 active:scale-95"
+            <button
+              type="button"
+              onClick={() => {
+                if (onEnterCatalog) {
+                  onEnterCatalog(selectedSucursal);
+                }
+              }}
+              className="bg-[#EF233C] hover:bg-[#C01730] text-white rounded-xl px-7 py-3.5 font-bold text-sm sm:text-base tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-[#EF233C]/25 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer"
             >
               <span>🛒 Entrar al Catálogo de {sucursalNombre}</span>
               <span>→</span>
-            </Link>
+            </button>
           ) : (
             <button
               type="button"

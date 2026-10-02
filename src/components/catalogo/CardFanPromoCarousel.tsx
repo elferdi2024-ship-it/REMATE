@@ -88,7 +88,7 @@ export default function CardFanPromoCarousel({
                 <span className="text-sm sm:text-xl animate-bounce">🔥</span>
               </h2>
               <span className="bg-gradient-to-r from-[#EF233C] to-red-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-md shadow-red-500/40 border border-red-400/40 shrink-0">
-                6 PROMOS
+                {total} PROMOS
               </span>
             </div>
             <p className="text-[11px] sm:text-sm text-slate-300 font-bold tracking-tight mt-1 m-0">

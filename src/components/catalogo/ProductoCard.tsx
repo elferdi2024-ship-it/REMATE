@@ -103,6 +103,8 @@ export const ProductoCard = memo(function ProductoCard({
   const { bg: badgeBg, color: badgeColor } = getCatBadgeColors(producto.categoria);
   const isFresh = ["FRUTAS Y VERDURAS", "CARNES Y EMBUTIDOS", "LÁCTEOS Y HUEVOS"].includes(producto.categoria.toUpperCase());
 
+  const [imageError, setImageError] = React.useState(false);
+
   return (
     <article
       ref={cardRef}
@@ -153,8 +155,8 @@ export const ProductoCard = memo(function ProductoCard({
           </div>
         )}
 
-        {/* Imagen del Producto */}
-        {producto.imagen ? (
+        {/* Imagen del Producto con fallback elegante */}
+        {producto.imagen && !imageError ? (
           <Image
             src={producto.imagen}
             alt={producto.nombre}
@@ -162,9 +164,15 @@ export const ProductoCard = memo(function ProductoCard({
             sizes="(max-width: 768px) 50vw, 20vw"
             className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
+            onError={() => setImageError(true)}
           />
         ) : (
-          <span className="text-4xl transition-transform duration-300 group-hover:scale-110">{emoji}</span>
+          <div className="flex flex-col items-center justify-center p-2 text-center select-none">
+            <span className="text-3xl sm:text-4xl transition-transform duration-300 group-hover:scale-110">{emoji}</span>
+            <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mt-1 line-clamp-1 max-w-[90px]">
+              {producto.categoria.split(" ")[0]}
+            </span>
+          </div>
         )}
 
         {/* Badge Marca Patrocinada */}

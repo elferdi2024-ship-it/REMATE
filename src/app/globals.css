@@ -1429,13 +1429,10 @@ html.dark-mode body { background: var(--bg); }
   background: var(--bg2);
 }
 
-/* En mobile usamos la imagen portrait que es más cuadrada */
-@media (max-width: 600px) {
+/* En mobile y tablets el carrusel se desliza táctilmente de forma nativa; ocultamos la flecha flotante para no tapar productos */
+@media (max-width: 768px) {
   .cat-expand-arrow {
-    right: -10px;
-    width: 38px;
-    height: 38px;
-    font-size: 1.2rem;
+    display: none !important;
   }
 }
 
