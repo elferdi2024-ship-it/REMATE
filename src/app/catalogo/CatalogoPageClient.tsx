@@ -1366,24 +1366,6 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         <Suspense fallback={null}>
           <SharedCartWatcher onLoadCart={() => {}} />
         </Suspense>
-        <div className="page-wrapper" style={{ marginTop: "16px", marginBottom: "8px" }}>
-          {/* Guía Marti movida al Hero por estética y minimalismo */}
-        </div>
-        <Hero
-          onOpenCart={() => {}}
-          cartQty={0}
-          cartTotal={0}
-          onOpenUser={() => {}}
-          isLoggedIn={false}
-          searchQuery=""
-          onSearchChange={() => {}}
-          onSearchSubmit={() => {}}
-          suggestedProducts={[]}
-          recentSearches={[]}
-          onSelectSuggestion={() => {}}
-          sucursalId={sucursalId}
-          onChangeBranch={() => setIsBranchModalOpen(true)}
-        />
         <div className="page-wrapper">
           <AdSlotPlacement slot="hero" onBrandFilter={() => {}} />
         </div>
@@ -1555,24 +1537,6 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       {/* Cuando el usuario busca o filtra categorías, ocultamos las secciones de marketing para llevarlo directo a los productos */}
       {!search.trim() && (!activeCat || activeCat === "Todos") && activeTab === "inicio" && !urlSoloOfertas && (
         <>
-          <Hero
-            onOpenCart={() => setCartOpen(true)}
-            cartQty={totalQty}
-            cartTotal={total}
-            onOpenUser={() => setUserPanelOpen(true)}
-            onShareCart={cartItems.length > 0 ? handleShareCart : undefined}
-            isLoggedIn={!!user}
-            userDisplayName={user?.displayName || alias || undefined}
-            searchQuery={search}
-            onSearchChange={setSearchDebounced}
-            onSearchSubmit={handleSelectSuggestion}
-            suggestedProducts={instantSuggestions}
-            recentSearches={recentSearches}
-            onSelectSuggestion={handleSelectSuggestion}
-            sucursalId={sucursalId}
-            onChangeBranch={() => setIsBranchModalOpen(true)}
-          />
-
           {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS 1:1) — Controlada desde Admin ── */}
           {Boolean(ofertasConfig?.mostrarOfertasRemate) && (() => {
             const firestorePromos = ofertasConfig?.premiumPromos || [];

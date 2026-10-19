@@ -460,7 +460,7 @@ export default function TopHeaderNav({
       >
         <div
           ref={scrollRef}
-          className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1 scroll-smooth"
+          className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1 scroll-smooth touch-pan-x pr-8"
         >
           {/* Píldora: Todos */}
           <button
@@ -471,10 +471,10 @@ export default function TopHeaderNav({
               if (isFavoritosActive) onToggleFavoritos();
               onSelectCategory("Todos");
             }}
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ${
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 shadow-2xs ${
               isTodosActive
-                ? "bg-slate-900 text-white shadow-[0_4px_12px_-2px_rgba(15,23,42,0.25)]"
-                : "border border-slate-200/80 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                ? "bg-slate-900 text-white shadow-[0_4px_12px_-2px_rgba(15,23,42,0.25)] border border-slate-900"
+                : "border border-slate-200/90 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
             }`}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
@@ -491,10 +491,10 @@ export default function TopHeaderNav({
             type="button"
             aria-current={isOfertasActive ? "true" : "false"}
             onClick={onToggleOfertas}
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ${
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 shadow-2xs ${
               isOfertasActive
-                ? "bg-[#EF233C] text-white shadow-[0_4px_12px_-2px_rgba(239,35,60,0.35)]"
-                : "border border-red-200/80 bg-red-50/50 text-[#EF233C] hover:bg-red-50 hover:border-red-300"
+                ? "bg-[#EF233C] text-white shadow-[0_4px_12px_-2px_rgba(239,35,60,0.35)] border border-[#EF233C]"
+                : "border border-red-200/80 bg-red-50/70 text-[#EF233C] hover:bg-red-100/70"
             }`}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
@@ -509,10 +509,10 @@ export default function TopHeaderNav({
             type="button"
             aria-current={isFavoritosActive ? "true" : "false"}
             onClick={onToggleFavoritos}
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ${
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 shadow-2xs ${
               isFavoritosActive
-                ? "bg-[#EF233C] text-white shadow-[0_4px_12px_-2px_rgba(239,35,60,0.35)]"
-                : "border border-slate-200/80 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                ? "bg-[#EF233C] text-white shadow-[0_4px_12px_-2px_rgba(239,35,60,0.35)] border border-[#EF233C]"
+                : "border border-slate-200/90 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
             }`}
           >
             <svg
@@ -565,10 +565,10 @@ export default function TopHeaderNav({
                   if (isFavoritosActive) onToggleFavoritos();
                   onSelectCategory(cat);
                 }}
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all active:scale-95 shadow-2xs ${
                   isSelected
-                    ? "bg-slate-900 text-white shadow-[0_4px_12px_-2px_rgba(15,23,42,0.22)] font-bold"
-                    : "border border-slate-200/80 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                    ? "bg-slate-900 text-white shadow-[0_4px_12px_-2px_rgba(15,23,42,0.22)] font-bold border border-slate-900"
+                    : "border border-slate-200/90 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                 }`}
               >
                 <span className="text-[13px] leading-none">{emoji}</span>
@@ -577,6 +577,9 @@ export default function TopHeaderNav({
             );
           })}
         </div>
+
+        {/* Desvanecimiento derecho sutil para sugerir scroll lateral */}
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10" />
       </nav>
     </header>
   );

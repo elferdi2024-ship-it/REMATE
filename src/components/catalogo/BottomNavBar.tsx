@@ -72,7 +72,7 @@ const getTabIcon = (id: string, isSelected: boolean, cartQty: number) => {
           </svg>
           {cartQty > 0 && (
             <span
-              className="absolute -right-2.5 -top-1.5 z-10 flex min-w-[17px] h-[17px] items-center justify-center rounded-full bg-[#EF233C] px-1 text-[9.5px] font-black text-white shadow-xs ring-2 ring-white tabular-nums"
+              className="absolute -right-2.5 -top-1.5 z-10 flex min-w-[16px] h-[16px] items-center justify-center rounded-full bg-[#EF233C] px-1 text-[9px] font-black text-white shadow-xs ring-2 ring-white tabular-nums"
               style={{ fontFamily: "var(--font-mono)" }}
             >
               {cartQty > 99 ? "99+" : cartQty}
@@ -137,14 +137,14 @@ export default function BottomNavBar({
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-xl border-t border-slate-200/80 pb-[calc(env(safe-area-inset-bottom,0px)+6px)] pt-1 shadow-[0_-8px_30px_rgba(15,23,42,0.06)] md:hidden select-none">
-      <div className="grid grid-cols-5 items-center w-full max-w-md mx-auto">
+      <div className="flex items-center justify-around w-full max-w-md mx-auto h-[52px] px-1">
         {tabs.map((tab) => {
           const isSelected = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
-              className={`relative flex flex-col items-center justify-center min-h-[50px] py-1 transition-all active:scale-95 touch-manipulation ${
+              className={`flex-1 flex flex-col items-center justify-center h-full py-1 min-w-0 transition-all active:scale-95 touch-manipulation relative ${
                 isSelected ? "text-[#EF233C]" : "text-slate-400 hover:text-slate-600"
               }`}
               aria-label={tab.label}
@@ -160,7 +160,7 @@ export default function BottomNavBar({
               </div>
 
               <span
-                className={`text-[10.5px] tracking-tight mt-1 transition-colors ${
+                className={`text-[10px] sm:text-[10.5px] tracking-tight mt-1 truncate max-w-full transition-colors ${
                   isSelected ? "font-black text-[#EF233C]" : "font-semibold text-slate-500"
                 }`}
               >
