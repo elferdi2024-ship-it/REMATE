@@ -1785,9 +1785,9 @@ html.dark-mode body { background: var(--bg); }
   color: var(--text2); margin-bottom: 4px;
 }
 .field-input {
-  width: 100%; padding: 9px 11px;
+  width: 100%; padding: 10px 12px;
   border: 1.5px solid var(--border); border-radius: var(--r-sm);
-  font-family: var(--font-body), sans-serif; font-size: 15px;
+  font-family: var(--font-body), sans-serif; font-size: 16px; /* 16px previene el zoom automático de Safari iOS */
   outline: none; transition: border 0.15s, box-shadow 0.15s;
   color: var(--texto); background: var(--bg); margin-bottom: 8px;
 }
@@ -1818,6 +1818,7 @@ html.dark-mode body { background: var(--bg); }
   flex-shrink: 0;
   display: flex; align-items: center; gap: 12px;
   padding: 12px 14px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
   background: linear-gradient(180deg, #fefefe 0%, #f7f5f1 100%);
   border-top: 1.5px solid var(--border);
   box-shadow: 0 -4px 20px rgba(0,0,0,0.06);

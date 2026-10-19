@@ -35,7 +35,7 @@ export default function FloatCartBtn({
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 120, opacity: 0, scale: 0.95 }}
           transition={{ type: "spring", stiffness: 350, damping: 28 }}
-          className="fixed bottom-[74px] md:bottom-6 left-1/2 -translate-x-1/2 z-[95] w-[94%] max-w-sm flex flex-col gap-1.5 pointer-events-none"
+          className="fixed bottom-[calc(64px+env(safe-area-inset-bottom,8px))] md:bottom-6 left-1/2 -translate-x-1/2 z-[95] w-[94%] max-w-sm flex flex-col gap-1.5 pointer-events-none"
         >
           {/* Barra de Envio Gratis Flotante (Instacart / Amazon Fresh Standard) */}
           <div className="pointer-events-auto bg-white/95 backdrop-blur-xl border border-stone-200/90 shadow-[0_8px_24px_rgba(0,0,0,0.12)] rounded-2xl p-2.5 flex flex-col gap-1.5 transition-all">
