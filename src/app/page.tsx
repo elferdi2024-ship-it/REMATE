@@ -80,14 +80,21 @@ export default function LandingPage() {
     const sp = new URLSearchParams(window.location.search);
     const urlS = sp.get("sucursal");
     const saved = ls.getSelectedSucursal();
-    const effective = (urlS && SUCURSALES.some((s) => s.id === urlS)) ? urlS : (saved && SUCURSALES.some((s) => s.id === saved)) ? saved : "";
+    const effective = (urlS && SUCURSALES.some((s) => s.id === urlS)) 
+      ? urlS 
+      : (saved && SUCURSALES.some((s) => s.id === saved)) 
+        ? saved 
+        : "";
     if (effective) {
       setSelectedSucursal(effective);
-      if (urlS && urlS !== saved) {
-        ls.setSelectedSucursal(urlS);
+      if (urlS !== effective) {
+        ls.setSelectedSucursal(effective);
+        const params = new URLSearchParams(window.location.search);
+        params.set("sucursal", effective);
+        router.replace(`/?${params.toString()}`, { scroll: false });
       }
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -105,11 +112,7 @@ export default function LandingPage() {
   }, []);
 
   const handleSelectSucursal = (id: string) => {
-    handleEnterCatalog(id);
-  };
-
-  const handleEnterCatalog = (id: string, targetCategory?: string) => {
-    const sucursal = SUCURSALES.find(s => s.id === id);
+    const sucursal = SUCURSALES.find((s) => s.id === id);
     const nombre = sucursal ? sucursal.nombre : "";
 
     if (cartItems.length > 0 && selectedSucursal && id !== selectedSucursal) {
@@ -122,7 +125,29 @@ export default function LandingPage() {
 
     ls.setSelectedSucursal(id);
     setSelectedSucursal(id);
-    
+
+    const params = new URLSearchParams(window.location.search);
+    params.set("sucursal", id);
+    router.replace(`/?${params.toString()}`, { scroll: false });
+
+    toast.success(`🏪 Catálogo de ${nombre} seleccionado`);
+  };
+
+  const handleEnterCatalog = (id: string, targetCategory?: string) => {
+    const sucursal = SUCURSALES.find((s) => s.id === id);
+    const nombre = sucursal ? sucursal.nombre : "";
+
+    if (cartItems.length > 0 && selectedSucursal && id !== selectedSucursal) {
+      const confirmacion = confirm(
+        "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
+      );
+      if (!confirmacion) return;
+      clearCart();
+    }
+
+    ls.setSelectedSucursal(id);
+    setSelectedSucursal(id);
+
     const cat = targetCategory || pendingCategory;
     setPendingCategory("");
 
@@ -172,7 +197,7 @@ export default function LandingPage() {
           setPendingCategory("");
           setIsModalOpen(true);
         }}
-        onSelectSucursal={handleSelectSucursal}
+        onSelectSucursal={handleEnterCatalog}
         onEnterCatalog={handleEnterCatalog}
       />
 
@@ -355,7 +380,7 @@ export default function LandingPage() {
       {/* Branch Section */}
       <BranchSection
         selectedSucursal={activeSucursalId}
-        onSelectSucursal={handleSelectSucursal}
+        onSelectSucursal={handleEnterCatalog}
         onEnterCatalog={handleEnterCatalog}
       />
 
@@ -429,7 +454,7 @@ export default function LandingPage() {
               setIsModalOpen(true);
             }
           } else if (tab === "inicio") {
-            router.push("/");
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }
         }}
         cartQty={totalQty}
@@ -490,11 +515,7 @@ export default function LandingPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSelectSucursal={(id) => {
-          if (pendingCategory) {
-            handleEnterCatalog(id, pendingCategory);
-          } else {
-            handleSelectSucursal(id);
-          }
+          handleEnterCatalog(id, pendingCategory || undefined);
           setIsModalOpen(false);
         }}
         selectedSucursal={selectedSucursal}

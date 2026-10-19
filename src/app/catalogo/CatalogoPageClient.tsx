@@ -51,13 +51,16 @@ const FacturaModal = dynamic(() => import("@/components/catalogo/FacturaModal"),
 const QuickViewModal = dynamic(() => import("@/components/catalogo/QuickViewModal"), { ssr: false });
 const ShippingThresholdBar = dynamic(() => import("@/components/catalogo/ShippingThresholdBar"), { ssr: false });
 const QuickOrderModal = dynamic(() => import("@/components/catalogo/QuickOrderModal"), { ssr: false });
+const PedidoEnviarWhatsApp = dynamic(() => import("@/components/carrito/PedidoEnviarWhatsApp"), { ssr: false });
+import type { PedidoPendienteWA } from "@/components/carrito/PedidoEnviarWhatsApp";
 import {
   armarMensajeWA,
-  enviarWhatsApp,
-  enviarFacturaWhatsApp,
+  construirLinkWhatsApp,
+  abrirWhatsApp,
+  esMobile,
 } from "@/lib/whatsapp";
 import {
-  guardarPedidoGlobal,
+  guardarPedidoGlobalInstantaneo,
   guardarPedidoUsuario,
   incrementarStats,
 } from "@/lib/pedidos";
@@ -66,7 +69,14 @@ import { haptic } from "@/lib/haptic";
 import * as ls from "@/lib/ls";
 import { SUCURSALES, type MetodoEntrega } from "@/lib/sucursales";
 import { ZonaEnvio, calcularCostoEnvio, COSTOS_ENVIO } from "@/lib/envio-config";
-import { getSucursalWhatsApp } from "@/lib/sucursales-config";
+import {
+  getSucursalWhatsApp,
+  getSucursalWhatsAppCached,
+  prefetchSucursalWhatsApp,
+} from "@/lib/sucursales-config";
+
+const LS_PEDIDO_PENDIENTE = "elremate_pedido_pendiente_wa";
+const PEDIDO_PENDIENTE_TTL_MS = 1000 * 60 * 60 * 6; // 6 h
 import { db } from "@/lib/firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import type { Vista, CartItem, Producto, BulkPriceTier } from "@/types";
@@ -411,11 +421,35 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const [facturaModalOpen, setFacturaModalOpen] = useState(false);
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [pedidoPendiente, setPedidoPendiente] = useState<PedidoPendienteWA | null>(null);
+
+  // Restaurar pedido no confirmado (cliente volvió de WhatsApp o recargó la página)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(LS_PEDIDO_PENDIENTE);
+      if (!raw) return;
+      const p = JSON.parse(raw) as PedidoPendienteWA;
+      if (p?.url && Date.now() - p.creadoEn < PEDIDO_PENDIENTE_TTL_MS) {
+        setPedidoPendiente({ ...p, autoAbierto: true });
+      } else {
+        localStorage.removeItem(LS_PEDIDO_PENDIENTE);
+      }
+    } catch {
+      localStorage.removeItem(LS_PEDIDO_PENDIENTE);
+    }
+  }, []);
   const [metodoEntrega, setMetodoEntrega] = useState<MetodoEntrega>('envio');
   const [zonaEnvio, setZonaEnvio] = useState<ZonaEnvio>('canelones');
   const [sucursalId, setSucursalId] = useState<string | null>(() => {
-    return searchParams?.get("sucursal") || null;
+    const urlS = searchParams?.get("sucursal");
+    if (urlS && SUCURSALES.some((s) => s.id === urlS)) return urlS;
+    const saved = ls.getSelectedSucursal();
+    if (saved && SUCURSALES.some((s) => s.id === saved)) return saved;
+    return null;
   });
+  useEffect(() => {
+    prefetchSucursalWhatsApp(sucursalId);
+  }, [sucursalId]);
   const { config: tiendaConfig } = useTiendaConfig();
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -985,24 +1019,61 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   const handleFinalizado = useCallback(() => {
     clearCart();
     setClientNotes("");
-    toast.success("¡Pedido enviado correctamente! 🚀");
-  }, [clearCart, toast]);
+  }, [clearCart]);
 
-  const handleConfirmSend = useCallback(async () => {
-    setCartOpen(false);
-    setActiveOrderId(null); // Reset anterior
+  const persistPedidoPendiente = useCallback((p: PedidoPendienteWA | null) => {
+    setPedidoPendiente(p);
+    try {
+      if (p) localStorage.setItem(LS_PEDIDO_PENDIENTE, JSON.stringify(p));
+      else localStorage.removeItem(LS_PEDIDO_PENDIENTE);
+    } catch {
+      /* storage lleno / modo privado */
+    }
+  }, []);
 
-    const nombre = alias || "Cliente";
-    const tel = telefono || "No proporcionado";
+  const handleConfirmSend = useCallback(() => {
+    if (cartItems.length === 0) return;
 
-    // Build delivery info based on method
-    let deliveryDireccion = direccion || "";
+    const nombre = alias.trim();
+    const tel = telefono.trim();
+
+    // ── Validación previa (sin cerrar el carrito) ──
+    const focusField = (id: string) => {
+      setTimeout(() => {
+        const el = document.getElementById(id) as HTMLInputElement | null;
+        el?.focus();
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
+    };
+    if (!sucursalId) {
+      toast.error("Elegí una sucursal para enviar el pedido");
+      return;
+    }
+    if (nombre.length < 2) {
+      toast.error("Escribí tu nombre o el de tu negocio");
+      focusField("clientName");
+      return;
+    }
+    if (metodoEntrega === "envio" && direccion.trim().length < 4) {
+      toast.error("Falta la dirección de entrega");
+      focusField("clientDir");
+      return;
+    }
+
+    haptic.send();
+
+    // Desktop + número aún no cacheado: pre-abrimos la pestaña DENTRO del click
+    const cachedPhone = getSucursalWhatsAppCached(sucursalId);
+    const preopened: Window | null =
+      !cachedPhone && !esMobile() ? window.open("", "_blank") : null;
+
+    // ── Datos de entrega ──
+    let deliveryDireccion = direccion.trim();
     let deliveryNotas = clientNotes || "";
     const selectedSucursal = SUCURSALES.find((s) => s.id === sucursalId);
 
-    if (metodoEntrega === 'retiro' && selectedSucursal) {
+    if (metodoEntrega === "retiro" && selectedSucursal) {
       deliveryDireccion = `RETIRO EN LOCAL: ${selectedSucursal.nombre} — ${selectedSucursal.direccion} (Tel: ${selectedSucursal.telefono})`;
-      // Prepend delivery method to notes
       const retiroLine = `🏪 RETIRO EN SUCURSAL: ${selectedSucursal.nombre} (${selectedSucursal.direccion})`;
       deliveryNotas = deliveryNotas ? `${retiroLine}\n${deliveryNotas}` : retiroLine;
     } else {
@@ -1012,7 +1083,6 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       deliveryNotas = deliveryNotas ? `${envioLine}\n${deliveryNotas}` : envioLine;
     }
 
-    // 1. Guardar pedido en Firebase (Global y Local) + Incrementar Stats
     const pedidoItems = cartItems.map((i) => ({
       codigo: i.codigo,
       nombre: i.nombre,
@@ -1020,84 +1090,107 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       precioUnitario: i.precio,
     }));
 
+    // ── 1. ID instantáneo + guardado en segundo plano (no bloquea WhatsApp) ──
+    let orderId = `L${Date.now().toString().slice(-8)}`;
     try {
-      setIsProcessing(true);
-      
-      let orderId = `L-${Date.now().toString().slice(-6)}`; // Fallback ID
-      
-      // 1. Guardar pedido en Firebase Global (admin-visible)
-      try {
-        const generatedId = await guardarPedidoGlobal({
-          uid: user?.uid ?? null,
-          clienteNombre: nombre,
-          clienteTelefono: tel,
-          clienteDireccion: deliveryDireccion || undefined,
-          items: pedidoItems,
-          total: totalConEnvio,
-          notas: deliveryNotas || undefined,
-          status: "no_leido",
-          sucursalId: sucursalId || null,
-        });
-        orderId = generatedId;
-        setActiveOrderId(orderId);
-      } catch (fErr) {
-        console.error("❌ Firestore: Error al guardar pedido global:", fErr);
-      }
-
-      // Stats (No bloqueante)
-      const codigos = cartItems.map((i) => i.codigo);
-      incrementarStats(codigos).catch((err) =>
-        console.warn("⚠️ Stats: Error al incrementar stats:", err)
-      );
-      
-      // 2. Si hay usuario, guardar en su historial privado (Cloud)
-      if (user) {
-        guardarPedidoUsuario(user.uid, {
-          items: pedidoItems,
-          total: totalConEnvio,
-          notas: deliveryNotas || undefined,
-          mensajeWA: "", 
-        }).catch((err) => console.error("❌ Firestore: Error al guardar pedido usuario:", err));
-      }
-
-      // 3. Guardar siempre en local (resiliencia total)
-      try {
-        saveLocalPedido(cartItems, totalConEnvio, deliveryNotas || undefined);
-      } catch (lErr) {
-        console.error("❌ LocalStorage: Error al guardar historial local:", lErr);
-      }
-
-      // 4. GENERAR Y ENVIAR POR WHATSAPP (Lo más importante)
-      try {
-        const telefonoWhatsApp = await getSucursalWhatsApp(sucursalId);
-
-        await enviarFacturaWhatsApp(
-          telefonoWhatsApp,
-          nombre,
-          tel,
-          cartItems,
-          deliveryNotas || undefined,
-          "/logo.png",
-          orderId,
-          deliveryDireccion,
-          false,
-          costoEnvio
-        );
-      } catch (waErr) {
-        console.error("❌ WhatsApp: Error al enviar factura:", waErr);
-        throw new Error("No se pudo descargar el comprobante del pedido.");
-      }
-
-      // Reset delivery state after success (preserve selected sucursal)
-      setMetodoEntrega('envio');
-      handleFinalizado();
-    } catch (err: any) {
-      console.error("🚨 Error crítico en flujo de pedido:", err);
-      toast.error(err.message || "Hubo un problema al procesar el pedido");
-    } finally {
-      setIsProcessing(false);
+      const { id, done } = guardarPedidoGlobalInstantaneo({
+        uid: user?.uid ?? null,
+        clienteNombre: nombre,
+        clienteTelefono: tel || "No proporcionado",
+        clienteDireccion: deliveryDireccion || undefined,
+        items: pedidoItems,
+        total: totalConEnvio,
+        notas: deliveryNotas || undefined,
+        status: "no_leido",
+        sucursalId,
+      });
+      orderId = id;
+      done.catch((err) => console.error("❌ Firestore: Error al guardar pedido global:", err));
+    } catch (fErr) {
+      console.error("❌ Firestore: Error preparando pedido global:", fErr);
     }
-  }, [alias, telefono, direccion, metodoEntrega, zonaEnvio, costoEnvio, totalConEnvio, sucursalId, cartItems, clientNotes, user, saveLocalPedido, handleFinalizado, toast]);
+    setActiveOrderId(orderId);
+
+    const numeroVisible = orderId.slice(-6).toUpperCase();
+    const mensaje = armarMensajeWA(
+      nombre,
+      tel || "No proporcionado",
+      cartItems,
+      deliveryNotas || undefined,
+      numeroVisible,
+      deliveryDireccion,
+      costoEnvio
+    );
+
+    incrementarStats(cartItems.map((i) => i.codigo)).catch((err) =>
+      console.warn("⚠️ Stats: Error al incrementar stats:", err)
+    );
+    if (user) {
+      guardarPedidoUsuario(user.uid, {
+        items: pedidoItems,
+        total: totalConEnvio,
+        notas: deliveryNotas || undefined,
+        mensajeWA: mensaje,
+      }).catch((err) => console.error("❌ Firestore: Error al guardar pedido usuario:", err));
+    }
+    try {
+      saveLocalPedido(cartItems, totalConEnvio, deliveryNotas || undefined);
+    } catch (lErr) {
+      console.error("❌ LocalStorage: Error al guardar historial local:", lErr);
+    }
+
+    const pendiente: PedidoPendienteWA = {
+      id: orderId,
+      url: "",
+      mensaje,
+      total: totalConEnvio,
+      cantidadProductos: cartItems.length,
+      entregaLabel: metodoEntrega === "retiro" ? "🏪 Retiro en local" : "🚚 Envío a domicilio",
+      sucursalNombre: selectedSucursal?.nombre ?? "—",
+      creadoEn: Date.now(),
+      autoAbierto: true,
+      items: [...cartItems],
+    };
+
+    const lanzar = (phone: string) => {
+      const url = construirLinkWhatsApp(phone, mensaje);
+      persistPedidoPendiente({ ...pendiente, url });
+      setCartOpen(false);
+      handleFinalizado();
+      setMetodoEntrega("envio");
+      abrirWhatsApp(url, preopened);
+    };
+
+    // ── 2. Abrir WhatsApp YA (dentro del gesto del usuario) ──
+    if (cachedPhone) {
+      lanzar(cachedPhone);
+      return;
+    }
+    setIsProcessing(true);
+    getSucursalWhatsApp(sucursalId, 2000)
+      .then(lanzar)
+      .finally(() => setIsProcessing(false));
+  }, [alias, telefono, direccion, metodoEntrega, zonaEnvio, costoEnvio, totalConEnvio, sucursalId, cartItems, clientNotes, user, saveLocalPedido, handleFinalizado, persistPedidoPendiente, toast]);
+
+  const handlePedidoConfirmado = useCallback(() => {
+    persistPedidoPendiente(null);
+    toast.success("¡Gracias! Tu pedido fue enviado al local 🚀");
+  }, [persistPedidoPendiente, toast]);
+
+  const handlePedidoCerrar = useCallback(() => {
+    persistPedidoPendiente(null);
+  }, [persistPedidoPendiente]);
+
+  const handlePedidoModificar = useCallback((items: CartItem[]) => {
+    items.forEach((item) => {
+      for (let i = 0; i < item.cantidad; i++) {
+        addItem({ codigo: item.codigo, nombre: item.nombre, precio: item.precio });
+      }
+    });
+    persistPedidoPendiente(null);
+    setCartOpen(true);
+    toast.info("Productos cargados en el carrito para modificar.");
+  }, [addItem, persistPedidoPendiente, toast]);
 
   // Send WA flow
   const handleSendWA = useCallback(() => {
@@ -1389,13 +1482,11 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onIgnore={handleIgnoreSharedCart}
       />
 
-      {/* Branch Selector Premium (Top Banner - solo si aún no hay sucursal elegida) */}
-      {!sucursalId && (
-        <BranchBar
-          sucursalName={SUCURSALES.find(s => s.id === sucursalId)?.nombre || null}
-          onClick={() => setIsBranchModalOpen(true)}
-        />
-      )}
+      {/* Branch Selector Premium (Top Banner) */}
+      <BranchBar
+        sucursalName={SUCURSALES.find(s => s.id === sucursalId)?.nombre || null}
+        onClick={() => setIsBranchModalOpen(true)}
+      />
 
       {/* TopHeaderNav Accesible (Estilo Mercado Atlántida) */}
       <TopHeaderNav
@@ -1851,6 +1942,14 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         productos={productos}
         qtyMap={qtyMap}
         onQtyChange={handleQtyChange}
+      />
+
+      {/* Último paso: enviar pedido por WhatsApp */}
+      <PedidoEnviarWhatsApp
+        pedido={pedidoPendiente}
+        onConfirmado={handlePedidoConfirmado}
+        onCerrar={handlePedidoCerrar}
+        onModificar={handlePedidoModificar}
       />
     </div>
   );

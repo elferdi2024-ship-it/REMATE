@@ -45,7 +45,7 @@ export default function BranchSection({
             ELEGÍ TU <span className="text-[#E8302A]">SUCURSAL Y CATÁLOGO</span>
           </h2>
           <p className="font-serif italic text-[1.1rem] text-[#5C4A35] max-w-[680px] mx-auto leading-relaxed">
-            Cada sucursal cuenta con su propio catálogo digital, stock disponible y precios mayoristas. Tocá tu sucursal para ingresar inmediatamente a su catálogo de ofertas.
+            Cada sucursal cuenta con su propio catálogo digital, stock disponible y precios mayoristas. Tocá tu sucursal para seleccionar e ingresar a su catálogo de ofertas.
           </p>
           {selectedSucursal && activeSucursal && (
             <div className="inline-flex items-center gap-2 bg-[#E8302A]/10 border border-[#E8302A]/40 rounded-full px-6 py-2.5 mt-5 text-[0.85rem] font-bold text-[#E8302A] shadow-[0_4px_16px_rgba(232,48,42,0.12)] animate-fade-in">
@@ -81,7 +81,7 @@ export default function BranchSection({
                     </div>
                     {isActive ? (
                       <span className="bg-[#E8302A] text-white text-[0.65rem] font-black uppercase py-1 px-3 rounded-full tracking-[1.5px] shadow-[0_2px_8px_rgba(232,48,42,0.3)] animate-pulse">
-                        ✓ CATÁLOGO SELECCIONADO
+                        ✓ CATÁLOGO ACTIVO
                       </span>
                     ) : (
                       <span className="bg-[#F5F0E8] text-[#5C4A35] text-[0.65rem] font-bold uppercase py-1 px-3 rounded-full tracking-[1px] group-hover:bg-[#E8302A] group-hover:text-white transition-colors">

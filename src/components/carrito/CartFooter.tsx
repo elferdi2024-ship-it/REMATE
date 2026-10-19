@@ -1,10 +1,9 @@
 // filepath: src/components/carrito/CartFooter.tsx
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import DeliveryMethodSelector from './DeliveryMethodSelector';
-import DeliverySlotScheduler from './DeliverySlotScheduler';
 import type { MetodoEntrega } from '@/lib/sucursales';
 import type { ZonaEnvio } from '@/lib/envio-config';
 
@@ -65,27 +64,6 @@ export default function CartFooter({
 }: CartFooterProps) {
   const isDisabled = isProcessing || isTiendaCerrada || !sucursalId;
   const sub = subtotal ?? (total - costoEnvio);
-  const [selectedSlotId, setSelectedSlotId] = useState<string | null>("slot-1");
-
-  const deliverySlots = useMemo(() => {
-    const today = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-
-    const toDateKey = (d: Date) => d.toISOString().split("T")[0];
-    const todayKey = toDateKey(today);
-    const tomorrowKey = toDateKey(tomorrow);
-
-    return [
-      { id: "slot-1", date: todayKey, dateLabel: "Hoy", timeRange: "10:00 - 12:00", available: true, capacityPercent: 40 },
-      { id: "slot-2", date: todayKey, dateLabel: "Hoy", timeRange: "12:00 - 14:00", available: true, capacityPercent: 85 },
-      { id: "slot-3", date: todayKey, dateLabel: "Hoy", timeRange: "14:00 - 16:00", available: true, capacityPercent: 60, isExpress: true },
-      { id: "slot-4", date: todayKey, dateLabel: "Hoy", timeRange: "16:00 - 18:00", available: false, capacityPercent: 100 },
-      { id: "slot-5", date: tomorrowKey, dateLabel: "Mañana", timeRange: "09:00 - 11:00", available: true, capacityPercent: 20 },
-      { id: "slot-6", date: tomorrowKey, dateLabel: "Mañana", timeRange: "11:00 - 13:00", available: true, capacityPercent: 50 },
-      { id: "slot-7", date: tomorrowKey, dateLabel: "Mañana", timeRange: "15:00 - 17:00", available: true, capacityPercent: 30, isExpress: true },
-    ];
-  }, []);
 
   return (
     <>
@@ -104,36 +82,33 @@ export default function CartFooter({
           subtotal={sub}
         />
 
-        {/* Reserva de Franja Horaria / Slot Scheduler */}
-        <DeliverySlotScheduler
-          slots={deliverySlots}
-          selectedSlotId={selectedSlotId}
-          tipoEntrega={metodoEntrega}
-          onSelectSlot={(slot) => {
-            setSelectedSlotId(slot.id);
-            if (onClientNotesChange) {
-              const prev = clientNotes || "";
-              const slotInfo = `[Franja Horaria: ${slot.dateLabel} ${slot.timeRange} hs]`;
-              if (!prev.includes("[Franja Horaria:")) {
-                onClientNotesChange(`${slotInfo} ${prev}`.trim());
-              } else {
-                onClientNotesChange(prev.replace(/\[Franja Horaria:[^\]]+\]/, slotInfo));
-              }
-            }
-          }}
-        />
+        {/* Banner informativo de método */}
+        {metodoEntrega === 'retiro' ? (
+          <div className="my-2 rounded-xl bg-emerald-50 border border-emerald-200/80 p-2.5 text-xs text-emerald-900 flex items-center gap-2">
+            <span className="text-base">🏪</span>
+            <span>Retiro inmediato en el mostrador de la sucursal (sin costo de envío).</span>
+          </div>
+        ) : (
+          <div className="my-2 rounded-xl bg-blue-50 border border-blue-200/80 p-2.5 text-xs text-blue-900 flex items-center gap-2">
+            <span className="text-base">🚚</span>
+            <span>Coordinás día y hora exacta de entrega por WhatsApp al enviar el pedido.</span>
+          </div>
+        )}
 
         {/* Fila nombre + teléfono */}
         <div className="cart-form-row">
           <div>
             <label className="field-label" htmlFor="clientName">
-              👤 Nombre / Negocio
+              👤 Nombre / Negocio <span style={{ color: '#EF233C' }}>*</span>
             </label>
             <input
               id="clientName"
               type="text"
               className="field-input"
               placeholder="Ej: Don Pepe"
+              autoComplete="name"
+              enterKeyHint="next"
+              required
               value={alias}
               onChange={(e) => onAliasChange(e.target.value)}
             />
@@ -144,7 +119,9 @@ export default function CartFooter({
             </label>
             <input
               id="clientTel"
-              type="text"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
               className="field-input"
               placeholder="099..."
               value={telefono}
@@ -157,13 +134,15 @@ export default function CartFooter({
         {metodoEntrega === 'envio' && onDireccionChange && (
           <div>
             <label className="field-label" htmlFor="clientDir">
-              📍 Dirección de entrega
+              📍 Dirección de entrega <span style={{ color: '#EF233C' }}>*</span>
             </label>
             <input
               id="clientDir"
               type="text"
               className="field-input"
               placeholder="Calle, Barrio, Ciudad..."
+              autoComplete="street-address"
+              required
               value={direccion || ''}
               onChange={(e) => onDireccionChange(e.target.value)}
             />
@@ -240,7 +219,7 @@ export default function CartFooter({
           type="button"
         >
           {isProcessing ? (
-            <span className="btn-wa-loading">Enviando…</span>
+            <span className="btn-wa-loading">Abriendo WhatsApp…</span>
           ) : isTiendaCerrada ? (
             <span className="btn-wa-closed">Pausado</span>
           ) : !sucursalId ? (

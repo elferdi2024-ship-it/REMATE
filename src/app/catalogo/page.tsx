@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import CatalogoPageClient from "./CatalogoPageClient";
+import { ProductoSkeleton } from "@/components/catalogo/ProductoSkeleton";
 
 export const dynamic = "force-dynamic";
 
@@ -11,5 +13,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CatalogoPage() {
-  return <CatalogoPageClient />;
+  return (
+    <Suspense fallback={<ProductoSkeleton />}>
+      <CatalogoPageClient />
+    </Suspense>
+  );
 }

@@ -30,8 +30,9 @@ service cloud.firestore {
              data.items.size() > 0 &&
              data.items.size() <= 100 &&
              (!('clienteNombre' in data) || data.clienteNombre is string) &&
-             (!('sucursalId' in data) || data.sucursalId is string) &&
-             (!('estado' in data) || data.estado in ['pendiente', 'nuevo', 'En Preparación']);
+             (!('sucursalId' in data) || data.sucursalId == null || data.sucursalId is string) &&
+             (!('estado' in data) || data.estado in ['pendiente', 'nuevo', 'En Preparación', 'no_leido']) &&
+             (!('status' in data) || data.status in ['pendiente', 'nuevo', 'En Preparación', 'no_leido', 'cargado']);
     }
 
     // Catálogo: Cualquiera lee, staff escribe

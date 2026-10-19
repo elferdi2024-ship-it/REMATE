@@ -52,7 +52,7 @@ export default function TopHeaderNav({
   onOpenBranchModal,
   categorias,
 }: TopHeaderNavProps) {
-  const sucursalObj = SUCURSALES.find((s) => s.id === sucursalId) || SUCURSALES[0];
+  const sucursalObj = sucursalId ? SUCURSALES.find((s) => s.id === sucursalId) || null : null;
   const [inputValue, setInputValue] = useState(searchQuery || "");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchBoxRef = useRef<HTMLDivElement>(null);
@@ -143,8 +143,8 @@ export default function TopHeaderNav({
             title="Cambiar sucursal"
           >
             <span className="text-xs">🏪</span>
-            <span suppressHydrationWarning className="max-w-[70px] sm:max-w-none truncate">{sucursalObj.nombre}</span>
-            <span className="text-[9px] text-red-700 underline font-extrabold hidden sm:inline">cambiar</span>
+            <span suppressHydrationWarning className="max-w-[70px] sm:max-w-none truncate">{sucursalObj ? sucursalObj.nombre : "Elegir sucursal"}</span>
+            <span className="text-[9px] text-red-700 underline font-extrabold hidden sm:inline">{sucursalObj ? "cambiar" : "elegir"}</span>
           </button>
         </div>
 

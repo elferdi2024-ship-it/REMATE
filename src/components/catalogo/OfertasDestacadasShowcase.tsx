@@ -81,6 +81,12 @@ export default function OfertasDestacadasShowcase({
   const handleAddPromo = (promo: PremiumPromo, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!sucursalId && onOpenSucursalModal) {
+      onOpenSucursalModal();
+      return;
+    }
+
     haptic.add();
 
     addItem({
@@ -156,7 +162,7 @@ export default function OfertasDestacadasShowcase({
 
           {showViewAll && (
             <Link
-              href="/ofertas"
+              href={sucursalId ? `/ofertas?sucursal=${sucursalId}` : "/ofertas"}
               className="inline-flex items-center gap-1 text-[11px] font-extrabold text-[#EF233C] hover:text-[#C01730] bg-red-50 hover:bg-red-100 border border-red-200 px-2.5 py-1 rounded-lg transition-all uppercase tracking-wider"
             >
               <span>Ver todas</span>

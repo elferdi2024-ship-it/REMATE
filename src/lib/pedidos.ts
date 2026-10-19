@@ -1,6 +1,7 @@
 import {
   collection,
   addDoc,
+  setDoc,
   query,
   where,
   orderBy,
@@ -79,6 +80,31 @@ export async function guardarPedidoGlobal(
     fecha: Timestamp.now(),
   });
   return docRef.id;
+}
+
+/**
+ * Igual que guardarPedidoGlobal pero NO bloquea: el ID se genera localmente
+ * y la escritura queda en cola (Firestore la sincroniza aunque haya mala señal).
+ * Devuelve el ID de inmediato + la promesa de escritura.
+ */
+export function guardarPedidoGlobalInstantaneo(
+  pedido: PedidoGlobal
+): { id: string; done: Promise<void> } {
+  const ref = doc(collection(db, "pedidos_globales"));
+  const done = setDoc(ref, {
+    uid: pedido.uid ?? null,
+    clienteNombre: pedido.clienteNombre,
+    clienteTelefono: pedido.clienteTelefono ?? "",
+    clienteDireccion: pedido.clienteDireccion ?? "",
+    items: pedido.items,
+    total: pedido.total,
+    notas: pedido.notas ?? "",
+    status: pedido.status || "no_leido",
+    sucursalId: pedido.sucursalId ?? null,
+    canal: "whatsapp",
+    fecha: Timestamp.now(),
+  });
+  return { id: ref.id, done };
 }
 
 export async function actualizarEstadoPedido(

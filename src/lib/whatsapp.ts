@@ -59,47 +59,86 @@ export function armarMensajeWA(
   const totalFinal = subtotalItems + costoEnvio;
   const lines: string[] = [];
 
-  lines.push(`🧾 *PEDIDO MAYORISTA EL REMATE #${num}*`);
+  lines.push(`🧾 *PEDIDO EL REMATE #${num}*`);
   lines.push(`📅 ${fecha}`);
-  lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
-
-  lines.push(`*👤 DATOS DEL CLIENTE*`);
-  lines.push(`• *Nombre / Negocio:* ${nombre.trim() || "Cliente"}`);
-  lines.push(`• *Teléfono:* ${telefono.trim() || "No proporcionado"}`);
-  if (direccion?.trim()) {
-    lines.push(`• *Dirección:* ${direccion.trim()}`);
+  lines.push(`━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`👤 *Cliente:* ${nombre.trim() || "Cliente"}`);
+  if (telefono.trim() && telefono !== "No proporcionado") {
+    lines.push(`📱 *Tel:* ${telefono.trim()}`);
   }
-  lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
-
-  lines.push(`*🛒 PRODUCTOS DE TU PEDIDO (${items.length})*`);
-  lines.push(``);
+  if (direccion?.trim()) {
+    lines.push(`📍 *Entrega:* ${direccion.trim()}`);
+  }
+  lines.push(`━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`🛒 *DETALLE (${items.length} items):*`);
   for (const item of items) {
     const sub = item.precio * item.cantidad;
-    lines.push(`📦 *${item.nombre}*`);
-    lines.push(`   ↳ SKU: \`${item.codigo}\` | Cantidad: ${item.cantidad} u. x ${formatPrecio(item.precio)} = *${formatPrecio(sub)}*`);
+    lines.push(`• *${item.cantidad}x* ${item.nombre} → *${formatPrecio(sub)}*`);
   }
-
-  lines.push(``);
-  lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
-  lines.push(`*💵 RESUMEN DE COMPRA*`);
-  lines.push(`• Subtotal Productos: *${formatPrecio(subtotalItems)}*`);
+  lines.push(`━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`💵 *Subtotal:* ${formatPrecio(subtotalItems)}`);
   if (costoEnvio > 0) {
-    lines.push(`• Envío: *${formatPrecio(costoEnvio)}*`);
+    lines.push(`🚚 *Envío:* ${formatPrecio(costoEnvio)}`);
   } else {
-    lines.push(`• Envío: *¡GRATIS! ($0)*`);
+    lines.push(`🚚 *Envío:* ¡GRATIS!`);
   }
-  lines.push(`💰 *TOTAL A PAGAR: ${formatPrecio(totalFinal)}*`);
+  lines.push(`💰 *TOTAL: ${formatPrecio(totalFinal)}*`);
 
   if (notas?.trim()) {
-    lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
-    lines.push(`📝 *INDICACIONES DE ENTREGA Y PREFERENCIAS:*`);
-    lines.push(`${notas.trim()}`);
+    lines.push(`━━━━━━━━━━━━━━━━━━━━`);
+    lines.push(`📝 *Notas:* ${notas.trim()}`);
   }
 
-  lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
-  lines.push(`⚡ _Pedido enviado mediante El Remate Web Express_`);
+  lines.push(`━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`⚡ _Pedido enviado desde elremate.uy_`);
 
   return lines.join("\n");
+}
+
+// ── Link + apertura directa (checkout) ───────────────────────────────────────
+
+/** Normaliza a formato internacional sin "+" (asume Uruguay si empieza con 0). */
+export function normalizarTelefonoWA(numero: string): string {
+  let digits = (numero || "").replace(/\D/g, "");
+  if (digits.startsWith("0")) digits = `598${digits.slice(1)}`;
+  return digits;
+}
+
+/**
+ * Link universal wa.me: en celular abre la app de WhatsApp directo al chat,
+ * en PC abre WhatsApp Desktop / Web. Siempre con el mensaje pre-cargado.
+ */
+export function construirLinkWhatsApp(numero: string, mensaje: string): string {
+  const phone = normalizarTelefonoWA(numero || process.env.NEXT_PUBLIC_WA_NUMBER || "");
+  return `https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`;
+}
+
+/**
+ * Abre WhatsApp. DEBE llamarse dentro del gesto del usuario (click) o con una
+ * ventana pre-abierta, si no el navegador lo bloquea como pop-up.
+ * - Mobile: navega en la misma pestaña (el SO intercepta y abre la app).
+ * - Desktop: nueva pestaña (usa `preopened` si existe).
+ */
+export function abrirWhatsApp(url: string, preopened?: Window | null): void {
+  if (typeof window === "undefined") return;
+  if (preopened && !preopened.closed) {
+    preopened.location.href = url;
+    return;
+  }
+  if (isMobile()) {
+    window.location.href = url;
+    return;
+  }
+  const win = window.open(url, "_blank");
+  if (win) {
+    win.opener = null;
+  } else {
+    window.location.href = url;
+  }
+}
+
+export function esMobile(): boolean {
+  return isMobile();
 }
 
 // ── Función principal ────────────────────────────────────────────────────────
