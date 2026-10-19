@@ -1573,8 +1573,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             onChangeBranch={() => setIsBranchModalOpen(true)}
           />
 
-          {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS 1:1) ── */}
-          {(() => {
+          {/* ── SECCIÓN DE OFERTAS PREMIUM SÚPER DESTACADAS (BANNERS 1:1) — Controlada desde Admin ── */}
+          {Boolean(ofertasConfig?.mostrarOfertasRemate) && (() => {
             const firestorePromos = ofertasConfig?.premiumPromos || [];
             // Filtrar promos obsoletas/vencidas (caja para pizza, la banderita, etc.)
             const expiredIds = ["PREMIUM-1782923459129", "PREMIUM-1784116773499"];

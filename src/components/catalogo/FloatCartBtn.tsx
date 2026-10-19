@@ -31,73 +31,62 @@ export default function FloatCartBtn({
     <AnimatePresence>
       {hasItems && (
         <motion.div
-          initial={{ y: 120, opacity: 0, scale: 0.95 }}
+          initial={{ y: 80, opacity: 0, scale: 0.96 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: 120, opacity: 0, scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 350, damping: 28 }}
-          className="fixed bottom-[calc(64px+env(safe-area-inset-bottom,8px))] md:bottom-6 left-1/2 -translate-x-1/2 z-[95] w-[94%] max-w-sm flex flex-col gap-1.5 pointer-events-none"
+          exit={{ y: 80, opacity: 0, scale: 0.96 }}
+          transition={{ type: "spring", stiffness: 380, damping: 28 }}
+          className="fixed bottom-[calc(58px+env(safe-area-inset-bottom,8px))] md:bottom-6 left-1/2 -translate-x-1/2 z-[90] w-[92%] max-w-sm pointer-events-none"
         >
-          {/* Barra de Envio Gratis Flotante (Instacart / Amazon Fresh Standard) */}
-          <div className="pointer-events-auto bg-white/95 backdrop-blur-xl border border-stone-200/90 shadow-[0_8px_24px_rgba(0,0,0,0.12)] rounded-2xl p-2.5 flex flex-col gap-1.5 transition-all">
-            <div className="flex justify-between items-center text-[11px] font-extrabold text-stone-800 px-0.5">
-              {isEligible ? (
-                <span className="text-emerald-700 flex items-center gap-1.5">
-                  <span className="text-sm">🚚</span>
-                  <span>¡Envío gratis alcanzado!</span>
-                </span>
-              ) : (
-                <span className="flex items-center gap-1 text-slate-700">
-                  <span className="text-sm">🚚</span>
-                  <span>
-                    Faltan{" "}
-                    <strong className="text-[#EF233C] font-extrabold">
-                      ${missingAmount.toLocaleString("es-UY")}
-                    </strong>{" "}
-                    para envío gratis
-                  </span>
-                </span>
-              )}
-              <span className="text-slate-400 font-mono text-[10px] font-bold">
-                {Math.round(progressPercent)}%
-              </span>
-            </div>
-
-            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
-              <motion.div
-                className={`h-full rounded-full transition-all ${
-                  isEligible
-                    ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
-                    : "bg-gradient-to-r from-[#EF233C] to-amber-500"
+          {/* Botón Flotante Unificado y Delgado (Sin doble tarjeta amontonada) */}
+          <div className="relative overflow-hidden rounded-2xl shadow-[0_12px_28px_-6px_rgba(239,35,60,0.45)] border border-[#EF233C]/40">
+            {/* Barra delgada de progreso de envío gratis (2.5px en la parte superior) */}
+            <div className="w-full h-[3px] bg-red-950/40">
+              <div
+                className={`h-full transition-all duration-300 ${
+                  isEligible ? "bg-emerald-400" : "bg-amber-300"
                 }`}
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                style={{ width: `${progressPercent}%` }}
               />
             </div>
-          </div>
 
-          {/* Botón Principal de Ver Pedido */}
-          <button
-            type="button"
-            onClick={() => {
-              haptic.add();
-              onClick();
-            }}
-            className="pointer-events-auto w-full bg-[#EF233C] hover:bg-[#C01730] text-white rounded-xl p-3.5 flex items-center justify-between shadow-[0_12px_32px_rgba(239,35,60,0.3)] active:scale-[0.97] transition-all cursor-pointer border border-[#EF233C]"
-          >
-            <div className="flex items-center gap-3">
-              <div className="relative flex items-center justify-center w-9 h-9 bg-white/20 rounded-lg">
-                <span className="text-lg">🛒</span>
-                <span className="absolute -top-1.5 -right-2 bg-[#0F172A] text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[20px] text-center border-2 border-[#EF233C] shadow-sm">
+            <button
+              type="button"
+              onClick={() => {
+                haptic.add();
+                onClick();
+              }}
+              className="pointer-events-auto w-full bg-[#EF233C] hover:bg-[#C01730] text-white px-3.5 py-2.5 sm:py-3 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="relative flex items-center justify-center h-6 min-w-[22px] px-1 rounded-full bg-white text-[#EF233C] text-xs font-black tabular-nums shadow-xs">
                   {totalQty}
-                </span>
+                </div>
+                <div className="flex flex-col text-left leading-none">
+                  <span
+                    className="text-sm sm:text-base font-extrabold text-white tabular-nums tracking-tight"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {formatPrice(total)}
+                  </span>
+                  {!isEligible && (
+                    <span className="text-[9.5px] text-white/80 font-medium mt-0.5">
+                      Faltan ${missingAmount.toLocaleString("es-UY")} p/ envío gratis
+                    </span>
+                  )}
+                  {isEligible && (
+                    <span className="text-[9.5px] text-emerald-200 font-bold mt-0.5">
+                      ✓ ¡Envío gratis alcanzado!
+                    </span>
+                  )}
+                </div>
               </div>
-              <span className="font-extrabold text-xs tracking-wider uppercase">VER MI PEDIDO</span>
-            </div>
-            <span className="font-extrabold text-sm bg-white/20 px-3 py-1.5 rounded-lg tracking-wide font-price">
-              {formatPrice(total)}
-            </span>
-          </button>
+
+              <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-white">
+                <span>Ver Pedido</span>
+                <span className="text-sm font-black">→</span>
+              </div>
+            </button>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

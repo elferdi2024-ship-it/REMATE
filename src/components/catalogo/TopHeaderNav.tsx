@@ -159,17 +159,16 @@ export default function TopHeaderNav({
               </svg>
             </button>
 
-            <Link href="/" className="flex items-center gap-1.5 group no-underline">
-              <div className="relative flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#EF233C] to-[#C01730] text-white shadow-[0_4px_12px_rgba(239,35,60,0.25)] group-hover:scale-105 transition-transform shrink-0">
-                <span className="font-bebas text-lg leading-none tracking-tight">R</span>
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className="font-bebas text-base sm:text-lg tracking-[0.04em] text-slate-900 leading-none">
-                  EL REMATE
-                </span>
-                <span className="text-[8.5px] sm:text-[9.5px] font-bold text-slate-500 tracking-[0.12em] uppercase mt-0.5">
-                  Mayorista
-                </span>
+            <Link href="/" className="flex items-center group no-underline shrink-0" aria-label="El Remate Mayorista">
+              <div className="relative h-8 w-[105px] sm:h-9 sm:w-[130px] flex items-center">
+                <Image
+                  src="/logo.png"
+                  alt="El Remate"
+                  fill
+                  sizes="(max-width: 640px) 105px, 130px"
+                  priority
+                  className="object-contain object-left group-hover:scale-105 transition-transform"
+                />
               </div>
             </Link>
           </div>

@@ -470,43 +470,36 @@ export default function LandingPage() {
 
       {/* Floating Selected Branch Bar */}
       {activeSucursalId && (
-        <div className="fixed bottom-[68px] md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-40 bg-[#110D0A]/95 backdrop-blur-md border border-[#E8302A]/50 rounded-2xl p-3 sm:p-3.5 shadow-[0_12px_32px_rgba(0,0,0,0.6)] flex items-center justify-between gap-3 text-white animate-fade-in ring-1 ring-white/10">
-          <div className="flex items-center gap-3 overflow-hidden min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-[#E8302A]/20 border border-[#E8302A]/40 flex items-center justify-center text-xl shrink-0">
+        <div className="fixed bottom-[calc(68px+env(safe-area-inset-bottom,8px))] md:bottom-6 left-3 right-3 md:left-auto md:right-6 md:w-auto md:max-w-md z-40 bg-slate-950/95 backdrop-blur-md border border-[#EF233C]/40 rounded-2xl p-2.5 sm:p-3 shadow-2xl flex items-center justify-between gap-2.5 text-white animate-fade-in ring-1 ring-white/10">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="w-9 h-9 rounded-xl bg-[#EF233C]/20 border border-[#EF233C]/30 flex items-center justify-center text-base shrink-0">
               🏪
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#E8302A] animate-pulse" />
-                <span className="text-[10px] font-black uppercase text-[#E8302A] tracking-wider truncate">
-                  Catálogo Activo
-                </span>
-              </div>
-              <div className="text-xs sm:text-sm font-bold text-white truncate">
+              <div className="text-xs sm:text-sm font-bold text-white truncate leading-tight">
                 Sucursal {sucursalNombre}
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setPendingCategory("");
+                  setIsModalOpen(true);
+                }}
+                className="text-[10px] text-slate-400 hover:text-white underline font-semibold transition-colors text-left"
+              >
+                Cambiar sucursal
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => {
-                setPendingCategory("");
-                setIsModalOpen(true);
-              }}
-              className="text-[11px] text-slate-300 hover:text-white underline font-semibold px-2 py-1 transition-colors cursor-pointer"
-            >
-              Cambiar
-            </button>
-            <button
-              type="button"
-              onClick={() => handleEnterCatalog(activeSucursalId)}
-              className="bg-[#E8302A] hover:bg-[#C4231E] text-white font-bebas text-sm sm:text-base tracking-wider px-3.5 py-1.5 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>Ver Catálogo</span>
-              <span>⚡</span>
-            </button>
-          </div>
+
+          <button
+            type="button"
+            onClick={() => handleEnterCatalog(activeSucursalId)}
+            className="bg-[#EF233C] hover:bg-[#C01730] text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5 shrink-0 whitespace-nowrap cursor-pointer"
+          >
+            <span>Ver Catálogo</span>
+            <span className="text-xs font-black">→</span>
+          </button>
         </div>
       )}
 

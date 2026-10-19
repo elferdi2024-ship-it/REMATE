@@ -966,23 +966,43 @@ export default function OfertasAdmin() {
           <h3 className="text-sm font-bold text-[var(--admin-text-lo)] uppercase tracking-widest">
             Configuración General
           </h3>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <span className="text-xs font-bold text-[var(--admin-text-lo)]">
-              {config.activa ? "Ofertas Activas" : "Ofertas Pausadas"}
-            </span>
-            <div
-              onClick={() => setConfig((p) => ({ ...p, activa: !p.activa }))}
-              className={`relative h-7 w-12 rounded-full transition-colors cursor-pointer ${
-                config.activa ? "bg-green-500" : "bg-[var(--admin-input-bg)] border border-[var(--admin-border)]"
-              }`}
-            >
+          <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
+            <label className="flex items-center gap-2 sm:gap-3 cursor-pointer">
+              <span className="text-xs font-bold text-[var(--admin-text-lo)]">
+                {config.mostrarOfertasRemate ? "Banners 1:1 Remate: Activo" : "Banners 1:1 Remate: Oculto"}
+              </span>
               <div
-                className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-md transition-transform ${
-                  config.activa ? "translate-x-5" : "translate-x-0.5"
+                onClick={() => setConfig((p) => ({ ...p, mostrarOfertasRemate: !p.mostrarOfertasRemate }))}
+                className={`relative h-7 w-12 rounded-full transition-colors cursor-pointer ${
+                  config.mostrarOfertasRemate ? "bg-red-500" : "bg-[var(--admin-input-bg)] border border-[var(--admin-border)]"
                 }`}
-              />
-            </div>
-          </label>
+              >
+                <div
+                  className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-md transition-transform ${
+                    config.mostrarOfertasRemate ? "translate-x-5" : "translate-x-0.5"
+                  }`}
+                />
+              </div>
+            </label>
+
+            <label className="flex items-center gap-2 sm:gap-3 cursor-pointer">
+              <span className="text-xs font-bold text-[var(--admin-text-lo)]">
+                {config.activa ? "Ofertas Activas" : "Ofertas Pausadas"}
+              </span>
+              <div
+                onClick={() => setConfig((p) => ({ ...p, activa: !p.activa }))}
+                className={`relative h-7 w-12 rounded-full transition-colors cursor-pointer ${
+                  config.activa ? "bg-green-500" : "bg-[var(--admin-input-bg)] border border-[var(--admin-border)]"
+                }`}
+              >
+                <div
+                  className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-md transition-transform ${
+                    config.activa ? "translate-x-5" : "translate-x-0.5"
+                  }`}
+                />
+              </div>
+            </label>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -95,6 +95,7 @@ export interface FlashOffer {
 
 export interface OfertaConfig {
   activa: boolean;
+  mostrarOfertasRemate?: boolean;
   titulo: string;
   subtitulo: string;
   productos: OfertaProducto[];
@@ -107,3 +108,4 @@ export interface OfertaConfig {
   expiresAt?: string;
   updatedAt: string;
 }
+
