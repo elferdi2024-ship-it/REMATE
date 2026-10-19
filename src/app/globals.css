@@ -71,9 +71,35 @@
 
   /* ── Tipografía ── */
   /* NOTA: Estas variables vienen inyectadas desde layout.tsx vía next/font */
-  --font-display: var(--font-display, 'Plus Jakarta Sans', system-ui, sans-serif);
-  --font-body:    var(--font-body, 'Inter', system-ui, -apple-system, sans-serif);
+  --font-display: var(--font-display, 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif);
+  --font-body:    var(--font-body, 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif);
+  --font-mono:    var(--font-mono, 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace);
   --font-bebas:   var(--font-bebas, 'Bebas Neue', sans-serif);
+
+  /* ── Lucian UX/UI Prompt Tokens (Mapped to El Remate Wholesale Identity) ── */
+  --ux-page: #F8FAFC;
+  --ux-surface: #FFFFFF;
+  --ux-surface-2: #F1F5F9;
+  --ux-surface-3: #E2E8F0;
+  --ux-ink: #0F172A;
+  --ux-ink-2: #334155;
+  --ux-ink-3: #64748B;
+  --ux-line: rgba(15, 23, 42, 0.08);
+  --ux-line-2: rgba(15, 23, 42, 0.15);
+  --ux-accent: #EF233C;
+  --ux-accent-2: #D90429;
+  --ux-accent-soft: rgba(239, 35, 60, 0.10);
+  --ux-accent-ink: #FFFFFF;
+  --ux-mint: #059669;
+  --ux-warn: #D97706;
+  --ux-danger: #EF233C;
+  --ux-glass: rgba(255, 255, 255, 0.78);
+  --ux-glass-line: rgba(255, 255, 255, 0.90);
+  --ux-shadow: rgba(15, 23, 42, 0.08);
+  --ux-shadow-strong: rgba(15, 23, 42, 0.18);
+  --ux-grad: linear-gradient(120deg, #EF233C, #D90429 55%, #0F172A);
+  --ux-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ux-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
 
   /* ── Escala tipográfica modular (ratio 1.25) ── */
   --text-xs:   0.6875rem;  /* 11px — labels, unidades, badges tiny */
@@ -111,16 +137,16 @@
   --text2: var(--tierra);
 
   /* ── Sombras Premium ── */
-  --shadow-premium: 0 10px 25px -5px rgba(0,0,0,0.04), 0 8px 10px -6px rgba(0,0,0,0.04);
+  --shadow-premium: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
 
   /* ── Glassmorphism Premium (Fase 2) ── */
-  --glass-bg: rgba(255, 255, 255, 0.45);
-  --glass-bg-hover: rgba(255, 255, 255, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.45);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-hover: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(15, 23, 42, 0.08);
   --glass-blur: blur(14px);
 }
 
-/* Keyframes globales para animaciones ultra-smooth (Fase 2 & 4) */
+/* Keyframes globales para animaciones ultra-smooth (Fase 2 & 4 + Lucian UX/UI) */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -157,10 +183,29 @@
   100% { background-position: 200% 0; }
 }
 
+/* Lucian UX/UI #092 Sweeping Magnifier & Staggered Up */
+@keyframes u092-scan {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(42px, 8px) rotate(7deg); }
+  50% { transform: translate(72px, -4px) rotate(-4deg); }
+  75% { transform: translate(26px, -7px) rotate(-9deg); }
+}
+
+@keyframes u092-up {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Lucian UX/UI #243 Passing Sheen */
+@keyframes u243-sh {
+  0%, 72% { left: -65%; }
+  92%, 100% { left: 135%; }
+}
+
 .skeleton-shimmer {
-  background: linear-gradient(90deg, transparent 0%, rgba(250, 249, 246, 0.6) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(248, 250, 252, 0.75) 50%, transparent 100%);
   background-size: 200% 100%;
-  animation: shimmerWave 2s infinite linear;
+  animation: shimmerWave 1.8s infinite linear;
 }
 
 .animate-soft-pulse {
@@ -186,32 +231,65 @@
   box-shadow: var(--shadow-md);
 }
 
-/* 
-   ELIMINADO: Dark mode automático por sistema. 
-   Forzamos esquema claro para garantizar legibilidad premium del catálogo.
-*/
+.ux {
+  font-family: var(--font-body);
+  color: var(--ux-ink);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 /* ── DARK MODE class-based (solo si se activa manualmente) ── */
-.dark-mode {
-  --bg:    #0D0B09;
-  --bg2:   #171310;
-  --bg3:   #252018;
-  --white: #1E1A14;
+.dark-mode,
+:root[data-theme="dark"] {
+  --bg:    #090D16;
+  --bg2:   #0F172A;
+  --bg3:   #1E293B;
+  --white: #131C31;
 
-  --texto:    #F0EBE3;
-  --tierra:   #D4CEC6;
-  --muted:    #A89E94;
-  --faint:    #7A7068;
+  --texto:    #F8FAFC;
+  --tierra:   #CBD5E1;
+  --muted:    #94A3B8;
+  --faint:    #64748B;
 
-  --border:   #3A342C;
-  --border-2: #4E4538;
+  --border:   #1E293B;
+  --border-2: #334155;
   --border2:  var(--border-2);
+
+  --ux-page: #090D16;
+  --ux-surface: #131C31;
+  --ux-surface-2: #1E293B;
+  --ux-surface-3: #334155;
+  --ux-ink: #F8FAFC;
+  --ux-ink-2: rgba(248, 250, 252, 0.72);
+  --ux-ink-3: rgba(248, 250, 252, 0.48);
+  --ux-line: rgba(255, 255, 255, 0.08);
+  --ux-line-2: rgba(255, 255, 255, 0.16);
+  --ux-accent: #FF4D63;
+  --ux-accent-2: #EF233C;
+  --ux-accent-soft: rgba(255, 77, 99, 0.15);
+  --ux-accent-ink: #FFFFFF;
+  --ux-mint: #34D399;
+  --ux-warn: #FBBF24;
+  --ux-danger: #FF4D63;
+  --ux-glass: rgba(19, 28, 49, 0.75);
+  --ux-glass-line: rgba(255, 255, 255, 0.14);
+  --ux-shadow: rgba(0, 0, 0, 0.45);
+  --ux-shadow-strong: rgba(0, 0, 0, 0.72);
 
   --shadow-sm:    0 1px 3px rgba(0,0,0,0.30);
   --shadow-md:    0 4px 16px rgba(0,0,0,0.40);
   --shadow-lg:    0 12px 40px rgba(0,0,0,0.55);
   --shadow-panel: -8px 0 48px rgba(0,0,0,0.65);
-
 }
 
 /* ── variables para el Panel de Administración (Por defecto: Modo Claro) ── */

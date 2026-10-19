@@ -366,8 +366,8 @@ export default function ProductoGrid({
   if (productos.length === 0) {
     return (
       <div className="no-results">
-        <span className="no-results-icon">&#128269;</span>
-        <p>No encontramos nada con eso — probá con otro término.</p>
+        <span className="no-results-icon" aria-hidden="true">📦</span>
+        <p>No encontramos productos con ese criterio. Probá con otro término.</p>
       </div>
     );
   }
@@ -411,7 +411,7 @@ export default function ProductoGrid({
                   gap: "10px",
                   marginBottom: "12px",
                   paddingBottom: "8px",
-                  borderBottom: "1.5px solid rgba(17,11,8,0.06)",
+                  borderBottom: "1.5px solid rgba(15,23,42,0.06)",
                   ...(isSponsoredCategory ? {
                     background: `linear-gradient(90deg, ${adBrand.color || 'var(--primary-color)'}12 0%, transparent 100%)`,
                     borderLeft: `4px solid ${adBrand.color || 'var(--primary-color)'}`,
@@ -425,24 +425,27 @@ export default function ProductoGrid({
                   <button
                     onClick={() => onSelectCategory?.(cat)}
                     disabled={!onSelectCategory}
-                    className={`group flex items-center gap-2 bg-stone-50 border border-stone-200/80 rounded-full px-3.5 py-1.5 transition-all text-left shadow-[0_2px_6px_rgba(0,0,0,0.02)] active:scale-95 outline-none ${
-                      onSelectCategory ? 'hover:bg-[#E8302A]/5 hover:border-[#E8302A]/20 hover:shadow-[0_4px_12px_rgba(232,48,42,0.06)] cursor-pointer' : 'cursor-default'
+                    className={`group flex items-center gap-2 bg-white border border-slate-200/90 rounded-full pl-2 pr-3.5 py-1 transition-all text-left shadow-[0_2px_8px_-2px_rgba(15,23,42,0.05)] active:scale-95 outline-none ${
+                      onSelectCategory ? 'hover:bg-slate-900 hover:border-slate-900 cursor-pointer' : 'cursor-default'
                     }`}
                   >
-                    <span className="text-sm shrink-0 bg-white border border-stone-200 shadow-sm w-7 h-7 rounded-full flex items-center justify-center transition-transform group-hover:scale-110">
+                    <span className="text-sm shrink-0 bg-slate-50 border border-slate-200/80 w-7 h-7 rounded-full flex items-center justify-center transition-transform group-hover:scale-105">
                       {EMOJI_POR_CATEGORIA[cat] || "📦"}
                     </span>
-                    <h2 className="cat-section-title transition-colors group-hover:text-[#E8302A]">
+                    <h2 className="cat-section-title transition-colors group-hover:text-white">
                       {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
                     </h2>
                     {onSelectCategory && (
-                      <span className="text-stone-400 group-hover:text-[#E8302A] text-xs font-black transition-all group-hover:translate-x-0.5">
-                        ➔
+                      <span className="text-slate-400 group-hover:text-white text-xs font-black transition-all group-hover:translate-x-0.5">
+                        →
                       </span>
                     )}
                   </button>
-                  <span className="cat-section-count">
-                    {catProds.length} {catProds.length === 1 ? 'item' : 'items'}
+                  <span
+                    className="cat-section-count tabular-nums"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {catProds.length} {catProds.length === 1 ? 'artículo' : 'artículos'}
                   </span>
                 </div>
                 {isSponsoredCategory && (

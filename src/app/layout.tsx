@@ -1,5 +1,6 @@
+// filepath: src/app/layout.tsx
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Inter, Bebas_Neue } from "next/font/google";
+import { Plus_Jakarta_Sans, Outfit, JetBrains_Mono, Bebas_Neue } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import { CartProvider } from "@/lib/cart-context";
 import { ToastProvider } from "@/lib/toast-context";
@@ -7,18 +8,25 @@ import { FavoritosProvider } from "@/lib/favoritos-context";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import "./globals.css";
 
-const inter = Inter({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const plusJakarta = Plus_Jakarta_Sans({
+const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
-  weight: ["500", "600", "700", "800"],
+  weight: ["500", "600", "700", "800", "900"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  weight: ["500", "600", "700"],
 });
 
 const bebasNeue = Bebas_Neue({
@@ -29,9 +37,9 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "El Remate Canelones — Distribuidora Mayorista",
+  title: "El Remate Canelones | Distribuidora Mayorista",
   description:
-    "Catálogo mayorista de El Remate Canelones. Más de 1900 productos, precios al público, pedidos por WhatsApp.",
+    "Catálogo mayorista de El Remate Canelones. Más de 1900 productos, precios directos de fábrica y pedidos por WhatsApp.",
   keywords: [
     "distribuidora el remate",
     "mayorista canelones",
@@ -60,8 +68,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_UY",
     url: "https://remate-psi.vercel.app",
-    title: "El Remate Canelones — Distribuidora Mayorista",
-    description: "Catálogo mayorista en línea. Más de 1900 productos activos con precios insuperables y pedido express directo por WhatsApp.",
+    title: "El Remate Canelones | Distribuidora Mayorista",
+    description: "Catálogo mayorista en línea. Más de 1900 productos activos con precios directos de fábrica y pedido express por WhatsApp.",
     siteName: "Distribuidora El Remate",
     images: [
       {
@@ -74,7 +82,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "El Remate Canelones — Distribuidora Mayorista",
+    title: "El Remate Canelones | Distribuidora Mayorista",
     description: "Catálogo mayorista en línea. Más de 1900 productos con entrega a domicilio y pedido por WhatsApp.",
     images: ["/logo.png"],
   },
@@ -92,7 +100,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={`${inter.variable} ${plusJakarta.variable} ${bebasNeue.variable}`}>
+    <html lang="es" className={`${plusJakarta.variable} ${outfit.variable} ${jetbrainsMono.variable} ${bebasNeue.variable}`}>
       <body style={{ margin: 0, minHeight: "100vh" }}>
         {/* Service Worker Registration */}
         <script
