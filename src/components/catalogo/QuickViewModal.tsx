@@ -102,7 +102,7 @@ export default function QuickViewModal({
 
       {/* Overlay */}
       <div
-        className={`fixed inset-0 bg-[#090D1A]/50 z-[100] transition-all duration-300 ease-out ${
+        className={`fixed inset-0 bg-[#090D1A]/50 z-[200] transition-all duration-300 ease-out ${
           isOpen && !isClosing
             ? "opacity-100 backdrop-blur-sm"
             : "opacity-0 backdrop-blur-none pointer-events-none"
@@ -112,7 +112,7 @@ export default function QuickViewModal({
 
       {/* Modal Card / Bottom Sheet */}
       <div
-        className={`fixed z-[101] bottom-0 left-0 right-0 md:top-1/2 md:left-1/2 md:right-auto md:bottom-auto md:-translate-x-1/2 md:-translate-y-1/2 bg-white md:rounded-[32px] rounded-t-[32px] overflow-hidden shadow-2xl ring-1 ring-black/10 transition-transform duration-300 ease-out flex flex-col ${
+        className={`fixed z-[201] bottom-0 left-0 right-0 md:top-1/2 md:left-1/2 md:right-auto md:bottom-auto md:-translate-x-1/2 md:-translate-y-1/2 bg-white md:rounded-[32px] rounded-t-[32px] overflow-hidden shadow-2xl ring-1 ring-black/10 transition-transform duration-300 ease-out flex flex-col ${
           isOpen && !isClosing
             ? "translate-y-0 md:scale-100 opacity-100"
             : "translate-y-full md:translate-y-[-50%] md:scale-[0.97] opacity-0"

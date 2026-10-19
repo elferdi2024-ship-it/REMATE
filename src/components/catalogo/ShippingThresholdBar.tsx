@@ -1,4 +1,4 @@
-﻿// filepath: src/components/catalogo/ShippingThresholdBar.tsx
+// filepath: src/components/catalogo/ShippingThresholdBar.tsx
 "use client";
 
 import React, { memo } from "react";
@@ -23,47 +23,68 @@ export const ShippingThresholdBar = memo(function ShippingThresholdBar({
   const estimatedSavings = Math.round(currentTotal * 0.18); // ~18% estimated wholesale saving
 
   return (
-    <div className="w-full bg-slate-900 border-y border-slate-800 text-white px-3 sm:px-6 py-2.5 shadow-sm transition-all duration-300">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 text-xs">
-        {/* Main Status & Progress */}
+    <div
+      className={`w-full border-y transition-all duration-300 px-3 sm:px-6 py-2.5 shadow-2xs ${
+        isReached
+          ? "bg-gradient-to-r from-emerald-50/90 via-teal-50/70 to-emerald-50/90 border-emerald-200/80 text-emerald-950"
+          : "bg-white border-slate-200/90 text-slate-800"
+      }`}
+    >
+      <div className="max-w-[1280px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 text-xs">
+        {/* Estado y Barra de Progreso */}
         <div className="flex-1 w-full flex flex-col gap-1.5">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-1.5 font-bold">
               {isReached ? (
-                <span className="text-emerald-400 font-extrabold flex items-center gap-1">
-                  <span>🎉</span>
+                <span className="text-emerald-800 font-extrabold flex items-center gap-1.5">
+                  <span className="text-sm">🎉</span>
                   <span>¡Despacho Bonificado Desbloqueado!</span>
                 </span>
               ) : (
-                <span className="text-slate-200 flex items-center gap-1.5">
-                  <span className="text-amber-400">🚚</span>
+                <span className="text-slate-700 flex items-center gap-1.5 font-semibold">
+                  <span className="text-sm">🚚</span>
                   <span>
-                    Te faltan <strong className="text-white font-mono font-black text-sm">{formatPrice(remaining)}</strong> para Despacho Bonificado {sucursalName ? `en ${sucursalName}` : "en Canelones"}
+                    Te faltan{" "}
+                    <strong
+                      className="text-[#EF233C] font-mono font-black text-sm"
+                      style={{ fontFamily: "var(--font-mono)" }}
+                    >
+                      {formatPrice(remaining)}
+                    </strong>{" "}
+                    para Despacho Bonificado {sucursalName ? `en ${sucursalName}` : "en Canelones"}
                   </span>
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               {currentTotal > 0 && (
-                <span className="hidden md:inline-flex items-center gap-1 text-[11px] font-extrabold text-emerald-400 bg-emerald-950/70 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                <span className="hidden md:inline-flex items-center gap-1 text-[11px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
                   <span>💰 Ahorro mayorista est.:</span>
-                  <span className="font-mono">{formatPrice(estimatedSavings)}</span>
+                  <span
+                    className="font-mono font-black"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {formatPrice(estimatedSavings)}
+                  </span>
                 </span>
               )}
 
-              <span className="text-[11px] font-mono font-extrabold text-slate-400">
+              <span
+                className="text-[11px] font-mono font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md"
+                style={{ fontFamily: "var(--font-mono)" }}
+              >
                 {percent}%
               </span>
             </div>
           </div>
 
           {/* Progress Bar Track */}
-          <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700/60 relative">
+          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/80 relative">
             <div
               className={`h-full transition-all duration-500 ease-out rounded-full ${
                 isReached
-                  ? "bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 shadow-[0_0_8px_rgba(16,185,129,0.35)]"
                   : "bg-gradient-to-r from-amber-500 via-[#EF233C] to-red-500"
               }`}
               style={{ width: `${percent}%` }}
@@ -76,10 +97,13 @@ export const ShippingThresholdBar = memo(function ShippingThresholdBar({
           <button
             type="button"
             onClick={onOpenCart}
-            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-xl transition-all active:scale-95 shrink-0"
+            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-white bg-slate-900 hover:bg-[#EF233C] px-3.5 py-1.5 rounded-xl transition-all active:scale-95 shrink-0 shadow-2xs"
           >
-            <span>Ver Carrito</span>
-            <span className="text-[#EF233C] font-mono font-black">
+            <span>Ver Pedido</span>
+            <span
+              className="text-red-300 font-mono font-black"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
               ({formatPrice(currentTotal)})
             </span>
           </button>

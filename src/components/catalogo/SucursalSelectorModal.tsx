@@ -31,7 +31,7 @@ export default function SucursalSelectorModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
       <div 
         className="relative w-full max-w-2xl bg-[#110D0A] border border-[#E8302A]/40 rounded-3xl p-6 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.8)] text-white overflow-hidden max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}

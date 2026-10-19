@@ -177,13 +177,13 @@ export default function ResultsBar({
         </div>
 
         {/* Right: Controles compactos (Filtros, Pedido Rápido, Ordenar, Selector Segmentado Lucian #047) */}
-        <div className="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-between sm:justify-end w-full sm:w-auto">
           {/* Botón Pedido Rápido B2B */}
           {onOpenQuickOrder && (
             <button
               type="button"
               onClick={onOpenQuickOrder}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-[#EF233C] text-white rounded-xl text-[11px] font-extrabold uppercase tracking-wider transition-all shadow-2xs active:scale-95 shrink-0"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-slate-900 hover:bg-[#EF233C] text-white rounded-xl text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-wider transition-all shadow-2xs active:scale-95 shrink-0"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
@@ -197,7 +197,7 @@ export default function ResultsBar({
             <button
               type="button"
               onClick={onOpenFilters}
-              className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200/90 rounded-xl text-xs font-bold text-slate-800 transition-colors active:scale-95"
+              className="md:hidden inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200/90 rounded-xl text-xs font-bold text-slate-800 transition-colors active:scale-95 shrink-0"
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
@@ -216,12 +216,12 @@ export default function ResultsBar({
 
           {/* Ordenar por selector */}
           {onSortChange && (
-            <div className="relative inline-block">
+            <div className="relative inline-block shrink-0">
               <select
                 value={sortBy}
                 onChange={(e) => onSortChange(e.target.value)}
                 aria-label="Ordenar productos"
-                className="appearance-none bg-slate-100/90 hover:bg-slate-200/70 border border-slate-200/90 text-slate-800 font-bold text-xs rounded-xl pl-3 pr-7 py-1.5 outline-none focus:border-slate-400 cursor-pointer h-8 transition-colors"
+                className="appearance-none bg-slate-100/90 hover:bg-slate-200/70 border border-slate-200/90 text-slate-800 font-bold text-xs rounded-xl pl-2.5 pr-7 py-1.5 outline-none focus:border-slate-400 cursor-pointer h-8 transition-colors max-w-[130px] sm:max-w-none truncate"
               >
                 <option value="relevancia">Relevancia</option>
                 <option value="precio-asc">Menor precio</option>
@@ -229,7 +229,7 @@ export default function ResultsBar({
                 <option value="nombre-asc">Nombre: A-Z</option>
                 <option value="oferta-desc">Ofertas primero</option>
               </select>
-              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="6 9 12 15 18 9" />
                 </svg>
@@ -242,7 +242,7 @@ export default function ResultsBar({
             ref={segRef}
             role="radiogroup"
             aria-label="Modo de visualización del catálogo"
-            className="relative inline-grid grid-cols-3 items-center bg-slate-100 border border-slate-200/80 rounded-xl p-[3px]"
+            className="relative inline-grid grid-cols-3 items-center bg-slate-100 border border-slate-200/80 rounded-xl p-[3px] shrink-0"
           >
             <span
               aria-hidden="true"
@@ -273,7 +273,7 @@ export default function ResultsBar({
                   tabIndex={checked ? 0 : -1}
                   onClick={() => onToggleVista(opt.id)}
                   onKeyDown={(e) => handleKeyDown(e, i)}
-                  className={`relative z-10 flex h-7 w-8 items-center justify-center rounded-[9px] transition-all active:scale-90 ${
+                  className={`relative z-10 flex h-7 w-7 sm:w-8 items-center justify-center rounded-[9px] transition-all active:scale-90 ${
                     checked ? "text-slate-900" : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
