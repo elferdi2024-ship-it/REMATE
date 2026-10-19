@@ -186,24 +186,24 @@ export default function QuickViewModal({
                   Elegí la presentación:
                 </div>
 
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="flex items-stretch gap-2.5 w-full">
                   {/* Opción 1: Individual */}
                   <button
                     type="button"
                     onClick={() => handleSetExactQty(1)}
-                    className={`p-3 rounded-2xl border text-left transition-all relative ${
+                    className={`flex-1 min-w-0 p-3 rounded-2xl border text-left transition-all relative ${
                       !isBoxActive
                         ? "bg-amber-50/70 border-amber-500 ring-2 ring-amber-400/30 shadow-xs"
                         : "bg-slate-50 border-slate-200 hover:bg-slate-100 opacity-80"
                     }`}
                   >
-                    <div className="text-[10px] font-bold uppercase text-slate-500">
+                    <div className="text-[10px] font-bold uppercase text-slate-500 truncate">
                       Por Unidad
                     </div>
                     <div className="text-base font-black text-slate-950 font-mono leading-tight mt-0.5">
                       ${producto.precio}
                     </div>
-                    <div className="text-[10px] font-medium text-slate-600 mt-1">
+                    <div className="text-[10px] font-medium text-slate-600 mt-1 truncate">
                       1 a {boxTier.minCantidad - 1} unidades
                     </div>
                   </button>
@@ -212,24 +212,24 @@ export default function QuickViewModal({
                   <button
                     type="button"
                     onClick={() => handleSetExactQty(boxTier.minCantidad)}
-                    className={`p-3 rounded-2xl border text-left transition-all relative ${
+                    className={`flex-1 min-w-0 p-3 rounded-2xl border text-left transition-all relative ${
                       isBoxActive
                         ? "bg-emerald-50 border-emerald-500 ring-2 ring-emerald-400/30 shadow-xs"
                         : "bg-slate-50 border-slate-200 hover:bg-slate-100 opacity-80"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-extrabold uppercase text-emerald-800">
+                      <span className="text-[10px] font-extrabold uppercase text-emerald-800 truncate">
                         📦 Caja ({boxTier.minCantidad} u.)
                       </span>
                       {isBoxActive && (
-                        <span className="text-[10px] font-black text-emerald-700">✓</span>
+                        <span className="text-[10px] font-black text-emerald-700 ml-1 shrink-0">✓</span>
                       )}
                     </div>
                     <div className="text-base font-black text-emerald-700 font-mono leading-tight mt-0.5">
                       ${boxTier.precioUnitario} <span className="text-[10px] font-medium text-emerald-900">c/u</span>
                     </div>
-                    <div className="text-[10px] font-bold text-emerald-800 mt-1">
+                    <div className="text-[10px] font-bold text-emerald-800 mt-1 truncate">
                       Ahorrás ${(boxTier.minCantidad * (producto.precio - boxTier.precioUnitario)).toLocaleString("es-UY")}
                     </div>
                   </button>
@@ -320,10 +320,10 @@ export default function QuickViewModal({
               <button
                 type="button"
                 onClick={handleConfirmCart}
-                className="w-full bg-[#EF233C] hover:bg-[#C01730] text-white font-black text-base py-4 px-6 rounded-2xl shadow-lg shadow-[#EF233C]/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                className="w-full bg-[#EF233C] hover:bg-[#C01730] text-white font-extrabold text-sm sm:text-base py-3.5 sm:py-4 px-4 sm:px-6 rounded-2xl shadow-lg shadow-[#EF233C]/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
               >
-                <span>🛒</span>
-                <span>
+                <span className="shrink-0">🛒</span>
+                <span className="truncate">
                   {qty > 0 ? "ACTUALIZAR EN EL PEDIDO" : "AGREGAR AL PEDIDO"} — ${pricing.subtotal.toLocaleString("es-UY")}
                 </span>
               </button>

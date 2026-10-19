@@ -91,17 +91,18 @@ export default function RecipeComboModal({
         </div>
 
         {/* Total y CTA de agregar combo completo */}
-        <div className="flex items-center justify-between pt-1">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+          <div className="flex items-baseline justify-between sm:block">
             <div className="text-[10px] uppercase font-bold text-stone-400">Total del Combo</div>
             <div className="text-xl font-black text-stone-900">{formatPrice(totalComboPrice)}</div>
           </div>
           <button
             type="button"
             onClick={handleAddAll}
-            className="bg-[#E8302A] hover:bg-[#c9241f] text-white px-5 py-2.5 rounded-xl font-black text-xs shadow-md shadow-[#E8302A]/20 active:scale-95 transition-all"
+            className="w-full sm:w-auto bg-[#EF233C] hover:bg-[#c9241f] text-white px-5 py-3 sm:py-2.5 rounded-xl font-black text-xs uppercase tracking-wide shadow-md shadow-[#EF233C]/20 active:scale-95 transition-all flex items-center justify-center gap-1.5"
           >
-            🛒 AGREGAR TODO AL CARRITO
+            <span>🛒</span>
+            <span>AGREGAR TODO AL CARRITO</span>
           </button>
         </div>
       </div>

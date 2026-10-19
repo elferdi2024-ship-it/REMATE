@@ -1020,16 +1020,16 @@ html.dark-mode body { background: var(--bg); }
 
 /* La flecha › ahora va pegada a la derecha del contenedor (no absoluta al grid) */
 
-.grid {
+.products-catalog-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   padding: 4px 0 8px;
 }
-@media (min-width: 520px)  { .grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
-@media (min-width: 780px)  { .grid { grid-template-columns: repeat(4, 1fr); gap: 18px; } }
-@media (min-width: 1060px) { .grid { grid-template-columns: repeat(5, 1fr); gap: 20px; } }
-@media (min-width: 1300px) { .grid { grid-template-columns: repeat(6, 1fr); gap: 24px; } }
+@media (min-width: 520px)  { .products-catalog-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
+@media (min-width: 780px)  { .products-catalog-grid { grid-template-columns: repeat(4, 1fr); gap: 18px; } }
+@media (min-width: 1060px) { .products-catalog-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; } }
+@media (min-width: 1300px) { .products-catalog-grid { grid-template-columns: repeat(6, 1fr); gap: 24px; } }
 
 .grid-banner-row {
   grid-column: 1 / -1;

@@ -133,7 +133,7 @@ export default function SucursalSelectorModal({
                   </div>
                 </div>
 
-                <div className="shrink-0 self-end md:self-center">
+                <div className="shrink-0 w-full md:w-auto md:self-center mt-1 md:mt-0">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
