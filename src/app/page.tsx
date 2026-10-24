@@ -3,6 +3,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+const ChatWidget = dynamic(() => import("@/components/chat/ChatWidget"), { ssr: false });
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
@@ -507,6 +509,9 @@ export default function LandingPage() {
           </button>
         </div>
       )}
+
+      {/* Asistente Inteligente y Chat de Pedidos El Remate */}
+      <ChatWidget onOpenCart={() => handleEnterCatalog(activeSucursalId || "canelones")} />
 
       {/* Modal de Selección de Sucursal */}
       <SucursalSelectorModal

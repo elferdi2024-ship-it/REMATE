@@ -52,6 +52,7 @@ const QuickViewModal = dynamic(() => import("@/components/catalogo/QuickViewModa
 const ShippingThresholdBar = dynamic(() => import("@/components/catalogo/ShippingThresholdBar"), { ssr: false });
 const QuickOrderModal = dynamic(() => import("@/components/catalogo/QuickOrderModal"), { ssr: false });
 const PedidoEnviarWhatsApp = dynamic(() => import("@/components/carrito/PedidoEnviarWhatsApp"), { ssr: false });
+const ChatWidget = dynamic(() => import("@/components/chat/ChatWidget"), { ssr: false });
 import type { PedidoPendienteWA } from "@/components/carrito/PedidoEnviarWhatsApp";
 import {
   armarMensajeWA,
@@ -1946,6 +1947,12 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         onConfirmado={handlePedidoConfirmado}
         onCerrar={handlePedidoCerrar}
         onModificar={handlePedidoModificar}
+      />
+
+      {/* Chatbot Concierge El Remate Canelones */}
+      <ChatWidget
+        catalog={productos}
+        onOpenCart={() => setCartOpen(true)}
       />
     </div>
   );
