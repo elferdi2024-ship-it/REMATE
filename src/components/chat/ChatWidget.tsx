@@ -110,7 +110,9 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
   ]);
 
   const [handoffSubmitting, setHandoffSubmitting] = useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastScrolledMsgIdRef = useRef<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Generar o recuperar sessionId
@@ -171,11 +173,47 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
     } catch {}
   }, [messages]);
 
-  // Scroll al final al recibir mensajes
+  // Scroll inteligente: cuando responde el bot, alinear al INICIO de su mensaje para leer desde arriba
   useEffect(() => {
-    if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!isOpen) return;
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    // Si está cargando respuesta (usuario acaba de enviar), mostrar el indicador de escritura abajo
+    if (loading) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+      return;
     }
+
+    const lastMsg = messages[messages.length - 1];
+    if (!lastMsg) return;
+
+    // Evitar re-scrollear si el usuario solo ajustó cantidades (+ / -) dentro de una tarjeta
+    if (lastScrolledMsgIdRef.current === lastMsg.id) return;
+    lastScrolledMsgIdRef.current = lastMsg.id;
+
+    requestAnimationFrame(() => {
+      if (!messagesContainerRef.current) return;
+      if (lastMsg.role === "bot") {
+        const msgEl = messagesContainerRef.current.querySelector(
+          `[data-msg-id="${lastMsg.id}"]`
+        ) as HTMLElement | null;
+        if (msgEl) {
+          messagesContainerRef.current.scrollTo({
+            top: Math.max(0, msgEl.offsetTop - 12),
+            behavior: "smooth",
+          });
+          return;
+        }
+      }
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    });
   }, [messages, isOpen, loading]);
 
   // Manejar foco en input al abrir
@@ -586,10 +624,14 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
           )}
 
           {/* ── Área de Mensajes (Con scroll suave y layout amplio) ── */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 bg-[radial-gradient(circle_at_top_right,rgba(239,35,60,0.05),transparent_55%),#FAF8F5]">
+          <div
+            ref={messagesContainerRef}
+            className="relative flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 bg-[radial-gradient(circle_at_top_right,rgba(239,35,60,0.05),transparent_55%),#FAF8F5]"
+          >
             {messages.map((m) => (
               <div
                 key={m.id}
+                data-msg-id={m.id}
                 className={`flex flex-col ${
                   m.role === "user" ? "items-end" : "items-start"
                 }`}
