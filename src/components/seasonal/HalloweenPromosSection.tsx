@@ -60,7 +60,7 @@ export default function HalloweenPromosSection({
   const scrollHorizontal = (dir: "left" | "right") => {
     if (!scrollContainerRef.current) return;
     haptic.selection();
-    const amount = 270;
+    const amount = 180;
     scrollContainerRef.current.scrollBy({
       left: dir === "left" ? -amount : amount,
       behavior: "smooth",
@@ -70,16 +70,16 @@ export default function HalloweenPromosSection({
   return (
     <section
       aria-label="Ofertas Especiales de Halloween"
-      className="relative w-full overflow-hidden rounded-2xl sm:rounded-[28px] bg-gradient-to-br from-[#1A0D26] via-[#13091C] to-[#0D0714] border border-orange-500/40 shadow-[0_14px_38px_rgba(249,115,22,0.16)] text-white p-3.5 sm:p-5 md:p-6 my-2.5 select-none"
+      className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#1A0D26] via-[#13091C] to-[#0D0714] border border-orange-500/40 shadow-[0_8px_24px_rgba(249,115,22,0.15)] text-white p-2.5 sm:p-4 my-1.5 sm:my-2.5 select-none"
     >
-      {/* Glows decorativos de fondo (no bloquean clics) */}
-      <div className="pointer-events-none absolute -top-20 -left-20 w-64 h-64 rounded-full bg-orange-500/20 blur-[80px]" />
-      <div className="pointer-events-none absolute -bottom-20 -right-20 w-72 h-72 rounded-full bg-[#EF233C]/20 blur-[90px]" />
+      {/* Glows decorativos de fondo */}
+      <div className="pointer-events-none absolute -top-16 -left-16 w-48 h-48 rounded-full bg-orange-500/20 blur-[65px]" />
+      <div className="pointer-events-none absolute -bottom-16 -right-16 w-52 h-52 rounded-full bg-[#EF233C]/20 blur-[70px]" />
 
       {/* Telaraña SVG sutil en esquina superior derecha */}
       <svg
         viewBox="0 0 100 100"
-        className="pointer-events-none absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 text-orange-400/15"
+        className="pointer-events-none absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 text-orange-400/15"
         fill="none"
       >
         <path
@@ -99,104 +99,96 @@ export default function HalloweenPromosSection({
         />
       </svg>
 
-      {/* Encabezado de la Sección */}
-      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 pb-3.5 mb-3.5 border-b border-white/10">
-        <div className="flex items-start sm:items-center gap-3">
-          {/* Emblema Calabaza + Destello */}
-          <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-br from-orange-500 via-[#EF233C] to-amber-600 p-0.5 shadow-lg shadow-orange-500/30 shrink-0 flex items-center justify-center">
-            <div className="w-full h-full bg-[#160B20] rounded-[14px] flex items-center justify-center text-2xl sm:text-3xl">
+      {/* Encabezado Ultra-Compacto (1 sola franja en móvil y desktop) */}
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 pb-2 mb-2.5 border-b border-white/10">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-orange-500 via-[#EF233C] to-amber-600 p-[1.5px] shadow-md shadow-orange-500/25 shrink-0 flex items-center justify-center">
+            <div className="w-full h-full bg-[#160B20] rounded-[10px] flex items-center justify-center text-base sm:text-xl">
               🎃
             </div>
           </div>
 
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <span className="inline-flex items-center gap-1 bg-orange-500/20 border border-orange-400/40 text-orange-300 text-[10px] sm:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">
-                🕸️ Especial Halloween
-              </span>
-              <span className="inline-flex items-center gap-1 bg-[#EF233C] text-white text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
-                5 Ofertas Dulces
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <h2 className="text-xs sm:text-base md:text-lg font-black tracking-tight uppercase font-display leading-none text-white m-0">
+                Especial{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-[#EF233C]">
+                  Halloween
+                </span>
+              </h2>
+              <span className="bg-[#EF233C] text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full leading-none">
+                5 Promos
               </span>
               {itemsInCartCount > 0 && (
-                <span className="inline-flex items-center gap-1 bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full">
-                  ✓ {itemsInCartCount} en tu pedido
+                <span className="bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none">
+                  ✓ {itemsInCartCount}
                 </span>
               )}
             </div>
-
-            <h2 className="text-lg sm:text-2xl md:text-[26px] font-black tracking-tight uppercase font-display mt-1 leading-tight text-white">
-              Golosinas de{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-[#EF233C]">
-                Halloween en Remate
-              </span>
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 font-medium mt-0.5 m-0">
-              Tocá cualquier placa para ampliarla o sumala directo a tu carrito mayorista/minorista.
+            <p className="text-[10px] sm:text-xs text-slate-300/90 font-medium truncate m-0 mt-0.5">
+              Tocá una placa para ampliar o sumá directo al pedido
             </p>
           </div>
         </div>
 
-        {/* Acciones rápidas: Botón Combo Completo + Selector de Vista Móvil */}
-        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 shrink-0">
+        {/* Controles compactos a la derecha */}
+        <div className="flex items-center gap-1.5 shrink-0 ml-auto">
           <button
             type="button"
             onClick={handleAddFullPack}
-            className={`flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all active:scale-95 shadow-lg cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-wider transition-all active:scale-95 shadow-md cursor-pointer ${
               comboAddedFlash
                 ? "bg-emerald-500 text-white shadow-emerald-500/30"
-                : "bg-gradient-to-r from-orange-500 to-[#EF233C] hover:from-orange-400 hover:to-red-500 text-white shadow-orange-500/25 border border-orange-300/30"
+                : "bg-gradient-to-r from-orange-500 to-[#EF233C] hover:from-orange-400 hover:to-red-500 text-white shadow-orange-500/20 border border-orange-300/30"
             }`}
           >
-            <span>{comboAddedFlash ? "✓ ¡Pack Sumado!" : "🍬 Sumar las 5 Promos"}</span>
-            <span className="bg-black/25 px-2 py-0.5 rounded-lg font-mono text-xs sm:text-sm">
+            <span>{comboAddedFlash ? "✓ ¡Pack Listo!" : "🍬 Pack x5"}</span>
+            <span className="bg-black/25 px-1.5 py-0.5 rounded-md font-mono text-[10px] sm:text-xs">
               ${totalComboPrice}
             </span>
           </button>
 
-          {/* Toggle Carrusel / Grilla en Móvil */}
-          <div className="flex lg:hidden items-center gap-1">
-            <button
-              type="button"
-              onClick={() => {
-                haptic.selection();
-                setMobileGridMode((prev) => !prev);
-              }}
-              className="text-[11px] font-bold text-orange-200 bg-white/10 hover:bg-white/15 border border-white/15 px-2.5 py-2 rounded-xl transition-colors"
-            >
-              {mobileGridMode ? "Ver Carrusel" : "Ver Grilla (5)"}
-            </button>
+          <button
+            type="button"
+            onClick={() => {
+              haptic.selection();
+              setMobileGridMode((prev) => !prev);
+            }}
+            className="lg:hidden text-[10px] font-bold text-orange-200 bg-white/10 hover:bg-white/15 border border-white/15 px-2 py-1.5 rounded-xl transition-colors"
+          >
+            {mobileGridMode ? "Carrusel" : "Grilla"}
+          </button>
 
-            {!mobileGridMode && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => scrollHorizontal("left")}
-                  aria-label="Anterior"
-                  className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-white font-black"
-                >
-                  ‹
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollHorizontal("right")}
-                  aria-label="Siguiente"
-                  className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-white font-black"
-                >
-                  ›
-                </button>
-              </>
-            )}
-          </div>
+          {!mobileGridMode && (
+            <div className="hidden sm:flex lg:hidden items-center gap-1">
+              <button
+                type="button"
+                onClick={() => scrollHorizontal("left")}
+                aria-label="Anterior"
+                className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-white text-sm font-black"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollHorizontal("right")}
+                aria-label="Siguiente"
+                className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-white text-sm font-black"
+              >
+                ›
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Grilla / Carrusel de las 5 Placas 1:1 */}
+      {/* Carrusel / Grilla Compacta de las 5 Placas 1:1 (En móvil se ven ~2.2 tarjetas a la vez y entran completas en pantalla) */}
       <div
         ref={scrollContainerRef}
         className={
           mobileGridMode
-            ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5"
-            : "flex lg:grid lg:grid-cols-5 gap-3 sm:gap-3.5 overflow-x-auto lg:overflow-visible no-scrollbar snap-x snap-mandatory pb-1"
+            ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3"
+            : "flex lg:grid lg:grid-cols-5 gap-2.5 sm:gap-3 overflow-x-auto lg:overflow-visible no-scrollbar snap-x snap-mandatory pb-0.5"
         }
       >
         {HALLOWEEN_PROMOS.map((promo) => {
@@ -210,11 +202,11 @@ export default function HalloweenPromosSection({
               className={`${
                 mobileGridMode
                   ? "w-full"
-                  : "w-[235px] sm:w-[250px] lg:w-full shrink-0 snap-start"
-              } group relative rounded-2xl bg-white text-slate-900 overflow-hidden flex flex-col justify-between transition-all duration-200 ${
+                  : "w-[152px] xs:w-[162px] sm:w-[190px] lg:w-full shrink-0 snap-start"
+              } group relative rounded-xl sm:rounded-2xl bg-white text-slate-900 overflow-hidden flex flex-col justify-between transition-all duration-200 ${
                 inCartQty > 0
-                  ? "ring-3 ring-orange-500 shadow-[0_10px_28px_rgba(249,115,22,0.35)]"
-                  : "border border-white/20 shadow-md hover:shadow-xl hover:-translate-y-0.5"
+                  ? "ring-2 ring-orange-500 shadow-[0_6px_20px_rgba(249,115,22,0.35)]"
+                  : "border border-white/20 shadow-sm hover:shadow-lg hover:-translate-y-0.5"
               }`}
             >
               {/* Flyer 1:1 Cuadrado Completo */}
@@ -229,54 +221,37 @@ export default function HalloweenPromosSection({
                   src={promo.imagen}
                   alt={promo.titulo}
                   fill
-                  sizes="(max-width: 640px) 245px, (max-width: 1024px) 260px, 240px"
+                  sizes="(max-width: 640px) 165px, (max-width: 1024px) 200px, 230px"
                   className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                 />
 
-                {/* Badge flotante superior */}
-                <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none">
-                  <span className="bg-slate-950/80 backdrop-blur-xs text-orange-300 border border-orange-400/40 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg shadow-xs">
-                    {promo.badge}
+                {/* Badge flotante compacto */}
+                <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between gap-1 pointer-events-none">
+                  <span className="bg-slate-950/80 backdrop-blur-xs text-orange-300 border border-orange-400/40 text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md shadow-xs truncate">
+                    {promo.destaque || promo.badge}
                   </span>
                   {inCartQty > 0 && (
-                    <span className="bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-lg shadow-sm">
-                      {inCartQty} en carrito
+                    <span className="bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md shadow-sm shrink-0">
+                      ×{inCartQty}
                     </span>
                   )}
                 </div>
-
-                {/* Botón lupa sutil al pasar el mouse */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors flex items-end justify-end p-2 pointer-events-none">
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-950/85 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
-                    🔍 Ver Flyer
-                  </span>
-                </div>
               </div>
 
-              {/* Barra inferior de conversión rápida */}
-              <div className="p-2.5 sm:p-3 bg-white flex flex-col justify-between gap-2 border-t border-slate-100">
-                <div>
-                  <h3
-                    onClick={() => onSelectPromo(prod)}
-                    className="font-black text-xs sm:text-sm text-slate-900 leading-snug line-clamp-1 cursor-pointer hover:text-[#EF233C] transition-colors"
-                    title={promo.titulo}
-                  >
-                    {promo.titulo}
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-medium line-clamp-1 m-0 mt-0.5">
-                    {promo.subtitulo}
-                  </p>
-                </div>
+              {/* Barra inferior compacta: Título 1 línea + Precio + Botón Sumar */}
+              <div className="p-2 sm:p-2.5 bg-white flex flex-col justify-between gap-1.5 border-t border-slate-100">
+                <h3
+                  onClick={() => onSelectPromo(prod)}
+                  className="font-extrabold text-[11px] sm:text-xs text-slate-900 leading-tight truncate cursor-pointer hover:text-[#EF233C] transition-colors m-0"
+                  title={promo.titulo}
+                >
+                  {promo.titulo}
+                </h3>
 
-                <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-100">
-                  <div className="flex flex-col leading-none">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600">
-                      Oferta
-                    </span>
-                    <span className="font-mono text-lg sm:text-xl font-black text-[#EF233C]">
-                      ${promo.precio}
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between gap-1.5">
+                  <span className="font-mono text-sm sm:text-base font-black text-[#EF233C] leading-none">
+                    ${promo.precio}
+                  </span>
 
                   {inCartQty === 0 ? (
                     <button
@@ -286,14 +261,14 @@ export default function HalloweenPromosSection({
                         haptic.add();
                         onAddPromo(prod, e);
                       }}
-                      className="bg-gradient-to-r from-[#EF233C] to-orange-600 hover:from-[#D90429] hover:to-orange-500 text-white text-xs font-black uppercase tracking-wider px-3.5 py-2 rounded-xl shadow-md shadow-red-500/25 transition-all active:scale-95 cursor-pointer shrink-0"
+                      className="bg-gradient-to-r from-[#EF233C] to-orange-600 hover:from-[#D90429] hover:to-orange-500 text-white text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-lg shadow-xs transition-all active:scale-95 cursor-pointer shrink-0"
                     >
                       + Sumar
                     </button>
                   ) : (
                     <div
                       onClick={(e) => e.stopPropagation()}
-                      className="flex items-center bg-slate-900 text-white rounded-xl p-0.5 shadow-sm"
+                      className="flex items-center bg-slate-900 text-white rounded-lg p-0.5 shadow-xs"
                     >
                       <button
                         type="button"
@@ -302,11 +277,11 @@ export default function HalloweenPromosSection({
                           onQtyChange(`PROMO-${promo.id}`, inCartQty - 1);
                         }}
                         aria-label="Restar 1"
-                        className="w-7 h-7 rounded-lg hover:bg-white/15 flex items-center justify-center font-black text-sm transition-colors cursor-pointer"
+                        className="w-5 h-5 sm:w-6 sm:h-6 rounded-md hover:bg-white/15 flex items-center justify-center font-black text-xs transition-colors cursor-pointer"
                       >
                         −
                       </button>
-                      <span className="px-2 font-mono text-xs sm:text-sm font-black min-w-[24px] text-center">
+                      <span className="px-1.5 font-mono text-[11px] font-black min-w-[18px] text-center">
                         {inCartQty}
                       </span>
                       <button
@@ -316,7 +291,7 @@ export default function HalloweenPromosSection({
                           onAddPromo(prod, e);
                         }}
                         aria-label="Sumar 1"
-                        className="w-7 h-7 rounded-lg bg-orange-500 hover:bg-orange-400 text-white flex items-center justify-center font-black text-sm transition-colors cursor-pointer"
+                        className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-orange-500 hover:bg-orange-400 text-white flex items-center justify-center font-black text-xs transition-colors cursor-pointer"
                       >
                         +
                       </button>
