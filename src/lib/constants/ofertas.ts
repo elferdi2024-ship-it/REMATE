@@ -1,7 +1,77 @@
 // filepath: src/lib/constants/ofertas.ts
 import type { PremiumPromo, OfertaConfig } from "@/types/ofertas";
 
+export interface HalloweenPromoItem extends PremiumPromo {
+  subtitulo: string;
+  badge: string;
+  destaque?: string;
+}
+
+export const HALLOWEEN_PROMOS: HalloweenPromoItem[] = [
+  {
+    id: "halloween-caramelos-florestal-500g",
+    titulo: "Caramelos Florestal 500g",
+    subtitulo: "Bolsa 500g surtidos · Ideal para repartir",
+    badge: "🎃 Especial Halloween",
+    destaque: "Bolsa 500g",
+    precio: 75,
+    cantidad: 1,
+    imagen: "/promos/halloween/caramelos-florestal-500g.jpg",
+    activa: true,
+    sucursalId: null,
+  },
+  {
+    id: "halloween-paleta-malvavisco",
+    titulo: "Paleta Grande Malvavisco",
+    subtitulo: "Formas divertidas de Halloween · 45g",
+    badge: "👻 Súper Buscada",
+    destaque: "Unidad 45g",
+    precio: 35,
+    cantidad: 1,
+    imagen: "/promos/halloween/paleta-grande-malvavisco.jpg",
+    activa: true,
+    sucursalId: null,
+  },
+  {
+    id: "halloween-chupetin-ringring-x20",
+    titulo: "Chupetín RingRing x 20u",
+    subtitulo: "Pote / Pack x 20 unidades ($10,50 c/u)",
+    badge: "🍬 Pack Mayorista",
+    destaque: "$10,50 c/u",
+    precio: 210,
+    cantidad: 1,
+    imagen: "/promos/halloween/chupetin-ringring-x20.jpg",
+    activa: true,
+    sucursalId: null,
+  },
+  {
+    id: "halloween-cremitas-ducrem-18u",
+    titulo: "Cremitas Ducrem 18u",
+    subtitulo: "Display x 18 unidades · Avellana y crema",
+    badge: "🔥 Clásico Kiosco",
+    destaque: "Display x 18u",
+    precio: 170,
+    cantidad: 1,
+    imagen: "/promos/halloween/cremitas-ducrem-18u.jpg",
+    activa: true,
+    sucursalId: null,
+  },
+  {
+    id: "halloween-paletas-florestal",
+    titulo: "Paletas Florestal Pegadas",
+    subtitulo: "Paquete 200g · Chupetines frutales Banzé",
+    badge: "🍭 Oferta Dulce",
+    destaque: "Paquete 200g",
+    precio: 75,
+    cantidad: 1,
+    imagen: "/promos/halloween/paletas-florestal.jpg",
+    activa: true,
+    sucursalId: null,
+  },
+];
+
 export const DEFAULT_PREMIUM_PROMOS: PremiumPromo[] = [
+  ...HALLOWEEN_PROMOS,
   {
     id: "promo-jugos-clight-tang",
     titulo: "Jugos Clight / Tang en Oferta (1 caja x $150 / 3 cajas x $300)",

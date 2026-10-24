@@ -34,6 +34,7 @@ import { useTiendaConfig } from "@/hooks/useTiendaConfig";
 import type { OfertaConfig } from "@/types/ofertas";
 import { DEFAULT_PREMIUM_PROMOS, DEFAULT_OFERTAS_CONFIG } from "@/lib/constants/ofertas";
 import CardFanPromoCarousel from "@/components/catalogo/CardFanPromoCarousel";
+import HalloweenPromosSection from "@/components/seasonal/HalloweenPromosSection";
 
 import BranchBar from "@/components/catalogo/BranchBar";
 import TopHeaderNav from "@/components/catalogo/TopHeaderNav";
@@ -863,9 +864,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       let escalaPrecios: BulkPriceTier[] | undefined = undefined;
       if (codigo.startsWith("PROMO-")) {
         const promoId = codigo.replace("PROMO-", "");
-        const allPromos = (ofertasConfig?.premiumPromos && ofertasConfig.premiumPromos.length > 0)
-          ? ofertasConfig.premiumPromos
-          : DEFAULT_PREMIUM_PROMOS;
+        const allPromos = [...DEFAULT_PREMIUM_PROMOS, ...(ofertasConfig?.premiumPromos || [])];
         const promo = allPromos.find((p) => p.id === promoId);
         if (promo) {
           nombre = promo.titulo;
@@ -1627,6 +1626,18 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
       {/* Contenido del catálogo — max-width desktop */}
       <div className="page-wrapper pt-3 sm:pt-4">
+        {/* SECCION DESTACADA ESPECIAL HALLOWEEN (5 OFERTAS DULCES) */}
+        {(!search.trim() || /halloween|caramelo|florestal|malvavisco|paleta|chupetin|ringring|ducrem|cremita|golosina/i.test(search)) &&
+          (!activeCat || activeCat === "Todos" || /golosina|chocolate|dulce|snack|oferta/i.test(activeCat)) &&
+          activeTab !== "favoritos" && (
+            <HalloweenPromosSection
+              enabled={tiendaConfig.modoHalloween ?? true}
+              qtyMap={qtyMap}
+              onAddPromo={handleAddProduct}
+              onQtyChange={handleQtyChange}
+              onSelectPromo={(prod) => setQuickViewProduct(prod)}
+            />
+          )}
         {/* Tus Compras Frecuentes / Reorder Express */}
         {!search.trim() && (!activeCat || activeCat === "Todos") && (
           <SmartReorder
