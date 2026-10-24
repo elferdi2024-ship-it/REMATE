@@ -36,8 +36,32 @@ const CHAT_SESSION_KEY = "elremate_chat_session_id";
 const CHAT_HISTORY_KEY = "elremate_chat_history_v2";
 
 /**
- * Ícono personalizado exclusivo de El Remate Canelones:
- * Combinación de Carrito de Compras + Burbuja de Conversación + Destello de IA
+ * Ícono flotante estilo WhatsApp pero en el Rojo Institucional de El Remate Canelones (#EF233C)
+ * Silueta de burbuja de chat universalmente reconocida con puntos sutiles
+ */
+function WhatsAppStyleRedIcon({ className = "w-7 h-7" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {/* Silueta de burbuja de conversación idéntica en proporción al botón de WhatsApp */}
+      <path
+        d="M12 2C6.477 2 2 6.477 2 12C2 13.82 2.487 15.526 3.336 16.993L2.087 21.365C1.968 21.782 2.348 22.162 2.765 22.043L7.137 20.794C8.584 21.603 10.246 22.06 12 22.06C17.523 22.06 22 17.583 22 12.06C22 6.537 17.523 2 12 2Z"
+        fill="white"
+      />
+      {/* Tres puntos de diálogo en el color rojo insignia */}
+      <circle cx="8" cy="12" r="1.3" fill="#D90429" />
+      <circle cx="12" cy="12" r="1.3" fill="#D90429" />
+      <circle cx="16" cy="12" r="1.3" fill="#D90429" />
+    </svg>
+  );
+}
+
+/**
+ * Ícono para el Header interior del Chat
  */
 function ElRemateChatIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
@@ -47,13 +71,11 @@ function ElRemateChatIcon({ className = "w-5 h-5" }: { className?: string }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Burbuja de diálogo de fondo */}
       <path
         d="M21 11.5C21.003 9.4 19.8 7.5 18 6.4C16.1 5.3 13.8 5.1 11.8 5.8C9.7 6.6 8.2 8.4 7.7 10.6C7.2 12.8 7.9 15.1 9.4 16.7C10.1 17.4 11 17.9 12 18.2L11 21L15.2 19.4C16.9 19.1 18.5 18.2 19.6 16.8C20.5 15.3 21 13.4 21 11.5Z"
         fill="currentColor"
         fillOpacity="0.22"
       />
-      {/* Carrito de compras estilizado */}
       <path
         d="M3 4H5.2L6.8 13.2C6.9 13.9 7.5 14.5 8.3 14.5H16.2C16.9 14.5 17.6 14 17.8 13.3L19.2 8H6"
         stroke="currentColor"
@@ -61,10 +83,8 @@ function ElRemateChatIcon({ className = "w-5 h-5" }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Ruedas del carrito */}
       <circle cx="9" cy="17.5" r="1.3" fill="currentColor" />
       <circle cx="16" cy="17.5" r="1.3" fill="currentColor" />
-      {/* Destello IA Sparkle */}
       <path
         d="M14.5 3L15.3 4.7L17 5.5L15.3 6.3L14.5 8L13.7 6.3L12 5.5L13.7 4.7L14.5 3Z"
         fill="currentColor"
@@ -419,46 +439,35 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
   );
 
   // ── Cálculo dinámico de posición del FAB móvil para no colisionar ──
-  // Si hay carrito: queda flotando sobre la barra roja FloatCartBtn (124px)
-  // Si no hay carrito: queda flotando sobre BottomNavBar (68px)
+  // Si hay carrito: queda flotando sobre la barra roja FloatCartBtn (130px)
+  // Si no hay carrito: queda flotando sobre BottomNavBar (74px)
   const fabBottomStyle = items.length > 0
-    ? "bottom-[calc(124px+env(safe-area-inset-bottom,8px))] sm:bottom-6"
-    : "bottom-[calc(68px+env(safe-area-inset-bottom,8px))] sm:bottom-6";
+    ? "bottom-[calc(130px+env(safe-area-inset-bottom,8px))] sm:bottom-7"
+    : "bottom-[calc(74px+env(safe-area-inset-bottom,8px))] sm:bottom-7";
 
   return (
     <>
-      {/* ── Botón Flotante Asistente (FAB) — Totalmente reposicionado y sin colisiones ── */}
+      {/* ── Botón Flotante Redondo Asistente (FAB) — Estilo WhatsApp pero en Rojo Institucional (#EF233C) ── */}
       <div
         className={`fixed z-40 transition-all duration-300 ${
           isOpen ? "opacity-0 pointer-events-none translate-y-4 scale-90" : "opacity-100 translate-y-0 scale-100"
-        } right-3 sm:right-6 ${fabBottomStyle}`}
+        } right-4 sm:right-6 ${fabBottomStyle}`}
       >
         <button
           type="button"
           onClick={() => handleToggle(true)}
-          aria-label="Abrir Asistente Inteligente El Remate Canelones"
-          className="group relative flex items-center gap-2 sm:gap-3 pl-2.5 pr-3.5 py-2 sm:py-2.5 rounded-full bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#99001A] text-white shadow-[0_10px_25px_-3px_rgba(184,0,31,0.45)] border border-[#EF233C]/40 hover:border-[#EF233C] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+          aria-label="Abrir Asistente de Ventas El Remate Canelones"
+          className="group relative flex items-center justify-center w-14 h-14 sm:w-[58px] sm:h-[58px] rounded-full bg-gradient-to-tr from-[#B8001F] via-[#D90429] to-[#EF233C] text-white shadow-[0_8px_24px_rgba(239,35,60,0.48)] hover:shadow-[0_12px_32px_rgba(239,35,60,0.65)] hover:scale-108 active:scale-95 transition-all duration-200 cursor-pointer"
         >
-          {/* Avatar con ícono exclusivo */}
-          <div className="relative w-8 h-8 rounded-full bg-[#EF233C]/25 border border-[#EF233C]/60 flex items-center justify-center text-[#EF233C] shrink-0">
-            <ElRemateChatIcon className="w-4 h-4 text-[#EF233C]" />
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#EF233C] border-2 border-[#0F172A] animate-pulse" />
-          </div>
+          {/* Pulso sutil de atención estilo WhatsApp */}
+          <span className="absolute inset-0 rounded-full bg-[#EF233C] animate-ping opacity-20 pointer-events-none" />
 
-          <div className="flex flex-col items-start text-left leading-tight pr-0.5">
-            <span className="text-[12px] sm:text-[13px] font-extrabold tracking-tight text-white flex items-center gap-1">
-              Asistente{" "}
-              <span className="text-[8.5px] font-black uppercase px-1 py-0.2 rounded bg-[#EF233C]/25 text-[#FF6B6B] border border-[#EF233C]/40">
-                IA
-              </span>
-            </span>
-            <span className="text-[9.5px] font-semibold text-slate-300 hidden sm:inline">
-              Pedidos y Stock
-            </span>
-          </div>
+          {/* Ícono de burbuja de conversación blanca con puntos rojos reconocible al instante */}
+          <WhatsAppStyleRedIcon className="w-7 h-7 sm:w-8 sm:h-8 drop-shadow-xs transition-transform duration-200 group-hover:scale-105" />
 
+          {/* Badge delicado con conteo de carrito o notificación */}
           {items.length > 0 && (
-            <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-[#EF233C] text-white text-[10px] font-black shadow-xs">
+            <span className="absolute -top-1 -right-1 min-w-[21px] h-[21px] px-1 rounded-full bg-white text-[#D90429] text-[11px] font-black flex items-center justify-center shadow-md border border-[#EF233C]/20 ring-2 ring-[#EF233C]">
               {items.length}
             </span>
           )}
