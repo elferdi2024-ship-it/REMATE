@@ -1900,8 +1900,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             bottom: totalQty > 0 
               ? "calc(env(safe-area-inset-bottom, 12px) + 215px)" 
               : "calc(env(safe-area-inset-bottom, 12px) + 72px)",
-            right: "16px",
-            zIndex: 90,
+            left: "16px",
+            zIndex: 70,
             background: "var(--oscuro, #111)",
             color: "#fff",
             border: "1px solid rgba(255,255,255,0.15)",

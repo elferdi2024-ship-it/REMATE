@@ -51,13 +51,13 @@ function ElRemateChatIcon({ className = "w-5 h-5" }: { className?: string }) {
       <path
         d="M21 11.5C21.003 9.4 19.8 7.5 18 6.4C16.1 5.3 13.8 5.1 11.8 5.8C9.7 6.6 8.2 8.4 7.7 10.6C7.2 12.8 7.9 15.1 9.4 16.7C10.1 17.4 11 17.9 12 18.2L11 21L15.2 19.4C16.9 19.1 18.5 18.2 19.6 16.8C20.5 15.3 21 13.4 21 11.5Z"
         fill="currentColor"
-        fillOpacity="0.18"
+        fillOpacity="0.22"
       />
       {/* Carrito de compras estilizado */}
       <path
         d="M3 4H5.2L6.8 13.2C6.9 13.9 7.5 14.5 8.3 14.5H16.2C16.9 14.5 17.6 14 17.8 13.3L19.2 8H6"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="2.1"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -120,7 +120,6 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
       }
     } catch {}
 
-    // Mensaje de bienvenida inicial si no hay historial
     const welcomeMsg: MessageItem = {
       id: "welcome_0",
       role: "bot",
@@ -130,7 +129,21 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
     setMessages([welcomeMsg]);
   }, []);
 
-  // Guardar mensajes
+  // Bloqueo de scroll en body mientras el chat móvil está abierto
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (isOpen) {
+      document.body.classList.add("chat-widget-open");
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.classList.remove("chat-widget-open");
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isOpen]);
+
+  // Guardar mensajes en localStorage
   useEffect(() => {
     if (typeof window === "undefined" || messages.length === 0) return;
     try {
@@ -145,10 +158,12 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
     }
   }, [messages, isOpen, loading]);
 
-  // Manejar foco al abrir
+  // Manejar foco en input al abrir
   useEffect(() => {
-    if (isOpen && window.innerWidth > 640) {
-      setTimeout(() => inputRef.current?.focus(), 150);
+    if (isOpen) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 200);
     }
   }, [isOpen]);
 
@@ -195,7 +210,6 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
       haptic.add();
       setInputValue("");
 
-      // ── Acciones rápidas predefinidas ──
       let queryToSend = text;
       if (
         text.startsWith("🛒 Lista rápida:") ||
@@ -272,7 +286,6 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
         console.warn("Fallo conectando a /api/chat, utilizando motor local:", err);
       }
 
-      // Fallback local ultraveloz si la API no respondió
       if (!apiData) {
         apiData = localChatFallback(queryToSend, catalog);
       }
@@ -396,7 +409,6 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
         setHandoffSubmitting(false);
       }
 
-      // Link directo a WhatsApp con resumen
       const waText = `¡Hola El Remate Canelones! Soy ${name} (${phone}). ${
         message ? `\nConsulta: ${message}` : ""
       }${items.length > 0 ? `\nTengo ${items.length} productos en mi carrito por $${total.toLocaleString("es-UY")}.` : ""}`;
@@ -406,65 +418,77 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
     [items, total, getSessionId, toast]
   );
 
+  // ── Cálculo dinámico de posición del FAB móvil para no colisionar ──
+  // Si hay carrito: queda flotando sobre la barra roja FloatCartBtn (124px)
+  // Si no hay carrito: queda flotando sobre BottomNavBar (68px)
+  const fabBottomStyle = items.length > 0
+    ? "bottom-[calc(124px+env(safe-area-inset-bottom,8px))] sm:bottom-6"
+    : "bottom-[calc(68px+env(safe-area-inset-bottom,8px))] sm:bottom-6";
+
   return (
     <>
-      {/* ── Botón Flotante Asistente (FAB) — Identidad Canelones Crimson & Obsidian ── */}
+      {/* ── Botón Flotante Asistente (FAB) — Totalmente reposicionado y sin colisiones ── */}
       <div
         className={`fixed z-40 transition-all duration-300 ${
-          isOpen ? "opacity-0 pointer-events-none translate-y-4 scale-95" : "opacity-100 translate-y-0 scale-100"
-        } right-4 sm:right-6 bottom-[calc(1.2rem+env(safe-area-inset-bottom))]`}
+          isOpen ? "opacity-0 pointer-events-none translate-y-4 scale-90" : "opacity-100 translate-y-0 scale-100"
+        } right-3 sm:right-6 ${fabBottomStyle}`}
       >
         <button
           type="button"
           onClick={() => handleToggle(true)}
           aria-label="Abrir Asistente Inteligente El Remate Canelones"
-          className="group relative flex items-center gap-3 px-4 py-3 rounded-full bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#B8001F] text-white shadow-[0_12px_32px_rgba(184,0,31,0.35)] border border-[#EF233C]/40 hover:border-[#EF233C] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+          className="group relative flex items-center gap-2 sm:gap-3 pl-2.5 pr-3.5 py-2 sm:py-2.5 rounded-full bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#99001A] text-white shadow-[0_10px_25px_-3px_rgba(184,0,31,0.45)] border border-[#EF233C]/40 hover:border-[#EF233C] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
         >
           {/* Avatar con ícono exclusivo */}
-          <div className="relative w-8 h-8 rounded-full bg-[#EF233C]/20 border border-[#EF233C]/50 flex items-center justify-center text-[#EF233C]">
+          <div className="relative w-8 h-8 rounded-full bg-[#EF233C]/25 border border-[#EF233C]/60 flex items-center justify-center text-[#EF233C] shrink-0">
             <ElRemateChatIcon className="w-4 h-4 text-[#EF233C]" />
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#EF233C] border-2 border-[#0F172A] animate-pulse" />
           </div>
 
-          <div className="flex flex-col items-start text-left leading-tight pr-1">
-            <span className="text-[13px] font-extrabold tracking-tight text-white flex items-center gap-1.5">
-              El Remate{" "}
-              <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-[#EF233C]/25 text-[#FF6B6B] border border-[#EF233C]/40">
+          <div className="flex flex-col items-start text-left leading-tight pr-0.5">
+            <span className="text-[12px] sm:text-[13px] font-extrabold tracking-tight text-white flex items-center gap-1">
+              Asistente{" "}
+              <span className="text-[8.5px] font-black uppercase px-1 py-0.2 rounded bg-[#EF233C]/25 text-[#FF6B6B] border border-[#EF233C]/40">
                 IA
               </span>
             </span>
-            <span className="text-[10px] font-semibold text-slate-300 hidden sm:inline">
-              Asistente de Pedidos y Stock
+            <span className="text-[9.5px] font-semibold text-slate-300 hidden sm:inline">
+              Pedidos y Stock
             </span>
           </div>
 
           {items.length > 0 && (
-            <span className="ml-0.5 px-2 py-0.5 rounded-full bg-[#EF233C] text-white text-[10.5px] font-black shadow-xs">
+            <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-[#EF233C] text-white text-[10px] font-black shadow-xs">
               {items.length}
             </span>
           )}
         </button>
       </div>
 
-      {/* ── Backdrop en Mobile ── */}
+      {/* ── Backdrop en Mobile y Desktop (z-[999] por encima de toda barra de navegación y carrito flotante) ── */}
       {isOpen && (
         <div
           onClick={() => handleToggle(false)}
-          className="fixed inset-0 bg-[#0B0F19]/60 backdrop-blur-xs z-50 transition-opacity duration-200 sm:hidden"
+          className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-[999] transition-opacity duration-200"
         />
       )}
 
-      {/* ── Ventana del Chatbot Concierge ── */}
+      {/* ── Ventana del Chatbot Concierge (z-[1000] SIEMPRE AL FRENTE) ── */}
       {isOpen && (
         <aside
           role="dialog"
           aria-label="Atención y Pedidos El Remate Canelones"
-          className="fixed z-50 flex flex-col overflow-hidden bg-[#FAF8F5] border border-[#E2E8F0] shadow-[0_24px_64px_rgba(15,23,42,0.38)] sm:rounded-[22px] sm:right-5 sm:bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:w-[420px] sm:max-w-[calc(100vw-28px)] sm:h-[620px] sm:max-h-[calc(100dvh-100px)] inset-x-0 bottom-0 h-[88dvh] max-h-[680px] rounded-t-[24px] border-b-0 animate-in fade-in slide-in-from-bottom-5 duration-200"
+          className="fixed z-[1000] inset-x-0 bottom-0 h-[92dvh] max-h-[92dvh] sm:h-[640px] sm:max-h-[calc(100dvh-48px)] sm:w-[430px] sm:max-w-[calc(100vw-32px)] sm:right-6 sm:bottom-6 sm:inset-x-auto rounded-t-[26px] sm:rounded-[26px] flex flex-col overflow-hidden bg-[#FAF8F5] border border-slate-200/90 shadow-[0_-16px_50px_rgba(15,23,42,0.4)] animate-in fade-in slide-in-from-bottom-5 duration-200"
         >
-          {/* Manija táctil en Mobile */}
-          <div className="flex sm:hidden justify-center items-center py-2 bg-[#0B0F19]">
-            <span className="w-10 h-1 rounded-full bg-white/30" />
-          </div>
+          {/* Manija táctil en Mobile para cerrar o deslizar */}
+          <button
+            type="button"
+            onClick={() => handleToggle(false)}
+            aria-label="Minimizar chat"
+            className="flex sm:hidden justify-center items-center py-2.5 bg-gradient-to-r from-[#0B0F19] to-[#151D2A] cursor-pointer w-full group border-b border-white/5"
+          >
+            <span className="w-12 h-1.5 rounded-full bg-white/30 group-hover:bg-white/50 transition-colors" />
+          </button>
 
           {/* ── Header Exclusivo Canelones (Obsidian + Crimson Glow) ── */}
           <div className="flex items-center justify-between gap-3 px-4 py-3 bg-gradient-to-r from-[#0B0F19] via-[#151D2A] to-[#1E293B] text-white border-b border-[#EF233C]/30 shrink-0">
@@ -552,8 +576,8 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
             </div>
           )}
 
-          {/* ── Área de Mensajes ── */}
-          <div className="flex-1 overflow-y-auto p-3.5 space-y-3 bg-[radial-gradient(circle_at_top_right,rgba(239,35,60,0.05),transparent_55%),#FAF8F5]">
+          {/* ── Área de Mensajes (Con scroll suave y layout amplio) ── */}
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 bg-[radial-gradient(circle_at_top_right,rgba(239,35,60,0.05),transparent_55%),#FAF8F5]">
             {messages.map((m) => (
               <div
                 key={m.id}
@@ -564,7 +588,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                 <div
                   className={`max-w-[92%] px-3.5 py-2.5 rounded-[15px] text-[13.5px] leading-relaxed break-words shadow-xs ${
                     m.role === "user"
-                      ? "bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#B8001F] text-white rounded-br-[4px] font-medium"
+                      ? "bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#99001A] text-white rounded-br-[4px] font-medium"
                       : "bg-white text-[#0F172A] border border-[#E2E8F0] rounded-bl-[4px]"
                   }`}
                 >
@@ -774,7 +798,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                         placeholder="Tu nombre o comercio *"
                         required
                         defaultValue={typeof window !== "undefined" ? localStorage.getItem("elremate_cust_name") || "" : ""}
-                        className="w-full px-3 py-2 text-[13px] bg-white border border-[#E2E8F0] rounded-lg focus:outline-[#EF233C]"
+                        className="w-full px-3 py-2 text-[16px] sm:text-[13px] bg-white border border-[#E2E8F0] rounded-lg focus:outline-[#EF233C]"
                       />
                       <input
                         type="tel"
@@ -782,18 +806,18 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                         placeholder="Tu WhatsApp (ej: 099 123 456) *"
                         required
                         defaultValue={typeof window !== "undefined" ? localStorage.getItem("elremate_cust_phone") || "" : ""}
-                        className="w-full px-3 py-2 text-[13px] bg-white border border-[#E2E8F0] rounded-lg focus:outline-[#EF233C]"
+                        className="w-full px-3 py-2 text-[16px] sm:text-[13px] bg-white border border-[#E2E8F0] rounded-lg focus:outline-[#EF233C]"
                       />
                       <textarea
                         name="message"
                         rows={2}
                         placeholder="Contanos tu consulta o pedido mayorista…"
-                        className="w-full px-3 py-2 text-[13px] bg-white border border-[#E2E8F0] rounded-lg focus:outline-[#EF233C]"
+                        className="w-full px-3 py-2 text-[16px] sm:text-[13px] bg-white border border-[#E2E8F0] rounded-lg focus:outline-[#EF233C]"
                       />
                       <button
                         type="submit"
                         disabled={handoffSubmitting}
-                        className="w-full py-2 px-3 rounded-lg bg-[#EF233C] hover:bg-[#D90429] text-white text-[12.5px] font-extrabold transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
+                        className="w-full py-2.5 px-3 rounded-lg bg-[#EF233C] hover:bg-[#D90429] text-white text-[13px] font-extrabold transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
                       >
                         {handoffSubmitting ? "Enviando…" : "📨 Enviar y Avisar a un Asesor"}
                       </button>
@@ -822,20 +846,20 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                 key={idx}
                 type="button"
                 onClick={() => sendMessage(chip)}
-                className="px-3 py-1 rounded-full bg-white hover:bg-[#0F172A] hover:text-white border border-[#CBD5E1] text-[#0F172A] text-[12px] font-bold whitespace-nowrap shadow-xs transition-colors shrink-0 cursor-pointer"
+                className="px-3 py-1.5 rounded-full bg-white hover:bg-[#0F172A] hover:text-white border border-[#CBD5E1] text-[#0F172A] text-[12px] font-bold whitespace-nowrap shadow-xs transition-colors shrink-0 cursor-pointer active:scale-95"
               >
                 {chip}
               </button>
             ))}
           </div>
 
-          {/* ── Barra de Entrada de Mensaje ── */}
+          {/* ── Barra de Entrada de Mensaje (Accesible, visible y protegida con Safe Area) ── */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
               sendMessage(inputValue);
             }}
-            className="flex items-center gap-2 p-2.5 bg-white border-t border-[#E2E8F0] shrink-0 pb-[calc(0.6rem+env(safe-area-inset-bottom))]"
+            className="relative z-10 flex items-center gap-2 p-2.5 sm:p-3 bg-white border-t border-[#E2E8F0] shrink-0 pb-[calc(env(safe-area-inset-bottom,12px)+8px)]"
           >
             <input
               ref={inputRef}
@@ -844,7 +868,11 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Escribí un producto, tu lista o código CN-..."
               maxLength={400}
-              className="flex-1 min-w-0 px-3.5 py-2.5 text-[13.5px] bg-[#F8FAFC] text-[#0F172A] border border-[#CBD5E1] focus:border-[#EF233C] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#EF233C]/10 placeholder:text-neutral-400"
+              autoComplete="off"
+              autoCorrect="off"
+              enterKeyHint="send"
+              style={{ fontSize: "16px" }}
+              className="flex-1 min-w-0 px-3.5 py-2.5 sm:text-[13.5px] bg-[#F8FAFC] text-[#0F172A] border border-[#CBD5E1] focus:border-[#EF233C] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#EF233C]/10 placeholder:text-neutral-400"
             />
             <button
               type="submit"
