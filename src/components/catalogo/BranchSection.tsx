@@ -18,10 +18,16 @@ export default function BranchSection({
   const activeSucursal = SUCURSALES.find(s => s.id === selectedSucursal);
 
   const handleCardClick = (id: string) => {
-    if (onEnterCatalog) {
-      onEnterCatalog(id);
-    } else if (onSelectSucursal) {
-      onSelectSucursal(id);
+    if (selectedSucursal === id) {
+      if (onEnterCatalog) {
+        onEnterCatalog(id);
+      }
+    } else {
+      if (onSelectSucursal) {
+        onSelectSucursal(id);
+      } else if (onEnterCatalog) {
+        onEnterCatalog(id);
+      }
     }
   };
 
@@ -81,11 +87,11 @@ export default function BranchSection({
                     </div>
                     {isActive ? (
                       <span className="bg-[#E8302A] text-white text-[0.65rem] font-black uppercase py-1 px-3 rounded-full tracking-[1.5px] shadow-[0_2px_8px_rgba(232,48,42,0.3)] animate-pulse">
-                        ✓ CATÁLOGO ACTIVO
+                        ✓ CATÁLOGO SELECCIONADO
                       </span>
                     ) : (
                       <span className="bg-[#F5F0E8] text-[#5C4A35] text-[0.65rem] font-bold uppercase py-1 px-3 rounded-full tracking-[1px] group-hover:bg-[#E8302A] group-hover:text-white transition-colors">
-                        TOCÁ PARA VER CATÁLOGO ⚡
+                        TOCÁ PARA SELECCIONAR CATÁLOGO ⚡
                       </span>
                     )}
                   </div>

@@ -100,10 +100,11 @@ export default function HeroLanding({
                   key={sucursal.id}
                   type="button"
                   onClick={() => {
-                    if (onEnterCatalog) {
-                      onEnterCatalog(sucursal.id);
-                    } else if (onSelectSucursal) {
-                      onSelectSucursal(sucursal.id);
+                    if (isSelected) {
+                      if (onEnterCatalog) onEnterCatalog(sucursal.id);
+                    } else {
+                      if (onSelectSucursal) onSelectSucursal(sucursal.id);
+                      else if (onEnterCatalog) onEnterCatalog(sucursal.id);
                     }
                   }}
                   className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 select-none active:scale-95 group ${
@@ -121,7 +122,7 @@ export default function HeroLanding({
                   <span className={`text-[9px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md transition-all ${
                     isSelected ? "bg-white text-[#EF233C] font-extrabold shadow-xs" : "bg-slate-800 text-slate-400 group-hover:bg-[#EF233C] group-hover:text-white"
                   }`}>
-                    {isSelected ? "Catálogo Activo ⚡" : "Ver Catálogo ⚡"}
+                    {isSelected ? "Catálogo Activo ⚡" : "Seleccionar ⚡"}
                   </span>
                 </button>
               );

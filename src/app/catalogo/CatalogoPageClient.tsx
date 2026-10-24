@@ -1138,6 +1138,38 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     } catch (lErr) {
       console.error("❌ LocalStorage: Error al guardar historial local:", lErr);
     }
+    // ── Notificar al CRM Hub (El Remate Canelones #ER-CANELONES) en segundo plano ──
+    if (typeof window !== "undefined") {
+      fetch("/api/crm/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event: "order.created",
+          id: `evt_web_${Date.now()}_${orderId}`,
+          data: {
+            order: {
+              id: orderId,
+              publicCode: `CN-${numeroVisible}`,
+              status: "PENDING",
+              deliveryType: metodoEntrega === "retiro" ? "PICKUP" : "DELIVERY",
+              customerName: nombre,
+              customerPhone: tel || "",
+              deliveryAddress: deliveryDireccion || undefined,
+              customerNote: deliveryNotas || undefined,
+              total: totalConEnvio,
+              items: pedidoItems.map((p: any) => ({
+                productId: p.codigo,
+                name: p.nombre,
+                quantity: p.cantidad,
+                unitPrice: p.precioUnitario,
+                unit: "UNIT",
+              })),
+            },
+          },
+        }),
+      }).catch((err) => console.warn("⚠️ CRM Hub: Notificación en segundo plano no enviada:", err));
+    }
+
 
     const pendiente: PedidoPendienteWA = {
       id: orderId,

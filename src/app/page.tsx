@@ -23,6 +23,7 @@ import * as ls from "@/lib/ls";
 import { useToast } from "@/lib/toast-context";
 import { useCart } from "@/lib/cart-context";
 import { DEFAULT_CAROUSEL_SLIDES } from "@/lib/constants/ofertas";
+import { haptic } from "@/lib/haptic";
 
 // Subcomponentes
 import HeroLanding from "@/components/catalogo/HeroLanding";
@@ -123,12 +124,15 @@ export default function LandingPage() {
       clearCart();
     }
 
+    haptic.add();
     ls.setSelectedSucursal(id);
     setSelectedSucursal(id);
 
     const params = new URLSearchParams(window.location.search);
     params.set("sucursal", id);
-    router.replace(`/?${params.toString()}`, { scroll: false });
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, "", newUrl);
+    router.replace(newUrl, { scroll: false });
 
     toast.success(`🏪 Catálogo de ${nombre} seleccionado`);
   };
@@ -145,6 +149,7 @@ export default function LandingPage() {
       clearCart();
     }
 
+    haptic.add();
     ls.setSelectedSucursal(id);
     setSelectedSucursal(id);
 
@@ -197,7 +202,7 @@ export default function LandingPage() {
           setPendingCategory("");
           setIsModalOpen(true);
         }}
-        onSelectSucursal={handleEnterCatalog}
+        onSelectSucursal={handleSelectSucursal}
         onEnterCatalog={handleEnterCatalog}
       />
 
@@ -380,7 +385,7 @@ export default function LandingPage() {
       {/* Branch Section */}
       <BranchSection
         selectedSucursal={activeSucursalId}
-        onSelectSucursal={handleEnterCatalog}
+        onSelectSucursal={handleSelectSucursal}
         onEnterCatalog={handleEnterCatalog}
       />
 
