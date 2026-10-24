@@ -1,3 +1,4 @@
+// filepath: src/hooks/useTiendaConfig.ts
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,6 +9,7 @@ export interface TiendaConfig {
   pedidosAbiertos: boolean;
   bannerMensaje: string;
   minimoEnvioGratis: number;
+  modoHalloween?: boolean;
 }
 
 export function useTiendaConfig() {
@@ -15,6 +17,7 @@ export function useTiendaConfig() {
     pedidosAbiertos: true,
     bannerMensaje: "",
     minimoEnvioGratis: 2500,
+    modoHalloween: true,
   });
   const [loading, setLoading] = useState(true);
 
@@ -28,6 +31,7 @@ export function useTiendaConfig() {
             pedidosAbiertos: data.pedidosAbiertos ?? true,
             bannerMensaje: data.bannerMensaje ?? "",
             minimoEnvioGratis: data.minimoEnvioGratis ?? 2500,
+            modoHalloween: data.modoHalloween ?? true,
           });
         }
         setLoading(false);

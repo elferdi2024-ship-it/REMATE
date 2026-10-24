@@ -1,4 +1,4 @@
-﻿// filepath: src/components/dashboard/BusinessSwitchboard.tsx
+// filepath: src/components/dashboard/BusinessSwitchboard.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,6 +7,7 @@ export interface TiendaConfig {
   pedidosAbiertos: boolean;
   bannerMensaje: string;
   minimoEnvioGratis?: number;
+  modoHalloween?: boolean;
 }
 
 interface BusinessSwitchboardProps {
@@ -275,6 +276,56 @@ export default function BusinessSwitchboard({
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Control 4: Ambientación Especial de Temporada (Capa Halloween Superpuesta) */}
+        <div
+          className={`flex flex-col gap-4 rounded-2xl border p-5 transition-all duration-200 sm:flex-row sm:items-center sm:justify-between ${
+            (config.modoHalloween ?? true)
+              ? "border-orange-500/35 bg-orange-500/[0.04]"
+              : "border-[var(--admin-border)] bg-[var(--admin-bg)]"
+          }`}
+        >
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <h3 className="font-bold text-sm text-[var(--admin-text-hi)] flex items-center gap-1.5">
+                <span>🎃</span> Capa Decorativa Halloween
+              </h3>
+              <span
+                className={`rounded-full px-2.5 py-0.5 font-mono text-[10px] font-extrabold uppercase tracking-wider ${
+                  (config.modoHalloween ?? true)
+                    ? "bg-orange-500/15 text-orange-500"
+                    : "bg-slate-500/15 text-slate-400"
+                }`}
+              >
+                {(config.modoHalloween ?? true) ? "Ambientación Activa" : "Desactivada"}
+              </span>
+            </div>
+            <p className="max-w-md text-xs leading-relaxed text-[var(--admin-text-lo)]">
+              Superpone telarañas en buscador y tarjetas, murciélagos sutiles, bordes naranjas y calabaza junto al chat sin alterar el diseño ni los botones originales.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            role="switch"
+            aria-checked={config.modoHalloween ?? true}
+            disabled={configSaving}
+            onClick={() =>
+              onSaveConfig({ modoHalloween: !(config.modoHalloween ?? true) })
+            }
+            className={`relative inline-flex h-8 w-16 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500/40 ${
+              (config.modoHalloween ?? true)
+                ? "bg-orange-500"
+                : "bg-[var(--admin-input-bg)] border-[var(--admin-border)]"
+            } ${configSaving ? "opacity-50 cursor-not-allowed" : "active:scale-95"}`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow-md ring-0 transition duration-300 ease-in-out ${
+                (config.modoHalloween ?? true) ? "translate-x-8" : "translate-x-0"
+              }`}
+            />
+          </button>
         </div>
       </div>
     </section>

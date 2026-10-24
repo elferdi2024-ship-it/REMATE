@@ -53,6 +53,7 @@ const ShippingThresholdBar = dynamic(() => import("@/components/catalogo/Shippin
 const QuickOrderModal = dynamic(() => import("@/components/catalogo/QuickOrderModal"), { ssr: false });
 const PedidoEnviarWhatsApp = dynamic(() => import("@/components/carrito/PedidoEnviarWhatsApp"), { ssr: false });
 const ChatWidget = dynamic(() => import("@/components/chat/ChatWidget"), { ssr: false });
+const HalloweenOverlay = dynamic(() => import("@/components/seasonal/HalloweenOverlay"), { ssr: false });
 import type { PedidoPendienteWA } from "@/components/carrito/PedidoEnviarWhatsApp";
 import {
   armarMensajeWA,
@@ -1953,6 +1954,12 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       <ChatWidget
         catalog={productos}
         onOpenCart={() => setCartOpen(true)}
+      />
+
+      {/* Capa Decorativa de Halloween (Controlada en vivo desde Admin Switchboard) */}
+      <HalloweenOverlay
+        enabled={tiendaConfig.modoHalloween ?? true}
+        cartQty={totalQty}
       />
     </div>
   );
