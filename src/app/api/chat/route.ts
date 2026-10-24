@@ -7,6 +7,7 @@ import {
   parseSegmentQuantityAndTerm,
   searchCatalogByTokens,
   localChatFallback,
+  STOP_WORDS,
   type ChatProductItem,
   type OrderCardData,
 } from "@/lib/chat-engine";

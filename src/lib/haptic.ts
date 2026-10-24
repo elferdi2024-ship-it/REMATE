@@ -14,4 +14,19 @@ export const haptic = {
       navigator.vibrate([50, 30, 100]);
     }
   },
+  selection: () => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(15);
+    }
+  },
+  impact: () => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(25);
+    }
+  },
+  success: () => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate([15, 30, 20]);
+    }
+  },
 };

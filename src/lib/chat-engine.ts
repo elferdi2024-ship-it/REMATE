@@ -177,7 +177,8 @@ export function searchCatalogByTokens(
     }
 
     if (pNameNorm.includes(joinedQuery)) score += 45;
-    if (p.precioAntes && p.precioAntes > p.precio) score += 6;
+    const prevP = (p as any).precioAnterior || (p as any).precioAntes;
+    if (prevP && prevP > p.precio) score += 6;
 
     scored.push({ product: p, score });
   }

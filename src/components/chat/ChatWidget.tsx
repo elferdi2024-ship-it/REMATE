@@ -7,7 +7,6 @@ import { useToast } from "@/lib/toast-context";
 import { haptic } from "@/lib/haptic";
 import { construirLinkWhatsApp } from "@/lib/whatsapp";
 import {
-  cleanEncoding,
   formatChatMarkdown,
   localChatFallback,
   type ChatProductItem,
@@ -36,8 +35,46 @@ interface ChatWidgetProps {
 const CHAT_SESSION_KEY = "elremate_chat_session_id";
 const CHAT_HISTORY_KEY = "elremate_chat_history_v2";
 
+/**
+ * Ícono personalizado exclusivo de El Remate Canelones:
+ * Combinación de Carrito de Compras + Burbuja de Conversación + Destello de IA
+ */
+function ElRemateChatIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Burbuja de diálogo de fondo */}
+      <path
+        d="M21 11.5C21.003 9.4 19.8 7.5 18 6.4C16.1 5.3 13.8 5.1 11.8 5.8C9.7 6.6 8.2 8.4 7.7 10.6C7.2 12.8 7.9 15.1 9.4 16.7C10.1 17.4 11 17.9 12 18.2L11 21L15.2 19.4C16.9 19.1 18.5 18.2 19.6 16.8C20.5 15.3 21 13.4 21 11.5Z"
+        fill="currentColor"
+        fillOpacity="0.18"
+      />
+      {/* Carrito de compras estilizado */}
+      <path
+        d="M3 4H5.2L6.8 13.2C6.9 13.9 7.5 14.5 8.3 14.5H16.2C16.9 14.5 17.6 14 17.8 13.3L19.2 8H6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Ruedas del carrito */}
+      <circle cx="9" cy="17.5" r="1.3" fill="currentColor" />
+      <circle cx="16" cy="17.5" r="1.3" fill="currentColor" />
+      {/* Destello IA Sparkle */}
+      <path
+        d="M14.5 3L15.3 4.7L17 5.5L15.3 6.3L14.5 8L13.7 6.3L12 5.5L13.7 4.7L14.5 3Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps) {
-  const { items, total, addItem, setItemQty } = useCart();
+  const { items, total, setItemQty } = useCart();
   const toast = useToast();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -87,7 +124,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
     const welcomeMsg: MessageItem = {
       id: "welcome_0",
       role: "bot",
-      text: "¡Hola! 👋 ¿En qué podemos ayudarte hoy?\n\nPodés escribir acá abajo tu lista para armar tu pedido al instante o consultarnos cualquier duda sobre precios, stock y envíos:",
+      text: "¡Hola! 👋 ¿En qué podemos ayudarte hoy en **El Remate Canelones**?\n\nPodés escribir acá abajo tu lista para armar tu pedido al instante o consultarnos cualquier duda sobre precios mayoristas, stock y envíos:",
       isWelcome: true,
     };
     setMessages([welcomeMsg]);
@@ -136,7 +173,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
     const welcomeMsg: MessageItem = {
       id: `welcome_${Date.now()}`,
       role: "bot",
-      text: "¡Hola! 👋 ¿En qué podemos ayudarte hoy?\n\nPodés escribir acá abajo tu lista para armar tu pedido al instante o consultarnos cualquier duda sobre precios, stock y envíos:",
+      text: "¡Hola! 👋 ¿En qué podemos ayudarte hoy en **El Remate Canelones**?\n\nPodés escribir acá abajo tu lista para armar tu pedido al instante o consultarnos cualquier duda sobre precios mayoristas, stock y envíos:",
       isWelcome: true,
     };
     setMessages([welcomeMsg]);
@@ -371,7 +408,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
 
   return (
     <>
-      {/* ── Botón Flotante Asistente (FAB) ── */}
+      {/* ── Botón Flotante Asistente (FAB) — Identidad Canelones Crimson & Obsidian ── */}
       <div
         className={`fixed z-40 transition-all duration-300 ${
           isOpen ? "opacity-0 pointer-events-none translate-y-4 scale-95" : "opacity-100 translate-y-0 scale-100"
@@ -380,38 +417,29 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
         <button
           type="button"
           onClick={() => handleToggle(true)}
-          aria-label="Abrir Asistente y Pedidos El Remate"
-          className="group relative flex items-center gap-3 px-4 py-3 rounded-full bg-gradient-to-br from-[#0F1E15] via-[#173824] to-[#1FA855] text-white shadow-[0_12px_32px_rgba(10,28,17,0.38)] border border-emerald-400/30 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+          aria-label="Abrir Asistente Inteligente El Remate Canelones"
+          className="group relative flex items-center gap-3 px-4 py-3 rounded-full bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#B8001F] text-white shadow-[0_12px_32px_rgba(184,0,31,0.35)] border border-[#EF233C]/40 hover:border-[#EF233C] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
         >
-          <div className="relative w-8 h-8 rounded-full bg-emerald-500/25 border border-emerald-300/40 flex items-center justify-center text-emerald-300">
-            <svg
-              className="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-              <circle cx="8" cy="12" r="1" fill="currentColor" stroke="none" />
-              <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
-              <circle cx="16" cy="12" r="1" fill="currentColor" stroke="none" />
-            </svg>
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#122419] animate-pulse" />
+          {/* Avatar con ícono exclusivo */}
+          <div className="relative w-8 h-8 rounded-full bg-[#EF233C]/20 border border-[#EF233C]/50 flex items-center justify-center text-[#EF233C]">
+            <ElRemateChatIcon className="w-4 h-4 text-[#EF233C]" />
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#EF233C] border-2 border-[#0F172A] animate-pulse" />
           </div>
 
           <div className="flex flex-col items-start text-left leading-tight pr-1">
             <span className="text-[13px] font-extrabold tracking-tight text-white flex items-center gap-1.5">
-              El Remate <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-400/30">IA</span>
+              El Remate{" "}
+              <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-[#EF233C]/25 text-[#FF6B6B] border border-[#EF233C]/40">
+                IA
+              </span>
             </span>
-            <span className="text-[10px] font-semibold text-emerald-200/90 hidden sm:inline">
-              Atención y Pedidos en vivo
+            <span className="text-[10px] font-semibold text-slate-300 hidden sm:inline">
+              Asistente de Pedidos y Stock
             </span>
           </div>
 
           {items.length > 0 && (
-            <span className="ml-0.5 px-2 py-0.5 rounded-full bg-emerald-400 text-[#0F1E15] text-[10.5px] font-black shadow-xs">
+            <span className="ml-0.5 px-2 py-0.5 rounded-full bg-[#EF233C] text-white text-[10.5px] font-black shadow-xs">
               {items.length}
             </span>
           )}
@@ -422,7 +450,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
       {isOpen && (
         <div
           onClick={() => handleToggle(false)}
-          className="fixed inset-0 bg-[#0C1610]/50 backdrop-blur-xs z-50 transition-opacity duration-200 sm:hidden"
+          className="fixed inset-0 bg-[#0B0F19]/60 backdrop-blur-xs z-50 transition-opacity duration-200 sm:hidden"
         />
       )}
 
@@ -431,44 +459,31 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
         <aside
           role="dialog"
           aria-label="Atención y Pedidos El Remate Canelones"
-          className="fixed z-50 flex flex-col overflow-hidden bg-[#F9F7F1] border border-[#DCD8CC] shadow-[0_24px_64px_rgba(10,24,15,0.34)] sm:rounded-[22px] sm:right-5 sm:bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:w-[420px] sm:max-w-[calc(100vw-28px)] sm:h-[620px] sm:max-h-[calc(100dvh-100px)] inset-x-0 bottom-0 h-[88dvh] max-h-[680px] rounded-t-[24px] border-b-0 animate-in fade-in slide-in-from-bottom-5 duration-200"
+          className="fixed z-50 flex flex-col overflow-hidden bg-[#FAF8F5] border border-[#E2E8F0] shadow-[0_24px_64px_rgba(15,23,42,0.38)] sm:rounded-[22px] sm:right-5 sm:bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:w-[420px] sm:max-w-[calc(100vw-28px)] sm:h-[620px] sm:max-h-[calc(100dvh-100px)] inset-x-0 bottom-0 h-[88dvh] max-h-[680px] rounded-t-[24px] border-b-0 animate-in fade-in slide-in-from-bottom-5 duration-200"
         >
           {/* Manija táctil en Mobile */}
-          <div className="flex sm:hidden justify-center items-center py-2 bg-[#122118]">
+          <div className="flex sm:hidden justify-center items-center py-2 bg-[#0B0F19]">
             <span className="w-10 h-1 rounded-full bg-white/30" />
           </div>
 
-          {/* ── Header ── */}
-          <div className="flex items-center justify-between gap-3 px-4 py-3 bg-gradient-to-r from-[#122118] via-[#173824] to-[#1D3828] text-white border-b border-white/10 shrink-0">
+          {/* ── Header Exclusivo Canelones (Obsidian + Crimson Glow) ── */}
+          <div className="flex items-center justify-between gap-3 px-4 py-3 bg-gradient-to-r from-[#0B0F19] via-[#151D2A] to-[#1E293B] text-white border-b border-[#EF233C]/30 shrink-0">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/30 to-emerald-500/10 border border-emerald-300/40 flex items-center justify-center text-emerald-300 shrink-0">
-                <svg
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.1"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                  <circle cx="8" cy="12" r="1" fill="currentColor" stroke="none" />
-                  <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
-                  <circle cx="16" cy="12" r="1" fill="currentColor" stroke="none" />
-                </svg>
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#122118]" />
+              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#EF233C]/25 to-[#EF233C]/10 border border-[#EF233C]/40 flex items-center justify-center text-[#EF233C] shrink-0 shadow-inner">
+                <ElRemateChatIcon className="w-5 h-5 text-[#EF233C]" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#EF233C] border-2 border-[#0B0F19]" />
               </div>
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-extrabold tracking-tight truncate text-white">
-                    El Remate
+                    El Remate Canelones
                   </h3>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 text-[9px] font-black uppercase tracking-wider shrink-0">
+                  <span className="px-2 py-0.5 rounded-full bg-[#EF233C]/20 text-[#FF8596] border border-[#EF233C]/35 text-[9px] font-black uppercase tracking-wider shrink-0">
                     En Línea
                   </span>
                 </div>
-                <p className="text-[11px] font-medium text-emerald-100/80 truncate">
+                <p className="text-[11px] font-medium text-slate-300 truncate">
                   Atención y Pedidos · {catalog.length > 0 ? `${catalog.length.toLocaleString("es-UY")} productos` : "Canelones Mayorista"}
                 </p>
               </div>
@@ -481,7 +496,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Abrir en WhatsApp"
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#1FA855] hover:bg-[#188a46] text-white text-[11px] font-extrabold shadow-sm transition-transform active:scale-95"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-[11px] font-extrabold shadow-sm transition-transform active:scale-95"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
@@ -517,9 +532,9 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
 
           {/* ── Barra Viva del Carrito en el Chat ── */}
           {items.length > 0 && (
-            <div className="flex items-center justify-between px-3 py-2 bg-[#E8F6EE] border-b border-[#CBE7D5] shrink-0">
-              <div className="flex items-center gap-2 min-w-0 truncate text-[12px] font-extrabold text-[#14532D]">
-                <span className="w-2 h-2 rounded-full bg-[#1FA855] shrink-0" />
+            <div className="flex items-center justify-between px-3 py-2 bg-[#FFF1F2] border-b border-[#FECDD3] shrink-0">
+              <div className="flex items-center gap-2 min-w-0 truncate text-[12px] font-extrabold text-[#9F1239]">
+                <span className="w-2 h-2 rounded-full bg-[#EF233C] shrink-0 animate-ping" />
                 <span className="truncate">
                   {items.length === 1 ? "1 producto" : `${items.length} productos`} en tu pedido · ${total.toLocaleString("es-UY")}
                 </span>
@@ -530,7 +545,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                   setIsOpen(false);
                   onOpenCart?.();
                 }}
-                className="px-2.5 py-1 rounded-md bg-[#16241B] hover:bg-black text-white text-[11px] font-extrabold shrink-0 transition-colors cursor-pointer"
+                className="px-2.5 py-1 rounded-md bg-[#EF233C] hover:bg-[#D90429] text-white text-[11px] font-extrabold shrink-0 transition-colors cursor-pointer shadow-xs"
               >
                 Ver carrito →
               </button>
@@ -538,7 +553,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
           )}
 
           {/* ── Área de Mensajes ── */}
-          <div className="flex-1 overflow-y-auto p-3.5 space-y-3 bg-[radial-gradient(circle_at_top_right,rgba(31,168,85,0.06),transparent_55%),#F9F7F1]">
+          <div className="flex-1 overflow-y-auto p-3.5 space-y-3 bg-[radial-gradient(circle_at_top_right,rgba(239,35,60,0.05),transparent_55%),#FAF8F5]">
             {messages.map((m) => (
               <div
                 key={m.id}
@@ -549,8 +564,8 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                 <div
                   className={`max-w-[92%] px-3.5 py-2.5 rounded-[15px] text-[13.5px] leading-relaxed break-words shadow-xs ${
                     m.role === "user"
-                      ? "bg-gradient-to-br from-[#16241B] to-[#1F3A28] text-white rounded-br-[4px] font-medium"
-                      : "bg-white text-[#1B2620] border border-[#E4E1D8] rounded-bl-[4px]"
+                      ? "bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#B8001F] text-white rounded-br-[4px] font-medium"
+                      : "bg-white text-[#0F172A] border border-[#E2E8F0] rounded-bl-[4px]"
                   }`}
                 >
                   <div
@@ -565,27 +580,27 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                       <button
                         type="button"
                         onClick={() => sendMessage("🛒 Ejemplo de lista")}
-                        className="flex flex-col items-start p-2.5 rounded-xl bg-[#FAF8F3] hover:bg-[#F2FBF5] border border-[#E5E2D8] hover:border-[#1FA855] text-left transition-all cursor-pointer group active:scale-95"
+                        className="flex flex-col items-start p-2.5 rounded-xl bg-[#F8FAFC] hover:bg-[#FFF5F5] border border-[#E2E8F0] hover:border-[#EF233C] text-left transition-all cursor-pointer group active:scale-95 shadow-xs"
                       >
                         <span className="text-base leading-none mb-1">🛒</span>
-                        <b className="text-[12px] font-extrabold text-[#16241B] group-hover:text-[#1FA855]">
+                        <b className="text-[12px] font-extrabold text-[#0F172A] group-hover:text-[#EF233C]">
                           Armar lista rápida
                         </b>
-                        <small className="text-[10.5px] text-[#626B64] font-medium leading-tight">
-                          "2 yerba, 1 aceite, 3 leches"
+                        <small className="text-[10.5px] text-[#64748B] font-medium leading-tight">
+                          &ldquo;2 yerba, 1 aceite, 3 leches&rdquo;
                         </small>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => sendMessage("🏷️ Ofertas y Mayorista")}
-                        className="flex flex-col items-start p-2.5 rounded-xl bg-[#FAF8F3] hover:bg-[#F2FBF5] border border-[#E5E2D8] hover:border-[#1FA855] text-left transition-all cursor-pointer group active:scale-95"
+                        className="flex flex-col items-start p-2.5 rounded-xl bg-[#F8FAFC] hover:bg-[#FFF5F5] border border-[#E2E8F0] hover:border-[#EF233C] text-left transition-all cursor-pointer group active:scale-95 shadow-xs"
                       >
                         <span className="text-base leading-none mb-1">🏷️</span>
-                        <b className="text-[12px] font-extrabold text-[#16241B] group-hover:text-[#1FA855]">
+                        <b className="text-[12px] font-extrabold text-[#0F172A] group-hover:text-[#EF233C]">
                           Ofertas y Mayorista
                         </b>
-                        <small className="text-[10.5px] text-[#626B64] font-medium leading-tight">
+                        <small className="text-[10.5px] text-[#64748B] font-medium leading-tight">
                           Descuentos por bulto y escala
                         </small>
                       </button>
@@ -593,13 +608,13 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                       <button
                         type="button"
                         onClick={() => sendMessage("📦 Rastrear pedido")}
-                        className="flex flex-col items-start p-2.5 rounded-xl bg-[#FAF8F3] hover:bg-[#F2FBF5] border border-[#E5E2D8] hover:border-[#1FA855] text-left transition-all cursor-pointer group active:scale-95"
+                        className="flex flex-col items-start p-2.5 rounded-xl bg-[#F8FAFC] hover:bg-[#FFF5F5] border border-[#E2E8F0] hover:border-[#EF233C] text-left transition-all cursor-pointer group active:scale-95 shadow-xs"
                       >
                         <span className="text-base leading-none mb-1">📦</span>
-                        <b className="text-[12px] font-extrabold text-[#16241B] group-hover:text-[#1FA855]">
+                        <b className="text-[12px] font-extrabold text-[#0F172A] group-hover:text-[#EF233C]">
                           Rastrear mi pedido
                         </b>
-                        <small className="text-[10.5px] text-[#626B64] font-medium leading-tight">
+                        <small className="text-[10.5px] text-[#64748B] font-medium leading-tight">
                           Estado con código CN-XXXX
                         </small>
                       </button>
@@ -607,13 +622,13 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                       <button
                         type="button"
                         onClick={() => sendMessage("💬 Hablar con asesor")}
-                        className="flex flex-col items-start p-2.5 rounded-xl bg-[#FAF8F3] hover:bg-[#F2FBF5] border border-[#E5E2D8] hover:border-[#1FA855] text-left transition-all cursor-pointer group active:scale-95"
+                        className="flex flex-col items-start p-2.5 rounded-xl bg-[#F8FAFC] hover:bg-[#FFF5F5] border border-[#E2E8F0] hover:border-[#EF233C] text-left transition-all cursor-pointer group active:scale-95 shadow-xs"
                       >
                         <span className="text-base leading-none mb-1">💬</span>
-                        <b className="text-[12px] font-extrabold text-[#16241B] group-hover:text-[#1FA855]">
+                        <b className="text-[12px] font-extrabold text-[#0F172A] group-hover:text-[#EF233C]">
                           Hablar con asesor
                         </b>
-                        <small className="text-[10.5px] text-[#626B64] font-medium leading-tight">
+                        <small className="text-[10.5px] text-[#64748B] font-medium leading-tight">
                           Atención personalizada
                         </small>
                       </button>
@@ -628,23 +643,23 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                         return (
                           <div
                             key={prod.codigo}
-                            className="flex items-center justify-between gap-2 p-2.5 bg-[#FAF8F3] border border-[#E5E2D9] hover:border-emerald-300 rounded-xl transition-all"
+                            className="flex items-center justify-between gap-2 p-2.5 bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#EF233C]/50 rounded-xl transition-all shadow-xs"
                           >
                             <div className="min-w-0 flex-1">
-                              <b className="block text-[12.5px] font-extrabold text-[#16241B] leading-tight truncate">
+                              <b className="block text-[12.5px] font-extrabold text-[#0F172A] leading-tight truncate">
                                 {prod.nombre}
                               </b>
-                              <div className="text-[11.5px] text-[#5B645D] font-semibold mt-0.5">
+                              <div className="text-[11.5px] text-[#64748B] font-semibold mt-0.5">
                                 {prod.cantidadSugerida > 1 && `${prod.cantidadSugerida}× `}$
                                 {prod.precioUnitarioAplicado.toLocaleString("es-UY")} c/u
                                 {prod.ahorroTotal > 0 && (
-                                  <span className="text-emerald-700 ml-1">
+                                  <span className="text-[#EF233C] font-bold ml-1">
                                     · Ahorrás ${prod.ahorroTotal.toLocaleString("es-UY")}
                                   </span>
                                 )}
                               </div>
                               {prod.escalaPrecios && prod.escalaPrecios.length > 0 && (
-                                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">
+                                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-extrabold">
                                   Mayorista desde {prod.escalaPrecios[0].minCantidad} u: $
                                   {prod.escalaPrecios[0].precioUnitario}
                                 </span>
@@ -656,8 +671,8 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                               onClick={() => handleAddProduct(prod)}
                               className={`px-3 py-1.5 rounded-lg text-[12px] font-extrabold shrink-0 transition-transform active:scale-95 cursor-pointer ${
                                 inCartItem
-                                  ? "bg-[#16241B] text-white"
-                                  : "bg-[#1FA855] hover:bg-[#168341] text-white shadow-xs"
+                                  ? "bg-[#0F172A] text-white"
+                                  : "bg-[#EF233C] hover:bg-[#D90429] text-white shadow-xs"
                               }`}
                             >
                               {inCartItem ? `✓ En pedido (${inCartItem.cantidad})` : `+ Sumar ${prod.cantidadSugerida > 1 ? `(${prod.cantidadSugerida})` : ""}`}
@@ -671,7 +686,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                         <button
                           type="button"
                           onClick={() => handleAddAllProducts(m.products!)}
-                          className="w-full mt-1.5 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#1FA855] to-[#14793B] hover:from-[#188a46] hover:to-[#0f602e] text-white text-[13px] font-extrabold shadow-md flex items-center justify-center gap-1.5 transition-transform active:scale-98 cursor-pointer"
+                          className="w-full mt-1.5 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#EF233C] via-[#D90429] to-[#B8001F] hover:from-[#D90429] hover:to-[#99001A] text-white text-[13px] font-extrabold shadow-md flex items-center justify-center gap-1.5 transition-transform active:scale-98 cursor-pointer"
                         >
                           <span>🛒</span>
                           <span>
@@ -685,12 +700,12 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
 
                   {/* ── Tarjeta de Seguimiento de Pedido ── */}
                   {m.orderCard && (
-                    <div className="mt-3 p-3 bg-[#FAF8F3] border border-[#D5E8DC] rounded-xl">
+                    <div className="mt-3 p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl shadow-xs">
                       <div className="flex items-center justify-between gap-2 pb-1.5">
-                        <strong className="text-[13px] font-extrabold text-[#16241B]">
+                        <strong className="text-[13px] font-extrabold text-[#0F172A]">
                           📦 Pedido {m.orderCard.publicCode}
                         </strong>
-                        <span className="text-[12px] font-black text-emerald-700">
+                        <span className="text-[12px] font-black text-[#EF233C]">
                           ${m.orderCard.totalApprox.toLocaleString("es-UY")}
                         </span>
                       </div>
@@ -711,19 +726,19 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                             <div
                               key={stKey}
                               className={`h-1.5 rounded-full ${
-                                isActive ? "bg-[#1FA855]" : "bg-[#E2DFD7]"
+                                isActive ? "bg-[#EF233C]" : "bg-[#E2E8F0]"
                               }`}
                             />
                           );
                         })}
                       </div>
 
-                      <div className="text-[12px] font-bold text-[#1B2620] mb-2">
+                      <div className="text-[12px] font-bold text-[#0F172A] mb-2">
                         {m.orderCard.statusLabel}
                       </div>
 
                       {Array.isArray(m.orderCard.items) && m.orderCard.items.length > 0 && (
-                        <div className="text-[11.5px] text-[#525B54] space-y-0.5 mb-2.5">
+                        <div className="text-[11.5px] text-[#64748B] space-y-0.5 mb-2.5">
                           {m.orderCard.items.slice(0, 3).map((it, i) => (
                             <div key={i}>• {it.quantity}× {it.name}</div>
                           ))}
@@ -737,7 +752,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                         )}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block w-full py-2 rounded-lg bg-[#1FA855] hover:bg-[#188a46] text-white text-center text-[12px] font-extrabold transition-colors"
+                        className="block w-full py-2 rounded-lg bg-[#EF233C] hover:bg-[#D90429] text-white text-center text-[12px] font-extrabold transition-colors shadow-xs"
                       >
                         Consultar en WhatsApp
                       </a>
@@ -748,10 +763,10 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                   {m.showHandoffForm && (
                     <form
                       onSubmit={handleHandoffSubmit}
-                      className="mt-3 p-3 bg-[#F6F4EC] border border-[#DFDCD2] rounded-xl flex flex-col gap-2"
+                      className="mt-3 p-3 bg-[#FFF5F5] border border-[#FECDD3] rounded-xl flex flex-col gap-2"
                     >
-                      <strong className="text-[12px] font-extrabold text-[#16241B]">
-                        📲 Atención con un Asesor Comercial
+                      <strong className="text-[12px] font-extrabold text-[#0F172A]">
+                        📲 Atención con un Asesor Comercial Canelones
                       </strong>
                       <input
                         type="text"
@@ -759,7 +774,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                         placeholder="Tu nombre o comercio *"
                         required
                         defaultValue={typeof window !== "undefined" ? localStorage.getItem("elremate_cust_name") || "" : ""}
-                        className="w-full px-3 py-2 text-[13px] bg-white border border-[#D5D2C8] rounded-lg focus:outline-emerald-500"
+                        className="w-full px-3 py-2 text-[13px] bg-white border border-[#E2E8F0] rounded-lg focus:outline-[#EF233C]"
                       />
                       <input
                         type="tel"
@@ -767,18 +782,18 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                         placeholder="Tu WhatsApp (ej: 099 123 456) *"
                         required
                         defaultValue={typeof window !== "undefined" ? localStorage.getItem("elremate_cust_phone") || "" : ""}
-                        className="w-full px-3 py-2 text-[13px] bg-white border border-[#D5D2C8] rounded-lg focus:outline-emerald-500"
+                        className="w-full px-3 py-2 text-[13px] bg-white border border-[#E2E8F0] rounded-lg focus:outline-[#EF233C]"
                       />
                       <textarea
                         name="message"
                         rows={2}
-                        placeholder="Contanos tu consulta o pedido especial…"
-                        className="w-full px-3 py-2 text-[13px] bg-white border border-[#D5D2C8] rounded-lg focus:outline-emerald-500"
+                        placeholder="Contanos tu consulta o pedido mayorista…"
+                        className="w-full px-3 py-2 text-[13px] bg-white border border-[#E2E8F0] rounded-lg focus:outline-[#EF233C]"
                       />
                       <button
                         type="submit"
                         disabled={handoffSubmitting}
-                        className="w-full py-2 px-3 rounded-lg bg-[#D5382A] hover:bg-[#b52a1e] text-white text-[12.5px] font-extrabold transition-colors disabled:opacity-50 cursor-pointer"
+                        className="w-full py-2 px-3 rounded-lg bg-[#EF233C] hover:bg-[#D90429] text-white text-[12.5px] font-extrabold transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
                       >
                         {handoffSubmitting ? "Enviando…" : "📨 Enviar y Avisar a un Asesor"}
                       </button>
@@ -790,8 +805,8 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
 
             {loading && (
               <div className="flex items-start">
-                <div className="px-3.5 py-2.5 rounded-[15px] bg-white text-[#5B645D] text-[13px] italic border border-[#E4E1D8] flex items-center gap-2 shadow-xs">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                <div className="px-3.5 py-2.5 rounded-[15px] bg-white text-[#64748B] text-[13px] italic border border-[#E2E8F0] flex items-center gap-2 shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-[#EF233C] animate-ping" />
                   <span>Consultando catálogo y stock de Canelones…</span>
                 </div>
               </div>
@@ -801,13 +816,13 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
           </div>
 
           {/* ── Chips Rápidos Carousel ── */}
-          <div className="flex items-center gap-1.5 px-3 py-2 bg-[#F2EFE6] border-t border-[#E5E2D9] overflow-x-auto no-scrollbar shrink-0">
+          <div className="flex items-center gap-1.5 px-3 py-2 bg-[#F1F5F9] border-t border-[#E2E8F0] overflow-x-auto no-scrollbar shrink-0">
             {suggestions.map((chip, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => sendMessage(chip)}
-                className="px-3 py-1 rounded-full bg-white hover:bg-[#16241B] hover:text-white border border-[#D5D2C8] text-[#1B2620] text-[12px] font-bold whitespace-nowrap shadow-xs transition-colors shrink-0 cursor-pointer"
+                className="px-3 py-1 rounded-full bg-white hover:bg-[#0F172A] hover:text-white border border-[#CBD5E1] text-[#0F172A] text-[12px] font-bold whitespace-nowrap shadow-xs transition-colors shrink-0 cursor-pointer"
               >
                 {chip}
               </button>
@@ -820,7 +835,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
               e.preventDefault();
               sendMessage(inputValue);
             }}
-            className="flex items-center gap-2 p-2.5 bg-white border-t border-[#E5E2D9] shrink-0 pb-[calc(0.6rem+env(safe-area-inset-bottom))]"
+            className="flex items-center gap-2 p-2.5 bg-white border-t border-[#E2E8F0] shrink-0 pb-[calc(0.6rem+env(safe-area-inset-bottom))]"
           >
             <input
               ref={inputRef}
@@ -829,13 +844,13 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Escribí un producto, tu lista o código CN-..."
               maxLength={400}
-              className="flex-1 min-w-0 px-3.5 py-2.5 text-[13.5px] bg-[#FAF8F3] text-[#1B2620] border border-[#DDD9CE] focus:border-[#1FA855] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/10 placeholder:text-neutral-400"
+              className="flex-1 min-w-0 px-3.5 py-2.5 text-[13.5px] bg-[#F8FAFC] text-[#0F172A] border border-[#CBD5E1] focus:border-[#EF233C] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#EF233C]/10 placeholder:text-neutral-400"
             />
             <button
               type="submit"
               disabled={!inputValue.trim() || loading}
               aria-label="Enviar mensaje"
-              className="w-10 h-10 rounded-xl bg-[#1FA855] hover:bg-[#168341] text-white flex items-center justify-center transition-all disabled:opacity-40 disabled:pointer-events-none active:scale-95 cursor-pointer shrink-0 shadow-xs"
+              className="w-10 h-10 rounded-xl bg-[#EF233C] hover:bg-[#D90429] text-white flex items-center justify-center transition-all disabled:opacity-40 disabled:pointer-events-none active:scale-95 cursor-pointer shrink-0 shadow-xs"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13" />
