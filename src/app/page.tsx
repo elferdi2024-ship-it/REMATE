@@ -79,6 +79,7 @@ export default function LandingPage() {
   const sucursalNombre = SUCURSALES.find(s => s.id === activeSucursalId)?.nombre || "";
 
   useEffect(() => {
+    router.prefetch("/catalogo");
     setMounted(true);
     const sp = new URLSearchParams(window.location.search);
     const urlS = sp.get("sucursal");
@@ -90,8 +91,8 @@ export default function LandingPage() {
         : "";
     if (effective) {
       setSelectedSucursal(effective);
+      ls.setSelectedSucursal(effective);
       if (urlS !== effective) {
-        ls.setSelectedSucursal(effective);
         const params = new URLSearchParams(window.location.search);
         params.set("sucursal", effective);
         router.replace(`/?${params.toString()}`, { scroll: false });
@@ -132,9 +133,7 @@ export default function LandingPage() {
 
     const params = new URLSearchParams(window.location.search);
     params.set("sucursal", id);
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState(null, "", newUrl);
-    router.replace(newUrl, { scroll: false });
+    router.replace(`/?${params.toString()}`, { scroll: false });
 
     toast.success(`🏪 Catálogo de ${nombre} seleccionado`);
   };
@@ -484,7 +483,7 @@ export default function LandingPage() {
             </div>
             <div className="min-w-0">
               <div className="text-xs sm:text-sm font-bold text-white truncate leading-tight">
-                Sucursal {sucursalNombre}
+                Catálogo: Sucursal {sucursalNombre}
               </div>
               <button
                 type="button"

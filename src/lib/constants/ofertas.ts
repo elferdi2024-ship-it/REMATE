@@ -17,7 +17,7 @@ export const HALLOWEEN_PROMOS: HalloweenPromoItem[] = [
     precio: 75,
     cantidad: 1,
     imagen: "/promos/halloween/caramelos-florestal-500g.jpg",
-    activa: true,
+    activa: false,
     sucursalId: null,
   },
   {
@@ -29,7 +29,7 @@ export const HALLOWEEN_PROMOS: HalloweenPromoItem[] = [
     precio: 35,
     cantidad: 1,
     imagen: "/promos/halloween/paleta-grande-malvavisco.jpg",
-    activa: true,
+    activa: false,
     sucursalId: null,
   },
   {
@@ -41,7 +41,7 @@ export const HALLOWEEN_PROMOS: HalloweenPromoItem[] = [
     precio: 210,
     cantidad: 1,
     imagen: "/promos/halloween/chupetin-ringring-x20.jpg",
-    activa: true,
+    activa: false,
     sucursalId: null,
   },
   {
@@ -53,7 +53,7 @@ export const HALLOWEEN_PROMOS: HalloweenPromoItem[] = [
     precio: 170,
     cantidad: 1,
     imagen: "/promos/halloween/cremitas-ducrem-18u.jpg",
-    activa: true,
+    activa: false,
     sucursalId: null,
   },
   {
@@ -65,13 +65,12 @@ export const HALLOWEEN_PROMOS: HalloweenPromoItem[] = [
     precio: 75,
     cantidad: 1,
     imagen: "/promos/halloween/paletas-florestal.jpg",
-    activa: true,
+    activa: false,
     sucursalId: null,
   },
 ];
 
 export const DEFAULT_PREMIUM_PROMOS: PremiumPromo[] = [
-  ...HALLOWEEN_PROMOS,
   {
     id: "promo-jugos-clight-tang",
     titulo: "Jugos Clight / Tang en Oferta (1 caja x $150 / 3 cajas x $300)",

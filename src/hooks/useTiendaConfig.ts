@@ -17,7 +17,7 @@ export function useTiendaConfig() {
     pedidosAbiertos: true,
     bannerMensaje: "",
     minimoEnvioGratis: 2500,
-    modoHalloween: true,
+    modoHalloween: false,
   });
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +31,7 @@ export function useTiendaConfig() {
             pedidosAbiertos: data.pedidosAbiertos ?? true,
             bannerMensaje: data.bannerMensaje ?? "",
             minimoEnvioGratis: data.minimoEnvioGratis ?? 2500,
-            modoHalloween: data.modoHalloween ?? true,
+            modoHalloween: false,
           });
         }
         setLoading(false);

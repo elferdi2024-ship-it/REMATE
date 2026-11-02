@@ -34,7 +34,6 @@ import { useTiendaConfig } from "@/hooks/useTiendaConfig";
 import type { OfertaConfig } from "@/types/ofertas";
 import { DEFAULT_PREMIUM_PROMOS, DEFAULT_OFERTAS_CONFIG } from "@/lib/constants/ofertas";
 import CardFanPromoCarousel from "@/components/catalogo/CardFanPromoCarousel";
-import HalloweenPromosSection from "@/components/seasonal/HalloweenPromosSection";
 
 import BranchBar from "@/components/catalogo/BranchBar";
 import TopHeaderNav from "@/components/catalogo/TopHeaderNav";
@@ -54,7 +53,6 @@ const ShippingThresholdBar = dynamic(() => import("@/components/catalogo/Shippin
 const QuickOrderModal = dynamic(() => import("@/components/catalogo/QuickOrderModal"), { ssr: false });
 const PedidoEnviarWhatsApp = dynamic(() => import("@/components/carrito/PedidoEnviarWhatsApp"), { ssr: false });
 const ChatWidget = dynamic(() => import("@/components/chat/ChatWidget"), { ssr: false });
-const HalloweenOverlay = dynamic(() => import("@/components/seasonal/HalloweenOverlay"), { ssr: false });
 import type { PedidoPendienteWA } from "@/components/carrito/PedidoEnviarWhatsApp";
 import {
   armarMensajeWA,
@@ -1626,18 +1624,6 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
       {/* Contenido del catálogo — max-width desktop */}
       <div className="page-wrapper pt-3 sm:pt-4">
-        {/* SECCION DESTACADA ESPECIAL HALLOWEEN (5 OFERTAS DULCES) */}
-        {(!search.trim() || /halloween|caramelo|florestal|malvavisco|paleta|chupetin|ringring|ducrem|cremita|golosina/i.test(search)) &&
-          (!activeCat || activeCat === "Todos" || /golosina|chocolate|dulce|snack|oferta/i.test(activeCat)) &&
-          activeTab !== "favoritos" && (
-            <HalloweenPromosSection
-              enabled={tiendaConfig.modoHalloween ?? true}
-              qtyMap={qtyMap}
-              onAddPromo={handleAddProduct}
-              onQtyChange={handleQtyChange}
-              onSelectPromo={(prod) => setQuickViewProduct(prod)}
-            />
-          )}
         {/* Tus Compras Frecuentes / Reorder Express */}
         {!search.trim() && (!activeCat || activeCat === "Todos") && (
           <SmartReorder
@@ -1965,12 +1951,6 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       <ChatWidget
         catalog={productos}
         onOpenCart={() => setCartOpen(true)}
-      />
-
-      {/* Capa Decorativa de Halloween (Controlada en vivo desde Admin Switchboard) */}
-      <HalloweenOverlay
-        enabled={tiendaConfig.modoHalloween ?? true}
-        cartQty={totalQty}
       />
     </div>
   );

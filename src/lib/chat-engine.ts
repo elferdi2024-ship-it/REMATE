@@ -1,21 +1,9 @@
 // filepath: src/lib/chat-engine.ts
 import { calcularPrecioConEscala } from "./pricing";
 import type { BulkPriceTier, Producto } from "@/types";
-import { HALLOWEEN_PROMOS } from "./constants/ofertas";
 
 function withSeasonalPromos(catalog: Producto[]): Producto[] {
-  const seasonalProducts: Producto[] = HALLOWEEN_PROMOS.map((p) => ({
-    codigo: `PROMO-${p.id}`,
-    nombre: `${p.titulo} (Especial Halloween)`,
-    precio: p.precio || 0,
-    categoria: "Golosinas y Chocolates",
-    imagen: p.imagen,
-    destacado: true,
-    escalaPrecios: p.escalaPrecios,
-  }));
-  const existingCodes = new Set(catalog.map((c) => c.codigo));
-  const extra = seasonalProducts.filter((sp) => !existingCodes.has(sp.codigo));
-  return [...extra, ...catalog];
+  return catalog;
 }
 
 export interface ChatProductItem {
@@ -145,14 +133,6 @@ export const BUSINESS_RUBROS: BusinessRubro[] = [
     keywords: ["sal gruesa", "adobo dukita", "chimichurri", "mayonesa bqb", "aceite de arroz"],
     humanAdvice: "Para asado y parrillada sugerí los infaltables: Sal gruesa Cololo, adobo y chimichurri Centenario/Dukita por kilo, mayonesa balde para ensaladas y aceite de arroz.",
     chips: ["🔥 Sumar condimentos de asado", "🥩 Ver mayonesas y salsas", "🥤 Ver bebidas frías", "🛵 Envíos para el finde"],
-  },
-  {
-    id: "halloween",
-    rubroName: "Especial Halloween y Golosinas en Oferta",
-    terms: ["halloween", "haloween", "noche de brujas", "golosinas halloween", "caramelos florestal", "malvavisco", "chupetin ringring", "ringring", "ducrem", "cremitas ducrem", "paletas florestal"],
-    keywords: ["caramelos florestal 500g", "paleta grande malvavisco", "chupetin ringring", "cremitas ducrem 18u", "paletas florestal pegadas"],
-    humanAdvice: "Para Halloween destacá nuestras 5 promos dulces especiales: Caramelos Florestal 500g ($75), Paleta Grande Malvavisco ($35), Chupetín RingRing x20 ($210), Cremitas Ducrem 18u ($170) y Paletas Florestal ($75). El pack completo de las 5 promos queda en $565.",
-    chips: ["🎃 Sumar las 5 promos ($565)", "🍬 Ver Caramelos y Chupetines", "👻 Ver Cremitas Ducrem", "🛒 Abrir mi carrito"],
   },
   {
     id: "descartables",

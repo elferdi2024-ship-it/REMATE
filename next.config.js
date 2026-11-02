@@ -1,12 +1,12 @@
 /** @type {import('next').NextConfig} */
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://*.firebaseapp.com;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  img-src 'self' data: blob: https://firebasestorage.googleapis.com https://*.googleusercontent.com;
-  font-src 'self' https://fonts.gstatic.com data:;
-  connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com;
-  frame-src 'self' https://*.firebaseapp.com;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://*.firebaseapp.com https://vercel.live https://*.vercel.live;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://vercel.live;
+  img-src 'self' data: blob: https://firebasestorage.googleapis.com https://*.googleusercontent.com https://vercel.live https://*.vercel.live https://vercel.com;
+  font-src 'self' https://fonts.gstatic.com https://assets.vercel.com data:;
+  connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com https://vercel.live https://*.vercel.live https://*.pusher.com wss://*.pusher.com;
+  frame-src 'self' https://*.firebaseapp.com https://vercel.live;
   frame-ancestors 'none';
   form-action 'self' https://wa.me https://api.whatsapp.com;
   base-uri 'self';

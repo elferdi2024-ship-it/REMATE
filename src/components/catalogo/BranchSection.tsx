@@ -86,7 +86,7 @@ export default function BranchSection({
                       🏪
                     </div>
                     {isActive ? (
-                      <span className="bg-[#E8302A] text-white text-[0.65rem] font-black uppercase py-1 px-3 rounded-full tracking-[1.5px] shadow-[0_2px_8px_rgba(232,48,42,0.3)] animate-pulse">
+                      <span className="bg-[#1A7A42] text-white text-[0.65rem] font-black uppercase py-1 px-3 rounded-full tracking-[1.5px] shadow-[0_2px_8px_rgba(26,122,66,0.3)]">
                         ✓ CATÁLOGO SELECCIONADO
                       </span>
                     ) : (

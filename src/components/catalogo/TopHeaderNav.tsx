@@ -160,12 +160,12 @@ export default function TopHeaderNav({
             </button>
 
             <Link href="/" className="flex items-center group no-underline shrink-0" aria-label="El Remate Mayorista">
-              <div className="relative h-8 w-[105px] sm:h-9 sm:w-[130px] flex items-center">
+              <div className="relative h-11 w-[78px] sm:h-12 sm:w-[86px] md:h-13 md:w-[93px] flex items-center">
                 <Image
                   src="/logo.png"
                   alt="El Remate"
                   fill
-                  sizes="(max-width: 640px) 105px, 130px"
+                  sizes="(max-width: 640px) 78px, (max-width: 768px) 86px, 93px"
                   priority
                   className="object-contain object-left group-hover:scale-105 transition-transform"
                 />

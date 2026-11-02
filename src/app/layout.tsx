@@ -109,7 +109,10 @@ export default function RootLayout({
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js')
-                    .then(function(reg) { console.log('[SW] Registered:', reg.scope); })
+                    .then(function(reg) {
+                      reg.update();
+                      console.log('[SW] Registered & Updated:', reg.scope);
+                    })
                     .catch(function(err) { console.warn('[SW] Registration failed:', err); });
                 });
               }

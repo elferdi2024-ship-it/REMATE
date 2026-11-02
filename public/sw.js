@@ -1,6 +1,6 @@
 // Service Worker — Distribuidora El Remate
-// v3 — cache versionado + offline robusto
-const CACHE_VERSION = 'v3';
+// v5 — cache versionado + limpieza forzada
+const CACHE_VERSION = 'v5';
 const CACHE_NAME = `elremate-cache-${CACHE_VERSION}`;
 
 const PRECACHE_ASSETS = [
@@ -14,11 +14,25 @@ const PRECACHE_ASSETS = [
 
 // ── INSTALL ───────────────────────────────────────────────
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_ASSETS))
-      .then(() => self.skipWaiting())
+      .then(async (cache) => {
+        // Carga tolerante: Si un asset da error de red o 404, no rompe la instalación
+        await Promise.allSettled(
+          PRECACHE_ASSETS.map(async (url) => {
+            try {
+              const res = await fetch(url);
+              if (res && res.status >= 200 && res.status < 300) {
+                await cache.put(url, res);
+              }
+            } catch (err) {
+              console.warn('[SW] No se pudo precachear:', url, err);
+            }
+          })
+        );
+      })
   );
 });
 
