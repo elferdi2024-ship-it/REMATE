@@ -69,7 +69,7 @@ import { encodeCartToURL, decodeCartFromURL } from "@/lib/cart-share";
 import { haptic } from "@/lib/haptic";
 import * as ls from "@/lib/ls";
 import { SUCURSALES, type MetodoEntrega } from "@/lib/sucursales";
-import { ZonaEnvio, calcularCostoEnvio, COSTOS_ENVIO } from "@/lib/envio-config";
+import { ZonaEnvio, calcularCostoEnvio, COSTOS_ENVIO, UMBRAL_ENVIO_GRATIS } from "@/lib/envio-config";
 import {
   getSucursalWhatsApp,
   getSucursalWhatsAppCached,
@@ -1076,9 +1076,14 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       const retiroLine = `🏪 RETIRO EN SUCURSAL: ${selectedSucursal.nombre} (${selectedSucursal.direccion})`;
       deliveryNotas = deliveryNotas ? `${retiroLine}\n${deliveryNotas}` : retiroLine;
     } else {
-      const zonaNombre = COSTOS_ENVIO[zonaEnvio]?.nombre || zonaEnvio;
-      const costoTexto = costoEnvio === 0 ? "GRATIS ($0)" : `$${costoEnvio}`;
-      const envioLine = `🏠 ENVÍO A DOMICILIO (${zonaNombre.toUpperCase()} - Costo: ${costoTexto}): ${deliveryDireccion || "Sin dirección"}`;
+      const isOtrasZonas = zonaEnvio === "otras" || zonaEnvio === "montevideo";
+      const zonaNombre = isOtrasZonas ? "OTRAS ZONAS" : (COSTOS_ENVIO[zonaEnvio]?.nombre || zonaEnvio).toUpperCase();
+      const costoTexto = isOtrasZonas
+        ? "A consultar por WhatsApp"
+        : costoEnvio === 0
+        ? "GRATIS ($0)"
+        : `$${costoEnvio}`;
+      const envioLine = `🏠 ENVÍO A DOMICILIO (${zonaNombre} - Costo: ${costoTexto}): ${deliveryDireccion || "Sin dirección"}`;
       deliveryNotas = deliveryNotas ? `${envioLine}\n${deliveryNotas}` : envioLine;
     }
 
@@ -1118,7 +1123,9 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       deliveryNotas || undefined,
       numeroVisible,
       deliveryDireccion,
-      costoEnvio
+      costoEnvio,
+      metodoEntrega,
+      zonaEnvio
     );
 
     incrementarStats(cartItems.map((i) => i.codigo)).catch((err) =>
@@ -1618,6 +1625,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       {/* Barra de despacho mayorista y cálculo de ahorro en vivo */}
       <ShippingThresholdBar
         currentTotal={total}
+        threshold={tiendaConfig?.minimoEnvioGratis ?? UMBRAL_ENVIO_GRATIS}
         sucursalName={SUCURSALES.find(s => s.id === sucursalId)?.nombre || null}
         onOpenCart={() => setCartOpen(true)}
       />

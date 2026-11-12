@@ -1,17 +1,24 @@
 // filepath: src/lib/envio-config.ts
 
-export type ZonaEnvio = 'canelones' | 'montevideo';
+export type ZonaEnvio = 'canelones' | 'otras' | 'montevideo';
 
-export const UMBRAL_ENVIO_GRATIS = 1000;
+export const UMBRAL_ENVIO_GRATIS = 2500;
+export const COSTO_ENVIO_CANELONES = 150;
 
-export const COSTOS_ENVIO: Record<ZonaEnvio, { nombre: string; costo: number }> = {
+export const COSTOS_ENVIO: Record<ZonaEnvio, { nombre: string; costo: number; aConsultar?: boolean }> = {
   canelones: {
     nombre: 'Canelones',
-    costo: 250,
+    costo: 150,
+  },
+  otras: {
+    nombre: 'Otras Zonas',
+    costo: 0,
+    aConsultar: true,
   },
   montevideo: {
-    nombre: 'Montevideo',
-    costo: 400,
+    nombre: 'Otras Zonas',
+    costo: 0,
+    aConsultar: true,
   },
 };
 
@@ -22,6 +29,8 @@ export function calcularCostoEnvio(
   umbralGratis: number = UMBRAL_ENVIO_GRATIS
 ): number {
   if (metodo === 'retiro') return 0;
-  if (subtotal >= umbralGratis) return 0;
-  return COSTOS_ENVIO[zona]?.costo ?? 250;
+  if (zona === 'otras' || zona === 'montevideo') return 0;
+  const umbralEfectivo = Math.max(UMBRAL_ENVIO_GRATIS, Number(umbralGratis) || UMBRAL_ENVIO_GRATIS);
+  if (subtotal >= umbralEfectivo) return 0;
+  return COSTOS_ENVIO[zona]?.costo ?? COSTO_ENVIO_CANELONES;
 }

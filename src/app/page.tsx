@@ -80,6 +80,9 @@ export default function LandingPage() {
 
   useEffect(() => {
     router.prefetch("/catalogo");
+    SUCURSALES.forEach((s) => {
+      router.prefetch(`/catalogo?sucursal=${s.id}`);
+    });
     setMounted(true);
     const sp = new URLSearchParams(window.location.search);
     const urlS = sp.get("sucursal");
@@ -116,26 +119,8 @@ export default function LandingPage() {
   }, []);
 
   const handleSelectSucursal = (id: string) => {
-    const sucursal = SUCURSALES.find((s) => s.id === id);
-    const nombre = sucursal ? sucursal.nombre : "";
-
-    if (cartItems.length > 0 && selectedSucursal && id !== selectedSucursal) {
-      const confirmacion = confirm(
-        "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
-      );
-      if (!confirmacion) return;
-      clearCart();
-    }
-
-    haptic.add();
-    ls.setSelectedSucursal(id);
-    setSelectedSucursal(id);
-
-    const params = new URLSearchParams(window.location.search);
-    params.set("sucursal", id);
-    router.replace(`/?${params.toString()}`, { scroll: false });
-
-    toast.success(`🏪 Catálogo de ${nombre} seleccionado`);
+    // Al tocar una sucursal en la página de inicio, se selecciona su catálogo e ingresa de inmediato
+    handleEnterCatalog(id);
   };
 
   const handleEnterCatalog = (id: string, targetCategory?: string) => {
@@ -143,7 +128,7 @@ export default function LandingPage() {
     const nombre = sucursal ? sucursal.nombre : "";
 
     if (cartItems.length > 0 && selectedSucursal && id !== selectedSucursal) {
-      const confirmacion = confirm(
+      const confirmacion = window.confirm(
         "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
       );
       if (!confirmacion) return;

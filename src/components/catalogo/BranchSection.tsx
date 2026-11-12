@@ -15,24 +15,9 @@ export default function BranchSection({
   onSelectSucursal, 
   onEnterCatalog 
 }: BranchSectionProps) {
-  const activeSucursal = SUCURSALES.find(s => s.id === selectedSucursal);
+  const activeSucursal = SUCURSALES.find((s) => s.id === selectedSucursal);
 
   const handleCardClick = (id: string) => {
-    if (selectedSucursal === id) {
-      if (onEnterCatalog) {
-        onEnterCatalog(id);
-      }
-    } else {
-      if (onSelectSucursal) {
-        onSelectSucursal(id);
-      } else if (onEnterCatalog) {
-        onEnterCatalog(id);
-      }
-    }
-  };
-
-  const handleButtonClick = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
     if (onEnterCatalog) {
       onEnterCatalog(id);
     } else if (onSelectSucursal) {
@@ -45,19 +30,19 @@ export default function BranchSection({
       <div className="max-w-[1200px] mx-auto">
         <div className="text-center mb-[48px]">
           <span className="text-[11px] font-bold tracking-[4px] uppercase text-[#9C8570] block mb-2">
-            Sucursales & Catálogos por Zona
+            Sucursales & Catálogos Oficiales
           </span>
           <h2 className="font-bebas text-[clamp(2.2rem,5vw,3.2rem)] text-[#111111] tracking-[2px] mb-2 leading-none">
             ELEGÍ TU <span className="text-[#E8302A]">SUCURSAL Y CATÁLOGO</span>
           </h2>
           <p className="font-serif italic text-[1.1rem] text-[#5C4A35] max-w-[680px] mx-auto leading-relaxed">
-            Cada sucursal cuenta con su propio catálogo digital, stock disponible y precios mayoristas. Tocá tu sucursal para seleccionar e ingresar a su catálogo de ofertas.
+            Cada sucursal cuenta con su propio catálogo digital, disponibilidad de stock y precios mayoristas. Tocá tu sucursal para ingresar de inmediato a su catálogo.
           </p>
           {selectedSucursal && activeSucursal && (
-            <div className="inline-flex items-center gap-2 bg-[#E8302A]/10 border border-[#E8302A]/40 rounded-full px-6 py-2.5 mt-5 text-[0.85rem] font-bold text-[#E8302A] shadow-[0_4px_16px_rgba(232,48,42,0.12)] animate-fade-in">
+            <div className="inline-flex items-center gap-2 bg-[#1A7A42]/10 border border-[#1A7A42]/40 rounded-full px-6 py-2.5 mt-5 text-[0.85rem] font-bold text-[#1A7A42] shadow-[0_4px_16px_rgba(26,122,66,0.12)] animate-fade-in">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E8302A] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#E8302A]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1A7A42] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#1A7A42]"></span>
               </span>
               <span>CATÁLOGO SELECCIONADO:</span>
               <strong className="text-[#111111] uppercase tracking-wide">
@@ -76,25 +61,33 @@ export default function BranchSection({
                 onClick={() => handleCardClick(sucursal.id)}
                 className={`bg-white rounded-[20px] p-7 transition-all duration-300 cursor-pointer flex flex-col justify-between relative group active:scale-[0.98] ${
                   isActive
-                    ? "border-2 border-[#E8302A] shadow-[0_8px_30px_rgba(232,48,42,0.25)] ring-2 ring-[#E8302A]/20"
+                    ? "border-2 border-[#1A7A42] shadow-[0_8px_30px_rgba(26,122,66,0.22)] ring-2 ring-[#1A7A42]/20"
                     : "border border-[#DDD8D0] shadow-[0_4px_20px_rgba(17,11,8,0.06)] hover:-translate-y-1.5 hover:shadow-[0_16px_40px_rgba(17,11,8,0.14)] hover:border-[#E8302A]"
                 }`}
               >
                 <div>
                   <div className="flex justify-between items-center mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-[#F5F0E8] flex items-center justify-center text-2xl group-hover:bg-[#E8302A] group-hover:text-white transition-colors">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-colors ${
+                      isActive 
+                        ? "bg-[#1A7A42] text-white" 
+                        : "bg-[#F5F0E8] group-hover:bg-[#E8302A] group-hover:text-white"
+                    }`}>
                       🏪
                     </div>
                     {isActive ? (
-                      <span className="bg-[#1A7A42] text-white text-[0.65rem] font-black uppercase py-1 px-3 rounded-full tracking-[1.5px] shadow-[0_2px_8px_rgba(26,122,66,0.3)]">
+                      <span className="bg-[#1A7A42] text-white text-[0.65rem] font-black uppercase py-1 px-3 rounded-full tracking-[1.5px] shadow-[0_2px_8px_rgba(26,122,66,0.3)] flex items-center gap-1">
                         ✓ CATÁLOGO SELECCIONADO
                       </span>
                     ) : (
                       <span className="bg-[#F5F0E8] text-[#5C4A35] text-[0.65rem] font-bold uppercase py-1 px-3 rounded-full tracking-[1px] group-hover:bg-[#E8302A] group-hover:text-white transition-colors">
-                        TOCÁ PARA SELECCIONAR CATÁLOGO ⚡
+                        TOCÁ PARA VER CATÁLOGO
                       </span>
                     )}
                   </div>
+
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#E8302A] block mb-1">
+                    Catálogo de Productos
+                  </span>
 
                   <h3 className="font-bebas text-[1.85rem] text-[#111111] tracking-[1px] mb-2 leading-tight group-hover:text-[#E8302A] transition-colors">
                     Sucursal {sucursal.nombre}
@@ -118,11 +111,15 @@ export default function BranchSection({
 
                 <div className="mt-6 border-t border-[#DDD8D0] pt-4">
                   <button
-                    onClick={(e) => handleButtonClick(sucursal.id, e)}
-                    className={`w-full border-0 rounded-[12px] py-3.5 px-4 font-bebas text-[1.15rem] tracking-[1.5px] cursor-pointer transition-all flex items-center justify-center gap-2 text-white ${
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCardClick(sucursal.id);
+                    }}
+                    className={`w-full border-0 rounded-[12px] py-3.5 px-4 font-bebas text-[1.15rem] tracking-[1.5px] cursor-pointer transition-all flex items-center justify-center gap-2 text-white shadow-md active:scale-[0.98] ${
                       isActive
                         ? "bg-[#1A7A42] hover:bg-[#145E33] shadow-[0_4px_14px_rgba(26,122,66,0.3)]"
-                        : "bg-[#E8302A] hover:bg-[#C4231E] shadow-[0_4px_14px_rgba(232,48,42,0.3)] group-hover:scale-[1.02]"
+                        : "bg-[#E8302A] hover:bg-[#C4231E] shadow-[0_4px_14px_rgba(232,48,42,0.3)] group-hover:scale-[1.01]"
                     }`}
                   >
                     {isActive
@@ -138,4 +135,3 @@ export default function BranchSection({
     </section>
   );
 }
-

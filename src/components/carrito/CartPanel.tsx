@@ -171,11 +171,11 @@ export default function CartPanel({
                     <span>
                       {isEligible ? (
                         <span className="text-emerald-700 flex items-center gap-1">
-                          <span>🚚</span> ¡Envío Gratis Bonificado!
+                          <span>🚚</span> ¡Envío Gratis Bonificado en Canelones!
                         </span>
                       ) : (
                         <span>
-                          Faltan <strong className="text-[#EF233C]">${missingAmount.toLocaleString('es-UY')}</strong> para envío gratis
+                          Faltan <strong className="text-[#EF233C]">${missingAmount.toLocaleString('es-UY')}</strong> para envío gratis en Canelones
                         </span>
                       )}
                     </span>
@@ -333,7 +333,9 @@ export default function CartPanel({
                   {metodoEntrega === 'envio' && (
                     <div className="text-[10px] text-slate-500 font-medium truncate">
                       Subtotal: ${baseSubtotal.toLocaleString('es-UY')}
-                      {costoEnvio > 0 ? (
+                      {zonaEnvio === 'otras' || zonaEnvio === 'montevideo' ? (
+                        <span className="text-amber-600 font-extrabold"> · Envío a consultar</span>
+                      ) : costoEnvio > 0 ? (
                         <span className="text-[#EF233C] font-extrabold"> + Envío ${costoEnvio}</span>
                       ) : (
                         <span className="text-emerald-600 font-bold"> (Envío Gratis)</span>

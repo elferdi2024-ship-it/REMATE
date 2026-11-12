@@ -681,7 +681,7 @@ export default function TutorialPage() {
                       {/* Checkout fields */}
                       <div className="space-y-2.5 pt-1">
                         <div className="bg-[#EBF7F0] border border-emerald-500/20 text-[#1A7A42] p-2.5 rounded-lg text-[9px] font-black text-center uppercase tracking-wide">
-                          🚚 ¡ENVÍO GRATIS APLICADO! SUPERASTE LOS $3.000
+                          🚚 ¡ENVÍO GRATIS APLICADO! SUPERASTE LOS $2.500
                         </div>
 
                         <div>

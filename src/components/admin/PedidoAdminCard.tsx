@@ -79,6 +79,9 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
       )
       .join("");
 
+    const itemsSubtotal = pedido.items.reduce((s, i) => s + i.cantidad * i.precioUnitario, 0);
+    const shippingCost = Math.max(0, pedido.total - itemsSubtotal);
+
     const isRetiro = pedido.clienteDireccion?.includes("RETIRO EN LOCAL");
     const metodoLabel = isRetiro ? "🟢 RETIRO EN SUCURSAL" : "🚚 ENVÍO A DOMICILIO";
     const direccionClean = pedido.clienteDireccion
@@ -259,6 +262,16 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
           </table>
 
           <div class="divider"></div>
+
+          ${shippingCost > 0 ? `
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 1mm;">
+            <span>SUBTOTAL:</span>
+            <span>${formatCurrency(itemsSubtotal)}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 2mm;">
+            <span>ENVÍO:</span>
+            <span>${formatCurrency(shippingCost)}</span>
+          </div>` : ''}
 
           <div class="totals">
             TOTAL: ${formatCurrency(pedido.total)}
@@ -667,6 +680,24 @@ export default function PedidoAdminCard({ pedido, onViewFull }: PedidoAdminCardP
             </div>
 
             <div className="my-3 border-b border-dashed border-gray-300" />
+
+            {(() => {
+              const itemsSub = pedido.items.reduce((s, i) => s + i.cantidad * i.precioUnitario, 0);
+              const ship = Math.max(0, pedido.total - itemsSub);
+              if (ship <= 0) return null;
+              return (
+                <div className="space-y-1 font-mono text-[11px] text-gray-600 mb-2">
+                  <div className="flex justify-between">
+                    <span>SUBTOTAL:</span>
+                    <span>{formatCurrency(itemsSub)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>ENVÍO:</span>
+                    <span>{formatCurrency(ship)}</span>
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="flex justify-between font-mono text-base font-black text-black">
               <span>TOTAL:</span>

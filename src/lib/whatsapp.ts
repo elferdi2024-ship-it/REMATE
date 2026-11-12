@@ -1,4 +1,5 @@
 import { generarFacturaBlob, descargarFactura } from "./generarFactura";
+import { UMBRAL_ENVIO_GRATIS, COSTO_ENVIO_CANELONES } from "./envio-config";
 
 interface CartItem {
   codigo: string;
@@ -45,7 +46,9 @@ export function armarMensajeWA(
   notas?: string,
   numeroPedido?: string,
   direccion?: string,
-  costoEnvio: number = 0
+  costoEnvio: number = 0,
+  metodoEntrega: 'envio' | 'retiro' = 'envio',
+  zonaEnvio: string = 'canelones'
 ): string {
   const num = numeroPedido ?? generarNumeroPedido();
   const fecha = new Date().toLocaleDateString("es-UY", {
@@ -56,7 +59,13 @@ export function armarMensajeWA(
     minute: "2-digit",
   });
   const subtotalItems = items.reduce((s, i) => s + i.precio * i.cantidad, 0);
-  const totalFinal = subtotalItems + costoEnvio;
+  const isRetiro =
+    metodoEntrega === "retiro" ||
+    direccion?.toUpperCase().includes("RETIRO EN LOCAL") ||
+    direccion?.toUpperCase().includes("RETIRO EN SUCURSAL") ||
+    notas?.toUpperCase().includes("RETIRO EN SUCURSAL") ||
+    notas?.toUpperCase().includes("RETIRO EN LOCAL");
+  const isOtrasZonas = !isRetiro && (zonaEnvio === "otras" || zonaEnvio === "montevideo");
   const lines: string[] = [];
 
   lines.push(`🧾 *PEDIDO EL REMATE #${num}*`);
@@ -77,12 +86,29 @@ export function armarMensajeWA(
   }
   lines.push(`━━━━━━━━━━━━━━━━━━━━`);
   lines.push(`💵 *Subtotal:* ${formatPrecio(subtotalItems)}`);
-  if (costoEnvio > 0) {
-    lines.push(`🚚 *Envío:* ${formatPrecio(costoEnvio)}`);
+
+  if (isRetiro) {
+    lines.push(`🏪 *Modalidad:* Retiro en sucursal (Sin costo de envío)`);
+    lines.push(`💰 *TOTAL: ${formatPrecio(subtotalItems)}*`);
+  } else if (isOtrasZonas) {
+    lines.push(`🚚 *Envío:* A consultar por WhatsApp (Otras zonas)`);
+    lines.push(`💰 *TOTAL: ${formatPrecio(subtotalItems)}* _(+ costo de envío a coordinar)_`);
   } else {
-    lines.push(`🚚 *Envío:* ¡GRATIS!`);
+    // Canelones a domicilio: solo es gratis si supera o iguala UMBRAL_ENVIO_GRATIS ($2.500)
+    const costoFinalCanelones =
+      subtotalItems >= UMBRAL_ENVIO_GRATIS
+        ? 0
+        : costoEnvio > 0
+        ? costoEnvio
+        : COSTO_ENVIO_CANELONES;
+    if (costoFinalCanelones > 0) {
+      lines.push(`🚚 *Envío Canelones:* ${formatPrecio(costoFinalCanelones)}`);
+      lines.push(`💰 *TOTAL: ${formatPrecio(subtotalItems + costoFinalCanelones)}*`);
+    } else {
+      lines.push(`🚚 *Envío Canelones:* ¡GRATIS!`);
+      lines.push(`💰 *TOTAL: ${formatPrecio(subtotalItems)}*`);
+    }
   }
-  lines.push(`💰 *TOTAL: ${formatPrecio(totalFinal)}*`);
 
   if (notas?.trim()) {
     lines.push(`━━━━━━━━━━━━━━━━━━━━`);
@@ -159,7 +185,9 @@ export async function enviarFacturaWhatsApp(
   numeroPedido?: string,
   direccion?: string,
   skipRedirect: boolean = false,
-  costoEnvio: number = 0
+  costoEnvio: number = 0,
+  metodoEntrega: 'envio' | 'retiro' = 'envio',
+  zonaEnvio: string = 'canelones'
 ): Promise<void> {
   const phone = (numero || process.env.NEXT_PUBLIC_WA_NUMBER || "").replace(/\D/g, "");
   const numFinal = numeroPedido || generarNumeroPedido();
@@ -198,7 +226,7 @@ export async function enviarFacturaWhatsApp(
   }
 
   // 1. Copiar siempre mensaje al portapapeles como respaldo silencioso
-  const mensaje = armarMensajeWA(nombre, telefono, items, notas, numFinal, direccion, costoEnvio);
+  const mensaje = armarMensajeWA(nombre, telefono, items, notas, numFinal, direccion, costoEnvio, metodoEntrega, zonaEnvio);
   if (typeof navigator !== "undefined" && navigator.clipboard) {
     navigator.clipboard.writeText(mensaje).catch(() => {});
   }

@@ -108,10 +108,14 @@ export default function DeliveryMethodSelector({
             📍 Zona de Envío:
           </label>
           <div className="flex items-stretch gap-2 w-full">
-            {(Object.keys(COSTOS_ENVIO) as ZonaEnvio[]).map((key) => {
-              const zona = COSTOS_ENVIO[key];
-              const isSelected = zonaEnvio === key;
-              const costoText = isFreeShipping ? '¡Gratis!' : `$${zona.costo}`;
+            {(['canelones', 'otras'] as const).map((key) => {
+              const isCanelones = key === 'canelones';
+              const isSelected = isCanelones
+                ? zonaEnvio === 'canelones'
+                : (zonaEnvio === 'otras' || zonaEnvio === 'montevideo');
+              const costoText = isCanelones
+                ? (isFreeShipping ? '¡Gratis!' : `$${COSTOS_ENVIO.canelones.costo}`)
+                : 'A consultar';
 
               return (
                 <button
@@ -125,12 +129,12 @@ export default function DeliveryMethodSelector({
                   }`}
                 >
                   <span className="text-xs font-extrabold flex items-center gap-1 truncate w-full">
-                    <span>{key === 'canelones' ? '🏖️' : '🏙️'}</span>
-                    <span className="truncate">{zona.nombre}</span>
+                    <span>{isCanelones ? '🏖️' : '📍'}</span>
+                    <span className="truncate">{isCanelones ? 'Canelones' : 'Otras Zonas'}</span>
                   </span>
                   <span
                     className={`text-[11px] font-black mt-1 font-mono ${
-                      isFreeShipping ? 'text-emerald-600' : 'text-[#EF233C]'
+                      isCanelones && isFreeShipping ? 'text-emerald-600' : 'text-[#EF233C]'
                     }`}
                   >
                     {costoText}
@@ -139,6 +143,27 @@ export default function DeliveryMethodSelector({
               );
             })}
           </div>
+
+          {/* Banner explicativo según zona */}
+          {zonaEnvio === 'otras' || zonaEnvio === 'montevideo' ? (
+            <div className="mt-2.5 rounded-xl bg-amber-50 border border-amber-200/80 p-2.5 text-[11px] text-amber-900 flex items-start gap-2">
+              <span className="text-sm shrink-0">💬</span>
+              <span>
+                <strong>Otras zonas:</strong> Coordinás y consultás el costo de envío directo por WhatsApp al enviar el pedido.
+              </span>
+            </div>
+          ) : (
+            <div className="mt-2.5 rounded-xl bg-slate-100/90 border border-slate-200/90 p-2.5 text-[11px] text-slate-700 flex items-start gap-2">
+              <span className="text-sm shrink-0">🚚</span>
+              <span>
+                {isFreeShipping ? (
+                  <strong className="text-emerald-700">¡Genial! Tu pedido supera los $2.500 y tiene envío bonificado ($0) en Canelones.</strong>
+                ) : (
+                  <span>Envíos en Canelones por <strong>$150</strong> (menores de $2.500). ¡Gratis a partir de $2.500!</span>
+                )}
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>

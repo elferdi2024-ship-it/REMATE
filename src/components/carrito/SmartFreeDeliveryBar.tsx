@@ -61,7 +61,7 @@ export default function SmartFreeDeliveryBar({
         <div className="mt-2 text-[11px] text-stone-600 flex items-center justify-between border-t border-emerald-100 pt-1.5 font-medium">
           <span>Envío por zona:</span>
           <span className="font-bold text-stone-800">
-            Canelones ${COSTOS_ENVIO.canelones.costo} · Montevideo ${COSTOS_ENVIO.montevideo.costo}
+            Canelones ${COSTOS_ENVIO.canelones.costo} (menores a $2.500) · Otras zonas a consultar por WhatsApp
           </span>
         </div>
       )}

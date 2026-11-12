@@ -1,4 +1,4 @@
-﻿// filepath: src/app/admin/page.tsx
+// filepath: src/app/admin/page.tsx
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -52,7 +52,12 @@ export default function AdminDashboardPage() {
       doc(db, "config", "tienda"),
       (snap) => {
         if (snap.exists()) {
-          setConfig(snap.data() as TiendaConfig);
+          const data = snap.data() as TiendaConfig;
+          const raw = Number(data.minimoEnvioGratis);
+          setConfig({
+            ...data,
+            minimoEnvioGratis: !isNaN(raw) && raw >= 2500 ? raw : 2500,
+          });
         } else {
           // Inicializar si no existe
           setConfig({ pedidosAbiertos: true, bannerMensaje: "", minimoEnvioGratis: 2500 });

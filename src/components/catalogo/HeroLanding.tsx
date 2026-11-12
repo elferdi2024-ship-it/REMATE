@@ -63,9 +63,9 @@ export default function HeroLanding({
             <button
               type="button"
               onClick={onOpenSucursalModal}
-              className="bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 text-[11px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-md transition-all hover:bg-emerald-900/60 active:scale-95 flex items-center gap-1.5"
+              className="bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 text-[11px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-md transition-all hover:bg-emerald-900/60 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
-              <span>🏪</span> {sucursalNombre.toUpperCase()} ✎
+              <span>🏪</span> CATÁLOGO {sucursalNombre.toUpperCase()} ✎
             </button>
           )}
         </div>
@@ -100,11 +100,10 @@ export default function HeroLanding({
                   key={sucursal.id}
                   type="button"
                   onClick={() => {
-                    if (isSelected) {
-                      if (onEnterCatalog) onEnterCatalog(sucursal.id);
-                    } else {
-                      if (onSelectSucursal) onSelectSucursal(sucursal.id);
-                      else if (onEnterCatalog) onEnterCatalog(sucursal.id);
+                    if (onEnterCatalog) {
+                      onEnterCatalog(sucursal.id);
+                    } else if (onSelectSucursal) {
+                      onSelectSucursal(sucursal.id);
                     }
                   }}
                   className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 select-none active:scale-95 group ${
@@ -120,9 +119,11 @@ export default function HeroLanding({
                     {sucursal.direccion}
                   </span>
                   <span className={`text-[9px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md transition-all ${
-                    isSelected ? "bg-white text-[#EF233C] font-extrabold shadow-xs" : "bg-slate-800 text-slate-400 group-hover:bg-[#EF233C] group-hover:text-white"
+                    isSelected 
+                      ? "bg-white text-[#EF233C] font-extrabold shadow-xs" 
+                      : "bg-slate-800 text-slate-400 group-hover:bg-[#EF233C] group-hover:text-white"
                   }`}>
-                    {isSelected ? "Catálogo Activo ⚡" : "Seleccionar ⚡"}
+                    {isSelected ? "Catálogo Activo ⚡ Ver" : "Ver Catálogo ➡️"}
                   </span>
                 </button>
               );
@@ -140,7 +141,7 @@ export default function HeroLanding({
                   onEnterCatalog(selectedSucursal);
                 }
               }}
-              className="bg-[#EF233C] hover:bg-[#C01730] text-white rounded-xl px-7 py-3.5 font-bold text-sm sm:text-base tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-[#EF233C]/25 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+              className="bg-[#EF233C] hover:bg-[#C01730] text-white rounded-xl px-7 py-3.5 font-bold text-sm sm:text-base tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-[#EF233C]/25 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer ring-2 ring-[#EF233C]/50"
             >
               <span>🛒 Entrar al Catálogo de {sucursalNombre}</span>
               <span>→</span>
@@ -149,9 +150,9 @@ export default function HeroLanding({
             <button
               type="button"
               onClick={onOpenSucursalModal}
-              className="bg-[#EF233C] hover:bg-[#C01730] text-white rounded-xl px-7 py-3.5 font-bold text-sm sm:text-base tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-[#EF233C]/25 transition-all hover:-translate-y-0.5 active:scale-95"
+              className="bg-[#EF233C] hover:bg-[#C01730] text-white rounded-xl px-7 py-3.5 font-bold text-sm sm:text-base tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-[#EF233C]/25 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer"
             >
-              <span>🛒 Seleccionar Sucursal y Entrar</span>
+              <span>🏪 Seleccionar Sucursal y Entrar al Catálogo</span>
               <span>→</span>
             </button>
           )}

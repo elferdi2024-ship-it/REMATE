@@ -27,10 +27,11 @@ export function useTiendaConfig() {
       (snap) => {
         if (snap.exists()) {
           const data = snap.data();
+          const rawMinimo = Number(data.minimoEnvioGratis);
           setConfig({
             pedidosAbiertos: data.pedidosAbiertos ?? true,
             bannerMensaje: data.bannerMensaje ?? "",
-            minimoEnvioGratis: data.minimoEnvioGratis ?? 2500,
+            minimoEnvioGratis: !isNaN(rawMinimo) && rawMinimo >= 2500 ? rawMinimo : 2500,
             modoHalloween: false,
           });
         }

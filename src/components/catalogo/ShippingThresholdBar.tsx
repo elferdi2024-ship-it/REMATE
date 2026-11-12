@@ -3,6 +3,7 @@
 
 import React, { memo } from "react";
 import { formatPrice } from "@/lib/format";
+import { UMBRAL_ENVIO_GRATIS } from "@/lib/envio-config";
 
 interface ShippingThresholdBarProps {
   currentTotal: number;
@@ -13,7 +14,7 @@ interface ShippingThresholdBarProps {
 
 export const ShippingThresholdBar = memo(function ShippingThresholdBar({
   currentTotal,
-  threshold = 3500,
+  threshold = UMBRAL_ENVIO_GRATIS,
   sucursalName,
   onOpenCart,
 }: ShippingThresholdBarProps) {
