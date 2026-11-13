@@ -119,8 +119,27 @@ export default function LandingPage() {
   }, []);
 
   const handleSelectSucursal = (id: string) => {
-    // Al tocar una sucursal en la página de inicio, se selecciona su catálogo e ingresa de inmediato
-    handleEnterCatalog(id);
+    const sucursal = SUCURSALES.find((s) => s.id === id);
+    const nombre = sucursal ? sucursal.nombre : "";
+
+    if (cartItems.length > 0 && selectedSucursal && id !== selectedSucursal) {
+      const confirmacion = window.confirm(
+        "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
+      );
+      if (!confirmacion) return;
+      clearCart();
+    }
+
+    haptic.add();
+    ls.setSelectedSucursal(id);
+    setSelectedSucursal(id);
+
+    // URL como Single Source of Truth (SSOT)
+    const params = new URLSearchParams(window.location.search);
+    params.set("sucursal", id);
+    router.replace(`/?${params.toString()}`, { scroll: false });
+
+    toast.success(`🏪 Catálogo de Sucursal ${nombre} seleccionado`);
   };
 
   const handleEnterCatalog = (id: string, targetCategory?: string) => {
@@ -502,7 +521,11 @@ export default function LandingPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSelectSucursal={(id) => {
-          handleEnterCatalog(id, pendingCategory || undefined);
+          if (pendingCategory) {
+            handleEnterCatalog(id, pendingCategory);
+          } else {
+            handleSelectSucursal(id);
+          }
           setIsModalOpen(false);
         }}
         selectedSucursal={selectedSucursal}
