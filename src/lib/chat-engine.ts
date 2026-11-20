@@ -10,6 +10,7 @@ export interface ChatProductItem {
   codigo: string;
   nombre: string;
   categoria?: string;
+  imagen?: string;
   precio: number;
   precioUnitarioAplicado: number;
   ahorroTotal: number;
@@ -264,18 +265,65 @@ export function parseSegmentQuantityAndTerm(rawSegment: string) {
   return { qty, rawQuery: text, tokens };
 }
 
+export const URUGUAY_SYNONYMS: Record<string, string[]> = {
+  birra: ["cerveza"],
+  birras: ["cerveza"],
+  coca: ["coca cola"],
+  refresco: ["gaseosa", "refresco", "coca", "pepsi", "sprite"],
+  refrescos: ["gaseosa", "refresco", "coca", "pepsi", "sprite"],
+  pancho: ["pancho", "frankfurter", "salchicha"],
+  panchos: ["pancho", "frankfurter", "salchicha"],
+  galletita: ["galleta", "galletita"],
+  galletitas: ["galleta", "galletita"],
+  paty: ["hamburguesa"],
+  hamburguesas: ["hamburguesa"],
+  muzza: ["muzzarella", "muzarella", "mozzarella"],
+  ddl: ["dulce de leche"],
+  ph: ["papel higienico"],
+  lavandina: ["lavandina", "agua jane"],
+  fideos: ["fideo"],
+  yerbas: ["yerba"],
+  aceites: ["aceite"],
+  leches: ["leche"],
+  huevos: ["huevo"],
+  quesos: ["queso"],
+  jabon: ["jabon"],
+};
+
+export function expandTokensUruguay(tokens: string[]): string[] {
+  const expanded = new Set<string>();
+  for (const tk of tokens) {
+    expanded.add(tk);
+    const syns = URUGUAY_SYNONYMS[tk];
+    if (syns) {
+      for (const s of syns) {
+        s.split(/\s+/).forEach((part) => {
+          if (part.length >= 2) expanded.add(part);
+        });
+      }
+    }
+    // Singular básico para plurales en español (ej: "alfajores" -> "alfajor", "cervezas" -> "cerveza")
+    if (tk.length > 4 && tk.endsWith("es")) expanded.add(tk.slice(0, -2));
+    else if (tk.length > 3 && tk.endsWith("s")) expanded.add(tk.slice(0, -1));
+  }
+  return Array.from(expanded);
+}
+
 export function searchCatalogByTokens(
   products: Producto[],
   tokens: string[],
   maxResults = 4
 ): Producto[] {
   if (!tokens || tokens.length === 0 || !Array.isArray(products)) return [];
-  const fullProducts = withSeasonalPromos(products);
+  const fullProducts = withSeasonalPromos(products).filter(
+    (p) => p && typeof p.nombre === "string" && p.precio > 0 && !p.deshabilitado
+  );
+  const expandedTokens = expandTokensUruguay(tokens);
   const joinedQuery = tokens.join(" ");
-  const hasCremaInQuery = tokens.some((t) => t.includes("crema"));
-  const hasDulceInQuery = tokens.some((t) => t.includes("dulce"));
-  const hasPolvoInQuery = tokens.some((t) => t.includes("polvo"));
-  const hasLecheInQuery = tokens.some((t) => t.includes("leche"));
+  const hasCremaInQuery = expandedTokens.some((t) => t.includes("crema"));
+  const hasDulceInQuery = expandedTokens.some((t) => t.includes("dulce"));
+  const hasPolvoInQuery = expandedTokens.some((t) => t.includes("polvo"));
+  const hasLecheInQuery = expandedTokens.some((t) => t.includes("leche"));
 
   const scored: Array<{ product: Producto; score: number }> = [];
 
@@ -289,24 +337,32 @@ export function searchCatalogByTokens(
       continue;
     }
 
-    let matchedTokens = 0;
+    let matchedOriginal = 0;
     let score = 0;
 
-    for (const tk of tokens) {
-      if (pNameNorm.includes(tk)) {
-        matchedTokens++;
-        score += tk.length >= 4 ? 30 : 15;
-        if (new RegExp(`\\b${tk.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`).test(pNameNorm)) {
-          score += 20;
+    for (const origTk of tokens) {
+      const variants = expandTokensUruguay([origTk]);
+      let bestTkScore = 0;
+      for (const tk of variants) {
+        if (pNameNorm.includes(tk)) {
+          let s = tk.length >= 4 ? 30 : 15;
+          if (new RegExp(`\\b${tk.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`).test(pNameNorm)) {
+            s += 22;
+          }
+          if (tk === origTk) s += 8;
+          if (s > bestTkScore) bestTkScore = s;
+        } else if (pCatNorm.includes(tk)) {
+          if (10 > bestTkScore) bestTkScore = 10;
         }
-      } else if (pCatNorm.includes(tk)) {
-        matchedTokens += 0.5;
-        score += 10;
+      }
+      if (bestTkScore > 0) {
+        matchedOriginal += bestTkScore >= 15 ? 1 : 0.5;
+        score += bestTkScore;
       }
     }
 
-    if (matchedTokens === 0) continue;
-    const coverage = matchedTokens / tokens.length;
+    if (matchedOriginal === 0) continue;
+    const coverage = matchedOriginal / tokens.length;
     if (tokens.length >= 2 && coverage < 0.6) continue;
 
     // Regla de Oro: Discriminar leche común de crema o dulce de leche
@@ -380,6 +436,43 @@ export function localChatFallback(rawMsg: string, catalog: Producto[]): ChatApiR
     };
   }
 
+  // 4b. Ofertas y descuentos mayoristas
+  if (/\b(oferta|ofertas|promo|promos|promocion|promociones|mayorista|descuento|descuentos|bulto)\b/.test(nMsg)) {
+    const active = catalog.filter((p) => p && p.precio > 0 && !p.deshabilitado);
+    const promos = active
+      .filter((p) => (p.precioAnterior && p.precioAnterior > p.precio) || (p.escalaPrecios && p.escalaPrecios.length > 0) || p.destacado)
+      .slice(0, 6);
+    const picked = promos.length > 0 ? promos : active.filter((p) => p.imagen).slice(0, 5);
+    if (picked.length > 0) {
+      const items: ChatProductItem[] = picked.map((p) => {
+        const qty = p.escalaPrecios?.[0]?.minCantidad || 1;
+        const calc = calcularPrecioConEscala(p.precio, qty, p.escalaPrecios);
+        return {
+          codigo: p.codigo,
+          nombre: cleanEncoding(p.nombre),
+          categoria: p.categoria,
+          imagen: p.imagen,
+          precio: p.precio,
+          precioUnitarioAplicado: calc.precioUnitario,
+          ahorroTotal: calc.ahorroTotal,
+          unidad: (p as any).unidad || "u",
+          escalaPrecios: p.escalaPrecios,
+          cantidadSugerida: qty,
+          subtotalSugerido: Math.round(qty * calc.precioUnitario),
+        };
+      });
+      const sum = items.reduce((a, b) => a + b.subtotalSugerido, 0);
+      return {
+        reply: `🔥 ¡Acá tenés **ofertas y destacados mayoristas** disponibles hoy! Recordá que en **Canelones** el envío es **GRATIS superando los $2.500** (o retiro gratis en cualquiera de nuestras 6 sucursales):`,
+        isMultiList: items.length > 1,
+        totalListApprox: sum,
+        products: items,
+        suggestions: ["🛒 Ejemplo de lista", "🛵 Horarios y envíos", "💬 Hablar con asesor"],
+        intent: "offers",
+      };
+    }
+  }
+
   // 5. Detección Inteligente de Rubro Comercial (Pizzería, Panadería, Kiosco, etc.)
   const detectedRubro = detectRubro(rawMsg);
   if (detectedRubro) {
@@ -393,6 +486,7 @@ export function localChatFallback(rawMsg: string, catalog: Producto[]): ChatApiR
           codigo: p.codigo,
           nombre: cleanEncoding(p.nombre),
           categoria: p.categoria,
+          imagen: p.imagen,
           precio: p.precio,
           precioUnitarioAplicado: calc.precioUnitario,
           ahorroTotal: calc.ahorroTotal,
@@ -416,8 +510,11 @@ export function localChatFallback(rawMsg: string, catalog: Producto[]): ChatApiR
     }
   }
 
-  // 6. Búsqueda y armado de lista por segmentos
-  const segments = rawMsg.split(/[,;\n]+|\s+\+\s+/).map((s) => s.trim()).filter(Boolean);
+  // 6. Búsqueda y armado de lista por segmentos (soporta comas, saltos de línea, "+" y " y ")
+  const segments = rawMsg
+    .split(/[,;\n]+|\s+\+\s+|\s+y\s+(?=\d|\w{3,})/i)
+    .map((s) => s.trim())
+    .filter(Boolean);
   const matched: ChatProductItem[] = [];
 
   for (const seg of segments) {
@@ -434,6 +531,7 @@ export function localChatFallback(rawMsg: string, catalog: Producto[]): ChatApiR
         codigo: best.codigo,
         nombre: cleanEncoding(best.nombre),
         categoria: best.categoria,
+        imagen: best.imagen,
         precio: best.precio,
         precioUnitarioAplicado: calc.precioUnitario,
         ahorroTotal: calc.ahorroTotal,

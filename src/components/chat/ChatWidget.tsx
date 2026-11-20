@@ -110,10 +110,49 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
   ]);
 
   const [handoffSubmitting, setHandoffSubmitting] = useState(false);
+  const [mobileViewport, setMobileViewport] = useState<{ height: number; top: number } | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastScrolledMsgIdRef = useRef<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sincronización con VisualViewport en móvil para que el teclado virtual nunca tape el header ni el input
+  useEffect(() => {
+    if (!isOpen || typeof window === "undefined") {
+      setMobileViewport(null);
+      return;
+    }
+
+    const updateViewport = () => {
+      if (window.innerWidth >= 640) {
+        setMobileViewport(null);
+        return;
+      }
+      const vv = window.visualViewport;
+      if (vv) {
+        setMobileViewport({
+          height: Math.round(vv.height),
+          top: Math.round(vv.offsetTop),
+        });
+      } else {
+        setMobileViewport({
+          height: window.innerHeight,
+          top: 0,
+        });
+      }
+    };
+
+    updateViewport();
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", updateViewport);
+    vv?.addEventListener("scroll", updateViewport);
+    window.addEventListener("resize", updateViewport);
+    return () => {
+      vv?.removeEventListener("resize", updateViewport);
+      vv?.removeEventListener("scroll", updateViewport);
+      window.removeEventListener("resize", updateViewport);
+    };
+  }, [isOpen]);
 
   // Generar o recuperar sessionId
   const getSessionId = useCallback(() => {
@@ -216,9 +255,9 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
     });
   }, [messages, isOpen, loading]);
 
-  // Manejar foco en input al abrir
+  // Manejar foco en input al abrir SOLO en desktop (en móvil evita que el teclado tape la bienvenida)
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && typeof window !== "undefined" && window.innerWidth >= 640) {
       setTimeout(() => {
         inputRef.current?.focus();
       }, 200);
@@ -520,56 +559,55 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
         />
       )}
 
-      {/* ── Ventana del Chatbot Concierge (z-[1000] SIEMPRE AL FRENTE) ── */}
+      {/* ── Ventana del Chatbot Concierge (z-[1000] SIEMPRE AL FRENTE, adaptable al teclado móvil) ── */}
       {isOpen && (
         <aside
           role="dialog"
           aria-label="Atención y Pedidos El Remate Canelones"
-          className="fixed z-[1000] inset-x-0 bottom-0 h-[92dvh] max-h-[92dvh] sm:h-[640px] sm:max-h-[calc(100dvh-48px)] sm:w-[430px] sm:max-w-[calc(100vw-32px)] sm:right-6 sm:bottom-6 sm:inset-x-auto rounded-t-[26px] sm:rounded-[26px] flex flex-col overflow-hidden bg-[#FAF8F5] border border-slate-200/90 shadow-[0_-16px_50px_rgba(15,23,42,0.4)] animate-in fade-in slide-in-from-bottom-5 duration-200"
+          style={
+            mobileViewport
+              ? {
+                  top: `${mobileViewport.top}px`,
+                  height: `${mobileViewport.height}px`,
+                  maxHeight: `${mobileViewport.height}px`,
+                }
+              : undefined
+          }
+          className="fixed z-[1000] inset-x-0 bottom-0 h-[100dvh] sm:top-auto sm:h-[640px] sm:max-h-[calc(100dvh-48px)] sm:w-[430px] sm:max-w-[calc(100vw-32px)] sm:right-6 sm:bottom-6 sm:inset-x-auto rounded-none sm:rounded-[26px] flex flex-col overflow-hidden bg-[#FAF8F5] border-0 sm:border sm:border-slate-200/90 shadow-[0_-16px_50px_rgba(15,23,42,0.4)] animate-in fade-in duration-150"
         >
-          {/* Manija táctil en Mobile para cerrar o deslizar */}
-          <button
-            type="button"
-            onClick={() => handleToggle(false)}
-            aria-label="Minimizar chat"
-            className="flex sm:hidden justify-center items-center py-2.5 bg-gradient-to-r from-[#0B0F19] to-[#151D2A] cursor-pointer w-full group border-b border-white/5"
-          >
-            <span className="w-12 h-1.5 rounded-full bg-white/30 group-hover:bg-white/50 transition-colors" />
-          </button>
-
-          {/* ── Header Exclusivo Canelones (Obsidian + Crimson Glow) ── */}
-          <div className="flex items-center justify-between gap-3 px-4 py-3 bg-gradient-to-r from-[#0B0F19] via-[#151D2A] to-[#1E293B] text-white border-b border-[#EF233C]/30 shrink-0">
+          {/* ── Header Exclusivo Canelones (Compacto y legible en Mobile + Desktop) ── */}
+          <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 sm:px-4 sm:py-3 bg-gradient-to-r from-[#0B0F19] via-[#151D2A] to-[#1E293B] text-white border-b border-[#EF233C]/30 shrink-0 pt-[max(10px,env(safe-area-inset-top,10px))] sm:pt-3">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#EF233C]/25 to-[#EF233C]/10 border border-[#EF233C]/40 flex items-center justify-center text-[#EF233C] shrink-0 shadow-inner">
                 <ElRemateChatIcon className="w-5 h-5 text-[#EF233C]" />
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#EF233C] border-2 border-[#0B0F19]" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0B0F19]" />
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-extrabold tracking-tight truncate text-white">
-                    El Remate Canelones
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-[14px] font-extrabold tracking-tight truncate text-white">
+                    El Remate
                   </h3>
-                  <span className="px-2 py-0.5 rounded-full bg-[#EF233C]/20 text-[#FF8596] border border-[#EF233C]/35 text-[9px] font-black uppercase tracking-wider shrink-0">
+                  <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[9px] font-black uppercase tracking-wider shrink-0">
                     En Línea
                   </span>
                 </div>
                 <p className="text-[11px] font-medium text-slate-300 truncate">
-                  Atención y Pedidos · {catalog.length > 0 ? `${catalog.length.toLocaleString("es-UY")} productos` : "Canelones Mayorista"}
+                  Asistente Mayorista · {catalog.length > 0 ? `${catalog.length.toLocaleString("es-UY")} prod.` : "Canelones"}
                 </p>
               </div>
             </div>
 
-            {/* Acciones del Header */}
+            {/* Acciones del Header (táctiles 36x36px en móvil) */}
             <div className="flex items-center gap-1.5 shrink-0">
               <a
                 href={construirLinkWhatsApp("59894611400", "¡Hola El Remate Canelones! Tengo una consulta sobre el catálogo mayorista.")}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Abrir en WhatsApp"
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-[11px] font-extrabold shadow-sm transition-transform active:scale-95"
+                className="inline-flex items-center justify-center gap-1.5 w-9 h-9 sm:w-auto sm:px-2.5 sm:py-1.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-[11px] font-extrabold shadow-sm transition-transform active:scale-95"
               >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-4 h-4 sm:w-3.5 sm:h-3.5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
                 </svg>
                 <span className="hidden sm:inline">WhatsApp</span>
@@ -579,9 +617,9 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                 type="button"
                 onClick={handleReset}
                 title="Reiniciar chat"
-                className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
               >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="w-4 h-4 sm:w-3.5 sm:h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
                   <path d="M3 3v5h5" />
                 </svg>
@@ -591,7 +629,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                 type="button"
                 onClick={() => handleToggle(false)}
                 title="Cerrar chat"
-                className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18" />
@@ -710,48 +748,108 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                     </div>
                   )}
 
-                  {/* ── Tarjetas Interactivas de Productos en Chat ── */}
+                  {/* ── Tarjetas Interactivas de Productos en Chat (Con Miniatura + Stepper) ── */}
                   {Array.isArray(m.products) && m.products.length > 0 && (
                     <div className="flex flex-col gap-2 mt-3 pt-1">
                       {m.products.map((prod) => {
                         const inCartItem = items.find((i) => i.codigo === prod.codigo);
+                        const thumbUrl =
+                          prod.imagen ||
+                          catalog.find((c) => c.codigo === prod.codigo)?.imagen;
                         return (
                           <div
                             key={prod.codigo}
-                            className="flex items-center justify-between gap-2 p-2.5 bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#EF233C]/50 rounded-xl transition-all shadow-xs"
+                            className="flex items-center gap-2.5 p-2 bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#EF233C]/50 rounded-xl transition-all shadow-xs"
                           >
+                            {/* Miniatura WebP del producto */}
+                            <div className="w-11 h-11 rounded-lg bg-white border border-slate-200/80 flex items-center justify-center shrink-0 overflow-hidden p-1">
+                              {thumbUrl ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img
+                                  src={thumbUrl}
+                                  alt={prod.nombre}
+                                  loading="lazy"
+                                  className="max-w-full max-h-full object-contain"
+                                />
+                              ) : (
+                                <span className="text-lg">📦</span>
+                              )}
+                            </div>
+
                             <div className="min-w-0 flex-1">
-                              <b className="block text-[12.5px] font-extrabold text-[#0F172A] leading-tight truncate">
+                              <b className="block text-[12px] font-extrabold text-[#0F172A] leading-snug line-clamp-2">
                                 {prod.nombre}
                               </b>
-                              <div className="text-[11.5px] text-[#64748B] font-semibold mt-0.5">
+                              <div className="text-[11px] text-[#475569] font-semibold mt-0.5 tabular-nums">
                                 {prod.cantidadSugerida > 1 && `${prod.cantidadSugerida}× `}$
                                 {prod.precioUnitarioAplicado.toLocaleString("es-UY")} c/u
                                 {prod.ahorroTotal > 0 && (
                                   <span className="text-[#EF233C] font-bold ml-1">
-                                    · Ahorrás ${prod.ahorroTotal.toLocaleString("es-UY")}
+                                    · -${prod.ahorroTotal.toLocaleString("es-UY")}
                                   </span>
                                 )}
                               </div>
                               {prod.escalaPrecios && prod.escalaPrecios.length > 0 && (
-                                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-extrabold">
-                                  Mayorista desde {prod.escalaPrecios[0].minCantidad} u: $
+                                <span className="inline-block mt-1 px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[9.5px] font-extrabold">
+                                  Mayorista {prod.escalaPrecios[0].minCantidad}+ u: $
                                   {prod.escalaPrecios[0].precioUnitario}
                                 </span>
                               )}
                             </div>
 
-                            <button
-                              type="button"
-                              onClick={() => handleAddProduct(prod)}
-                              className={`px-3 py-1.5 rounded-lg text-[12px] font-extrabold shrink-0 transition-transform active:scale-95 cursor-pointer ${
-                                inCartItem
-                                  ? "bg-[#0F172A] text-white"
-                                  : "bg-[#EF233C] hover:bg-[#D90429] text-white shadow-xs"
-                              }`}
-                            >
-                              {inCartItem ? `✓ En pedido (${inCartItem.cantidad})` : `+ Sumar ${prod.cantidadSugerida > 1 ? `(${prod.cantidadSugerida})` : ""}`}
-                            </button>
+                            {inCartItem ? (
+                              <div className="flex items-center bg-white border border-[#EF233C] rounded-lg overflow-hidden shrink-0 h-8">
+                                <button
+                                  type="button"
+                                  aria-label="Restar 1"
+                                  onClick={() => {
+                                    haptic.remove();
+                                    setItemQty(
+                                      {
+                                        codigo: prod.codigo,
+                                        nombre: prod.nombre,
+                                        precio: prod.precio,
+                                        escalaPrecios: prod.escalaPrecios,
+                                      },
+                                      Math.max(0, inCartItem.cantidad - 1)
+                                    );
+                                  }}
+                                  className="w-7 h-full flex items-center justify-center text-[#EF233C] font-black text-sm hover:bg-red-50 active:scale-90 cursor-pointer"
+                                >
+                                  −
+                                </button>
+                                <span className="px-1.5 text-[11.5px] font-black text-slate-900 tabular-nums">
+                                  {inCartItem.cantidad}
+                                </span>
+                                <button
+                                  type="button"
+                                  aria-label="Sumar 1"
+                                  onClick={() => {
+                                    haptic.add();
+                                    setItemQty(
+                                      {
+                                        codigo: prod.codigo,
+                                        nombre: prod.nombre,
+                                        precio: prod.precio,
+                                        escalaPrecios: prod.escalaPrecios,
+                                      },
+                                      inCartItem.cantidad + 1
+                                    );
+                                  }}
+                                  className="w-7 h-full flex items-center justify-center text-[#EF233C] font-black text-sm hover:bg-red-50 active:scale-90 cursor-pointer"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleAddProduct(prod)}
+                                className="px-2.5 py-1.5 rounded-lg text-[11.5px] font-extrabold shrink-0 bg-[#EF233C] hover:bg-[#D90429] text-white shadow-xs transition-transform active:scale-95 cursor-pointer"
+                              >
+                                + Sumar{prod.cantidadSugerida > 1 ? ` (${prod.cantidadSugerida})` : ""}
+                              </button>
+                            )}
                           </div>
                         );
                       })}

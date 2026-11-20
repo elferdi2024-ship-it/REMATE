@@ -25,18 +25,55 @@ let lastCatalogLoad = 0;
 
 async function getCachedCatalog(): Promise<Producto[]> {
   const now = Date.now();
-  if (cachedCatalog && now - lastCatalogLoad < 60000) {
+  if (cachedCatalog && now - lastCatalogLoad < 300000) {
     return cachedCatalog;
   }
+
+  // 1. Intentar catálogo en vivo desde Firestore Admin (incluye fotos y precios actualizados)
+  try {
+    const db = adminDbOrNull();
+    if (db) {
+      const snap = await db.collection("catalogo_activo").doc("productos").get();
+      if (snap.exists) {
+        const itemsObj = snap.data()?.items || {};
+        const list = Object.values(itemsObj)
+          .filter(
+            (p: any) =>
+              p &&
+              typeof p.nombre === "string" &&
+              p.nombre.trim().length > 0 &&
+              typeof p.precio === "number" &&
+              p.precio > 0 &&
+              !p.deshabilitado
+          )
+          .map((p: any) => ({
+            ...p,
+            nombre: cleanEncoding(p.nombre),
+            categoria: cleanEncoding(p.categoria || ""),
+          })) as Producto[];
+        if (list.length > 0) {
+          cachedCatalog = list;
+          lastCatalogLoad = now;
+          return cachedCatalog;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Firestore live catalog fallback a productos.json:", err);
+  }
+
+  // 2. Fallback rápido a public/productos.json
   try {
     const raw = await readFile(join(process.cwd(), "public", "productos.json"), "utf8");
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
-      cachedCatalog = parsed.map((p) => ({
-        ...p,
-        nombre: cleanEncoding(p.nombre),
-        categoria: cleanEncoding(p.categoria),
-      }));
+      cachedCatalog = parsed
+        .filter((p) => p && typeof p.nombre === "string" && Number(p.precio) > 0 && !p.deshabilitado)
+        .map((p) => ({
+          ...p,
+          nombre: cleanEncoding(p.nombre),
+          categoria: cleanEncoding(p.categoria || ""),
+        }));
       lastCatalogLoad = now;
       return cachedCatalog;
     }
@@ -46,36 +83,39 @@ async function getCachedCatalog(): Promise<Producto[]> {
   return cachedCatalog || [];
 }
 
-const GEMINI_SYSTEM_PROMPT = `Sos el Asistente Inteligente de Ventas y Pedidos Mayorista de "El Remate Canelones" (distribuidora mayorista y minorista en Canelones, Uruguay).
-Hablás en español rioplatense uruguayo ("es-UY": vos, che, tenés, querés, decime, dale, bárbaro, etc.). Tu tono es ágil, cordial, motivador, cercano y altamente resolutivo comercialmente.
+const GEMINI_SYSTEM_PROMPT = `Sos el Asistente Inteligente de Ventas y Pedidos Mayorista de "El Remate Canelones" (distribuidora mayorista y minorista en Uruguay).
+Hablás en español rioplatense uruguayo ("es-UY": vos, che, tenés, querés, decime, dale, bárbaro). Tu tono es ágil, claro, cordial y resolutivo.
 
 CONTEXTO DEL NEGOCIO:
-• Distribuidora El Remate Canelones con más de 1.900 productos con precios directos de fábrica.
-• Modalidades: Venta por mayor (bulto cerrado con escalas de descuento) y por menor a comercios, pizzerías, rotiserías, panaderías, quioscos, minimarkets y familias.
-• Entregas y Envíos: Canelones Ciudad, Santa Lucía, Sauce, Las Piedras y zonas de influencia. También retiros en local mayorista.
-• Pedidos: Se confirman mediante el carrito web y WhatsApp oficial (+598 94 611 400).
+• Más de 2.200 productos con precios directos de fábrica (venta por unidad y por bulto con escalas de descuento).
+• 6 Sucursales (retiro en local SIN COSTO):
+  - Canelones (General Artigas 118 · 094 611 400)
+  - La Paz (Ramón Álvarez 225 · 094 358 830)
+  - Las Piedras Herrera (Luis Alberto de Herrera 487 · 092 202 019)
+  - Las Piedras Artigas (Av. Artigas 750 · 099 013 272)
+  - 18 de Mayo (Maestro Julio Castro 15 · 094 713 033)
+  - El Dorado (Elías Regules esq. Honduras · 093 404 158)
+• Envíos a domicilio: En Canelones cuesta $150, y es **GRATIS superando los $2.500**. Otras zonas se coordinan por WhatsApp.
+• Horarios: Lunes a Sábados de 08:00 a 19:00 hs.
 
 REGLAS DE ORO:
-1. ALTA CAPACIDAD RESOLUTIVA COMERCIAL:
-   - Si el cliente menciona su comercio o rubro (ej: "pizzería", "panadería", "rotisería", "quiosco", "almacén", "picada", "cumpleaños", "limpieza"):
-     * SELECCIONÁ activamente entre 4 y 7 productos esenciales del CATÁLOGO DISPONIBLE provisto para armarle una propuesta inicial completa y equilibrada.
-     * Asigná cantidades sugeridas lógicas para el rubro (ej: 2 a 5 unidades según producto).
-     * Respondé de forma motivadora y resolutiva explicando qué incluye la propuesta inicial y cómo sumar otros insumos.
-2. PRECISIÓN DE PRODUCTOS:
-   - Utilizá ÚNICAMENTE productos reales y sus códigos exactos presentes en el CATÁLOGO DISPONIBLE provisto.
-   - NUNCA confundas productos: "leche" es LECHE COMÚN LÍQUIDA (ej: Conaprole o Blancanuve). NO es "crema de leche" ni "dulce de leche", salvo que el cliente especifique "crema" o "dulce".
-   - Si piden algo no disponible, indicalo amablemente y ofrecé el producto sustituto más conveniente.
-3. MANEJO DE CORRECCIONES:
-   - Si el cliente te corrige (ej: "sacá eso", "eso no", "te equivocaste", "pedí yerba no café"), disculpate con simpatía ("¡Uh, tenés razón, disculpame!"), retirá el producto erróneo y sumá el correcto.
-4. FORMATO DE RESPUESTA OBLIGATORIO:
-   Respondé OBLIGATORIAMENTE un JSON estricto con esta estructura:
+1. PRECISIÓN ESTRICTA:
+   - Utilizá ÚNICAMENTE productos reales y sus códigos exactos del CATÁLOGO DISPONIBLE provisto.
+   - Si el cliente pide un producto puntual, devolvé SOLO coincidencias reales (máximo 4). NUNCA rellenes con productos irrelevantes ni golosinas si pidió otra cosa.
+   - Si el cliente menciona su comercio o rubro (pizzería, panadería, rotisería, kiosco, picada, cumpleaños, limpieza, asado), armá una propuesta de 4 a 6 insumos esenciales reales del catálogo.
+   - NUNCA confundas "leche" (leche líquida común) con "crema de leche" ni "dulce de leche", salvo que lo pida explícitamente.
+2. CONTEXTO DEL CARRITO:
+   - Si el cliente ya tiene productos en el carrito, tenelo en cuenta (ej: avisale cuánto le falta para llegar a $2.500 de envío gratis en Canelones).
+3. RESPUESTAS CONCISAS PARA MÓVIL:
+   - Escribí respuestas breves, escaneables y directas (máximo 2–3 párrafos cortos).
+4. FORMATO JSON OBLIGATORIO:
    {
-     "reply": "Texto de la respuesta para el cliente en español uruguayo amigable",
+     "reply": "Respuesta breve en español uruguayo",
      "items": [
        { "codigo": "código exacto según catálogo", "cantidad": 2 }
      ],
-     "intent": "order_list" | "search_products" | "delivery_info" | "correction" | "human_handoff" | "general_query",
-     "suggestions": ["Sugerencia 1", "Sugerencia 2", "Sugerencia 3"]
+     "intent": "order_list" | "search_products" | "delivery_info" | "offers" | "correction" | "human_handoff" | "general_query",
+     "suggestions": ["Sugerencia corta 1", "Sugerencia corta 2", "Sugerencia corta 3"]
    }`;
 
 export async function POST(request: Request) {
@@ -156,12 +196,15 @@ export async function POST(request: Request) {
       rubroProducts.forEach((p) => candidateMap.set(p.codigo, p));
     }
 
-    // B. Segmentación de cantidades y nombres de productos específicos
-    const segments = message.split(/[,;\n]+|\s+\+\s+/).map((s) => s.trim()).filter(Boolean);
+    // B. Segmentación de cantidades y nombres de productos específicos (soporta comas, saltos y " y ")
+    const segments = message
+      .split(/[,;\n]+|\s+\+\s+|\s+y\s+(?=\d|\w{3,})/i)
+      .map((s) => s.trim())
+      .filter(Boolean);
     for (const seg of segments) {
       const parsed = parseSegmentQuantityAndTerm(seg);
       if (parsed) {
-        const hits = searchCatalogByTokens(catalog, parsed.tokens, 3);
+        const hits = searchCatalogByTokens(catalog, parsed.tokens, 4);
         hits.forEach((h) => candidateMap.set(h.codigo, h));
       }
     }
@@ -193,15 +236,24 @@ export async function POST(request: Request) {
 
     const candidates = Array.from(candidateMap.values()).slice(0, 40);
 
-    // ── 3. Motor Gemini 3.5 Flash Lite Free Tier ($0 Cost) ──
-    // Clave configurada o fallback directo verificado para cero costos
+    // ── 3. Motor Gemini Free Tier ($0 Cost) con fallback automático de modelos ──
     const apiKey =
       process.env.GEMINI_API_KEY?.trim() ||
       Buffer.from("QVEuQWI4Uk42S1hQU0VzZC0wTnNha0tpemlTMGRWWnpNcXEweVd1UlhRbDRZcjAzQnN2MUE=", "base64").toString("utf-8");
-    const model = process.env.GEMINI_MODEL?.trim() || "gemini-3.5-flash-lite";
+
+    const configuredModel = process.env.GEMINI_MODEL?.trim();
+    const modelsToTry = Array.from(
+      new Set(
+        [
+          configuredModel && configuredModel !== "gemini-3.5-flash-lite" ? configuredModel : null,
+          "gemini-2.5-flash",
+          "gemini-2.0-flash",
+          "gemini-2.0-flash-lite",
+        ].filter((m): m is string => Boolean(m))
+      )
+    );
 
     if (apiKey && candidates.length > 0) {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
       const catalogLines = candidates
         .map((p) => `• [${p.codigo}] ${p.nombre} ($${p.precio})`)
         .join("\n");
@@ -213,7 +265,7 @@ export async function POST(request: Request) {
         `CATÁLOGO DISPONIBLE:\n${catalogLines}`;
 
       const contents = [
-        ...history.slice(-4).map((h: any) => ({
+        ...history.slice(-6).map((h: any) => ({
           role: h.role === "assistant" || h.role === "bot" ? "model" : "user",
           parts: [{ text: String(h.text || h.content || "") }],
         })),
@@ -225,23 +277,28 @@ export async function POST(request: Request) {
         contents.shift();
       }
 
-      try {
-        const geminiRes = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: AbortSignal.timeout(7500),
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: sysText }] },
-            contents,
-            generationConfig: {
-              responseMimeType: "application/json",
-              temperature: 0.15,
-              maxOutputTokens: 600,
-            },
-          }),
-        });
+      for (const model of modelsToTry) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        try {
+          const geminiRes = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            signal: AbortSignal.timeout(7000),
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: sysText }] },
+              contents,
+              generationConfig: {
+                responseMimeType: "application/json",
+                temperature: 0.15,
+                maxOutputTokens: 650,
+              },
+            }),
+          });
 
-        if (geminiRes.ok) {
+          if (!geminiRes.ok) {
+            continue;
+          }
+
           const geminiData = await geminiRes.json();
           const rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (rawText) {
@@ -251,19 +308,19 @@ export async function POST(request: Request) {
             if (Array.isArray(parsedAi.items)) {
               for (const it of parsedAi.items) {
                 let prod = catalog.find((p) => p.codigo === it.codigo);
-                // Si la IA devolvió un nombre o código ligeramente distinto, resolver por nombre
                 if (!prod && it.nombre) {
                   const normItemName = normText(it.nombre);
                   prod = catalog.find((p) => normText(p.nombre).includes(normItemName));
                 }
                 if (prod) {
-                  const qty = Number(it.cantidad || 1);
+                  const qty = Math.max(1, Number(it.cantidad || 1));
                   const escala = prod.escalaPrecios as BulkPriceTier[] | undefined;
                   const calc = calcularPrecioConEscala(prod.precio, qty, escala);
                   resolvedProducts.push({
                     codigo: prod.codigo,
                     nombre: cleanEncoding(prod.nombre),
                     categoria: prod.categoria,
+                    imagen: prod.imagen,
                     precio: prod.precio,
                     precioUnitarioAplicado: calc.precioUnitario,
                     ahorroTotal: calc.ahorroTotal,
@@ -278,7 +335,6 @@ export async function POST(request: Request) {
 
             const sum = resolvedProducts.reduce((a, b) => a + b.subtotalSugerido, 0);
 
-            // Sincronizar en segundo plano con el CRM Hub si hay interacción comercial
             sendCrmEvent(
               "chat.interaction",
               {
@@ -288,6 +344,7 @@ export async function POST(request: Request) {
                 botReply: parsedAi.reply,
                 intent: parsedAi.intent,
                 productsCount: resolvedProducts.length,
+                modelUsed: model,
               },
               `chat_evt_${Date.now()}`
             ).catch(() => {});
@@ -301,9 +358,9 @@ export async function POST(request: Request) {
               intent: parsedAi.intent || "general_query",
             });
           }
+        } catch (geminiErr) {
+          console.warn(`Fallo o timeout en ${model}, probando siguiente:`, geminiErr);
         }
-      } catch (geminiErr) {
-        console.warn("Fallo o timeout de Gemini, recurriendo a motor local:", geminiErr);
       }
     }
 

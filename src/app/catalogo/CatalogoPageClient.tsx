@@ -201,8 +201,8 @@ type SemanticDomain =
   | "general_food";
 
 function getSemanticDomain(product: Producto): SemanticDomain {
-  const name = product.nombre.toLowerCase();
-  const category = (product.categoria || "").toLowerCase();
+  const name = String(product?.nombre || "").toLowerCase();
+  const category = String(product?.categoria || "").toLowerCase();
 
   // 1. Cleaning & Hygiene (Strict separation)
   if (
@@ -588,6 +588,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   // Fetch branch-specific or global productos
   useEffect(() => {
+    if (!mounted) return;
     const currentId = sucursalId;
     let cancelled = false;
 
@@ -605,7 +606,14 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
               const branchData = branchSnap.data();
               const items = branchData.items || {};
               const itemsList = Object.values(items) as Producto[];
-              const activeItems = itemsList.filter((item) => !item.deshabilitado);
+              const activeItems = itemsList.filter(
+                (item) =>
+                  item &&
+                  typeof item.nombre === "string" &&
+                  item.nombre.trim().length > 0 &&
+                  typeof item.precio === "number" &&
+                  !item.deshabilitado
+              );
               if (activeItems.length > 0) {
                 data = activeItems;
                 loadedFromBranch = true;
@@ -622,7 +630,14 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             const snap = await getDoc(doc(db, "catalogo_activo", "productos"));
             if (snap.exists()) {
               const docData = snap.data();
-              data = Object.values(docData.items || {}) as Producto[];
+              data = (Object.values(docData.items || {}) as Producto[]).filter(
+                (item) =>
+                  item &&
+                  typeof item.nombre === "string" &&
+                  item.nombre.trim().length > 0 &&
+                  typeof item.precio === "number" &&
+                  !item.deshabilitado
+              );
               console.log(`📦 Catálogo global cargado desde Firestore (${data.length} productos)`);
             } else {
               console.warn("⚠️ Documento de Firestore 'catalogo_activo/productos' no existe.");
@@ -1236,6 +1251,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
   }, [handleConfirmSend]);
 
   const handleSucursalChange = useCallback((newId: string) => {
+    if (newId === sucursalId) return;
     if (cartItems.length > 0) {
       const confirmacion = confirm(
         "Al cambiar de sucursal se vaciará tu carrito actual para evitar inconsistencias en precios y disponibilidad de stock. ¿Deseas cambiar?"
@@ -1250,7 +1266,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
     const params = new URLSearchParams(window.location.search);
     params.set("sucursal", newId);
     router.replace(`/catalogo?${params.toString()}`, { scroll: false });
-  }, [cartItems, clearCart, router]);
+  }, [sucursalId, cartItems, clearCart, router]);
 
 
   const handleLoadSharedCart = useCallback(() => {
@@ -1350,8 +1366,8 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       }
 
       // 4. Nombre similar (coincidencia de palabra clave)
-      const firstWord = product.nombre.split(' ')[0].toLowerCase();
-      if (firstWord.length > 2 && p.nombre.toLowerCase().includes(firstWord) && score !== -999) {
+      const firstWord = String(product.nombre || "").split(' ')[0].toLowerCase();
+      if (firstWord.length > 2 && String(p.nombre || "").toLowerCase().includes(firstWord) && score !== -999) {
         score += 20;
       }
 

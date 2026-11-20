@@ -995,6 +995,14 @@ html.dark-mode body { background: var(--bg); }
 }
 .cat-carousel-track::-webkit-scrollbar { display: none; }
 
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .cat-carousel-item {
   flex: 0 0 calc(50% - 6px);   /* 2 cols mobile chico */
   scroll-snap-align: start;
