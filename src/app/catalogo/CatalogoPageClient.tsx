@@ -26,7 +26,6 @@ import {
   SponsoredProductsRail,
   BottomNavBar,
   FilterSheet,
-  SmartReorder,
   ExclusiveAppPacksSection,
 } from "@/components/catalogo";
 import { useFavoritos } from "@/lib/favoritos-context";
@@ -1589,18 +1588,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       />
 
       {/* Contenido del catálogo — max-width desktop */}
-      <div className="page-wrapper pt-3 sm:pt-4">
-        {/* Tus Compras Frecuentes / Reorder Express */}
-        {!search.trim() && (!activeCat || activeCat === "Todos") && (
-          <SmartReorder
-            productos={productos}
-            pedidos={pedidos}
-            qtyMap={qtyMap}
-            onAddProduct={handleAddProduct}
-            onQtyChange={handleQtyChange}
-          />
-        )}
-
+      <div className="page-wrapper pt-2.5 sm:pt-4">
         {/* Packs Exclusivos de la App (Canasta Canario, Pack Cumpleaños, Pack Fin de Semana) */}
         {!loading &&
           !search.trim() &&
