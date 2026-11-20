@@ -1,15 +1,16 @@
 // filepath: src/app/admin/productos/page.tsx
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { db, storage } from "@/lib/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/lib/toast-context";
 import imageCompression from 'browser-image-compression';
 import Image from "next/image";
 import categoriaMapping from "@/lib/categoria_mapping.json";
 import { CATEGORIAS } from "@/types";
+import type { ImageCandidate } from "@/lib/product-image-finder";
 
 const catMap = (categoriaMapping as any).mapping || categoriaMapping;
 
@@ -44,6 +45,36 @@ export default function AdminProductos() {
   const [editingPrice, setEditingPrice] = useState<{ codigo: string, value: string } | null>(null);
   const [savingPrice, setSavingPrice] = useState<string | null>(null);
   const [togglingStatus, setTogglingStatus] = useState<string | null>(null);
+
+  // Estado para Buscador Automático de Imágenes (Modal 1 clic)
+  const [pickerProduct, setPickerProduct] = useState<ProductoRow | null>(null);
+  const [pickerQuery, setPickerQuery] = useState("");
+  const [pickerCandidates, setPickerCandidates] = useState<ImageCandidate[]>([]);
+  const [pickerLoading, setPickerLoading] = useState(false);
+  const [pickerError, setPickerError] = useState<string | null>(null);
+  const [applyingCandidateUrl, setApplyingCandidateUrl] = useState<string | null>(null);
+
+  // Estado para Auto-completar en Lote ($0)
+  const [batchLimit, setBatchLimit] = useState<number>(20);
+  const [batchRunning, setBatchRunning] = useState(false);
+  const [batchState, setBatchState] = useState<{
+    current: number;
+    total: number;
+    applied: number;
+    failed: number;
+    currentName: string;
+  }>({ current: 0, total: 0, applied: 0, failed: 0, currentName: "" });
+  const batchAbortRef = useRef(false);
+
+  // Leer filtro inicial por URL (?filter=sin_imagen) sin usar useSearchParams para evitar bailout SSR
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("filter") === "sin_imagen") {
+      setImageFilter("sin_imagen");
+      setSortBy("sin_imagen_primero");
+    }
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -138,10 +169,14 @@ export default function AdminProductos() {
       .replace(/--+/g, '-');
   };
 
-  const handleUploadImage = async (codigo: string, file: File) => {
+  const handleUploadImage = async (
+    codigo: string,
+    file: File,
+    silent = false
+  ): Promise<boolean> => {
     if (!file.type.startsWith("image/")) {
-      toast.error("Solo se permiten imágenes");
-      return;
+      if (!silent) toast.error("Solo se permiten imágenes");
+      return false;
     }
     setUploadingItem(codigo);
     setProgress(0);
@@ -149,50 +184,236 @@ export default function AdminProductos() {
     try {
       const product = productos.find(p => p.codigo === codigo);
       const productName = product ? product.nombre : "producto";
-      
+
       const options = {
         maxSizeMB: 0.5,
         maxWidthOrHeight: 800,
         useWebWorker: true
       };
-      
+
       const compressedFile = await imageCompression(file, options);
-      const ext = compressedFile.name.split('.').pop() || 'jpg';
+      const extFromName = compressedFile.name.split('.').pop()?.toLowerCase();
+      const ext = extFromName && ["jpg", "jpeg", "png", "webp"].includes(extFromName)
+        ? extFromName
+        : "jpg";
       const fileName = `${slugify(productName)}-${codigo}.${ext}`;
       const storageRef = ref(storage, `productos/${fileName}`);
 
       const uploadTask = uploadBytesResumable(storageRef, compressedFile);
 
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setProgress(p);
-        },
-        (error) => {
-          toast.error("Error al subir la imagen");
-          setUploadingItem(null);
-        },
-        async () => {
-          try {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            await updateDoc(doc(db, "catalogo_activo", "productos"), {
-              [`items.${codigo}.imagen`]: downloadURL
-            });
-            
-            setProductos(prev => prev.map(p => p.codigo === codigo ? { ...p, imagen: downloadURL } : p));
-            toast.success("Imagen SEO optimizada cargada");
-          } catch (e) {
-            toast.error("Error al guardar URL");
-          } finally {
-            setUploadingItem(null);
+      const downloadURL = await new Promise<string>((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setProgress(p);
+          },
+          (error) => reject(error),
+          async () => {
+            try {
+              const url = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve(url);
+            } catch (err) {
+              reject(err);
+            }
           }
-        }
+        );
+      });
+
+      await setDoc(
+        doc(db, "catalogo_activo", "productos"),
+        { items: { [codigo]: { imagen: downloadURL } } },
+        { merge: true }
       );
+
+      setProductos(prev => prev.map(p => p.codigo === codigo ? { ...p, imagen: downloadURL } : p));
+      if (!silent) toast.success("Imagen SEO optimizada cargada");
+      return true;
     } catch (error) {
       console.error(error);
-      toast.error("Error al comprimir la imagen");
+      if (!silent) toast.error("Error al procesar o subir la imagen");
+      return false;
+    } finally {
       setUploadingItem(null);
+    }
+  };
+
+  // Descarga una imagen candidata usando el proxy propio (sin CORS y sin debilitar CSP)
+  const fetchCandidateAsFile = async (
+    candidate: ImageCandidate,
+    codigo: string
+  ): Promise<File | null> => {
+    const urlsToTry = [candidate.url, candidate.thumbUrl].filter(
+      (u, idx, arr) => Boolean(u) && arr.indexOf(u) === idx
+    );
+
+    for (const remoteUrl of urlsToTry) {
+      try {
+        const res = await fetch(
+          `/api/admin/image-proxy?url=${encodeURIComponent(remoteUrl)}`
+        );
+        if (!res.ok) continue;
+        const blob = await res.blob();
+        if (!blob.type.startsWith("image/") || blob.size < 1024) continue;
+        const ext =
+          blob.type.includes("png")
+            ? "png"
+            : blob.type.includes("webp")
+            ? "webp"
+            : "jpg";
+        return new File([blob], `${codigo}.${ext}`, { type: blob.type });
+      } catch {
+        // Reintentar con thumbnail
+      }
+    }
+    return null;
+  };
+
+  const searchPickerImages = async (
+    prod: ProductoRow,
+    customQuery?: string
+  ) => {
+    setPickerLoading(true);
+    setPickerError(null);
+    setPickerCandidates([]);
+    try {
+      const res = await fetch("/api/admin/find-product-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          codigo: prod.codigo,
+          nombre: prod.nombre,
+          customQuery: customQuery?.trim() || undefined,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error(`Error HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      setPickerCandidates(Array.isArray(data.candidates) ? data.candidates : []);
+      if (!customQuery && data.queryUsed) {
+        setPickerQuery(data.queryUsed);
+      }
+      if (!data.candidates || data.candidates.length === 0) {
+        setPickerError("No se encontraron imágenes. Probá editar el nombre de búsqueda arriba.");
+      }
+    } catch (e: any) {
+      setPickerError(e?.message || "No se pudo consultar el buscador de imágenes");
+    } finally {
+      setPickerLoading(false);
+    }
+  };
+
+  const openImagePicker = (prod: ProductoRow) => {
+    setPickerProduct(prod);
+    setPickerQuery(prod.nombre);
+    searchPickerImages(prod);
+  };
+
+  const applyCandidateToProduct = async (candidate: ImageCandidate) => {
+    if (!pickerProduct || applyingCandidateUrl) return;
+    setApplyingCandidateUrl(candidate.url);
+    try {
+      const file = await fetchCandidateAsFile(candidate, pickerProduct.codigo);
+      if (!file) {
+        toast.error("No se pudo descargar esta foto. Probá con otra opción.");
+        return;
+      }
+      const ok = await handleUploadImage(pickerProduct.codigo, file);
+      if (ok) {
+        setPickerProduct(null);
+      }
+    } finally {
+      setApplyingCandidateUrl(null);
+    }
+  };
+
+  const handleBatchAutoFill = async () => {
+    const targets = filtrados
+      .filter((p) => !p.imagen || p.imagen.trim() === "")
+      .slice(0, batchLimit);
+
+    if (targets.length === 0) {
+      toast.info("No hay productos sin imagen en la vista filtrada actual.");
+      return;
+    }
+
+    batchAbortRef.current = false;
+    setBatchRunning(true);
+    setBatchState({
+      current: 0,
+      total: targets.length,
+      applied: 0,
+      failed: 0,
+      currentName: targets[0].nombre,
+    });
+
+    let applied = 0;
+    let failed = 0;
+
+    for (let i = 0; i < targets.length; i++) {
+      if (batchAbortRef.current) break;
+      const prod = targets[i];
+      setBatchState({
+        current: i + 1,
+        total: targets.length,
+        applied,
+        failed,
+        currentName: prod.nombre,
+      });
+
+      try {
+        const res = await fetch("/api/admin/find-product-images", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ codigo: prod.codigo, nombre: prod.nombre }),
+        });
+
+        if (!res.ok) {
+          failed++;
+          continue;
+        }
+
+        const data = await res.json();
+        const candidates: ImageCandidate[] = Array.isArray(data.candidates)
+          ? data.candidates
+          : [];
+
+        let uploaded = false;
+        // Probar los primeros 3 candidatos mejor rankeados hasta conseguir una descarga limpia
+        for (const cand of candidates.slice(0, 3)) {
+          if (batchAbortRef.current) break;
+          const file = await fetchCandidateAsFile(cand, prod.codigo);
+          if (!file) continue;
+          const ok = await handleUploadImage(prod.codigo, file, true);
+          if (ok) {
+            uploaded = true;
+            break;
+          }
+        }
+
+        if (uploaded) {
+          applied++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+
+      // Pausa breve para no saturar búsquedas ni Storage
+      if (!batchAbortRef.current && i < targets.length - 1) {
+        await new Promise((r) => setTimeout(r, 350));
+      }
+    }
+
+    setBatchState((prev) => ({ ...prev, applied, failed }));
+    setBatchRunning(false);
+
+    if (batchAbortRef.current) {
+      toast.info(`Lote detenido: ${applied} fotos aplicadas, ${failed} omitidas.`);
+    } else {
+      toast.success(`Lote finalizado: ${applied} fotos cargadas automáticamente (${failed} sin coincidencia).`);
     }
   };
 
@@ -407,6 +628,80 @@ export default function AdminProductos() {
           <span className="font-bebas text-2xl text-[var(--admin-text-hi)] mt-0.5">{stats.sinImagen}</span>
         </button>
       </div>
+
+      {/* Barra de Auto-Completado Masivo de Imágenes ($0) */}
+      {(stats.sinImagen > 0 || batchRunning) && (
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 shadow-sm space-y-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-base">✨</span>
+                <h3 className="text-sm font-bold text-[var(--admin-text-hi)]">
+                  Auto-completar Imágenes Faltantes (Uruguay · Costo $0)
+                </h3>
+              </div>
+              <p className="text-xs text-[var(--admin-text-lo)] mt-0.5">
+                Busca por código EAN (Open Food Facts) y supermercados de Uruguay, descarga, comprime y guarda en tu Firebase Storage.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {!batchRunning ? (
+                <>
+                  <select
+                    value={batchLimit}
+                    onChange={(e) => setBatchLimit(Number(e.target.value))}
+                    className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-input-bg)] px-3 py-2 text-xs font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none cursor-pointer"
+                  >
+                    <option value={10}>Lote de 10</option>
+                    <option value={20}>Lote de 20</option>
+                    <option value={50}>Lote de 50</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={handleBatchAutoFill}
+                    disabled={uploadingItem !== null}
+                    className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-black transition-all hover:bg-amber-400 disabled:opacity-50 shadow-md"
+                  >
+                    ✨ Completar Lote Automático
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    batchAbortRef.current = true;
+                  }}
+                  className="inline-flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-white transition-all hover:bg-red-600 shadow-md"
+                >
+                  ⏹ Detener Lote
+                </button>
+              )}
+            </div>
+          </div>
+
+          {batchRunning && (
+            <div className="space-y-2 pt-2 border-t border-amber-500/20">
+              <div className="flex items-center justify-between text-xs">
+                <span className="truncate font-semibold text-[var(--admin-text-hi)] max-w-[70%]">
+                  Procesando ({batchState.current}/{batchState.total}): {batchState.currentName}
+                </span>
+                <span className="font-mono text-[11px] font-bold text-amber-500 shrink-0">
+                  ✅ {batchState.applied} · ⚠️ {batchState.failed}
+                </span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--admin-bg)] border border-[var(--admin-border)]">
+                <div
+                  className="h-full bg-amber-500 transition-all duration-300"
+                  style={{
+                    width: `${batchState.total > 0 ? Math.round((batchState.current / batchState.total) * 100) : 0}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Control Bar (Search, Filters & Sort) */}
       <div className="flex flex-col gap-3 rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 shadow-sm">
@@ -688,13 +983,26 @@ export default function AdminProductos() {
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between pt-1">
-                      <label className={`cursor-pointer w-full text-center rounded-xl border px-3 py-2 text-[10px] font-extrabold uppercase tracking-wider transition-all ${
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => openImagePicker(prod)}
+                        disabled={batchRunning || uploadingItem === prod.codigo}
+                        className={`flex-1 rounded-xl border px-2.5 py-2 text-[10px] font-extrabold uppercase tracking-wider transition-all disabled:opacity-50 ${
+                          hasNoImage
+                            ? "bg-amber-500 text-black border-transparent hover:bg-amber-400 shadow-md"
+                            : "bg-[var(--admin-input-bg)] border-[var(--admin-border)] text-[var(--admin-text-hi)] hover:border-amber-500"
+                        }`}
+                      >
+                        ✨ Buscar Foto
+                      </button>
+
+                      <label className={`cursor-pointer flex-1 text-center rounded-xl border px-2.5 py-2 text-[10px] font-extrabold uppercase tracking-wider transition-all ${
                         hasNoImage
-                          ? "bg-[var(--admin-accent)] text-[var(--admin-sidebar-bg)] border-transparent hover:opacity-95 shadow-md animate-pulse"
+                          ? "bg-[var(--admin-accent)] text-[var(--admin-sidebar-bg)] border-transparent hover:opacity-95 shadow-md"
                           : "bg-[var(--admin-bg)] border-[var(--admin-border)] text-[var(--admin-text-mid)] hover:bg-[var(--admin-input-bg)] hover:text-[var(--admin-text-hi)]"
                       }`}>
-                        {hasNoImage ? "📸 Subir Imagen Faltante" : "🔄 Cambiar Imagen"}
+                        {hasNoImage ? "📸 Subir PC" : "🔄 Subir PC"}
                         <input
                           type="file"
                           accept="image/*"
@@ -759,6 +1067,141 @@ export default function AdminProductos() {
             >
               Última »
             </button>
+          </div>
+        </div>
+      )}
+      {/* Modal Selector Rápido de Imágenes ($0) */}
+      {pickerProduct && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+          onClick={() => {
+            if (!applyingCandidateUrl) setPickerProduct(null);
+          }}
+        >
+          <div
+            className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-4 border-b border-[var(--admin-border)] bg-[var(--admin-bg)] px-5 py-4">
+              <div className="min-w-0">
+                <span className="font-mono text-[10px] font-bold text-[var(--admin-accent)]">
+                  SKU: {pickerProduct.codigo}
+                </span>
+                <h3 className="truncate text-base font-bold text-[var(--admin-text-hi)]">
+                  {pickerProduct.nombre}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPickerProduct(null)}
+                disabled={Boolean(applyingCandidateUrl)}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-input-bg)] text-sm text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)] disabled:opacity-40"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Search bar inside modal */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                searchPickerImages(pickerProduct, pickerQuery);
+              }}
+              className="flex gap-2 border-b border-[var(--admin-border)] p-4"
+            >
+              <input
+                type="text"
+                value={pickerQuery}
+                onChange={(e) => setPickerQuery(e.target.value)}
+                placeholder="Editá el texto si el nombre del Excel está muy abreviado..."
+                className="flex-1 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-input-bg)] px-3.5 py-2 text-sm text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={pickerLoading || Boolean(applyingCandidateUrl)}
+                className="rounded-xl bg-[var(--admin-accent)] px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-[var(--admin-sidebar-bg)] hover:opacity-90 disabled:opacity-50"
+              >
+                {pickerLoading ? "Buscando..." : "🔍 Buscar"}
+              </button>
+            </form>
+
+            {/* Modal Body: Candidates Grid */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {pickerLoading ? (
+                <div className="flex flex-col items-center justify-center py-14 gap-3">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-amber-500 border-t-transparent" />
+                  <p className="text-xs font-semibold text-[var(--admin-text-lo)]">
+                    Buscando fotos en Open Food Facts y tiendas de Uruguay...
+                  </p>
+                </div>
+              ) : pickerError && pickerCandidates.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[var(--admin-border)] p-10 text-center">
+                  <p className="text-sm font-semibold text-[var(--admin-text-hi)]">{pickerError}</p>
+                  <p className="mt-1 text-xs text-[var(--admin-text-lo)]">
+                    Tip: Probá dejar solo la marca y el producto (ej. &quot;Yerba Canarias 1kg&quot;).
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                  {pickerCandidates.map((cand) => {
+                    const isApplying = applyingCandidateUrl === cand.url;
+                    const previewSrc = `/api/admin/image-proxy?url=${encodeURIComponent(
+                      cand.thumbUrl || cand.url
+                    )}`;
+                    return (
+                      <button
+                        key={cand.url}
+                        type="button"
+                        onClick={() => applyCandidateToProduct(cand)}
+                        disabled={Boolean(applyingCandidateUrl)}
+                        className="group relative flex flex-col overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] text-left transition-all hover:border-amber-500 hover:shadow-lg disabled:opacity-60"
+                      >
+                        <div className="relative flex h-36 w-full items-center justify-center bg-white p-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={previewSrc}
+                            alt={cand.title || pickerProduct.nombre}
+                            loading="lazy"
+                            className="max-h-full max-w-full object-contain transition-transform duration-200 group-hover:scale-105"
+                          />
+                          {isApplying && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/75 text-white gap-1">
+                              <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
+                              <span className="text-[10px] font-bold">Guardando...</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-1 p-2">
+                          <span
+                            className={`inline-flex w-max rounded px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${
+                              cand.confidence === "exact_ean"
+                                ? "bg-emerald-500/20 text-emerald-500"
+                                : cand.confidence === "uruguay_store"
+                                ? "bg-sky-500/20 text-sky-400"
+                                : "bg-[var(--admin-input-bg)] text-[var(--admin-text-lo)]"
+                            }`}
+                          >
+                            {cand.confidence === "exact_ean"
+                              ? "✅ EAN Exacto"
+                              : cand.confidence === "uruguay_store"
+                              ? "🇺🇾 Tienda UY"
+                              : "🌐 Web"}
+                          </span>
+                          <span className="truncate text-[10px] text-[var(--admin-text-lo)]">
+                            {cand.domain}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between border-t border-[var(--admin-border)] bg-[var(--admin-bg)] px-5 py-3 text-[11px] text-[var(--admin-text-lo)]">
+              <span>Hacé clic en una foto para descargarla, comprimirla y aplicarla en 1 paso.</span>
+            </div>
           </div>
         </div>
       )}

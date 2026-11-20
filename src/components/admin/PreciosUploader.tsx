@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Link from "next/link";
 import { type WorkBook } from "xlsx";
 import * as XLSX from "xlsx";
 import { db } from "@/lib/firebase";
@@ -32,6 +33,7 @@ export default function PreciosUploader() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [missingImagesCount, setMissingImagesCount] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -186,22 +188,32 @@ export default function PreciosUploader() {
       }
 
       const batchSize = 50;
-      const catalogoActivo: Record<string, ProductRow & { imagen?: string; deshabilitado?: boolean }> = {};
+      const catalogoActivo: Record<string, any> = {};
+      let sinImagen = 0;
       for (let i = 0; i < parsed.length; i++) {
         const codigo = parsed[i].codigo;
         const masterProd = masterData[codigo];
         const branchProd = existingBranchData[codigo];
+        const refProd = branchProd || masterProd;
         
         let precioFinal = parsed[i].precio;
         if (targetSucursal === "global" && masterProd && masterProd.precio <= 0) {
           precioFinal = masterProd.precio;
         }
 
+        const imagen = masterProd?.imagen || branchProd?.imagen || "";
+        if (!imagen) sinImagen++;
+
         catalogoActivo[codigo] = {
           ...parsed[i],
           precio: precioFinal,
-          ...(masterProd?.imagen ? { imagen: masterProd.imagen } : branchProd?.imagen ? { imagen: branchProd.imagen } : {}),
-          ...(branchProd?.deshabilitado !== undefined ? { deshabilitado: branchProd.deshabilitado } : {})
+          ...(imagen ? { imagen } : {}),
+          ...(branchProd?.deshabilitado !== undefined ? { deshabilitado: branchProd.deshabilitado } : {}),
+          ...(refProd?.escalaPrecios ? { escalaPrecios: refProd.escalaPrecios } : {}),
+          ...(refProd?.destacado !== undefined ? { destacado: refProd.destacado } : {}),
+          ...(refProd?.precioAnterior !== undefined ? { precioAnterior: refProd.precioAnterior } : {}),
+          ...(refProd?.marca ? { marca: refProd.marca } : {}),
+          ...(refProd?.contenido ? { contenido: refProd.contenido } : {}),
         };
         if ((i + 1) % batchSize === 0) {
           setUploadProgress(Math.round(((i + 1) / parsed.length) * 100));
@@ -209,6 +221,7 @@ export default function PreciosUploader() {
         }
       }
       setUploadProgress(100);
+      setMissingImagesCount(sinImagen);
 
       if (targetSucursal === "global") {
         await setDoc(doc(db, "catalogo_activo", "productos"), {
@@ -225,14 +238,16 @@ export default function PreciosUploader() {
       }
 
       setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        setFile(null);
-        setPreview([]);
-        setParsed([]);
-        setUploadProgress(0);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-      }, 3000);
+      if (sinImagen === 0) {
+        setTimeout(() => {
+          setSuccess(false);
+          setFile(null);
+          setPreview([]);
+          setParsed([]);
+          setUploadProgress(0);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        }, 3000);
+      }
     } catch (err: any) {
       console.error("Error al actualizar catálogo:", err);
       setError("Error al actualizar los precios en la base de datos.");
@@ -360,12 +375,45 @@ export default function PreciosUploader() {
       )}
 
       {success && (
-        <div className="rounded-xl border border-[var(--admin-accent)]/20 bg-[var(--admin-accent)]/10 p-6 text-center shadow-[0_0_30px_var(--admin-accent-glow)]">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--admin-accent)] text-3xl text-[var(--admin-sidebar-bg)] shadow-lg font-bold">
-            ✓
+        <div className="rounded-xl border border-[var(--admin-accent)]/20 bg-[var(--admin-accent)]/10 p-6 text-center shadow-[0_0_30px_var(--admin-accent-glow)] space-y-4">
+          <div>
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--admin-accent)] text-3xl text-[var(--admin-sidebar-bg)] shadow-lg font-bold">
+              ✓
+            </div>
+            <h3 className="font-bebas text-3xl tracking-wide text-[var(--admin-text-hi)]">Catálogo Actualizado</h3>
+            <p className="text-[var(--admin-accent)] font-medium mt-1">Los productos se sincronizaron con éxito.</p>
           </div>
-          <h3 className="font-bebas text-3xl tracking-wide text-[var(--admin-text-hi)]">Catálogo Actualizado</h3>
-          <p className="text-[var(--admin-accent)] font-medium mt-1">Los productos se sincronizaron con éxito.</p>
+
+          {missingImagesCount > 0 && (
+            <div className="mx-auto max-w-md rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-3">
+              <p className="text-xs font-semibold text-amber-500">
+                ⚠️ Detectamos <strong>{missingImagesCount}</strong> productos sin imagen en esta carga.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                <Link
+                  href="/admin/productos?filter=sin_imagen"
+                  className="w-full sm:w-auto rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-black hover:bg-amber-400 transition-all shadow-md"
+                >
+                  ✨ Completar Imágenes Automáticamente →
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSuccess(false);
+                    setFile(null);
+                    setPreview([]);
+                    setParsed([]);
+                    setUploadProgress(0);
+                    setMissingImagesCount(0);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                  className="w-full sm:w-auto rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-2.5 text-xs font-bold text-[var(--admin-text-mid)] hover:text-[var(--admin-text-hi)] transition-all"
+                >
+                  Cargar otro Excel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
