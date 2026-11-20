@@ -4,6 +4,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, MapPin, ShoppingCart, MessageCircle } from "lucide-react";
 import { SUCURSALES } from "@/lib/sucursales";
 
 interface HeroLandingProps {
@@ -13,180 +14,155 @@ interface HeroLandingProps {
   onEnterCatalog?: (id: string) => void;
 }
 
-export default function HeroLanding({ 
-  selectedSucursal, 
-  onOpenSucursalModal,
+export default function HeroLanding({
+  selectedSucursal,
   onSelectSucursal,
-  onEnterCatalog
+  onEnterCatalog,
 }: HeroLandingProps) {
-  const sucursalNombre = SUCURSALES.find(s => s.id === selectedSucursal)?.nombre || "";
+  const activeSucursal = SUCURSALES.find((s) => s.id === selectedSucursal) || null;
+
+  const handleBranchClick = (id: string) => {
+    if (onEnterCatalog) {
+      onEnterCatalog(id);
+    } else if (onSelectSucursal) {
+      onSelectSucursal(id);
+    }
+  };
 
   return (
-    <section className="relative w-full bg-gradient-to-b from-[#7F1D1D] via-[#450A0A] to-[#1F0404] text-white overflow-hidden min-h-[85vh] flex items-center border-b border-red-900/60 shadow-xl">
-      {/* Background with optimized overlay */}
-      <div className="absolute inset-0 z-0">
+    <section className="relative w-full bg-gradient-to-b from-[#0F172A] via-[#171117] to-[#1A080A] text-white overflow-hidden border-b border-white/10">
+      {/* Fondo sutil */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
           src="/hero-bg.jpg"
           alt="Distribuidora El Remate Canelones"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-40"
+          className="object-cover object-center opacity-20"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#450A0A]/90 via-[#7F1D1D]/75 to-[#1F0404]/80" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1F0404] via-transparent to-[#450A0A]/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A]/90 via-[#1A0B0E]/85 to-[#0F172A]/95" />
       </div>
 
-      {/* Hero Content */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 text-center flex flex-col items-center">
-        {/* Brand Logo */}
-        <div className="mb-6 flex justify-center">
-          <Image
-            src="/logo.png"
-            alt="Distribuidora El Remate"
-            width={180}
-            height={180}
-            className="object-contain max-w-[200px] h-auto drop-shadow-xl"
-            priority
-          />
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-5 pb-8 sm:py-10 flex flex-col items-center text-center">
+        {/* Marca compacta */}
+        <div className="flex items-center justify-center gap-3 mb-3.5">
+          <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
+            <Image
+              src="/logo.png"
+              alt="Distribuidora El Remate"
+              fill
+              sizes="64px"
+              className="object-contain drop-shadow-[0_4px_14px_rgba(239,35,60,0.45)]"
+              priority
+            />
+          </div>
+          <div className="text-left">
+            <span className="inline-block bg-[#EF233C] text-white text-[10px] font-black tracking-widest uppercase px-2.5 py-0.5 rounded-md">
+              Mayorista y Minorista
+            </span>
+            <p className="text-xs sm:text-sm font-bold text-slate-300 mt-1 m-0 leading-none">
+              Distribuidora El Remate · Canelones
+            </p>
+          </div>
         </div>
 
-        {/* Badges / Header Context */}
-        <div className="inline-flex flex-wrap items-center justify-center gap-2 mb-4">
-          <span className="bg-[#EF233C] text-white text-[11px] font-black tracking-widest uppercase px-3 py-1 rounded-md shadow-xs">
-            Venta Mayorista y Minorista
-          </span>
-          <span className="text-[11px] font-bold tracking-widest uppercase text-slate-400">
-            Distribuidora Oficial · Canelones
-          </span>
-          {selectedSucursal && (
+        {/* Título corto y directo */}
+        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-[1.1] max-w-2xl mb-4">
+          Entrá al catálogo y armá tu pedido{" "}
+          <span className="text-[#EF233C]">en 1 minuto</span>
+        </h1>
+
+        {/* CTA Principal Inmediato — 1 toque al catálogo */}
+        <div className="w-full max-w-md mb-5">
+          {activeSucursal ? (
             <button
               type="button"
-              onClick={onOpenSucursalModal}
-              className="bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 text-[11px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-md transition-all hover:bg-emerald-900/60 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-sm"
+              onClick={() => handleBranchClick(activeSucursal.id)}
+              className="w-full bg-[#EF233C] hover:bg-[#C01730] text-white rounded-2xl px-6 py-4 font-extrabold text-base sm:text-lg tracking-tight flex items-center justify-center gap-2.5 shadow-[0_12px_30px_-6px_rgba(239,35,60,0.55)] ring-2 ring-white/15 active:scale-[0.98] transition-all cursor-pointer"
             >
-              <span>🏪</span> CATÁLOGO {sucursalNombre.toUpperCase()} ✎
+              <ShoppingCart className="w-5 h-5 shrink-0" />
+              <span>Entrar al Catálogo · {activeSucursal.nombre}</span>
+              <ArrowRight className="w-5 h-5 shrink-0" />
             </button>
+          ) : (
+            <Link
+              href="/seleccionar-sucursal"
+              className="w-full bg-[#EF233C] hover:bg-[#C01730] text-white rounded-2xl px-6 py-4 font-extrabold text-base sm:text-lg tracking-tight flex items-center justify-center gap-2.5 shadow-[0_12px_30px_-6px_rgba(239,35,60,0.55)] ring-2 ring-white/15 active:scale-[0.98] transition-all no-underline"
+            >
+              <ShoppingCart className="w-5 h-5 shrink-0" />
+              <span>Ver Catálogo Online</span>
+              <ArrowRight className="w-5 h-5 shrink-0" />
+            </Link>
           )}
         </div>
 
-        {/* Main Title */}
-        <h1 className="font-bebas text-4xl sm:text-6xl lg:text-7xl tracking-wide leading-none text-white mb-3 max-w-4xl">
-          PRECIOS MAYORISTAS DIRECTOS
-          <span className="block text-[#EF233C] mt-1">
-            SIN INTERMEDIARIOS
-          </span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-sm sm:text-base lg:text-lg text-slate-300 font-medium max-w-2xl mx-auto mb-8 leading-relaxed">
-          Abastecé tu comercio, almacén o tu hogar con stock garantizado en alimentos, bebidas y limpieza con despacho express en Canelones.
-        </p>
-
-        {/* Interactive Branch Selector Matrix */}
-        <div className="w-full max-w-4xl mx-auto mb-8 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-2xl p-4 sm:p-6 text-center shadow-xl">
-          <div className="flex items-center justify-center gap-2 mb-3.5">
-            <span className="text-sm">🏪</span>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              ELEGÍ TU SUCURSAL PARA ENTRAR A SU CATÁLOGO:
+        {/* Selector directo de sucursal (1 toque -> entra al catálogo) */}
+        <div className="w-full max-w-4xl bg-white/[0.05] backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-4">
+          <div className="flex items-center justify-between gap-2 mb-2.5 px-0.5">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-300">
+              <MapPin className="w-3.5 h-3.5 text-[#EF233C] shrink-0" />
+              <span>
+                {activeSucursal
+                  ? "O elegí otra sucursal para entrar directo:"
+                  : "Elegí tu sucursal para entrar directo al catálogo:"}
+              </span>
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             {SUCURSALES.map((sucursal) => {
               const isSelected = selectedSucursal === sucursal.id;
               return (
                 <button
                   key={sucursal.id}
                   type="button"
-                  onClick={() => {
-                    if (isSelected && onEnterCatalog) {
-                      onEnterCatalog(sucursal.id);
-                    } else if (onSelectSucursal) {
-                      onSelectSucursal(sucursal.id);
-                    } else if (onEnterCatalog) {
-                      onEnterCatalog(sucursal.id);
-                    }
-                  }}
-                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 select-none active:scale-95 group ${
+                  onClick={() => handleBranchClick(sucursal.id)}
+                  className={`px-3 py-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between gap-2 active:scale-[0.97] group ${
                     isSelected
-                      ? "bg-[#EF233C] border-[#EF233C] text-white shadow-md shadow-[#EF233C]/30 ring-2 ring-white/20 scale-[1.02]"
-                      : "bg-slate-950/80 border-slate-800 text-slate-300 hover:border-[#EF233C] hover:bg-slate-900 hover:text-white"
+                      ? "bg-[#EF233C] border-[#EF233C] text-white shadow-md shadow-[#EF233C]/30"
+                      : "bg-slate-900/80 border-white/10 text-slate-100 hover:border-[#EF233C] hover:bg-slate-900"
                   }`}
                 >
-                  <span className="text-xs font-bold tracking-tight truncate w-full">
-                    {sucursal.nombre}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-normal truncate w-full">
-                    {sucursal.direccion}
-                  </span>
-                  <span className={`text-[9px] font-black tracking-wider uppercase px-2 py-0.5 rounded-md transition-all ${
-                    isSelected 
-                      ? "bg-white text-[#EF233C] font-extrabold shadow-xs" 
-                      : "bg-slate-800 text-slate-400 group-hover:bg-[#EF233C] group-hover:text-white"
-                  }`}>
-                    {isSelected ? "Catálogo Activo ⚡ Entrar" : "Seleccionar Catálogo"}
-                  </span>
+                  <div className="min-w-0">
+                    <div className="text-xs sm:text-[13px] font-extrabold tracking-tight truncate">
+                      {sucursal.nombre}
+                    </div>
+                    <div
+                      className={`text-[10px] truncate mt-0.5 ${
+                        isSelected ? "text-white/85" : "text-slate-400"
+                      }`}
+                    >
+                      {sucursal.direccion}
+                    </div>
+                  </div>
+                  <ArrowRight
+                    className={`w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 ${
+                      isSelected ? "text-white" : "text-slate-400 group-hover:text-[#EF233C]"
+                    }`}
+                  />
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Primary Action Buttons */}
-        <div className="flex gap-3.5 flex-wrap justify-center mb-10 items-center">
-          {selectedSucursal ? (
-            <button
-              type="button"
-              onClick={() => {
-                if (onEnterCatalog) {
-                  onEnterCatalog(selectedSucursal);
-                }
-              }}
-              className="bg-[#EF233C] hover:bg-[#C01730] text-white rounded-xl px-7 py-3.5 font-bold text-sm sm:text-base tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-[#EF233C]/25 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer ring-2 ring-[#EF233C]/50"
-            >
-              <span>🛒 Entrar al Catálogo de {sucursalNombre}</span>
-              <span>→</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onOpenSucursalModal}
-              className="bg-[#EF233C] hover:bg-[#C01730] text-white rounded-xl px-7 py-3.5 font-bold text-sm sm:text-base tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-[#EF233C]/25 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer"
-            >
-              <span>🏪 Seleccionar Sucursal y Entrar al Catálogo</span>
-              <span>→</span>
-            </button>
-          )}
-
+        {/* Línea compacta de confianza + WhatsApp */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] font-semibold text-slate-300">
+          <span>✓ +1.900 productos</span>
+          <span className="text-white/25">•</span>
+          <span>✓ Envío 24-48h</span>
+          <span className="text-white/25">•</span>
+          <span>✓ Pago contra entrega</span>
           <a
             href="https://wa.me/59899322325"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-emerald-900/40 text-emerald-400 border border-emerald-600/40 hover:bg-emerald-900/60 rounded-xl px-6 py-3.5 font-bold text-sm tracking-wider uppercase flex items-center gap-2 transition-all hover:-translate-y-0.5 active:scale-95"
+            className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-bold underline underline-offset-2"
           >
-            <span>💬 WhatsApp Directo</span>
+            <MessageCircle className="w-3.5 h-3.5" />
+            <span>WhatsApp directo</span>
           </a>
-        </div>
-
-        {/* Confidence Stats Data Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-800 border border-slate-800 rounded-2xl bg-slate-900/80 backdrop-blur-md w-full max-w-3xl overflow-hidden">
-          <div className="p-3.5 text-center">
-            <div className="font-bebas text-2xl sm:text-3xl text-[#EF233C] leading-none">1900+</div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">Productos en Stock</div>
-          </div>
-          <div className="p-3.5 text-center">
-            <div className="font-bebas text-2xl sm:text-3xl text-white leading-none">6</div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">Sucursales Canelones</div>
-          </div>
-          <div className="p-3.5 text-center">
-            <div className="font-bebas text-2xl sm:text-3xl text-emerald-400 leading-none">24-48h</div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">Despacho Express</div>
-          </div>
-          <div className="p-3.5 text-center">
-            <div className="font-bebas text-2xl sm:text-3xl text-amber-400 leading-none">100%</div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">Pago Contra Entrega</div>
-          </div>
         </div>
       </div>
     </section>

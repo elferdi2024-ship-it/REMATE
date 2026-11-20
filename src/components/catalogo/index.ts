@@ -22,3 +22,4 @@ export { default as SmartReorder } from "./SmartReorder";
 export { default as OfertasDestacadasShowcase } from "./OfertasDestacadasShowcase";
 export { default as TopHeaderNav } from "./TopHeaderNav";
 export { default as HamburgerMenuDrawer } from "./HamburgerMenuDrawer";
+export { default as ExclusiveAppPacksSection } from "./ExclusiveAppPacksSection";

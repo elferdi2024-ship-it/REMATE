@@ -17,7 +17,9 @@ export default function ProductJsonLd({ producto, appUrl = "https://elremate.com
     "@type": "Product",
     name: producto.nombre,
     image: producto.imagen ? [producto.imagen] : [],
-    description: `${producto.nombre} - Distribuidora El Remate Canelones. Venta mayorista y minorista con envío a domicilio.`,
+    description: producto.contenido
+      ? `${producto.nombre}. Incluye: ${producto.contenido.replace(/\n/g, " ")} — Distribuidora El Remate Canelones.`
+      : `${producto.nombre} - Distribuidora El Remate Canelones. Venta mayorista y minorista con envío a domicilio.`,
     sku: producto.codigo,
     mpn: producto.codigo,
     brand: {

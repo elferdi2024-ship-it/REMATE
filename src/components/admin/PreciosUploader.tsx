@@ -3,27 +3,14 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { type WorkBook } from "xlsx";
 import * as XLSX from "xlsx";
 import { db } from "@/lib/firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import categoryData from "@/lib/categoria_mapping.json";
 import { SUCURSALES } from "@/lib/sucursales";
-import { normalizeProductCategory } from "@/lib/category-normalizer";
+import { parseCatalogWorkbook, type ImportedProductRow } from "@/lib/catalog-importer";
+import { loadBaseCatalogMap, saveBranchCatalog } from "@/lib/branch-catalog";
 
-const RAW_MAPPING = categoryData as unknown as Record<string, string>;
-// Normalizar mapping para búsqueda rápida e insensible a espacios/casos
-const CATEGORY_MAPPING: Record<string, string> = {};
-Object.entries(RAW_MAPPING).forEach(([code, cat]) => {
-  CATEGORY_MAPPING[code.trim()] = cat.trim().toUpperCase();
-});
-
-interface ProductRow {
-  codigo: string;
-  nombre: string;
-  precio: number;
-  categoria: string;
-}
+type ProductRow = ImportedProductRow;
 
 export default function PreciosUploader() {
   const [file, setFile] = useState<File | null>(null);
@@ -38,117 +25,6 @@ export default function PreciosUploader() {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const KEYWORDS: Record<string, string[]> = {
-    "ACEITES Y GRASAS": ["aceite", "grasa", "manteca"],
-    "BEBIDAS ALCOHÓLICAS": ["cerveza", "vino", "fernet", "whisky", "sidra", "espumante"],
-    "BEBIDAS SIN ALCOHOL": ["agua", "jugo", "gaseosa", "refresco", "pepsi", "coca", "sprite"],
-    "CARNES Y EMBUTIDOS": ["jamon", "bondiola", "salchicha", "pancho", "chorizo", "morcilla", "fiambre", "carne", "arrollado", "mortadela"],
-    "CONSERVAS Y ENLATADOS": ["atun", "sardina", "choclo", "arveja", "poroto", "lenteja", "garbanzo", "lomito", "grated"],
-    "GOLOSINAS Y SNACKS": ["alfajor", "caramelo", "chocolate", "gomita", "chicle", "papas", "lay", "snack"],
-    "HARINAS, PASTAS Y CEREALES": ["harina", "fideo", "arroz", "pasta", "polenta", "avena", "cereal", "copos"],
-    "HIGIENE PERSONAL": ["jabon", "shampoo", "shampu", "dental", "afeitar", "desodorante", "pañal", "toallita"],
-    "LÁCTEOS Y HUEVOS": ["leche", "queso", "yogur", "crema", "manteca", "huevo", "ricota", "muzzarel", "conaprole"],
-    "LIMPIEZA DEL HOGAR": ["lavandina", "detergente", "limpiador", "suavizante", "jabon polvo", "desinfectante"],
-    "PANADERÍA Y REPOSTERÍA": ["pan ", "tostada", "galleta", "bizcocho", "budin", "reposteria"],
-    "YERBA, TÉ Y CAFÉ": ["yerba", "te ", "cafe", "nescafe", "bracafe"],
-  };
-
-  function categorizar(codigo: string, nombre: string): string {
-    const cleanCode = codigo.trim();
-    const mappedBase = CATEGORY_MAPPING[cleanCode] || "";
-
-    // Primero aplicar reglas estrictas de seguridad/negocio (ej: AGUA JANE -> LIMPIEZA, DOÑA COCA -> CARNES)
-    const strict = normalizeProductCategory({
-      codigo: cleanCode,
-      nombre,
-      precio: 1,
-      categoria: mappedBase || "OTROS",
-    });
-    if (strict && strict !== "OTROS") {
-      return strict;
-    }
-
-    // Fallback por palabras clave con límites de palabra
-    const n = nombre.toLowerCase();
-    for (const [cat, kws] of Object.entries(KEYWORDS)) {
-      if (kws.some((k) => new RegExp(`\\b${k.trim()}`).test(n))) return cat;
-    }
-    return mappedBase || "OTROS";
-  }
-
-  function cleanString(str: string): string {
-    return str.replace(/^[\s\u00A0]+|[\s\u00A0]+$/g, "").trim();
-  }
-
-  function cleanCode(str: string): string {
-    return str.replace(/[\s\u00A0]+/g, "");
-  }
-
-  function parseWorkbook(workbook: WorkBook): ProductRow[] {
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    const products: ProductRow[] = [];
-
-    // Determinar formato del Excel analizando las primeras filas con datos
-    let isCompactFormat = false;
-    let startRow = 1;
-
-    // Buscamos una fila representativa (no vacía) para analizar la estructura
-    for (let i = 0; i < Math.min(10, rows.length); i++) {
-      const row = rows[i];
-      if (row && row.length >= 3) {
-        const valCol0 = String(row[0] ?? "");
-        const valCol1 = String(row[1] ?? "");
-        const valCol2 = String(row[2] ?? "");
-        
-        const price2 = parseFloat(valCol2.replace(/[\s\u00A0]+/g, "").replace(",", "."));
-        // Si la columna 2 es un número válido y la columna 0 y 1 tienen texto, es formato compacto
-        if (cleanCode(valCol0) && cleanString(valCol1) && !isNaN(price2)) {
-          isCompactFormat = true;
-          // Si la fila 0 ya tiene un producto válido, empezamos desde la fila 0
-          if (i === 0) {
-            startRow = 0;
-          }
-          break;
-        }
-      }
-    }
-
-    console.log(`[Excel Parser] Detectado formato: ${isCompactFormat ? "Compacto (3 columnas)" : "Clásico (7 columnas)"}. Fila de inicio: ${startRow}`);
-
-    for (let i = startRow; i < rows.length; i++) {
-      const row = rows[i];
-      if (!row || row.length < 3) continue;
-
-      let codigo = "";
-      let nombre = "";
-      let precio = NaN;
-
-      if (isCompactFormat) {
-        codigo = cleanCode(String(row[0] ?? ""));
-        nombre = cleanString(String(row[1] ?? "")).toUpperCase();
-        const rawPrecio = String(row[2] ?? "").replace(/[\s\u00A0]+/g, "").replace(",", ".");
-        precio = parseFloat(rawPrecio);
-      } else {
-        if (row.length < 6) continue;
-        codigo = cleanCode(String(row[0] ?? ""));
-        nombre = cleanString(String(row[2] ?? "")).toUpperCase();
-        const rawPrecio = String(row[5] ?? "").replace(/[\s\u00A0]+/g, "").replace(",", ".");
-        precio = parseFloat(rawPrecio);
-      }
-
-      if (!nombre || isNaN(precio) || !codigo) continue;
-
-      products.push({
-        codigo,
-        nombre,
-        precio,
-        categoria: categorizar(codigo, nombre),
-      });
-    }
-    return products;
-  }
-
   function handleFile(fileObj: File) {
     setFile(fileObj);
     setError(null);
@@ -161,7 +37,7 @@ export default function PreciosUploader() {
       try {
         const data = e.target?.result;
         const workbook = XLSX.read(data, { type: "array" });
-        const products = parseWorkbook(workbook);
+        const products = parseCatalogWorkbook(workbook);
 
         if (products.length === 0) {
           setError("No se encontraron productos válidos en el archivo.");
@@ -184,9 +60,8 @@ export default function PreciosUploader() {
     setError(null);
 
     try {
-      // 1. Fetch master catalog for images and fallbacks
-      const masterSnap = await getDoc(doc(db, "catalogo_activo", "productos"));
-      const masterData = masterSnap.exists() ? masterSnap.data().items || {} : {};
+      // 1. Fetch master catalog (with JSON fallback) for images and fallbacks
+      const { items: masterData } = await loadBaseCatalogMap();
 
       // 2. If targeting specific branch, also fetch current branch data
       let existingBranchData: Record<string, any> = {};
@@ -240,10 +115,9 @@ export default function PreciosUploader() {
           totalProductos: parsed.length,
         });
       } else {
-        await setDoc(doc(db, "sucursales_catalogos", targetSucursal), {
-          items: catalogoActivo,
-          updatedAt: new Date().toISOString(),
-          totalProductos: parsed.length,
+        await saveBranchCatalog(targetSucursal, catalogoActivo, {
+          strictEmpty: parsed.length === 0,
+          source: "xlsx_upload",
         });
       }
 

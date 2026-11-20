@@ -3,9 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
-import categoriaMapping from "@/lib/categoria_mapping.json";
+import { loadBranchCatalog } from "@/lib/branch-catalog";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
 import { haptic } from "@/lib/haptic";
@@ -13,8 +11,8 @@ import { Producto } from "@/types";
 import { flyToCart } from "@/lib/flyToCart";
 import CartPanel from "@/components/carrito/CartPanel";
 import BottomNavBar from "@/components/catalogo/BottomNavBar";
-
-const catMap = (categoriaMapping as any).mapping || categoriaMapping;
+import * as ls from "@/lib/ls";
+import { SUCURSALES } from "@/lib/sucursales";
 
 type FiestaTab = "bebidas" | "parrilla" | "picada" | "extras";
 type Accent = "blue" | "red" | "yellow" | "neutral";
@@ -435,48 +433,30 @@ export default function FiestaClient() {
   const [activeTab, setActiveTab] = useState<FiestaTab>("bebidas");
   const [cartOpen, setCartOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [sucursalId, setSucursalId] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_PRODUCTS);
   const { items, totalQty, total, updateQty, removeItem } = useCart();
 
   useEffect(() => {
     setMounted(true);
 
+    const sp = new URLSearchParams(window.location.search);
+    const urlS = sp.get("sucursal");
+    const saved = ls.getSelectedSucursal();
+    const currentId =
+      urlS && SUCURSALES.some((s) => s.id === urlS)
+        ? urlS
+        : saved && SUCURSALES.some((s) => s.id === saved)
+          ? saved
+          : null;
+    if (currentId) {
+      setSucursalId(currentId);
+      ls.setSelectedSucursal(currentId);
+    }
+
     async function loadProducts() {
       try {
-        let data: Producto[] = [];
-        let loadedFromBranch = false;
-        const currentId = typeof window !== "undefined" ? localStorage.getItem("remate_sucursalId") : null;
-
-        if (currentId) {
-          try {
-            const branchSnap = await getDoc(doc(db, "sucursales_catalogos", currentId));
-            if (branchSnap.exists()) {
-              const branchData = branchSnap.data();
-              data = (Object.values(branchData.items || {}) as Producto[]).filter((item) => !item.deshabilitado);
-              loadedFromBranch = true;
-            }
-          } catch (error) {
-            console.error("Error cargando sucursal en Fiesta:", error);
-          }
-        }
-
-        if (!loadedFromBranch) {
-          const snap = await getDoc(doc(db, "catalogo_activo", "productos"));
-          if (snap.exists()) {
-            const docData = snap.data();
-            data = (Object.values(docData.items || {}) as Producto[]).filter((item) => !item.deshabilitado);
-          } else {
-            const response = await fetch("/productos.json");
-            if (response.ok) {
-              data = await response.json();
-            }
-          }
-        }
-
-        const normalizedData = data.map((product) => {
-          const barcode = String(product.codigo || "").trim();
-          return catMap[barcode] ? { ...product, categoria: catMap[barcode] } : product;
-        });
+        const { productos: normalizedData } = await loadBranchCatalog(currentId);
 
         const fiestaProducts = normalizedData
           .filter((product) => {
@@ -647,7 +627,7 @@ export default function FiestaClient() {
             total={total}
             onSendWA={() => {
               setCartOpen(false);
-              window.location.href = "/catalogo?openCart=true";
+              router.push(sucursalId ? `/catalogo?sucursal=${sucursalId}&openCart=true` : "/catalogo?openCart=true");
             }}
             alias=""
             onAliasChange={() => {}}
@@ -659,15 +639,16 @@ export default function FiestaClient() {
             onTelefonoChange={() => {}}
             metodoEntrega="envio"
             onMetodoEntregaChange={() => {}}
-            sucursalId={null}
+            sucursalId={sucursalId}
             onSucursalChange={() => {}}
             isProcessing={false}
           />
           <BottomNavBar
             activeTab=""
             onTabSelect={(tab: string) => {
-              if (tab === "buscar") router.push("/catalogo?focusSearch=true");
-              else if (tab === "favoritos") router.push("/catalogo?tab=favoritos");
+              const branchQuery = sucursalId ? `sucursal=${sucursalId}&` : "";
+              if (tab === "buscar") router.push(`/catalogo?${branchQuery}focusSearch=true`);
+              else if (tab === "favoritos") router.push(`/catalogo?${branchQuery}tab=favoritos`);
               else if (tab === "inicio") router.push("/");
             }}
             cartQty={totalQty}

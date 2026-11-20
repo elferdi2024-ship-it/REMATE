@@ -27,6 +27,7 @@ import {
   BottomNavBar,
   FilterSheet,
   SmartReorder,
+  ExclusiveAppPacksSection,
 } from "@/components/catalogo";
 import { useFavoritos } from "@/lib/favoritos-context";
 import { useBrands } from "@/hooks/useBrands";
@@ -79,12 +80,10 @@ import {
 const LS_PEDIDO_PENDIENTE = "elremate_pedido_pendiente_wa";
 const PEDIDO_PENDIENTE_TTL_MS = 1000 * 60 * 60 * 6; // 6 h
 import { db } from "@/lib/firebase";
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
+import { loadBranchCatalog } from "@/lib/branch-catalog";
 import type { Vista, CartItem, Producto, BulkPriceTier } from "@/types";
 import { CATEGORIAS, EMOJI_POR_CATEGORIA } from "@/types";
-import categoriaMapping from "@/lib/categoria_mapping.json";
-
-const catMap = (categoriaMapping as any).mapping || categoriaMapping;
 
 import { flyToCart } from "@/lib/flyToCart";
 import { BrandHeroCarousel, CustomHeroCarousel } from "@/components/ads";
@@ -523,30 +522,31 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   const categoria = urlCategoria; // Categoria is entirely derived from URL
 
-  // Load branch from URL or localStorage (no redirect - branch is optional for browsing)
+  // Load branch from URL or localStorage; if none selected, redirect to pre-catalog branch landing
   useEffect(() => {
     if (!mounted) return;
 
     const urlSucursal = searchParams?.get("sucursal");
     const savedSucursal = ls.getSelectedSucursal();
 
-    if (urlSucursal) {
-      const valid = SUCURSALES.some((s) => s.id === urlSucursal);
-      if (valid) {
-        setSucursalId(urlSucursal);
-        if (savedSucursal !== urlSucursal) ls.setSelectedSucursal(urlSucursal);
-      }
-    } else if (savedSucursal) {
-      const valid = SUCURSALES.some((s) => s.id === savedSucursal);
-      if (valid) {
-        setSucursalId(savedSucursal);
-        const params = new URLSearchParams(window.location.search);
-        params.set("sucursal", savedSucursal);
-        router.replace(`/catalogo?${params.toString()}`, { scroll: false });
-      }
-    } else {
-      setIsBranchModalOpen(true);
+    if (urlSucursal && SUCURSALES.some((s) => s.id === urlSucursal)) {
+      setSucursalId(urlSucursal);
+      if (savedSucursal !== urlSucursal) ls.setSelectedSucursal(urlSucursal);
+      return;
     }
+
+    if (savedSucursal && SUCURSALES.some((s) => s.id === savedSucursal)) {
+      setSucursalId(savedSucursal);
+      const params = new URLSearchParams(window.location.search);
+      params.set("sucursal", savedSucursal);
+      router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    params.delete("sucursal");
+    const qs = params.toString();
+    router.replace(qs ? `/seleccionar-sucursal?${qs}` : "/seleccionar-sucursal");
   }, [mounted, searchParams, router]);
 
   // Sync tab, search focus and cart parameters from URL
@@ -588,7 +588,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
 
   // Fetch branch-specific or global productos
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || !sucursalId) return;
     const currentId = sucursalId;
     let cancelled = false;
 
@@ -596,81 +596,16 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
       try {
         setLoading(true);
         setLoadingError(null);
-        let data: Producto[] = [];
-        let loadedFromBranch = false;
-        
-        try {
-          if (currentId) {
-            const branchSnap = await getDoc(doc(db, "sucursales_catalogos", currentId));
-            if (branchSnap.exists()) {
-              const branchData = branchSnap.data();
-              const items = branchData.items || {};
-              const itemsList = Object.values(items) as Producto[];
-              const activeItems = itemsList.filter(
-                (item) =>
-                  item &&
-                  typeof item.nombre === "string" &&
-                  item.nombre.trim().length > 0 &&
-                  typeof item.precio === "number" &&
-                  !item.deshabilitado
-              );
-              if (activeItems.length > 0) {
-                data = activeItems;
-                loadedFromBranch = true;
-                console.log(`🏪 Catálogo personalizado cargado para sucursal: ${currentId} (${data.length} productos)`);
-              }
-            }
-          }
-        } catch (e) {
-          console.error("❌ Falló la carga desde Firestore para la sucursal.", e);
-        }
-
-        if (!loadedFromBranch) {
-          try {
-            const snap = await getDoc(doc(db, "catalogo_activo", "productos"));
-            if (snap.exists()) {
-              const docData = snap.data();
-              data = (Object.values(docData.items || {}) as Producto[]).filter(
-                (item) =>
-                  item &&
-                  typeof item.nombre === "string" &&
-                  item.nombre.trim().length > 0 &&
-                  typeof item.precio === "number" &&
-                  !item.deshabilitado
-              );
-              console.log(`📦 Catálogo global cargado desde Firestore (${data.length} productos)`);
-            } else {
-              console.warn("⚠️ Documento de Firestore 'catalogo_activo/productos' no existe.");
-            }
-          } catch (e) {
-            console.error("❌ Falló la carga global desde Firestore.", e);
-          }
-        }
-
-        if (data.length === 0) {
-          console.info("🔄 Intentando cargar desde fallback local (productos.json)...");
-          const res = await fetch("/productos.json");
-          if (!res.ok) throw new Error(`HTTP ${res.status}: failed to load productos`);
-          data = (await res.json()) as Producto[];
-          console.log(`🏠 Catálogo cargado desde local JSON (${data.length} productos)`);
-        }
-
-        // Aplicar mapping de categorías del Excel
-        data = data.map(p => {
-          const barcode = String(p.codigo || "").trim();
-          if (catMap[barcode]) {
-            return { ...p, categoria: catMap[barcode] };
-          }
-          return p;
-        });
+        const { productos: loaded } = await loadBranchCatalog(currentId);
 
         if (!cancelled) {
-          setProductos(data);
+          setProductos(loaded);
           setLoading(false);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!cancelled) {
-          setLoadingError(err.message || "Error al cargar productos");
+          const msg = err instanceof Error ? err.message : "Error al cargar productos";
+          setLoadingError(msg);
           setLoading(false);
         }
       }
@@ -1658,6 +1593,21 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
             onQtyChange={handleQtyChange}
           />
         )}
+
+        {/* Packs Exclusivos de la App (Canasta Canario, Pack Cumpleaños, Pack Fin de Semana) */}
+        {!loading &&
+          !search.trim() &&
+          (!activeCat || activeCat === "Todos") &&
+          activeTab === "inicio" &&
+          !urlSoloOfertas && (
+            <ExclusiveAppPacksSection
+              productos={productos}
+              qtyMap={qtyMap}
+              onAdd={handleAddProduct}
+              onQtyChange={handleQtyChange}
+              onQuickView={(p) => setQuickViewProduct(p)}
+            />
+          )}
 
         <div className="flex gap-6 relative" style={{ alignItems: "flex-start" }}>
           {/* Main content */}

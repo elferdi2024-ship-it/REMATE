@@ -68,10 +68,14 @@ export default function LandingPage() {
   const [configCats, setConfigCats] = useState<Record<string, string>>({});
   const [selectedSucursal, setSelectedSucursal] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [pendingCategory, setPendingCategory] = useState<string>("");
+  const [pendingTarget, setPendingTarget] = useState<
+    | { type: "category"; value: string }
+    | { type: "search"; value: string }
+    | { type: "query"; key: string; value: string }
+    | null
+  >(null);
 
   const { brands } = useBrands();
-  const activePremiumBrands = brands.filter(b => b.active && ["oro", "plata"].includes(b.tier));
   const { items: cartItems, clearCart, totalQty } = useCart();
   const [ofertasConfig, setOfertasConfig] = useState<OfertaConfig | null>(null);
 
@@ -79,6 +83,7 @@ export default function LandingPage() {
   const sucursalNombre = SUCURSALES.find(s => s.id === activeSucursalId)?.nombre || "";
 
   useEffect(() => {
+    router.prefetch("/seleccionar-sucursal");
     router.prefetch("/catalogo");
     SUCURSALES.forEach((s) => {
       router.prefetch(`/catalogo?sucursal=${s.id}`);
@@ -118,7 +123,7 @@ export default function LandingPage() {
     return () => unsub();
   }, []);
 
-  const handleSelectSucursal = (id: string) => {
+  const handleEnterCatalog = (id: string) => {
     const sucursal = SUCURSALES.find((s) => s.id === id);
     const nombre = sucursal ? sucursal.nombre : "";
 
@@ -134,46 +139,27 @@ export default function LandingPage() {
     ls.setSelectedSucursal(id);
     setSelectedSucursal(id);
 
-    // URL como Single Source of Truth (SSOT)
-    const params = new URLSearchParams(window.location.search);
-    params.set("sucursal", id);
-    router.replace(`/?${params.toString()}`, { scroll: false });
+    const target = pendingTarget;
+    setPendingTarget(null);
 
-    toast.success(`🏪 Catálogo de Sucursal ${nombre} seleccionado`);
-  };
+    toast.success(`🏪 Catálogo de ${nombre} seleccionado`);
 
-  const handleEnterCatalog = (id: string, targetCategory?: string) => {
-    const sucursal = SUCURSALES.find((s) => s.id === id);
-    const nombre = sucursal ? sucursal.nombre : "";
-
-    if (cartItems.length > 0 && selectedSucursal && id !== selectedSucursal) {
-      const confirmacion = window.confirm(
-        "Al cambiar de sucursal se vaciará tu carrito actual porque los catálogos y precios varían por zona. ¿Deseas cambiar de sucursal?"
-      );
-      if (!confirmacion) return;
-      clearCart();
+    const params = new URLSearchParams({ sucursal: id });
+    if (target?.type === "category") {
+      params.set("categoria", target.value);
+    } else if (target?.type === "search") {
+      params.set("search", target.value);
+    } else if (target?.type === "query") {
+      params.set(target.key, target.value);
     }
 
-    haptic.add();
-    ls.setSelectedSucursal(id);
-    setSelectedSucursal(id);
-
-    const cat = targetCategory || pendingCategory;
-    setPendingCategory("");
-
-    toast.success(`🏪 Entrando al catálogo de ${nombre}...`);
-
-    if (cat) {
-      router.push(`/catalogo?sucursal=${id}&categoria=${encodeURIComponent(cat)}`);
-    } else {
-      router.push(`/catalogo?sucursal=${id}`);
-    }
+    router.push(`/catalogo?${params.toString()}`);
   };
 
   const handleCategoryClick = (e: React.MouseEvent, catNombre: string) => {
     if (!selectedSucursal) {
       e.preventDefault();
-      setPendingCategory(catNombre);
+      setPendingTarget({ type: "category", value: catNombre });
       setIsModalOpen(true);
     }
   };
@@ -204,10 +190,10 @@ export default function LandingPage() {
       <HeroLanding 
         selectedSucursal={activeSucursalId} 
         onOpenSucursalModal={() => {
-          setPendingCategory("");
+          setPendingTarget(null);
           setIsModalOpen(true);
         }}
-        onSelectSucursal={handleSelectSucursal}
+        onSelectSucursal={handleEnterCatalog}
         onEnterCatalog={handleEnterCatalog}
       />
 
@@ -254,7 +240,7 @@ export default function LandingPage() {
       <OfertasDestacadasShowcase 
         sucursalId={activeSucursalId} 
         onOpenSucursalModal={() => {
-          setPendingCategory("");
+          setPendingTarget(null);
           setIsModalOpen(true);
         }}
       />
@@ -300,7 +286,7 @@ export default function LandingPage() {
                     if (selectedSucursal) {
                       router.push(`/catalogo?sucursal=${selectedSucursal}&search=${encodeURIComponent(brandName)}`);
                     } else {
-                      setPendingCategory("");
+                      setPendingTarget({ type: "search", value: brandName });
                       setIsModalOpen(true);
                     }
                   }}
@@ -357,25 +343,20 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="text-center mt-10">
-            {selectedSucursal ? (
+          <div className="text-center mt-10 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/seleccionar-sucursal"
+              className="inline-flex items-center gap-2 bg-[#E8302A] text-white border-0 rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] no-underline transition-all duration-150 hover:bg-[#C4231E] cursor-pointer shadow-[0_4px_14px_rgba(232,48,42,0.3)]"
+            >
+              🛒 VER CATÁLOGO POR SUCURSAL →
+            </Link>
+            {selectedSucursal && (
               <Link
                 href={`/catalogo?sucursal=${selectedSucursal}`}
-                className="inline-flex items-center gap-2 bg-[#1A1410] text-white rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] no-underline transition-all duration-150 hover:bg-[#2C2318] shadow-md"
+                className="inline-flex items-center gap-2 bg-[#1A1410] text-white rounded-[12px] px-7 py-3.5 font-bebas text-[1.2rem] tracking-[2px] no-underline transition-all duration-150 hover:bg-[#2C2318] shadow-md"
               >
-                VER CATÁLOGO COMPLETO DE {sucursalNombre.toUpperCase()} →
+                CONTINUAR EN {sucursalNombre.toUpperCase()} ⚡
               </Link>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setPendingCategory("");
-                  setIsModalOpen(true);
-                }}
-                className="inline-flex items-center gap-2 bg-[#E8302A] text-white border-0 rounded-[12px] px-8 py-3.5 font-bebas text-[1.2rem] tracking-[2px] transition-all duration-150 hover:bg-[#C4231E] cursor-pointer shadow-[0_4px_14px_rgba(232,48,42,0.3)]"
-              >
-                EXPLORAR CATÁLOGO COMPLETO MAYORISTA →
-              </button>
             )}
           </div>
         </div>
@@ -390,7 +371,7 @@ export default function LandingPage() {
       {/* Branch Section */}
       <BranchSection
         selectedSucursal={activeSucursalId}
-        onSelectSucursal={handleSelectSucursal}
+        onSelectSucursal={handleEnterCatalog}
         onEnterCatalog={handleEnterCatalog}
       />
 
@@ -455,16 +436,22 @@ export default function LandingPage() {
             if (selectedSucursal) {
               router.push(`/catalogo?sucursal=${selectedSucursal}&focusSearch=true`);
             } else {
+              setPendingTarget({ type: "query", key: "focusSearch", value: "true" });
               setIsModalOpen(true);
             }
           } else if (tab === "favoritos") {
             if (selectedSucursal) {
               router.push(`/catalogo?sucursal=${selectedSucursal}&tab=favoritos`);
             } else {
+              setPendingTarget({ type: "query", key: "tab", value: "favoritos" });
               setIsModalOpen(true);
             }
           } else if (tab === "inicio") {
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            if (selectedSucursal) {
+              router.push(`/catalogo?sucursal=${selectedSucursal}`);
+            } else {
+              router.push("/seleccionar-sucursal");
+            }
           }
         }}
         cartQty={totalQty}
@@ -472,46 +459,12 @@ export default function LandingPage() {
           if (selectedSucursal) {
             router.push(`/catalogo?sucursal=${selectedSucursal}&openCart=true`);
           } else {
+            setPendingTarget({ type: "query", key: "openCart", value: "true" });
             setIsModalOpen(true);
           }
         }}
         onOpenUser={() => router.push("/cuenta")}
       />
-
-      {/* Floating Selected Branch Bar */}
-      {activeSucursalId && (
-        <div className="fixed bottom-[calc(68px+env(safe-area-inset-bottom,8px))] md:bottom-6 left-3 right-3 md:left-auto md:right-6 md:w-auto md:max-w-md z-40 bg-slate-950/95 backdrop-blur-md border border-[#EF233C]/40 rounded-2xl p-2.5 sm:p-3 shadow-2xl flex items-center justify-between gap-2.5 text-white animate-fade-in ring-1 ring-white/10">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="w-9 h-9 rounded-xl bg-[#EF233C]/20 border border-[#EF233C]/30 flex items-center justify-center text-base shrink-0">
-              🏪
-            </div>
-            <div className="min-w-0">
-              <div className="text-xs sm:text-sm font-bold text-white truncate leading-tight">
-                Catálogo: Sucursal {sucursalNombre}
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setPendingCategory("");
-                  setIsModalOpen(true);
-                }}
-                className="text-[10px] text-slate-400 hover:text-white underline font-semibold transition-colors text-left"
-              >
-                Cambiar sucursal
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => handleEnterCatalog(activeSucursalId)}
-            className="bg-[#EF233C] hover:bg-[#C01730] text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5 shrink-0 whitespace-nowrap cursor-pointer"
-          >
-            <span>Ver Catálogo</span>
-            <span className="text-xs font-black">→</span>
-          </button>
-        </div>
-      )}
 
       {/* Asistente Inteligente y Chat de Pedidos El Remate */}
       <ChatWidget onOpenCart={() => handleEnterCatalog(activeSucursalId || "canelones")} />
@@ -519,17 +472,16 @@ export default function LandingPage() {
       {/* Modal de Selección de Sucursal */}
       <SucursalSelectorModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setPendingTarget(null);
+        }}
         onSelectSucursal={(id) => {
-          if (pendingCategory) {
-            handleEnterCatalog(id, pendingCategory);
-          } else {
-            handleSelectSucursal(id);
-          }
+          handleEnterCatalog(id);
           setIsModalOpen(false);
         }}
         selectedSucursal={selectedSucursal}
-        categoryName={pendingCategory}
+        categoryName={pendingTarget?.type === "category" ? pendingTarget.value : ""}
       />
     </div>
   );

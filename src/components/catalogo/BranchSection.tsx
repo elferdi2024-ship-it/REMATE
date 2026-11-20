@@ -18,12 +18,10 @@ export default function BranchSection({
   const activeSucursal = SUCURSALES.find((s) => s.id === selectedSucursal);
 
   const handleCardClick = (id: string) => {
-    if (selectedSucursal === id && onEnterCatalog) {
+    if (onEnterCatalog) {
       onEnterCatalog(id);
     } else if (onSelectSucursal) {
       onSelectSucursal(id);
-    } else if (onEnterCatalog) {
-      onEnterCatalog(id);
     }
   };
 
@@ -82,7 +80,7 @@ export default function BranchSection({
                       </span>
                     ) : (
                       <span className="bg-[#F5F0E8] text-[#5C4A35] text-[0.65rem] font-bold uppercase py-1 px-3 rounded-full tracking-[1px] group-hover:bg-[#E8302A] group-hover:text-white transition-colors">
-                        TOCÁ PARA SELECCIONAR
+                        TOCÁ PARA ENTRAR
                       </span>
                     )}
                   </div>
@@ -111,41 +109,25 @@ export default function BranchSection({
                   </div>
                 </div>
 
-                <div className="mt-6 border-t border-[#DDD8D0] pt-4 flex gap-2">
+                <div className="mt-6 border-t border-[#DDD8D0] pt-4">
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (onSelectSucursal) {
-                        onSelectSucursal(sucursal.id);
-                      }
+                      handleCardClick(sucursal.id);
                     }}
-                    className={`flex-1 rounded-[12px] py-3.5 px-3 font-bebas text-[1.1rem] tracking-[1.5px] cursor-pointer transition-all flex items-center justify-center gap-1.5 text-white shadow-md active:scale-[0.98] ${
+                    className={`w-full rounded-[14px] py-3.5 px-4 font-bebas text-[1.15rem] tracking-[1.5px] cursor-pointer transition-all flex items-center justify-center gap-2 text-white shadow-md active:scale-[0.98] ${
                       isActive
-                        ? "bg-[#1A7A42] hover:bg-[#145E33] shadow-[0_4px_14px_rgba(26,122,66,0.3)]"
-                        : "bg-[#1A1410] hover:bg-[#2C2318] shadow-[0_4px_14px_rgba(26,20,16,0.3)]"
+                        ? "bg-[#1A7A42] hover:bg-[#145E33] shadow-[0_4px_14px_rgba(26,122,66,0.35)]"
+                        : "bg-[#E8302A] hover:bg-[#C4231E] shadow-[0_4px_14px_rgba(232,48,42,0.3)] hover:scale-[1.01]"
                     }`}
                   >
-                    {isActive
-                      ? `✓ CATÁLOGO ACTIVO`
-                      : `SELECCIONAR CATÁLOGO`}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onEnterCatalog) {
-                        onEnterCatalog(sucursal.id);
-                      } else if (onSelectSucursal) {
-                        onSelectSucursal(sucursal.id);
-                      }
-                    }}
-                    className="rounded-[12px] py-3.5 px-4 bg-[#E8302A] hover:bg-[#C4231E] text-white font-bebas text-[1.1rem] tracking-[1.5px] cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-[0_4px_14px_rgba(232,48,42,0.3)] hover:scale-[1.02] active:scale-[0.98]"
-                    title={`Entrar al catálogo de ${sucursal.nombre}`}
-                  >
-                    <span>ENTRAR</span>
-                    <span>⚡</span>
+                    <span>
+                      {isActive
+                        ? `✓ ENTRAR AL CATÁLOGO DE ${sucursal.nombre.toUpperCase()}`
+                        : `VER CATÁLOGO SUCURSAL ${sucursal.nombre.toUpperCase()}`}
+                    </span>
+                    <span className="text-xl">⚡</span>
                   </button>
                 </div>
               </div>

@@ -1,98 +1,150 @@
 // filepath: src/app/admin/sucursales/page.tsx
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import Image from "next/image";
 import { useToast } from "@/lib/toast-context";
 import { SUCURSALES } from "@/lib/sucursales";
-import { getAllSucursalConfigs, setSucursalWhatsApp, type SucursalConfig } from "@/lib/sucursales-config";
-import { CATEGORIAS } from "@/types";
-import Image from "next/image";
+import {
+  getAllSucursalConfigs,
+  setSucursalWhatsApp,
+  type SucursalConfig,
+} from "@/lib/sucursales-config";
+import {
+  loadBaseCatalogMap,
+  loadBranchCatalogForAdmin,
+  saveBranchCatalog,
+  resetBranchCatalogToGlobal,
+  getAllBranchesCatalogSummary,
+  initAllBranchesFromBase,
+  type CatalogItemsMap,
+  type BranchCatalogSummary,
+} from "@/lib/branch-catalog";
+import { CATEGORIAS, type Producto } from "@/types";
+import BranchProductModal from "@/components/admin/BranchProductModal";
+import BranchCatalogImporterModal from "@/components/admin/BranchCatalogImporterModal";
 
-interface CustomProducto {
-  codigo: string;
-  nombre: string;
-  precio: number;
-  categoria: string;
-  imagen?: string;
-  deshabilitado?: boolean;
-}
+type AdminTab = "catalogos" | "whatsapp";
+type StatusFilter = "todos" | "activos" | "ocultos" | "personalizados";
 
 export default function AdminSucursales() {
   const toast = useToast();
-  
-  // Selected branch
+
+  const [activeTab, setActiveTab] = useState<AdminTab>("catalogos");
   const [selectedSucursalId, setSelectedSucursalId] = useState<string>(SUCURSALES[0].id);
 
   // Catalogs state
-  const [masterCatalog, setMasterCatalog] = useState<Record<string, CustomProducto>>({});
-  const [branchCatalog, setBranchCatalog] = useState<Record<string, CustomProducto>>({});
+  const [masterCatalog, setMasterCatalog] = useState<CatalogItemsMap>({});
+  const [branchCatalog, setBranchCatalog] = useState<CatalogItemsMap>({});
   const [hasCustomCatalog, setHasCustomCatalog] = useState<boolean>(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [summaries, setSummaries] = useState<Record<string, BranchCatalogSummary>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
+  const [initializingAll, setInitializingAll] = useState<boolean>(false);
+
+  // Modals
+  const [productModalOpen, setProductModalOpen] = useState<boolean>(false);
+  const [editingProduct, setEditingProduct] = useState<Producto | null>(null);
+  const [importerOpen, setImporterOpen] = useState<boolean>(false);
+
+  // Filters & Pagination
+  const [search, setSearch] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("Todas");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(50);
 
   // WhatsApp phone config state
   const [waConfigs, setWaConfigs] = useState<Record<string, SucursalConfig>>({});
   const [waEditing, setWaEditing] = useState<Record<string, string>>({});
   const [waSaving, setWaSaving] = useState<string | null>(null);
 
-  // Load WA configs on mount
-  useEffect(() => {
-    getAllSucursalConfigs().then(setWaConfigs).catch(console.error);
+  const selectedSucursalObj = useMemo(
+    () => SUCURSALES.find((s) => s.id === selectedSucursalId) || SUCURSALES[0],
+    [selectedSucursalId]
+  );
+
+  const refreshSummaries = useCallback(async () => {
+    try {
+      const res = await getAllBranchesCatalogSummary();
+      setSummaries(res.branches);
+    } catch (e) {
+      console.warn("Error cargando resumen de sucursales:", e);
+    }
   }, []);
 
-  // Filters & Search
-  const [search, setSearch] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("Todas");
-
-  // Load master catalog on mount
+  // Load WA configs, master catalog & branch summaries on mount
   useEffect(() => {
-    async function loadMaster() {
-      try {
-        const snap = await getDoc(doc(db, "catalogo_activo", "productos"));
-        if (snap.exists()) {
-          setMasterCatalog(snap.data().items || {});
-        }
-      } catch (e) {
-        console.error("Error loading master catalog:", e);
-        toast.error("Error al cargar catálogo maestro");
-      }
-    }
-    loadMaster();
-  }, [toast]);
+    getAllSucursalConfigs().then(setWaConfigs).catch(console.error);
+    refreshSummaries();
+
+    loadBaseCatalogMap()
+      .then(({ items }) => setMasterCatalog(items))
+      .catch((e) => {
+        console.error("Error loading base catalog:", e);
+        toast.error("Error al cargar catálogo base");
+      });
+  }, [toast, refreshSummaries]);
 
   // Load branch custom catalog when selected branch changes
-  useEffect(() => {
-    async function loadBranchCatalog() {
-      setLoading(true);
-      try {
-        const snap = await getDoc(doc(db, "sucursales_catalogos", selectedSucursalId));
-        if (snap.exists()) {
-          setBranchCatalog(snap.data().items || {});
-          setHasCustomCatalog(true);
-        } else {
-          // If no custom catalog exists, state starts empty representing fallback
-          setBranchCatalog({});
-          setHasCustomCatalog(false);
-        }
-      } catch (e) {
-        console.error("Error loading branch catalog:", e);
-        toast.error("Error al cargar catálogo de la sucursal");
-      } finally {
-        setLoading(false);
-      }
+  const reloadSelectedBranch = useCallback(async () => {
+    setLoading(true);
+    setHasUnsavedChanges(false);
+    try {
+      const res = await loadBranchCatalogForAdmin(selectedSucursalId);
+      setBranchCatalog(res.items);
+      setHasCustomCatalog(res.hasCustomCatalog);
+    } catch (e) {
+      console.error("Error loading branch catalog:", e);
+      toast.error("Error al cargar catálogo de la sucursal");
+    } finally {
+      setLoading(false);
     }
-    loadBranchCatalog();
   }, [selectedSucursalId, toast]);
 
-  // Handle clone/copy master catalog
+  useEffect(() => {
+    reloadSelectedBranch();
+  }, [reloadSelectedBranch]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedCategory, statusFilter, itemsPerPage, selectedSucursalId]);
+
+  const missingCustomCount = useMemo(
+    () => SUCURSALES.filter((s) => !summaries[s.id]?.hasCustomCatalog).length,
+    [summaries]
+  );
+
+  // Initialize all missing branches from base catalog
+  const handleInitAllBranches = async (overwrite: boolean) => {
+    const confirmMsg = overwrite
+      ? "¿Sobrescribir TODAS las 6 sucursales con una copia nueva del catálogo base actual? Se perderán las personalizaciones previas."
+      : `Se creará un catálogo independiente basado en el catálogo actual para las ${missingCustomCount} sucursales que aún no tienen uno propio. ¿Continuar?`;
+
+    if (!confirm(confirmMsg)) return;
+
+    setInitializingAll(true);
+    try {
+      const res = await initAllBranchesFromBase(overwrite);
+      await Promise.all([refreshSummaries(), reloadSelectedBranch()]);
+      toast.success(
+        `✅ ${res.initialized.length} sucursales inicializadas con ${res.totalProducts} productos.`
+      );
+    } catch (e: unknown) {
+      console.error(e);
+      toast.error(e instanceof Error ? e.message : "Error al inicializar sucursales");
+    } finally {
+      setInitializingAll(false);
+    }
+  };
+
+  // Clone base catalog to selected branch
   const handleCloneMaster = async () => {
     if (
+      hasCustomCatalog &&
       !confirm(
-        `¿Estás seguro de copiar todo el Catálogo Maestro a la sucursal "${
-          SUCURSALES.find((s) => s.id === selectedSucursalId)?.nombre
-        }"? Esto sobrescribirá cualquier cambio existente.`
+        `¿Copiar todo el Catálogo Base a "${selectedSucursalObj.nombre}"? Esto sobrescribirá los cambios actuales de esta sucursal.`
       )
     ) {
       return;
@@ -100,31 +152,34 @@ export default function AdminSucursales() {
 
     setSaving(true);
     try {
-      // De-reference master catalog items
-      const clonedItems = JSON.parse(JSON.stringify(masterCatalog));
-      
-      // Save directly to Firestore branch document
-      await setDoc(doc(db, "sucursales_catalogos", selectedSucursalId), {
-        items: clonedItems,
-        clonedAt: new Date().toISOString(),
-      });
+      const baseItems =
+        Object.keys(masterCatalog).length > 0
+          ? masterCatalog
+          : (await loadBaseCatalogMap()).items;
+      const clonedItems: CatalogItemsMap = JSON.parse(JSON.stringify(baseItems));
 
+      await saveBranchCatalog(selectedSucursalId, clonedItems, {
+        strictEmpty: false,
+        source: "base_clone",
+      });
       setBranchCatalog(clonedItems);
       setHasCustomCatalog(true);
-      toast.success("Catálogo maestro copiado con éxito");
+      setHasUnsavedChanges(false);
+      await refreshSummaries();
+      toast.success(`Catálogo independiente creado para ${selectedSucursalObj.nombre}`);
     } catch (e) {
       console.error(e);
-      toast.error("Error al clonar catálogo");
+      toast.error("Error al clonar catálogo base");
     } finally {
       setSaving(false);
     }
   };
 
-  // Handle reset to global
+  // Reset selected branch to global fallback
   const handleResetToGlobal = async () => {
     if (
       !confirm(
-        `¿Estás seguro de restablecer el catálogo de esta sucursal? Se eliminarán los precios y habilitaciones personalizadas, volviendo a usar el catálogo global.`
+        `¿Restablecer "${selectedSucursalObj.nombre}" al catálogo global? Se eliminará su inventario personalizado.`
       )
     ) {
       return;
@@ -132,9 +187,11 @@ export default function AdminSucursales() {
 
     setSaving(true);
     try {
-      await deleteDoc(doc(db, "sucursales_catalogos", selectedSucursalId));
+      await resetBranchCatalogToGlobal(selectedSucursalId);
       setBranchCatalog({});
       setHasCustomCatalog(false);
+      setHasUnsavedChanges(false);
+      await refreshSummaries();
       toast.success("Sucursal restablecida al catálogo global");
     } catch (e) {
       console.error(e);
@@ -144,7 +201,7 @@ export default function AdminSucursales() {
     }
   };
 
-  // Handle price change in local state
+  // Inline edits
   const handlePriceChange = (codigo: string, value: string) => {
     const numericValue = parseFloat(value);
     setBranchCatalog((prev) => ({
@@ -154,12 +211,13 @@ export default function AdminSucursales() {
         precio: isNaN(numericValue) ? 0 : numericValue,
       },
     }));
+    setHasUnsavedChanges(true);
   };
 
-  // Handle status toggle (enable/disable) in local state
   const handleToggleStatus = (codigo: string) => {
     setBranchCatalog((prev) => {
       const currentItem = prev[codigo];
+      if (!currentItem) return prev;
       return {
         ...prev,
         [codigo]: {
@@ -168,17 +226,19 @@ export default function AdminSucursales() {
         },
       };
     });
+    setHasUnsavedChanges(true);
   };
 
-  // Handle batch save changes
   const handleSaveChanges = async () => {
     setSaving(true);
     try {
-      await setDoc(doc(db, "sucursales_catalogos", selectedSucursalId), {
-        items: branchCatalog,
-        updatedAt: new Date().toISOString(),
+      await saveBranchCatalog(selectedSucursalId, branchCatalog, {
+        strictEmpty: Object.keys(branchCatalog).length === 0,
+        source: "manual_edit",
       });
-      toast.success("Cambios guardados exitosamente");
+      setHasUnsavedChanges(false);
+      await refreshSummaries();
+      toast.success(`Cambios guardados en ${selectedSucursalObj.nombre}`);
     } catch (e) {
       console.error(e);
       toast.error("Error al guardar cambios");
@@ -187,15 +247,89 @@ export default function AdminSucursales() {
     }
   };
 
+  // Manual Add / Edit single product (auto-initializes branch from base if needed)
+  const handleSaveSingleProduct = async (producto: Producto, isEdit: boolean) => {
+    let workingMap: CatalogItemsMap;
+    if (!hasCustomCatalog) {
+      const base =
+        Object.keys(masterCatalog).length > 0
+          ? masterCatalog
+          : (await loadBaseCatalogMap()).items;
+      workingMap = JSON.parse(JSON.stringify(base));
+    } else {
+      workingMap = { ...branchCatalog };
+    }
+
+    workingMap[producto.codigo] = producto;
+    await saveBranchCatalog(selectedSucursalId, workingMap, {
+      strictEmpty: false,
+      source: "manual_product",
+    });
+
+    setBranchCatalog(workingMap);
+    setHasCustomCatalog(true);
+    setHasUnsavedChanges(false);
+    await refreshSummaries();
+    toast.success(
+      isEdit
+        ? `Producto ${producto.nombre} actualizado`
+        : `Producto ${producto.nombre} agregado a ${selectedSucursalObj.nombre}`
+    );
+  };
+
+  const handleDeleteProduct = async (prod: Producto) => {
+    if (!hasCustomCatalog) return;
+    if (!confirm(`¿Eliminar "${prod.nombre}" (${prod.codigo}) del catálogo de ${selectedSucursalObj.nombre}?`)) {
+      return;
+    }
+
+    const nextMap = { ...branchCatalog };
+    delete nextMap[prod.codigo];
+
+    setSaving(true);
+    try {
+      await saveBranchCatalog(selectedSucursalId, nextMap, {
+        strictEmpty: Object.keys(nextMap).length === 0,
+        source: "manual_delete",
+      });
+      setBranchCatalog(nextMap);
+      setHasUnsavedChanges(false);
+      await refreshSummaries();
+      toast.success("Producto eliminado de la sucursal");
+    } catch (e) {
+      console.error(e);
+      toast.error("No se pudo eliminar el producto");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleApplyImportedCatalog = async (
+    nextItems: CatalogItemsMap,
+    sourceLabel: string
+  ) => {
+    await saveBranchCatalog(selectedSucursalId, nextItems, {
+      strictEmpty: Object.keys(nextItems).length === 0,
+      source: "manual_import",
+    });
+    setBranchCatalog(nextItems);
+    setHasCustomCatalog(true);
+    setHasUnsavedChanges(false);
+    await refreshSummaries();
+    toast.success(
+      `Catálogo de ${selectedSucursalObj.nombre} actualizado desde ${sourceLabel}`
+    );
+  };
+
+  // WhatsApp handlers
   const handleWaPhoneChange = (sucursalId: string, value: string) => {
-    setWaEditing(prev => ({ ...prev, [sucursalId]: value }));
+    setWaEditing((prev) => ({ ...prev, [sucursalId]: value }));
   };
 
   const handleWaPhoneSave = async (sucursalId: string) => {
     const raw = waEditing[sucursalId];
     if (!raw?.trim()) return;
 
-    // Normalizar: quitar espacios, +, guiones. Si empieza con 0, agregar 598
     let phone = raw.replace(/[\s+\-]/g, "");
     if (phone.startsWith("0")) {
       phone = "598" + phone.slice(1);
@@ -206,9 +340,15 @@ export default function AdminSucursales() {
     setWaSaving(sucursalId);
     try {
       await setSucursalWhatsApp(sucursalId, phone);
-      setWaConfigs(prev => ({ ...prev, [sucursalId]: { telefonoWhatsApp: phone } }));
-      setWaEditing(prev => { const n = {...prev}; delete n[sucursalId]; return n; });
-      toast.success(`Teléfono WhatsApp actualizado para ${SUCURSALES.find(s => s.id === sucursalId)?.nombre}`);
+      setWaConfigs((prev) => ({ ...prev, [sucursalId]: { telefonoWhatsApp: phone } }));
+      setWaEditing((prev) => {
+        const n = { ...prev };
+        delete n[sucursalId];
+        return n;
+      });
+      toast.success(
+        `Teléfono WhatsApp actualizado para ${SUCURSALES.find((s) => s.id === sucursalId)?.nombre}`
+      );
     } catch (err) {
       console.error(err);
       toast.error("Error al guardar teléfono");
@@ -217,397 +357,706 @@ export default function AdminSucursales() {
     }
   };
 
-  // Build current display items:
-  // If branch custom catalog exists, we display its items.
-  // BUT we must also show any NEW products added to the master catalog that are missing in the branch.
-  const combinedCatalogList = useMemo(() => {
-    const list: CustomProducto[] = [];
-
-    // We iterate over all products in the master catalog to guarantee we show everything
-    Object.keys(masterCatalog).forEach((codigo) => {
-      const masterItem = masterCatalog[codigo];
-      const branchItem = branchCatalog[codigo];
-
-      if (hasCustomCatalog) {
-        if (branchItem) {
-          list.push({
+  // Display list: shows independent branch catalog items (including branch-exclusive items)
+  // or base catalog preview when branch is still using global fallback.
+  const displayItems = useMemo(() => {
+    if (hasCustomCatalog) {
+      return Object.values(branchCatalog)
+        .map((branchItem) => {
+          const masterItem = masterCatalog[branchItem.codigo];
+          return {
             ...branchItem,
-            nombre: masterItem.nombre, // always get freshest name
-            imagen: masterItem.imagen, // always get freshest image
-            categoria: masterItem.categoria, // always get freshest category
-          });
-        } else {
-          // Product exists in master but not cloned in branch yet, we show it as disabled or with fallback prices
-          list.push({
-            ...masterItem,
-            deshabilitado: true, // starts disabled since it wasn't customized
-          });
-        }
-      } else {
-        // Fallback display (shows global as template)
-        list.push({
-          ...masterItem,
-          deshabilitado: false,
-        });
-      }
-    });
+            imagen: branchItem.imagen || masterItem?.imagen,
+          };
+        })
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+    }
 
-    return list;
-  }, [masterCatalog, branchCatalog, hasCustomCatalog]);
+    return Object.values(masterCatalog)
+      .map((m) => ({ ...m, deshabilitado: Boolean(m.deshabilitado) }))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+  }, [hasCustomCatalog, branchCatalog, masterCatalog]);
 
-  // Filter items by search & category
+  const branchStats = useMemo(() => {
+    const total = displayItems.length;
+    const activos = displayItems.filter((p) => !p.deshabilitado && p.precio > 0).length;
+    const ocultos = total - activos;
+    const personalizados = hasCustomCatalog
+      ? displayItems.filter((p) => {
+          const m = masterCatalog[p.codigo];
+          return !m || m.precio !== p.precio || m.nombre !== p.nombre;
+        }).length
+      : 0;
+    return { total, activos, ocultos, personalizados };
+  }, [displayItems, hasCustomCatalog, masterCatalog]);
+
   const filteredItems = useMemo(() => {
-    return combinedCatalogList.filter((p) => {
+    const s = search.toLowerCase().trim();
+    return displayItems.filter((p) => {
       const matchesSearch =
-        p.nombre.toLowerCase().includes(search.toLowerCase()) ||
-        p.codigo.toLowerCase().includes(search.toLowerCase());
-      
+        !s ||
+        p.nombre.toLowerCase().includes(s) ||
+        p.codigo.toLowerCase().includes(s) ||
+        (p.marca || "").toLowerCase().includes(s);
+
       const matchesCategory =
         selectedCategory === "Todas" || p.categoria === selectedCategory;
 
-      return matchesSearch && matchesCategory;
+      let matchesStatus = true;
+      if (statusFilter === "activos") {
+        matchesStatus = !p.deshabilitado && p.precio > 0;
+      } else if (statusFilter === "ocultos") {
+        matchesStatus = Boolean(p.deshabilitado) || p.precio <= 0;
+      } else if (statusFilter === "personalizados") {
+        const m = masterCatalog[p.codigo];
+        matchesStatus = !m || m.precio !== p.precio || m.nombre !== p.nombre;
+      }
+
+      return matchesSearch && matchesCategory && matchesStatus;
     });
-  }, [combinedCatalogList, search, selectedCategory]);
+  }, [displayItems, search, selectedCategory, statusFilter, masterCatalog]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredItems.slice(start, start + itemsPerPage);
+  }, [filteredItems, currentPage, itemsPerPage]);
+
+  const existingCodesSet = useMemo(
+    () =>
+      new Set(
+        hasCustomCatalog ? Object.keys(branchCatalog) : Object.keys(masterCatalog)
+      ),
+    [hasCustomCatalog, branchCatalog, masterCatalog]
+  );
 
   return (
     <div className="space-y-6 text-[var(--admin-text-mid)]">
-      {/* ── WhatsApp por Sucursal ─────────────────────────────── */}
-      <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 space-y-4">
-        <div>
-          <h2 className="font-bebas text-3xl tracking-wider text-[var(--admin-text-hi)]">
-            📱 WhatsApp por Sucursal
-          </h2>
-          <p className="text-sm text-[var(--admin-text-lo)] mt-1">
-            Configurá el número de WhatsApp donde cada sucursal recibe los pedidos. Los clientes enviarán su pedido directo a este número.
-          </p>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {SUCURSALES.map((s) => {
-            const currentPhone = waConfigs[s.id]?.telefonoWhatsApp || "";
-            const editValue = waEditing[s.id];
-            const isEditing = editValue !== undefined;
-            const isSaving = waSaving === s.id;
-            const displayPhone = currentPhone
-              ? `+${currentPhone.slice(0, 3)} ${currentPhone.slice(3, 5)} ${currentPhone.slice(5, 8)} ${currentPhone.slice(8)}`
-              : "No configurado";
-
-            return (
-              <div
-                key={s.id}
-                className={`rounded-xl border p-4 space-y-3 transition-all ${
-                  currentPhone
-                    ? "border-green-500/30 bg-green-500/5"
-                    : "border-amber-500/30 bg-amber-500/5"
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-bold text-sm text-[var(--admin-text-hi)]">
-                      🏪 {s.nombre}
-                    </h3>
-                    <p className="text-xs text-[var(--admin-text-lo)]">{s.direccion}</p>
-                  </div>
-                  <span
-                    className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                      currentPhone
-                        ? "bg-green-500/20 text-green-600 dark:text-green-400"
-                        : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
-                    }`}
-                  >
-                    {currentPhone ? "Activo" : "Pendiente"}
-                  </span>
-                </div>
-
-                {/* Current number display */}
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">📲</span>
-                  <span className={`text-sm font-mono font-bold ${
-                    currentPhone ? "text-green-600 dark:text-green-400" : "text-amber-500"
-                  }`}>
-                    {displayPhone}
-                  </span>
-                </div>
-
-                {/* Edit form */}
-                <div className="flex gap-2">
-                  <input
-                    type="tel"
-                    placeholder="Ej: 094611400"
-                    value={isEditing ? editValue : ""}
-                    onChange={(e) => handleWaPhoneChange(s.id, e.target.value)}
-                    disabled={isSaving}
-                    className="flex-1 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2 text-xs font-mono text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:border-[var(--admin-accent)] focus:outline-none disabled:opacity-50"
-                  />
-                  <button
-                    onClick={() => handleWaPhoneSave(s.id)}
-                    disabled={!isEditing || !editValue?.trim() || isSaving}
-                    className="rounded-lg bg-[var(--admin-accent)] px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap"
-                  >
-                    {isSaving ? "..." : "Guardar"}
-                  </button>
-                </div>
-
-                {/* Helper text */}
-                <p className="text-[10px] text-[var(--admin-text-lo)]">
-                  Tel. actual en sistema: {s.telefono}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
-          <p className="text-xs text-blue-600 dark:text-blue-400">
-            💡 <strong>Formato:</strong> Podés ingresar el número con o sin código de país. Ejemplos válidos: <code className="bg-blue-500/10 px-1 rounded">094611400</code>, <code className="bg-blue-500/10 px-1 rounded">59894611400</code>
-          </p>
-        </div>
-      </div>
-
-      {/* Separador visual */}
-      <hr className="border-[var(--admin-border)]" />
-
-      {/* Header */}
+      {/* Page Title & Tabs */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="font-bebas text-3xl tracking-wider text-[var(--admin-text-hi)]">
-            Catálogos por Sucursal
-          </h2>
+          <h1 className="font-bebas text-3xl sm:text-4xl tracking-wider text-[var(--admin-text-hi)]">
+            Sucursales &amp; <span className="text-[var(--admin-accent)]">Catálogos Independientes</span>
+          </h1>
           <p className="text-sm text-[var(--admin-text-lo)]">
-            Control independiente de productos habilitados y precios personalizados para cada sucursal.
+            Cargá, editá y administrá de forma manual e independiente el listado de productos y WhatsApp de cada sucursal.
           </p>
         </div>
-      </div>
 
-      {/* Control Top Panel */}
-      <div className="grid gap-6 md:grid-cols-3">
-        {/* Branch Selector */}
-        <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 space-y-3">
-          <label className="text-xs font-bold uppercase tracking-wider text-[var(--admin-text-lo)]">
-            1. Seleccionar Sucursal
-          </label>
-          <select
-            value={selectedSucursalId}
-            onChange={(e) => setSelectedSucursalId(e.target.value)}
-            disabled={saving}
-            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2.5 text-sm font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-accent)]"
+        <div className="flex items-center gap-2 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab("catalogos")}
+            className={`rounded-lg px-4 py-2 text-xs font-extrabold uppercase tracking-wider transition-all ${
+              activeTab === "catalogos"
+                ? "bg-[var(--admin-accent)] text-[var(--admin-sidebar-bg)] shadow-sm"
+                : "text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)]"
+            }`}
           >
-            {SUCURSALES.map((s) => (
-              <option key={s.id} value={s.id} className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
-                {s.nombre} ({s.direccion})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Catalog Status Info */}
-        <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 flex flex-col justify-between">
-          <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-[var(--admin-text-lo)]">
-              2. Estado del Catálogo
-            </span>
-            <div className="flex items-center gap-2 mt-2">
-              <span className={`h-2.5 w-2.5 rounded-full ${hasCustomCatalog ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]'}`}></span>
-              <span className="text-sm font-bold text-[var(--admin-text-hi)]">
-                {hasCustomCatalog ? "Catálogo Personalizado" : "Catálogo Global (Fallback)"}
-              </span>
-            </div>
-            <p className="text-xs text-[var(--admin-text-lo)] mt-2">
-              {hasCustomCatalog
-                ? "Esta sucursal posee inventario y precios independientes."
-                : "Usa de forma directa todos los productos y precios del catálogo general."}
-            </p>
-          </div>
-        </div>
-
-        {/* Actions panel */}
-        <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 flex flex-col justify-center gap-2.5">
-          {!hasCustomCatalog ? (
-            <button
-              onClick={handleCloneMaster}
-              disabled={saving || loading}
-              className="w-full rounded-lg bg-[var(--admin-accent)] py-2.5 text-xs font-extrabold uppercase tracking-wider text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 disabled:opacity-50"
-            >
-              Customizar Sucursal 🏪
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={handleSaveChanges}
-                disabled={saving}
-                className="w-full rounded-lg bg-green-500 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white transition-all hover:opacity-95 shadow-[0_4px_12px_rgba(34,197,94,0.2)] disabled:opacity-50"
-              >
-                {saving ? "Guardando..." : "Guardar Cambios 💾"}
-              </button>
-              <button
-                onClick={handleResetToGlobal}
-                disabled={saving}
-                className="w-full rounded-lg border border-red-500/30 bg-red-500/10 py-2 text-xs font-bold uppercase tracking-wider text-red-500 transition-all hover:bg-red-500/20 disabled:opacity-50"
-              >
-                Restablecer a Global 🔄
-              </button>
-            </>
-          )}
+            🏪 Catálogos ({SUCURSALES.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("whatsapp")}
+            className={`rounded-lg px-4 py-2 text-xs font-extrabold uppercase tracking-wider transition-all ${
+              activeTab === "whatsapp"
+                ? "bg-[var(--admin-accent)] text-[var(--admin-sidebar-bg)] shadow-sm"
+                : "text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)]"
+            }`}
+          >
+            📱 WhatsApp
+          </button>
         </div>
       </div>
 
-      {/* Customization Table/Grid Panel */}
-      <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 space-y-4">
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative flex-1 w-full">
-            <input
-              type="text"
-              placeholder="Buscar producto por código o nombre..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-2 pl-10 text-xs sm:text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:border-[var(--admin-accent)] focus:outline-none"
-            />
-            <span className="absolute left-3 top-2.5 text-[var(--admin-text-lo)]">🔍</span>
+      {/* ── TAB 1: CATÁLOGOS INDEPENDIENTES POR SUCURSAL ──────────────────────── */}
+      {activeTab === "catalogos" && (
+        <div className="space-y-6">
+          {/* Resumen Global + Inicialización de las 6 Sucursales */}
+          <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 sm:p-6 space-y-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <h2 className="font-bebas text-2xl tracking-wider text-[var(--admin-text-hi)]">
+                  Estado de los 6 Catálogos
+                </h2>
+                <p className="text-xs text-[var(--admin-text-lo)]">
+                  Tocá cualquier sucursal para cargar o editar su catálogo. Cada sucursal almacena su propio listado independiente.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {missingCustomCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => handleInitAllBranches(false)}
+                    disabled={initializingAll || saving}
+                    className="rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white transition-all shadow-md disabled:opacity-50"
+                  >
+                    {initializingAll
+                      ? "Inicializando..."
+                      : `⚡ Inicializar ${missingCustomCount} Pendientes con Catálogo Actual`}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleInitAllBranches(true)}
+                  disabled={initializingAll || saving}
+                  className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] hover:border-[var(--admin-accent)] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--admin-text-hi)] transition-all disabled:opacity-50"
+                >
+                  🔄 Clonar Base a las 6 Sucursales
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {SUCURSALES.map((s) => {
+                const sum = summaries[s.id];
+                const isSelected = selectedSucursalId === s.id;
+                const isCustom = Boolean(sum?.hasCustomCatalog);
+
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setSelectedSucursalId(s.id)}
+                    className={`text-left rounded-xl border p-4 transition-all ${
+                      isSelected
+                        ? "border-[var(--admin-accent)] bg-[var(--admin-accent)]/10 ring-1 ring-[var(--admin-accent)] shadow-md"
+                        : "border-[var(--admin-border)] bg-[var(--admin-bg)]/60 hover:border-[var(--admin-accent)]/50"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div>
+                        <p className="font-bold text-sm text-[var(--admin-text-hi)]">
+                          🏪 {s.nombre}
+                        </p>
+                        <p className="text-[11px] text-[var(--admin-text-lo)]">{s.direccion}</p>
+                      </div>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider shrink-0 ${
+                          isCustom
+                            ? "bg-emerald-500/20 text-emerald-500"
+                            : "bg-amber-500/20 text-amber-500"
+                        }`}
+                      >
+                        {isCustom ? "Independiente" : "Base Global"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs pt-2 border-t border-[var(--admin-border)]/60">
+                      <span className="font-semibold text-[var(--admin-text-mid)]">
+                        {sum ? `${sum.activeCount} activos / ${sum.totalCount} tot.` : "Cargando..."}
+                      </span>
+                      {sum?.updatedAt && (
+                        <span className="text-[10px] text-[var(--admin-text-lo)]">
+                          {new Date(sum.updatedAt).toLocaleDateString("es-UY")}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="w-full md:w-64">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2 text-xs sm:text-sm font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none"
-            >
-              <option value="Todas" className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">Todas las Categorías</option>
-              {CATEGORIAS.map((cat) => (
-                <option key={cat} value={cat} className="bg-[var(--admin-card-bg)] text-[var(--admin-text-hi)]">
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+          {/* Panel de Acciones de la Sucursal Seleccionada */}
+          <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-5 sm:p-6 space-y-5">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-[var(--admin-border)]">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-bebas text-3xl tracking-wider text-[var(--admin-text-hi)]">
+                    Catálogo: {selectedSucursalObj.nombre}
+                  </h2>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider ${
+                      hasCustomCatalog
+                        ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30"
+                        : "bg-amber-500/15 text-amber-500 border border-amber-500/30"
+                    }`}
+                  >
+                    {hasCustomCatalog ? "Catálogo Independiente Activo" : "Usando Catálogo Global (Fallback)"}
+                  </span>
+                  {hasUnsavedChanges && (
+                    <span className="rounded-full bg-amber-500 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-black animate-pulse">
+                      Cambios sin guardar
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-[var(--admin-text-lo)] mt-1">
+                  {branchStats.activos} activos · {branchStats.ocultos} ocultos ·{" "}
+                  {branchStats.total} productos en total
+                  {hasCustomCatalog && branchStats.personalizados > 0
+                    ? ` · ${branchStats.personalizados} personalizados`
+                    : ""}
+                </p>
+              </div>
 
-        {/* Warning if read-only */}
-        {!hasCustomCatalog && (
-          <div className="rounded-lg border border-amber-500/35 bg-amber-500/5 p-4 text-center">
-            <p className="text-xs sm:text-sm text-amber-600 dark:text-amber-300 font-semibold">
-              ⚠️ El catálogo actual es de SOLO LECTURA porque la sucursal usa la configuración Global.
-            </p>
-            <p className="text-xs text-amber-700 dark:text-amber-400/80 mt-1">
-              Haz clic en &quot;Customizar Sucursal&quot; arriba para habilitar la edición independiente de precios y productos.
-            </p>
-          </div>
-        )}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setProductModalOpen(true);
+                  }}
+                  disabled={saving || loading}
+                  className="rounded-xl bg-[var(--admin-accent)] px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-[var(--admin-sidebar-bg)] hover:opacity-90 disabled:opacity-50 shadow-sm"
+                >
+                  ➕ Agregar Producto Manual
+                </button>
 
-        {/* Products Customizable Grid */}
-        {loading ? (
-          <div className="py-12 text-center text-[var(--admin-text-lo)]">Cargando catálogo de sucursal...</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left text-sm text-[var(--admin-text-mid)]">
-              <thead className="bg-[var(--admin-bg)] text-xs font-bold uppercase tracking-wider text-[var(--admin-text-lo)] border-b border-[var(--admin-border)]">
-                <tr>
-                  <th className="py-3 px-4 w-20">Foto</th>
-                  <th className="py-3 px-4">Código / Nombre</th>
-                  <th className="py-3 px-4 w-40">Categoría</th>
-                  <th className="py-3 px-4 text-center w-36">Precio Global</th>
-                  <th className="py-3 px-4 text-center w-40">Precio Sucursal</th>
-                  <th className="py-3 px-4 text-center w-32">Estado</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--admin-border)]">
-                {filteredItems.slice(0, 100).map((prod) => {
-                  const masterItem = masterCatalog[prod.codigo] || { precio: 0 };
-                  const isOverridden = hasCustomCatalog && prod.precio !== masterItem.precio;
-                  const isProductDisabled = prod.deshabilitado;
+                <button
+                  type="button"
+                  onClick={() => setImporterOpen(true)}
+                  disabled={saving || loading}
+                  className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] hover:border-[var(--admin-accent)] px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-[var(--admin-text-hi)] transition-all disabled:opacity-50"
+                >
+                  📥 Cargar Catálogo (Excel / Lista)
+                </button>
 
-                  return (
-                    <tr
-                      key={prod.codigo}
-                      className={`hover:bg-[var(--admin-input-bg)]/30 transition-colors ${
-                        isProductDisabled ? "opacity-45 bg-red-950/5" : ""
+                {!hasCustomCatalog ? (
+                  <button
+                    type="button"
+                    onClick={handleCloneMaster}
+                    disabled={saving || loading}
+                    className="rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white transition-all disabled:opacity-50"
+                  >
+                    🏪 Crear Copia Independiente
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleSaveChanges}
+                      disabled={saving || !hasUnsavedChanges}
+                      className={`rounded-xl px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white transition-all ${
+                        hasUnsavedChanges
+                          ? "bg-emerald-600 hover:bg-emerald-500 shadow-md"
+                          : "bg-emerald-600/40 cursor-not-allowed"
                       }`}
                     >
-                      {/* Image */}
-                      <td className="py-3 px-4">
-                        <div className="relative h-12 w-12 rounded-lg bg-[var(--admin-bg)] overflow-hidden flex items-center justify-center border border-[var(--admin-border)]">
-                          {prod.imagen ? (
-                            <Image
-                              src={prod.imagen}
-                              alt={prod.nombre}
-                              fill
-                              className="object-contain p-1"
-                            />
-                          ) : (
-                            <span className="text-xl">📦</span>
-                          )}
-                        </div>
-                      </td>
+                      {saving ? "Guardando..." : "💾 Guardar Cambios"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResetToGlobal}
+                      disabled={saving}
+                      className="rounded-xl border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-red-500 hover:bg-red-500/20 disabled:opacity-50"
+                    >
+                      Restablecer a Global
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
 
-                      {/* Name / Barcode */}
-                      <td className="py-3 px-4">
-                        <div className="font-semibold text-[var(--admin-text-hi)] line-clamp-1">{prod.nombre}</div>
-                        <div className="text-xs font-mono text-[var(--admin-accent)] mt-0.5">{prod.codigo}</div>
-                      </td>
+            {!hasCustomCatalog && (
+              <div className="rounded-xl border border-amber-500/35 bg-amber-500/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <p className="text-xs text-amber-600 dark:text-amber-300 font-semibold">
+                  ⚠️ Esta sucursal todavía muestra el catálogo base como plantilla. Podés hacer clic en{" "}
+                  <strong>&quot;Crear Copia Independiente&quot;</strong>,{" "}
+                  <strong>&quot;Agregar Producto Manual&quot;</strong> o{" "}
+                  <strong>&quot;Cargar Catálogo&quot;</strong> para independizarla.
+                </p>
+              </div>
+            )}
 
-                      {/* Category */}
-                      <td className="py-3 px-4">
-                        <span className="inline-block rounded-full bg-[var(--admin-bg)] border border-[var(--admin-border)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--admin-text-lo)] uppercase tracking-wider">
-                          {prod.categoria}
-                        </span>
-                      </td>
+            {/* Filtros */}
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="relative sm:col-span-2">
+                <input
+                  type="text"
+                  placeholder="Buscar por código, nombre o marca..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-2.5 pl-10 text-xs sm:text-sm text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:border-[var(--admin-accent)] focus:outline-none"
+                />
+                <span className="absolute left-3.5 top-3 text-sm text-[var(--admin-text-lo)]">🔍</span>
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="absolute right-3 top-3 text-xs text-[var(--admin-text-lo)] hover:text-[var(--admin-text-hi)]"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
 
-                      {/* Global Reference Price */}
-                      <td className="py-3 px-4 text-center font-bold text-[var(--admin-text-lo)]">
-                        ${masterItem.precio}
-                      </td>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2.5 text-xs font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none"
+              >
+                <option value="Todas">Todas las Categorías</option>
+                {CATEGORIAS.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
 
-                      {/* Branch Price Override Input */}
-                      <td className="py-3 px-4">
-                        <div className="relative flex justify-center">
-                          <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--admin-text-lo)]">$</span>
-                          <input
-                            type="number"
-                            value={prod.precio}
-                            disabled={!hasCustomCatalog || isProductDisabled || saving}
-                            onChange={(e) => handlePriceChange(prod.codigo, e.target.value)}
-                            className={`w-28 rounded-lg border px-3 py-1.5 pl-6 text-xs font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none ${
-                              !hasCustomCatalog || isProductDisabled
-                                ? "bg-[var(--admin-input-bg)]/50 border-[var(--admin-border)] text-[var(--admin-text-lo)]/50 cursor-not-allowed"
-                                : isOverridden
-                                ? "bg-[var(--admin-accent)]/5 border-[var(--admin-accent)] text-[var(--admin-accent)]"
-                                : "bg-[var(--admin-bg)] border-[var(--admin-border)]"
-                            }`}
-                          />
-                        </div>
-                      </td>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2.5 text-xs font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none"
+              >
+                <option value="todos">Todos los Estados</option>
+                <option value="activos">Solo Activos</option>
+                <option value="ocultos">Solo Ocultos / $0</option>
+                {hasCustomCatalog && (
+                  <option value="personalizados">Modificados / Exclusivos</option>
+                )}
+              </select>
+            </div>
 
-                      {/* Enabled / Disabled Toggle */}
-                      <td className="py-3 px-4 text-center">
-                        <button
-                          type="button"
-                          disabled={!hasCustomCatalog || saving}
-                          onClick={() => handleToggleStatus(prod.codigo)}
-                          className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider transition-all ${
-                            !hasCustomCatalog
-                              ? "bg-green-500/10 text-green-600 dark:text-green-500 cursor-not-allowed"
-                              : isProductDisabled
-                              ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500/20"
-                              : "bg-green-500/10 text-green-600 dark:text-green-500 border border-green-500/30 hover:bg-green-500/20"
+            {/* Tabla de Productos */}
+            {loading ? (
+              <div className="py-14 text-center text-sm text-[var(--admin-text-lo)]">
+                Cargando catálogo de {selectedSucursalObj.nombre}...
+              </div>
+            ) : paginatedItems.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-[var(--admin-border)] p-12 text-center space-y-3">
+                <span className="text-4xl block">📦</span>
+                <h3 className="font-bold text-[var(--admin-text-hi)]">
+                  {displayItems.length === 0
+                    ? "Esta sucursal aún no tiene productos cargados"
+                    : "No hay productos que coincidan con el filtro"}
+                </h3>
+                <p className="text-xs text-[var(--admin-text-lo)]">
+                  Podés agregar productos manualmente o importar una lista desde Excel / CSV.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-[var(--admin-border)]">
+                <table className="w-full min-w-[820px] text-left text-sm text-[var(--admin-text-mid)]">
+                  <thead className="bg-[var(--admin-bg)] text-xs font-bold uppercase tracking-wider text-[var(--admin-text-lo)] border-b border-[var(--admin-border)]">
+                    <tr>
+                      <th className="py-3 px-4 w-16">Foto</th>
+                      <th className="py-3 px-4">Código / Nombre</th>
+                      <th className="py-3 px-4 w-44">Categoría</th>
+                      <th className="py-3 px-4 text-center w-28">Precio Base</th>
+                      <th className="py-3 px-4 text-center w-36">Precio Sucursal</th>
+                      <th className="py-3 px-4 text-center w-28">Estado</th>
+                      <th className="py-3 px-4 text-right w-28">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--admin-border)]">
+                    {paginatedItems.map((prod) => {
+                      const masterItem = masterCatalog[prod.codigo];
+                      const isExclusive = hasCustomCatalog && !masterItem;
+                      const isPriceOverridden =
+                        hasCustomCatalog && masterItem && prod.precio !== masterItem.precio;
+                      const isProductDisabled = Boolean(prod.deshabilitado) || prod.precio <= 0;
+
+                      return (
+                        <tr
+                          key={prod.codigo}
+                          className={`hover:bg-[var(--admin-input-bg)]/30 transition-colors ${
+                            isProductDisabled ? "opacity-55 bg-red-950/5" : ""
                           }`}
                         >
-                          {isProductDisabled ? "Oculto 🚫" : "Activo 👁️"}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+                          <td className="py-3 px-4">
+                            <div className="relative h-11 w-11 rounded-lg bg-white overflow-hidden flex items-center justify-center border border-[var(--admin-border)]">
+                              {prod.imagen ? (
+                                <Image
+                                  src={prod.imagen}
+                                  alt={prod.nombre}
+                                  fill
+                                  className="object-contain p-1"
+                                />
+                              ) : (
+                                <span className="text-lg">📦</span>
+                              )}
+                            </div>
+                          </td>
 
-        {filteredItems.length > 100 && (
-          <p className="text-center text-xs text-[var(--admin-text-lo)] pt-4 font-semibold">
-            Mostrando los primeros 100 productos de {filteredItems.length} totales. Usa los buscadores e indicadores de arriba para filtrar.
-          </p>
-        )}
-      </div>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-[var(--admin-text-hi)] line-clamp-1">
+                                {prod.nombre}
+                              </span>
+                              {isExclusive && (
+                                <span className="rounded bg-blue-500/15 px-1.5 py-0.5 text-[9px] font-extrabold uppercase text-blue-500 shrink-0">
+                                  Exclusivo
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs font-mono text-[var(--admin-accent)] mt-0.5">
+                              {prod.codigo}
+                              {prod.marca ? ` · ${prod.marca}` : ""}
+                            </div>
+                          </td>
+
+                          <td className="py-3 px-4">
+                            <span className="inline-block rounded-full bg-[var(--admin-bg)] border border-[var(--admin-border)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--admin-text-lo)] uppercase tracking-wider">
+                              {prod.categoria}
+                            </span>
+                          </td>
+
+                          <td className="py-3 px-4 text-center font-bold text-[var(--admin-text-lo)]">
+                            {masterItem ? `$${masterItem.precio}` : "—"}
+                          </td>
+
+                          <td className="py-3 px-4">
+                            <div className="relative flex justify-center">
+                              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--admin-text-lo)]">
+                                $
+                              </span>
+                              <input
+                                type="number"
+                                value={prod.precio}
+                                disabled={!hasCustomCatalog || saving}
+                                onChange={(e) => handlePriceChange(prod.codigo, e.target.value)}
+                                className={`w-28 rounded-lg border px-3 py-1.5 pl-6 text-xs font-bold text-[var(--admin-text-hi)] focus:border-[var(--admin-accent)] focus:outline-none ${
+                                  !hasCustomCatalog
+                                    ? "bg-[var(--admin-input-bg)]/50 border-[var(--admin-border)] text-[var(--admin-text-lo)]/50 cursor-not-allowed"
+                                    : isPriceOverridden
+                                    ? "bg-[var(--admin-accent)]/5 border-[var(--admin-accent)] text-[var(--admin-accent)]"
+                                    : "bg-[var(--admin-bg)] border-[var(--admin-border)]"
+                                }`}
+                              />
+                            </div>
+                          </td>
+
+                          <td className="py-3 px-4 text-center">
+                            <button
+                              type="button"
+                              disabled={!hasCustomCatalog || saving}
+                              onClick={() => handleToggleStatus(prod.codigo)}
+                              className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider transition-all ${
+                                !hasCustomCatalog
+                                  ? "bg-green-500/10 text-green-600 cursor-not-allowed"
+                                  : prod.deshabilitado
+                                  ? "bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20"
+                                  : "bg-green-500/10 text-green-500 border border-green-500/30 hover:bg-green-500/20"
+                              }`}
+                            >
+                              {prod.deshabilitado ? "Oculto 🚫" : "Activo 👁️"}
+                            </button>
+                          </td>
+
+                          <td className="py-3 px-4 text-right">
+                            <div className="inline-flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                disabled={saving}
+                                onClick={() => {
+                                  setEditingProduct(prod);
+                                  setProductModalOpen(true);
+                                }}
+                                title="Editar producto"
+                                className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-2.5 py-1.5 text-xs font-bold hover:border-[var(--admin-accent)] transition-colors"
+                              >
+                                ✏️
+                              </button>
+                              {hasCustomCatalog && (
+                                <button
+                                  type="button"
+                                  disabled={saving}
+                                  onClick={() => handleDeleteProduct(prod)}
+                                  title="Eliminar de esta sucursal"
+                                  className="rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-xs font-bold text-red-500 hover:bg-red-500/20 transition-colors"
+                                >
+                                  🗑️
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Paginación */}
+            {filteredItems.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                <div className="flex items-center gap-2 text-xs text-[var(--admin-text-lo)]">
+                  <span>
+                    Mostrando{" "}
+                    <strong className="text-[var(--admin-text-hi)]">
+                      {(currentPage - 1) * itemsPerPage + 1}–
+                      {Math.min(currentPage * itemsPerPage, filteredItems.length)}
+                    </strong>{" "}
+                    de <strong className="text-[var(--admin-text-hi)]">{filteredItems.length}</strong>
+                  </span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                    className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-2 py-1 text-xs font-bold text-[var(--admin-text-hi)]"
+                  >
+                    <option value={25}>25 / pág</option>
+                    <option value={50}>50 / pág</option>
+                    <option value={100}>100 / pág</option>
+                  </select>
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                      className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-2.5 py-1.5 text-xs font-bold disabled:opacity-40"
+                    >
+                      «
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-1.5 text-xs font-bold disabled:opacity-40"
+                    >
+                      Anterior
+                    </button>
+                    <span className="px-2 text-xs font-mono font-bold text-[var(--admin-accent)]">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-1.5 text-xs font-bold disabled:opacity-40"
+                    >
+                      Siguiente
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-2.5 py-1.5 text-xs font-bold disabled:opacity-40"
+                    >
+                      »
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB 2: WHATSAPP POR SUCURSAL ──────────────────────────────────────── */}
+      {activeTab === "whatsapp" && (
+        <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-6 space-y-4">
+          <div>
+            <h2 className="font-bebas text-3xl tracking-wider text-[var(--admin-text-hi)]">
+              📱 WhatsApp por Sucursal
+            </h2>
+            <p className="text-sm text-[var(--admin-text-lo)] mt-1">
+              Configurá el número de WhatsApp donde cada sucursal recibe los pedidos.
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {SUCURSALES.map((s) => {
+              const currentPhone = waConfigs[s.id]?.telefonoWhatsApp || "";
+              const editValue = waEditing[s.id];
+              const isEditing = editValue !== undefined;
+              const isSaving = waSaving === s.id;
+              const displayPhone = currentPhone
+                ? `+${currentPhone.slice(0, 3)} ${currentPhone.slice(3, 5)} ${currentPhone.slice(5, 8)} ${currentPhone.slice(8)}`
+                : "No configurado";
+
+              return (
+                <div
+                  key={s.id}
+                  className={`rounded-xl border p-4 space-y-3 transition-all ${
+                    currentPhone
+                      ? "border-green-500/30 bg-green-500/5"
+                      : "border-amber-500/30 bg-amber-500/5"
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-bold text-sm text-[var(--admin-text-hi)]">
+                        🏪 {s.nombre}
+                      </h3>
+                      <p className="text-xs text-[var(--admin-text-lo)]">{s.direccion}</p>
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                        currentPhone
+                          ? "bg-green-500/20 text-green-600 dark:text-green-400"
+                          : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                      }`}
+                    >
+                      {currentPhone ? "Activo" : "Pendiente"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">📲</span>
+                    <span
+                      className={`text-sm font-mono font-bold ${
+                        currentPhone ? "text-green-600 dark:text-green-400" : "text-amber-500"
+                      }`}
+                    >
+                      {displayPhone}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="tel"
+                      placeholder="Ej: 094611400"
+                      value={isEditing ? editValue : ""}
+                      onChange={(e) => handleWaPhoneChange(s.id, e.target.value)}
+                      disabled={isSaving}
+                      className="flex-1 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2 text-xs font-mono text-[var(--admin-text-hi)] placeholder-[var(--admin-text-lo)]/50 focus:border-[var(--admin-accent)] focus:outline-none disabled:opacity-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleWaPhoneSave(s.id)}
+                      disabled={!isEditing || !editValue?.trim() || isSaving}
+                      className="rounded-lg bg-[var(--admin-accent)] px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-[var(--admin-sidebar-bg)] transition-all hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap"
+                    >
+                      {isSaving ? "..." : "Guardar"}
+                    </button>
+                  </div>
+
+                  <p className="text-[10px] text-[var(--admin-text-lo)]">
+                    Tel. actual en sistema: {s.telefono}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
+            <p className="text-xs text-blue-600 dark:text-blue-400">
+              💡 <strong>Formato:</strong> Podés ingresar el número con o sin código de país. Ejemplos válidos:{" "}
+              <code className="bg-blue-500/10 px-1 rounded">094611400</code>,{" "}
+              <code className="bg-blue-500/10 px-1 rounded">59894611400</code>
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Modales */}
+      <BranchProductModal
+        isOpen={productModalOpen}
+        sucursalNombre={selectedSucursalObj.nombre}
+        initialProduct={editingProduct}
+        existingCodes={existingCodesSet}
+        onClose={() => {
+          setProductModalOpen(false);
+          setEditingProduct(null);
+        }}
+        onSave={handleSaveSingleProduct}
+      />
+
+      <BranchCatalogImporterModal
+        isOpen={importerOpen}
+        sucursalId={selectedSucursalId}
+        sucursalNombre={selectedSucursalObj.nombre}
+        currentBranchItems={hasCustomCatalog ? branchCatalog : masterCatalog}
+        masterCatalog={masterCatalog}
+        onClose={() => setImporterOpen(false)}
+        onApplyItems={handleApplyImportedCatalog}
+      />
     </div>
   );
 }

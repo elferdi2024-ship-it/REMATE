@@ -55,10 +55,10 @@ export default function StepProcess({ selectedSucursal }: StepProcessProps) {
 
         <div className="flex gap-3 justify-center flex-wrap">
           <Link
-            href={selectedSucursal ? `/catalogo?sucursal=${selectedSucursal}` : "/seleccionar-sucursal"}
+            href="/seleccionar-sucursal"
             className="inline-flex items-center gap-2 bg-[#D62828] text-white rounded-[12px] px-9 py-4 font-bebas text-[1.3rem] tracking-[2px] no-underline shadow-[0_4px_18px_rgba(214,40,40,0.35)] transition-all hover:bg-[#C4231E]"
           >
-            🛒 IR AL CATÁLOGO
+            🛒 VER CATÁLOGO
           </Link>
           <a
             href="https://wa.me/59899322325"

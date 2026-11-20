@@ -5,8 +5,11 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { loadBranchCatalog } from "@/lib/branch-catalog";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
+import * as ls from "@/lib/ls";
+import { SUCURSALES } from "@/lib/sucursales";
 import type { OfertaConfig, OfertaProducto } from "@/types/ofertas";
 import type { Producto } from "@/types";
 import {
@@ -299,11 +302,26 @@ function OfertaCard({
 export default function OfertasPageClient() {
   const [config, setConfig] = useState<OfertaConfig | null>(null);
   const [catalogo, setCatalogo] = useState<Producto[]>([]);
+  const [sucursalId, setSucursalId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
   const toast = useToast();
 
   useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const urlS = sp.get("sucursal");
+    const saved = ls.getSelectedSucursal();
+    const effective =
+      urlS && SUCURSALES.some((s) => s.id === urlS)
+        ? urlS
+        : saved && SUCURSALES.some((s) => s.id === saved)
+          ? saved
+          : "";
+    if (effective) {
+      setSucursalId(effective);
+      ls.setSelectedSucursal(effective);
+    }
+
     async function load() {
       try {
         const snap = await getDoc(doc(db, "configuracion", "ofertas"));
@@ -319,14 +337,7 @@ export default function OfertasPageClient() {
             // Fetch catalog if category offers exist to resolve product codes
             if (data.categoryOffers && data.categoryOffers.length > 0) {
               try {
-                let catalogProds: Producto[] = [];
-                const catSnap = await getDoc(doc(db, "catalogo_activo", "productos"));
-                if (catSnap.exists()) {
-                  catalogProds = Object.values(catSnap.data().items || {}) as Producto[];
-                } else {
-                  const res = await fetch("/productos.json");
-                  if (res.ok) catalogProds = await res.json();
-                }
+                const { productos: catalogProds } = await loadBranchCatalog(effective || null);
                 setCatalogo(catalogProds);
               } catch (err) {
                 console.error("Error loading catalog for category offers:", err);
@@ -347,6 +358,8 @@ export default function OfertasPageClient() {
     }
     load();
   }, []);
+
+  const catalogHref = sucursalId ? `/catalogo?sucursal=${sucursalId}` : "/catalogo";
 
   const handleAddToCart = (producto: OfertaProducto) => {
     addItem({
@@ -423,7 +436,7 @@ export default function OfertasPageClient() {
           Las ofertas se actualizan periódicamente. Volvé pronto o explorá nuestro catálogo completo.
         </p>
         <Link
-          href="/catalogo"
+          href={catalogHref}
           style={{
             background: "linear-gradient(135deg, #E8302A, #D62828)",
             color: "#fff",
@@ -459,7 +472,7 @@ export default function OfertasPageClient() {
         }}
       >
         <Link
-          href="/catalogo"
+          href={catalogHref}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -531,7 +544,7 @@ export default function OfertasPageClient() {
         }}
       >
         {/* 0. Promos Especiales Destacadas (Banners 1:1) */}
-        <OfertasDestacadasShowcase showViewAll={false} />
+        <OfertasDestacadasShowcase sucursalId={sucursalId || null} showViewAll={false} />
 
         {/* 1. Custom Brand Banners */}
         {config.brandBanners && config.brandBanners.length > 0 && (
@@ -625,7 +638,7 @@ export default function OfertasPageClient() {
           ¿Buscás algo más? Explorá el catálogo completo
         </p>
         <Link
-          href="/catalogo"
+          href={catalogHref}
           style={{
             display: "inline-block",
             background: "rgba(255,255,255,0.06)",

@@ -13,6 +13,7 @@ import ProductJsonLd from "@/components/seo/ProductJsonLd";
 import { calcularPrecioConEscala } from "@/lib/pricing";
 import { haptic } from "@/lib/haptic";
 import BulkSavingsCallout from "./BulkSavingsCallout";
+import { getExclusivePackByProduct } from "@/lib/constants/exclusive-packs";
 
 interface QuickViewModalProps {
   producto: Producto | null;
@@ -67,6 +68,7 @@ export default function QuickViewModal({
   if (!producto) return null;
 
   const emoji = EMOJI_POR_CATEGORIA[producto.categoria] || "📦";
+  const exclusivePack = getExclusivePackByProduct(producto);
   const hasEscala = Boolean(producto.escalaPrecios && producto.escalaPrecios.length > 0);
   const boxTier = hasEscala ? producto.escalaPrecios![0] : null;
 
@@ -168,6 +170,11 @@ export default function QuickViewModal({
               <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider rounded-md">
                 {producto.categoria}
               </span>
+              {exclusivePack && (
+                <span className="px-2.5 py-0.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider rounded-md shadow-xs">
+                  📱 EXCLUSIVO APP
+                </span>
+              )}
               {producto.codigo.startsWith("PROMO-") && (
                 <span className="px-2.5 py-0.5 bg-[#EF233C] text-white text-[10px] font-black uppercase tracking-wider rounded-md shadow-xs">
                   🔥 OFERTA DESTACADA
@@ -176,8 +183,60 @@ export default function QuickViewModal({
             </div>
 
             <h2 className="text-lg sm:text-xl font-bold text-slate-950 leading-snug tracking-tight mb-3">
-              {producto.nombre}
+              {exclusivePack ? exclusivePack.tituloDisplay : producto.nombre}
             </h2>
+
+            {/* Contenido detallado del Pack Exclusivo */}
+            {exclusivePack ? (
+              <div className="mb-4 rounded-2xl border border-emerald-200/90 bg-gradient-to-b from-emerald-50/60 to-white overflow-hidden">
+                <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 bg-emerald-50/90 border-b border-emerald-100">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-sm shrink-0">📦</span>
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-950 truncate">
+                      Qué incluye este pack
+                    </span>
+                  </div>
+                  <span
+                    className="text-[10px] font-extrabold text-emerald-800 bg-white border border-emerald-200 px-2 py-0.5 rounded-full shrink-0 tabular-nums"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {exclusivePack.items.length} prod. · {exclusivePack.totalUnidades} u.
+                  </span>
+                </div>
+
+                <ul className="divide-y divide-slate-100 max-h-[260px] overflow-y-auto px-3.5 py-1">
+                  {exclusivePack.items.map((item, idx) => (
+                    <li
+                      key={idx}
+                      className="flex items-baseline gap-2.5 py-2 text-xs sm:text-[13px] text-slate-800"
+                    >
+                      <span
+                        className="inline-flex items-center justify-center min-w-[28px] px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 font-extrabold text-[11px] shrink-0 tabular-nums"
+                        style={{ fontFamily: "var(--font-mono)" }}
+                      >
+                        {item.cantidad}
+                      </span>
+                      <span className="font-semibold leading-snug">{item.nombre}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {exclusivePack.items.length > 7 && (
+                  <div className="px-3.5 py-1.5 bg-slate-50/90 border-t border-slate-100 text-center text-[10px] font-bold text-slate-500">
+                    Deslizá la lista para ver los {exclusivePack.items.length} productos incluidos
+                  </div>
+                )}
+              </div>
+            ) : producto.contenido ? (
+              <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5">
+                <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 mb-1.5">
+                  Descripción / Contenido
+                </div>
+                <p className="text-xs sm:text-[13px] text-slate-700 whitespace-pre-line leading-relaxed m-0">
+                  {producto.contenido}
+                </p>
+              </div>
+            ) : null}
 
             {/* Selector de Presentación (Individual vs Caja) */}
             {hasEscala && boxTier && (

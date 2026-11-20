@@ -15,6 +15,7 @@ export interface Producto {
   precioAnterior?: number;
   contenido?: string;
   destacado?: boolean;
+  exclusivoApp?: boolean;
   escalaPrecios?: BulkPriceTier[];
 }
 

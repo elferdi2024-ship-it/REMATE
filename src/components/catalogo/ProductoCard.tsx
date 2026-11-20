@@ -14,6 +14,7 @@ import { SponsorBadge } from "@/components/ads";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/format";
 import { obtenerPrecioPorUnidad } from "@/lib/search-normalizer";
+import { getExclusivePackByProduct } from "@/lib/constants/exclusive-packs";
 
 interface ProductoCardProps {
   producto: Producto;
@@ -100,6 +101,7 @@ export const ProductoCard = memo(function ProductoCard({
     ? Math.round((1 - producto.precio / (producto.precioAnterior as number)) * 100)
     : 0;
   const hasBulkTiers = Boolean(producto.escalaPrecios && producto.escalaPrecios.length > 0);
+  const exclusivePack = getExclusivePackByProduct(producto);
 
   const [imageError, setImageError] = React.useState(false);
 
@@ -114,6 +116,8 @@ export const ProductoCard = memo(function ProductoCard({
       className={`ux group relative flex flex-col h-full bg-white border min-w-0 ${
         isInCart
           ? "border-[#EF233C] ring-2 ring-[#EF233C]/15 shadow-[0_12px_28px_-10px_rgba(239,35,60,0.18)]"
+          : exclusivePack
+          ? "border-emerald-400/90 ring-1 ring-emerald-500/20 shadow-[0_8px_22px_-8px_rgba(5,150,105,0.22)] hover:border-emerald-500 hover:shadow-[0_14px_32px_-12px_rgba(5,150,105,0.28)]"
           : "border-slate-200/85 hover:border-slate-300 shadow-[0_4px_14px_-6px_rgba(15,23,42,0.05)] hover:shadow-[0_14px_32px_-12px_rgba(15,23,42,0.12)]"
       } rounded-2xl p-2.5 sm:p-3 transition-all duration-200 ease-out hover:-translate-y-0.5 select-none cursor-pointer`}
       style={{ minHeight: "294px" }}
@@ -154,8 +158,14 @@ export const ProductoCard = memo(function ProductoCard({
           </svg>
         </button>
 
-        {/* Badges Superiores Derecha: Descuento / Lo más pedido / Cantidad en carrito (.u051-cart b) */}
+        {/* Badges Superiores Derecha: Exclusivo App / Descuento / Lo más pedido / Cantidad en carrito */}
         <div className="absolute top-2 right-2 z-20 flex flex-col items-end gap-1">
+          {exclusivePack && (
+            <span className="bg-emerald-600 text-white text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-lg shadow-xs">
+              Exclusivo App
+            </span>
+          )}
+
           {hasDiscount && (
             <span
               className="bg-[#EF233C] text-white text-[10px] font-extrabold px-2 py-0.5 rounded-lg shadow-2xs tabular-nums tracking-tight"
@@ -165,7 +175,7 @@ export const ProductoCard = memo(function ProductoCard({
             </span>
           )}
 
-          {!hasDiscount && producto.destacado && (
+          {!hasDiscount && !exclusivePack && producto.destacado && (
             <span className="bg-slate-900/90 backdrop-blur-xs text-white text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-lg shadow-2xs">
               Lo más pedido
             </span>
@@ -355,9 +365,15 @@ export const ProductoCard = memo(function ProductoCard({
         </div>
 
         {/* Nombre del Producto */}
-        <h3 className="text-[12.5px] sm:text-[13px] font-bold text-slate-900 leading-[1.35] line-clamp-2 mb-2 group-hover:text-[#EF233C] transition-colors min-h-[2.7em] tracking-[-0.01em]">
+        <h3 className="text-[12.5px] sm:text-[13px] font-bold text-slate-900 leading-[1.35] line-clamp-2 mb-1.5 group-hover:text-[#EF233C] transition-colors min-h-[2.7em] tracking-[-0.01em]">
           {highlightText(producto.nombre, searchTerm)}
         </h3>
+
+        {exclusivePack && (
+          <div className="mb-2 inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200/80 rounded-md px-1.5 py-0.5 w-fit">
+            <span>📦 Incluye {exclusivePack.items.length} prod. · Ver detalle</span>
+          </div>
+        )}
 
         {/* Bloque de Precio Mayorista Tabular + Precio por Unidad */}
         {(() => {
