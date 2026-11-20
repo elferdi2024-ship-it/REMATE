@@ -90,11 +90,18 @@ function CategoryCarousel({
   onSelectBrand?: (brandName: string) => void;
 }) {
   const [showAll, setShowAll] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(36);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setShowAll(false);
-    if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+    setVisibleCount(36);
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = 0;
+    }
+    setCanScrollLeft(false);
   }, [cat]);
 
   const total = catProds.length;
@@ -102,6 +109,7 @@ function CategoryCarousel({
   const hasMore = total > pageSize;
 
   const displayProds = useMemo(() => catProds.slice(0, 24), [catProds]);
+  const expandedProds = useMemo(() => catProds.slice(0, visibleCount), [catProds, visibleCount]);
   const adIndices = useMemo(() => {
     const result: number[] = [];
     let adIdx = 0;
@@ -115,17 +123,34 @@ function CategoryCarousel({
     return result;
   }, [displayProds]);
 
-  const handleArrow = useCallback(() => {
+  const updateScrollEdges = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 12);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 12);
+  }, []);
+
+  useEffect(() => {
+    updateScrollEdges();
+  }, [displayProds.length, columns, showAll, updateScrollEdges]);
+
+  const handleArrow = useCallback((dir: "left" | "right" = "right") => {
     if (!scrollRef.current) return;
     const container = scrollRef.current;
-    const cardWidth = container.scrollWidth / total;
-    const pageWidth = cardWidth * pageSize;
-    container.scrollBy({ left: pageWidth, behavior: "smooth" });
-  }, [total, pageSize]);
+    const step = Math.max(240, container.clientWidth * 0.82);
+    container.scrollBy({
+      left: dir === "right" ? step : -step,
+      behavior: "smooth",
+    });
+  }, []);
 
-  const handleShowAll = () => setShowAll(true);
+  const handleShowAll = () => {
+    setVisibleCount(36);
+    setShowAll(true);
+  };
   const handleShowLess = () => {
     setShowAll(false);
+    setVisibleCount(36);
     if (scrollRef.current) scrollRef.current.scrollLeft = 0;
   };
 
@@ -160,32 +185,48 @@ function CategoryCarousel({
   }
 
   if (showAll) {
-    // Grid expandido — intercalamos ads de imagen como casillas dentro del grid
+    // Grid expandido multi-columna — respeta exactamente 2/3/4/5/6 columnas según pantalla
     const images = adBrand?.assets.filter(a => a.type === "image") || [];
+    const remaining = Math.max(0, total - expandedProds.length);
 
     return (
       <>
-        <div className="grid">
-          {catProds.map((p, pIdx) => {
+        <div className="flex items-center justify-between gap-2 pb-2.5">
+          <span className="text-[11px] font-semibold text-slate-500 tabular-nums">
+            Mostrando <strong className="text-slate-800">{expandedProds.length}</strong> de {total} productos
+          </span>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition-colors cursor-pointer"
+            onClick={handleShowLess}
+          >
+            <span>Contraer</span>
+            <span>↑</span>
+          </button>
+        </div>
+
+        <div className="products-catalog-grid">
+          {expandedProds.map((p, pIdx) => {
             const items: React.ReactNode[] = [
-              <ProductoCard
-                key={p.codigo}
-                producto={p}
-                qty={qtyMap[p.codigo] || 0}
-                searchTerm={searchTerm}
-                onAdd={onAdd}
-                onQtyChange={onQtyChange}
-                onQuickView={onQuickView}
-                sponsorBrand={adBrand}
-              />,
+              <div key={p.codigo} className="min-w-0">
+                <ProductoCard
+                  producto={p}
+                  qty={qtyMap[p.codigo] || 0}
+                  searchTerm={searchTerm}
+                  onAdd={onAdd}
+                  onQtyChange={onQtyChange}
+                  onQuickView={onQuickView}
+                  sponsorBrand={adBrand}
+                />
+              </div>,
             ];
 
             // Every 2 full rows (2 × columns), inject ONE image or video ad as a grid cell
-            if (showInlineAds && adBrand && (images.length > 0 || adBrand.assets.some(a => a.type === "video")) && (pIdx + 1) % (columns * 2) === 0 && pIdx < catProds.length - 1) {
+            if (showInlineAds && adBrand && (images.length > 0 || adBrand.assets.some(a => a.type === "video")) && (pIdx + 1) % (columns * 2) === 0 && pIdx < expandedProds.length - 1) {
               if (images.length > 0) {
                 const img = getImageAtIndex(adBrand, pIdx);
                 if (img) items.push(
-                  <div key={`ad-grid-${pIdx}`} className="brand-grid-slot">
+                  <div key={`ad-grid-${pIdx}`} className="brand-grid-slot min-w-0">
                     <BrandSpotlight brand={adBrand} asset={img} layout="card" onBrandFilter={onSelectBrand} />
                   </div>
                 );
@@ -202,10 +243,21 @@ function CategoryCarousel({
             return <React.Fragment key={p.codigo}>{items}</React.Fragment>;
           })}
         </div>
-        <div className="flex items-center justify-center pt-3 pb-5">
+
+        <div className="flex flex-wrap items-center justify-center gap-2.5 pt-4 pb-5">
+          {remaining > 0 && (
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-slate-900 hover:bg-[#EF233C] text-white text-xs font-bold transition-all active:scale-95 shadow-sm cursor-pointer"
+              onClick={() => setVisibleCount((c) => c + 36)}
+            >
+              <span>Ver {Math.min(36, remaining)} más</span>
+              <span className="opacity-75 tabular-nums">({remaining} restantes)</span>
+            </button>
+          )}
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
             onClick={handleShowLess}
           >
             <span>Mostrar menos</span>
@@ -220,7 +272,19 @@ function CategoryCarousel({
   return (
     <>
       <div className="cat-carousel-wrap">
-        <div ref={scrollRef} className="cat-carousel-track">
+        {hasMore && canScrollLeft && (
+          <button
+            type="button"
+            className="cat-expand-arrow cat-expand-arrow--left"
+            onClick={() => handleArrow("left")}
+            title="Anterior"
+            aria-label="Productos anteriores"
+          >
+            ‹
+          </button>
+        )}
+
+        <div ref={scrollRef} onScroll={updateScrollEdges} className="cat-carousel-track">
           {displayProds.map((p, pIdx) => {
             const items: React.ReactNode[] = [
               <div key={p.codigo} className="cat-carousel-item">
@@ -290,10 +354,11 @@ function CategoryCarousel({
           })}
         </div>
 
-        {hasMore && (
+        {hasMore && canScrollRight && (
           <button
+            type="button"
             className="cat-expand-arrow"
-            onClick={handleArrow}
+            onClick={() => handleArrow("right")}
             title="Ver más"
             aria-label="Ver más productos"
           >

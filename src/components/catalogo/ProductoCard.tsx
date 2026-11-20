@@ -103,11 +103,15 @@ export const ProductoCard = memo(function ProductoCard({
 
   const [imageError, setImageError] = React.useState(false);
 
+  React.useEffect(() => {
+    setImageError(false);
+  }, [producto.imagen]);
+
   return (
     <article
       ref={cardRef}
       onClick={() => onQuickView?.(producto)}
-      className={`ux group relative flex flex-col bg-white border ${
+      className={`ux group relative flex flex-col bg-white border min-w-0 ${
         isInCart
           ? "border-[#EF233C] ring-2 ring-[#EF233C]/15 shadow-[0_12px_28px_-10px_rgba(239,35,60,0.18)]"
           : "border-slate-200/85 hover:border-slate-300 shadow-[0_4px_14px_-6px_rgba(15,23,42,0.05)] hover:shadow-[0_14px_32px_-12px_rgba(15,23,42,0.12)]"
@@ -116,7 +120,7 @@ export const ProductoCard = memo(function ProductoCard({
     >
       {/* Escenario de Producto estilo Lucian #051 (.u051-stage) */}
       <div
-        className="relative w-full rounded-xl overflow-hidden mb-2.5 flex items-center justify-center border border-slate-100 bg-gradient-to-b from-slate-50/40 to-slate-100/60"
+        className="relative w-full max-h-[240px] rounded-xl overflow-hidden mb-2.5 flex items-center justify-center border border-slate-100/90 bg-white"
         style={{ aspectRatio: "1 / 1" }}
       >
         {/* Sombra de base sutil (.u051-shadow) */}
