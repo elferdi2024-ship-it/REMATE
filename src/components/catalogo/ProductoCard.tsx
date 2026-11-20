@@ -111,7 +111,7 @@ export const ProductoCard = memo(function ProductoCard({
     <article
       ref={cardRef}
       onClick={() => onQuickView?.(producto)}
-      className={`ux group relative flex flex-col bg-white border min-w-0 ${
+      className={`ux group relative flex flex-col h-full bg-white border min-w-0 ${
         isInCart
           ? "border-[#EF233C] ring-2 ring-[#EF233C]/15 shadow-[0_12px_28px_-10px_rgba(239,35,60,0.18)]"
           : "border-slate-200/85 hover:border-slate-300 shadow-[0_4px_14px_-6px_rgba(15,23,42,0.05)] hover:shadow-[0_14px_32px_-12px_rgba(15,23,42,0.12)]"
@@ -393,12 +393,12 @@ export const ProductoCard = memo(function ProductoCard({
                 )}
               </div>
 
-              <div className="text-[9.5px] font-semibold text-slate-500 uppercase tracking-wider mt-1.5 flex items-center justify-between">
-                <span>Directo fábrica</span>
+              <div className="text-[9.5px] font-semibold text-slate-500 uppercase tracking-wider mt-1.5 flex items-center justify-between gap-1.5 whitespace-nowrap">
+                <span className="truncate">Directo fábrica</span>
                 {packSizeTexto ? (
-                  <span className="text-slate-700 font-extrabold">{packSizeTexto}</span>
+                  <span className="text-slate-700 font-extrabold shrink-0">{packSizeTexto}</span>
                 ) : (
-                  <span className="text-emerald-700 font-bold">En stock</span>
+                  <span className="text-emerald-700 font-bold shrink-0">En stock</span>
                 )}
               </div>
             </div>

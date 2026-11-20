@@ -14,6 +14,10 @@ import { getActiveBrands, getBrandForCategory, getImageAtIndex, getVideoAtIndex,
 import { canShowAd } from "@/lib/adFrequency";
 import type { BrandConfig } from "@/types/brands";
 import { normalizeCategoryName, normalizeProductCategory } from "@/lib/category-normalizer";
+import {
+  sortCategoriesByUruguayPriority,
+  sortProductsInCategoryByUruguayPriority,
+} from "@/lib/category-priority";
 import { retailMediaGuard } from "@/lib/RetailMediaGuard";
 
 interface ProductoGridProps {
@@ -21,6 +25,7 @@ interface ProductoGridProps {
   vista: Vista;
   qtyMap: Record<string, number>;
   searchTerm?: string;
+  preserveOrder?: boolean;
   onAdd: (producto: Producto, e?: React.MouseEvent) => void;
   onQtyChange: (codigo: string, qty: number) => void;
   onQuickView?: (producto: Producto) => void;
@@ -208,7 +213,7 @@ function CategoryCarousel({
         <div className="products-catalog-grid">
           {expandedProds.map((p, pIdx) => {
             const items: React.ReactNode[] = [
-              <div key={p.codigo} className="min-w-0">
+              <div key={p.codigo} className="min-w-0 h-full">
                 <ProductoCard
                   producto={p}
                   qty={qtyMap[p.codigo] || 0}
@@ -389,6 +394,7 @@ export default function ProductoGrid({
   vista,
   qtyMap,
   searchTerm,
+  preserveOrder = false,
   onAdd,
   onQtyChange,
   onQuickView,
@@ -413,15 +419,25 @@ export default function ProductoGrid({
   }, []);
 
   const grouped = useMemo(() => {
-    return productos.reduce((acc, p) => {
+    const map = productos.reduce((acc, p) => {
       const cat = normalizeProductCategory(p);
       if (!acc[cat]) acc[cat] = [];
       acc[cat].push(p);
       return acc;
     }, {} as Record<string, Producto[]>);
-  }, [productos]);
 
-  const categories = Object.keys(grouped).sort();
+    if (!preserveOrder) {
+      for (const cat of Object.keys(map)) {
+        map[cat] = sortProductsInCategoryByUruguayPriority(map[cat]);
+      }
+    }
+    return map;
+  }, [productos, preserveOrder]);
+
+  const categories = useMemo(
+    () => sortCategoriesByUruguayPriority(Object.keys(grouped)),
+    [grouped]
+  );
 
   // Build ad sequence — weighted by tier
   const adSequence = useMemo(() => {

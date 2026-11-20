@@ -1714,6 +1714,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
                 vista={vista}
                 qtyMap={qtyMap}
                 searchTerm={search}
+                preserveOrder={urlSort !== "relevancia"}
                 onAdd={handleAddProduct}
                 onQtyChange={handleQtyChange}
                 onQuickView={(p) => setQuickViewProduct(p)}
