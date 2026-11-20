@@ -159,15 +159,28 @@ export function resolveExclusivePacksFromCatalog(
 
   for (const pack of EXCLUSIVE_APP_PACKS) {
     const matched = productos.find((p) => {
-      if (p.deshabilitado || (p.precio || 0) <= 0) return false;
       const byProduct = getExclusivePackByProduct(p);
       return byProduct?.id === pack.id;
     });
 
     if (matched) {
+      if (matched.deshabilitado || (matched.precio || 0) <= 0) continue;
       resolved.push({
         pack,
         producto: enrichProductoWithExclusivePack(matched),
+      });
+    } else {
+      resolved.push({
+        pack,
+        producto: {
+          codigo: pack.codigo,
+          nombre: pack.tituloDisplay,
+          precio: pack.precioFallback,
+          categoria: "OTROS",
+          contenido: formatPackContenido(pack.items),
+          destacado: true,
+          exclusivoApp: true,
+        },
       });
     }
   }

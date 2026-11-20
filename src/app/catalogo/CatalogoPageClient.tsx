@@ -34,6 +34,7 @@ import { useBrands } from "@/hooks/useBrands";
 import { useTiendaConfig } from "@/hooks/useTiendaConfig";
 import type { OfertaConfig } from "@/types/ofertas";
 import { DEFAULT_PREMIUM_PROMOS, DEFAULT_OFERTAS_CONFIG } from "@/lib/constants/ofertas";
+import { EXCLUSIVE_APP_PACKS } from "@/lib/constants/exclusive-packs";
 import CardFanPromoCarousel from "@/components/catalogo/CardFanPromoCarousel";
 
 import BranchBar from "@/components/catalogo/BranchBar";
@@ -825,6 +826,12 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
           nombre = prod.nombre;
           precio = prod.precio;
           escalaPrecios = prod.escalaPrecios;
+        } else {
+          const fallbackPack = EXCLUSIVE_APP_PACKS.find((pk) => pk.codigo === codigo);
+          if (fallbackPack) {
+            nombre = fallbackPack.tituloDisplay;
+            precio = fallbackPack.precioFallback;
+          }
         }
       }
 
@@ -1598,7 +1605,7 @@ export default function CatalogoPageClient(_props: CatalogoPageClientProps) {
         {!loading &&
           !search.trim() &&
           (!activeCat || activeCat === "Todos") &&
-          activeTab === "inicio" &&
+          activeTab !== "favoritos" &&
           !urlSoloOfertas && (
             <ExclusiveAppPacksSection
               productos={productos}

@@ -5,7 +5,11 @@ import { SUCURSALES } from "@/lib/sucursales";
 import { CATEGORIAS, type Producto } from "@/types";
 import categoriaMapping from "@/lib/categoria_mapping.json";
 import { normalizeProductCategory } from "@/lib/category-normalizer";
-import { enrichProductoWithExclusivePack } from "@/lib/constants/exclusive-packs";
+import {
+  EXCLUSIVE_APP_PACKS,
+  enrichProductoWithExclusivePack,
+  getExclusivePackByProduct,
+} from "@/lib/constants/exclusive-packs";
 
 const catMap: Record<string, string> =
   ((categoriaMapping as unknown as { mapping?: Record<string, string> }).mapping ||
@@ -29,16 +33,25 @@ export interface LoadedCatalogResult {
   source: "branch" | "global" | "json";
 }
 
+function normalizeCatalogItem(item: unknown, fallbackKey?: string): Producto | null {
+  if (!item || typeof item !== "object") return null;
+  const raw = item as Record<string, unknown>;
+  const codigo = String(raw.codigo ?? fallbackKey ?? "").trim();
+  const nombre = String(raw.nombre ?? "").trim();
+  const precio = typeof raw.precio === "number" ? raw.precio : Number(raw.precio);
+  if (!codigo || !nombre || !Number.isFinite(precio)) return null;
+
+  return {
+    ...(raw as unknown as Producto),
+    codigo,
+    nombre,
+    precio,
+    categoria: String(raw.categoria || "OTROS"),
+  };
+}
+
 function isValidCatalogItem(item: unknown): item is Producto {
-  if (!item || typeof item !== "object") return false;
-  const p = item as Partial<Producto>;
-  return (
-    typeof p.codigo === "string" &&
-    p.codigo.trim().length > 0 &&
-    typeof p.nombre === "string" &&
-    p.nombre.trim().length > 0 &&
-    typeof p.precio === "number"
-  );
+  return normalizeCatalogItem(item) !== null;
 }
 
 /**
@@ -77,10 +90,10 @@ export async function loadBaseCatalogMap(): Promise<{
         const rawItems = (snap.data().items || {}) as Record<string, unknown>;
         const clean: CatalogItemsMap = {};
         for (const [key, val] of Object.entries(rawItems)) {
-          if (isValidCatalogItem(val)) {
-            const code = val.codigo.trim() || key;
-            clean[code] = enrichProductoWithExclusivePack(
-              resolveProductCategory({ ...val, codigo: code }, true)
+          const normalized = normalizeCatalogItem(val, key);
+          if (normalized) {
+            clean[normalized.codigo] = enrichProductoWithExclusivePack(
+              resolveProductCategory(normalized, true)
             );
           }
         }
@@ -127,12 +140,51 @@ export async function loadBranchCatalog(
         const rawEntries = Object.values(rawItems);
 
         if (rawEntries.length > 0 || branchData.strictEmpty === true) {
-          const activeItems = rawEntries
-            .filter(isValidCatalogItem)
+          const branchItems = Object.entries(rawItems)
+            .map(([key, val]) => normalizeCatalogItem(val, key))
+            .filter((item): item is Producto => item !== null);
+
+          // Recordar qué packs exclusivos existen en la sucursal (incl. si fueron ocultados manualmente)
+          const branchPackIds = new Set<string>();
+          for (const item of branchItems) {
+            const pack = getExclusivePackByProduct(item);
+            if (pack) branchPackIds.add(pack.id);
+          }
+
+          const activeItems = branchItems
             .filter((item) => !item.deshabilitado)
             .map((item) =>
               enrichProductoWithExclusivePack(resolveProductCategory(item, true))
             );
+
+          // Si falta alguno de los packs exclusivos de la app en esta sucursal,
+          // traerlo desde el catálogo global `catalogo_activo/productos` (con su imagen y precio reales).
+          const missingExclusivePacks = EXCLUSIVE_APP_PACKS.filter(
+            (pack) => !branchPackIds.has(pack.id)
+          );
+
+          if (missingExclusivePacks.length > 0) {
+            try {
+              const globalSnap = await getDoc(doc(db, "catalogo_activo", "productos"));
+              if (globalSnap.exists()) {
+                const globalRaw = (globalSnap.data().items || {}) as Record<string, unknown>;
+                const missingIds = new Set(missingExclusivePacks.map((p) => p.id));
+                for (const [key, val] of Object.entries(globalRaw)) {
+                  const normalized = normalizeCatalogItem(val, key);
+                  if (!normalized || normalized.deshabilitado) continue;
+                  const pack = getExclusivePackByProduct(normalized);
+                  if (pack && missingIds.has(pack.id)) {
+                    activeItems.unshift(
+                      enrichProductoWithExclusivePack(resolveProductCategory(normalized, true))
+                    );
+                    missingIds.delete(pack.id);
+                  }
+                }
+              }
+            } catch (mergeErr) {
+              console.warn("⚠️ No se pudieron sincronizar packs exclusivos desde catálogo global:", mergeErr);
+            }
+          }
 
           if (activeItems.length > 0 || branchData.strictEmpty === true) {
             return { productos: activeItems, source: "branch" };
