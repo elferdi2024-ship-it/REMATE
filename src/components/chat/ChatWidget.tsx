@@ -33,7 +33,22 @@ interface ChatWidgetProps {
 }
 
 const CHAT_SESSION_KEY = "elremate_chat_session_id";
-const CHAT_HISTORY_KEY = "elremate_chat_history_v2";
+const LEGACY_CHAT_HISTORY_KEY = "elremate_chat_history_v2";
+const BRAIN_LAST_ORDER_KEY = "elremate_brain_last_order";
+
+interface SavedLastOrderItem {
+  codigo: string;
+  nombre: string;
+  cantidad: number;
+  precio: number;
+  imagen?: string;
+}
+
+interface SavedLastOrder {
+  items: SavedLastOrderItem[];
+  total: number;
+  savedAt: string;
+}
 
 /**
  * Ícono flotante estilo WhatsApp pero en el Rojo Institucional de El Remate Canelones (#EF233C)
@@ -110,6 +125,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
   ]);
 
   const [handoffSubmitting, setHandoffSubmitting] = useState(false);
+  const [lastOrder, setLastOrder] = useState<SavedLastOrder | null>(null);
   const [mobileViewport, setMobileViewport] = useState<{ height: number; top: number } | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -167,16 +183,41 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
     return sid;
   }, []);
 
-  // Inicializar conversación
+  // Cargar memoria del último pedido (para ofrecer "Repetir pedido") y arrancar SIEMPRE con el chat limpio
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    // Limpiar conversaciones antiguas guardadas en localStorage
     try {
-      const saved = localStorage.getItem(CHAT_HISTORY_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setMessages(parsed);
-          return;
+      localStorage.removeItem(LEGACY_CHAT_HISTORY_KEY);
+    } catch {}
+
+    // Recuperar último pedido guardado (prioridad: pedido confirmado en historial local -> último armado en chat)
+    try {
+      const rawHistory = localStorage.getItem("elremate_history");
+      if (rawHistory) {
+        const hist = JSON.parse(rawHistory);
+        if (Array.isArray(hist) && hist.length > 0 && Array.isArray(hist[0]?.items) && hist[0].items.length > 0) {
+          const prevItems: SavedLastOrderItem[] = hist[0].items.map((it: any) => ({
+            codigo: String(it.codigo || ""),
+            nombre: String(it.nombre || "Producto"),
+            cantidad: Math.max(1, Number(it.cantidad || 1)),
+            precio: Number(it.precioUnitario ?? it.precio ?? 0),
+          }));
+          const prevTotal = Number(hist[0].total || prevItems.reduce((s, i) => s + i.precio * i.cantidad, 0));
+          setLastOrder({
+            items: prevItems,
+            total: prevTotal,
+            savedAt: String(hist[0].fecha || ""),
+          });
+        }
+      } else {
+        const rawBrainOrder = localStorage.getItem(BRAIN_LAST_ORDER_KEY);
+        if (rawBrainOrder) {
+          const parsed = JSON.parse(rawBrainOrder) as SavedLastOrder;
+          if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+            setLastOrder(parsed);
+          }
         }
       }
     } catch {}
@@ -184,11 +225,30 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
     const welcomeMsg: MessageItem = {
       id: "welcome_0",
       role: "bot",
-      text: "¡Hola! 👋 ¿En qué podemos ayudarte hoy en **El Remate Canelones**?\n\nPodés escribir acá abajo tu lista para armar tu pedido al instante o consultarnos cualquier duda sobre precios mayoristas, stock y envíos:",
+      text: "¡Hola! 👋 ¿En qué podemos ayudarte hoy en **El Remate Canelones**?\n\nEscribí tu lista para armar el pedido al instante o elegí un acceso rápido:",
       isWelcome: true,
     };
     setMessages([welcomeMsg]);
   }, []);
+
+  // Sincronizar memoria del último pedido cuando el carrito tiene productos
+  useEffect(() => {
+    if (typeof window === "undefined" || items.length === 0) return;
+    try {
+      const snapshot: SavedLastOrder = {
+        items: items.map((i) => ({
+          codigo: i.codigo,
+          nombre: i.nombre,
+          cantidad: i.cantidad,
+          precio: i.precio,
+        })),
+        total,
+        savedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(BRAIN_LAST_ORDER_KEY, JSON.stringify(snapshot));
+      setLastOrder(snapshot);
+    } catch {}
+  }, [items, total]);
 
   // Bloqueo de scroll en body mientras el chat móvil está abierto
   useEffect(() => {
@@ -204,13 +264,7 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
     }
   }, [isOpen]);
 
-  // Guardar mensajes en localStorage
-  useEffect(() => {
-    if (typeof window === "undefined" || messages.length === 0) return;
-    try {
-      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(messages.slice(-25)));
-    } catch {}
-  }, [messages]);
+  // (Chat limpio por sesión: no persistimos mensajes antiguos en localStorage)
 
   // Scroll inteligente: cuando responde el bot, alinear al INICIO de su mensaje para leer desde arriba
   useEffect(() => {
@@ -275,17 +329,17 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
     });
   }, []);
 
-  // Limpiar conversación
+  // Limpiar conversación (mantiene la memoria del último pedido para poder repetirlo)
   const handleReset = useCallback(() => {
     haptic.impact();
     try {
       localStorage.removeItem(CHAT_SESSION_KEY);
-      localStorage.removeItem(CHAT_HISTORY_KEY);
+      localStorage.removeItem(LEGACY_CHAT_HISTORY_KEY);
     } catch {}
     const welcomeMsg: MessageItem = {
       id: `welcome_${Date.now()}`,
       role: "bot",
-      text: "¡Hola! 👋 ¿En qué podemos ayudarte hoy en **El Remate Canelones**?\n\nPodés escribir acá abajo tu lista para armar tu pedido al instante o consultarnos cualquier duda sobre precios mayoristas, stock y envíos:",
+      text: "¡Hola! 👋 ¿En qué podemos ayudarte hoy en **El Remate Canelones**?\n\nEscribí tu lista para armar el pedido al instante o elegí un acceso rápido:",
       isWelcome: true,
     };
     setMessages([welcomeMsg]);
@@ -297,6 +351,38 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
       "💬 Hablar con asesor",
     ]);
   }, []);
+
+  // Repetir último pedido guardado en memoria del Brain (actualizando precios desde el catálogo vivo)
+  const handleRepeatLastOrder = useCallback(() => {
+    if (!lastOrder || lastOrder.items.length === 0) return;
+    haptic.success();
+
+    let count = 0;
+    for (const savedItem of lastOrder.items) {
+      const liveProd = catalog.find((p) => p.codigo === savedItem.codigo);
+      setItemQty(
+        {
+          codigo: savedItem.codigo,
+          nombre: liveProd?.nombre || savedItem.nombre,
+          precio: liveProd?.precio ?? savedItem.precio,
+          escalaPrecios: liveProd?.escalaPrecios,
+        },
+        savedItem.cantidad
+      );
+      count++;
+    }
+
+    toast.success(`🔁 ¡${count} productos de tu último pedido cargados al carrito!`);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `bot_repeat_${Date.now()}`,
+        role: "bot",
+        text: `🔁 ¡Listo! Te cargué los **${count} productos** de tu último pedido al carrito con los precios actualizados. Tocá **"Ver carrito →"** arriba para revisar o enviar por WhatsApp.`,
+      },
+    ]);
+    setSuggestions(["🛒 Ver mi carrito completo", "🏷️ Ofertas y Mayorista", "💬 Hablar con asesor"]);
+  }, [lastOrder, catalog, setItemQty, toast]);
 
   // Enviar mensaje
   const sendMessage = useCallback(
@@ -686,6 +772,28 @@ export default function ChatWidget({ catalog = [], onOpenCart }: ChatWidgetProps
                       __html: formatChatMarkdown(m.text),
                     }}
                   />
+
+                  {/* Tarjeta "Repetir último pedido" si el Brain recuerda un pedido anterior */}
+                  {m.isWelcome && lastOrder && lastOrder.items.length > 0 && (
+                    <div className="mt-3 p-2.5 rounded-xl bg-gradient-to-r from-[#FFF1F2] to-[#FFF7ED] border border-[#FECDD3] flex items-center justify-between gap-2 shadow-2xs">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[11.5px] font-extrabold text-[#9F1239] flex items-center gap-1">
+                          <span>🔁</span>
+                          <span>Tu último pedido guardado</span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 font-medium truncate mt-0.5">
+                          {lastOrder.items.length} {lastOrder.items.length === 1 ? "producto" : "productos"} · ${Math.round(lastOrder.total).toLocaleString("es-UY")}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRepeatLastOrder}
+                        className="px-3 py-1.5 rounded-lg bg-[#EF233C] hover:bg-[#D90429] text-white text-[11.5px] font-extrabold shrink-0 transition-transform active:scale-95 cursor-pointer shadow-xs"
+                      >
+                        Repetir
+                      </button>
+                    </div>
+                  )}
 
                   {/* Bento Grid 2x2 en el mensaje de Bienvenida */}
                   {m.isWelcome && (
