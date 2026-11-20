@@ -212,14 +212,24 @@ async function searchBingImages(query: string, limit = 14): Promise<ImageCandida
           continue;
         }
 
+        // Descartar banners promocionales (ej. "PROMO 2x$90", "lanzamiento", flyers) y proporciones extremas
+        const lowerUrlAndTitle = `${murl} ${title}`.toLowerCase();
+        if (
+          /(promo|banner|oferta|lanzamiento|flyer|folleto|2x\$|2x\s*\d|3x2|descuento|cyber|black-?friday|cupon)/i.test(
+            lowerUrlAndTitle
+          )
+        ) {
+          continue;
+        }
+
         const w = Number(parsed.w || 0) || undefined;
         const h = Number(parsed.h || 0) || undefined;
 
-        // Descartar iconos diminutos o banners ultra alargados
+        // Descartar iconos diminutos o banners horizontales/verticales extremos (envases <= 1.85)
         if (w && h) {
-          if (w < 120 || h < 120) continue;
+          if (w < 140 || h < 140) continue;
           const ratio = Math.max(w / h, h / w);
-          if (ratio > 2.6) continue;
+          if (ratio > 1.85) continue;
         }
 
         const isUy = isUruguayPriorityDomain(imgDomain) || isUruguayPriorityDomain(pageDomain);

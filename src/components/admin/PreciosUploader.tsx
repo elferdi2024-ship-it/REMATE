@@ -9,6 +9,7 @@ import { db } from "@/lib/firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import categoryData from "@/lib/categoria_mapping.json";
 import { SUCURSALES } from "@/lib/sucursales";
+import { normalizeProductCategory } from "@/lib/category-normalizer";
 
 const RAW_MAPPING = categoryData as unknown as Record<string, string>;
 // Normalizar mapping para búsqueda rápida e insensible a espacios/casos
@@ -54,16 +55,25 @@ export default function PreciosUploader() {
 
   function categorizar(codigo: string, nombre: string): string {
     const cleanCode = codigo.trim();
-    if (CATEGORY_MAPPING[cleanCode]) {
-      return CATEGORY_MAPPING[cleanCode];
+    const mappedBase = CATEGORY_MAPPING[cleanCode] || "";
+
+    // Primero aplicar reglas estrictas de seguridad/negocio (ej: AGUA JANE -> LIMPIEZA, DOÑA COCA -> CARNES)
+    const strict = normalizeProductCategory({
+      codigo: cleanCode,
+      nombre,
+      precio: 1,
+      categoria: mappedBase || "OTROS",
+    });
+    if (strict && strict !== "OTROS") {
+      return strict;
     }
 
-    // 2. Fallback: Palabras clave por nombre
+    // Fallback por palabras clave con límites de palabra
     const n = nombre.toLowerCase();
     for (const [cat, kws] of Object.entries(KEYWORDS)) {
-      if (kws.some((k) => n.includes(k))) return cat;
+      if (kws.some((k) => new RegExp(`\\b${k.trim()}`).test(n))) return cat;
     }
-    return "OTROS";
+    return mappedBase || "OTROS";
   }
 
   function cleanString(str: string): string {

@@ -156,9 +156,11 @@ async function searchBing(query) {
         const imgD = getDomain(murl);
         const pageD = getDomain(purl);
         if (BLOCKED_DOMAINS.some((b) => imgD.includes(b) || pageD.includes(b))) continue;
+        const title = typeof p.t === "string" ? p.t : "";
+        if (/(promo|banner|oferta|lanzamiento|flyer|folleto|2x\$|2x\s*\d|3x2|descuento|cyber|black-?friday|cupon)/i.test(`${murl} ${title}`)) continue;
         const w = Number(p.w || 0);
         const h = Number(p.h || 0);
-        if (w && h && (w < 120 || h < 120 || Math.max(w / h, h / w) > 2.6)) continue;
+        if (w && h && (w < 140 || h < 140 || Math.max(w / h, h / w) > 1.85)) continue;
         const isUy =
           imgD.endsWith(".uy") ||
           pageD.endsWith(".uy") ||
