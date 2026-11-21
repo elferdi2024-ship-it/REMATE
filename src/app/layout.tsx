@@ -6,6 +6,7 @@ import { CartProvider } from "@/lib/cart-context";
 import { ToastProvider } from "@/lib/toast-context";
 import { FavoritosProvider } from "@/lib/favoritos-context";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { SorteoPopup } from "@/components/SorteoPopup";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -158,6 +159,7 @@ export default function RootLayout({
             <ToastProvider>
               <FavoritosProvider>
                 {children}
+                <SorteoPopup />
                 <PWAInstallPrompt />
               </FavoritosProvider>
             </ToastProvider>

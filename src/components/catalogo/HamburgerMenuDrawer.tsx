@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { SUCURSALES } from "@/lib/sucursales";
 import { EMOJI_POR_CATEGORIA } from "@/types";
@@ -121,6 +122,34 @@ export default function HamburgerMenuDrawer({
           >
             <span className="text-lg">💬</span>
             <span>Pedir por WhatsApp</span>
+          </a>
+
+          {/* Banner Sorteo Mensual */}
+          <a
+            href="https://club.distribuidoraelremate.uy/r/gral-artigas"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            className="group relative block overflow-hidden rounded-2xl border border-amber-300/80 bg-[#D92323] shadow-md transition-transform duration-200 hover:scale-[1.015] active:scale-[0.98]"
+          >
+            <div className="relative aspect-[1024/728] w-full overflow-hidden">
+              <Image
+                src="/promos/sorteo-mensual.jpg"
+                alt="Sorteo todos los meses - Anotate y ganá premios cada mes"
+                fill
+                sizes="310px"
+                className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              />
+            </div>
+            <div className="flex items-center justify-between bg-[#1B2620] px-3 py-2 text-[11px] font-extrabold text-white">
+              <span className="flex items-center gap-1.5">
+                <span>🎁</span>
+                <span>Sorteo Mensual · Anotate</span>
+              </span>
+              <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-black text-[#1B2620]">
+                Participar →
+              </span>
+            </div>
           </a>
 
           {/* Enlaces de Navegación Principal */}
